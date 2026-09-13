@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICL 810 – Foundations Study Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Spectral:wght@400;600;700&family=Inter:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --ink: #0f1824;
+  --deep: #1e2d3d;
+  --navy: #2f4156;
+  --red: #c42a1e;
+  --red-light: #fcedeb;
+  --blue: #1a5fa8;
+  --blue-light: #e9f2fb;
+  --teal: #0d6e6d;
+  --teal-light: #e5f5f5;
+  --green: #1d6b3e;
+  --green-light: #ebf6ee;
+  --purple: #6d2e91;
+  --purple-light: #f4ecf9;
+  --gold: #b87d00;
+  --gold-light: #fef9e7;
+  --orange: #d35f00;
+  --orange-light: #fff5ea;
+  --border: #d2dce8;
+  --muted: #5e6d82;
+  --bg: #f8fafb;
+  --white: #fff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#0f1824 0%,#1e2d3d 50%,#2f4156 100%);padding:52px 30px 42px;position:relative;overflow:hidden}
+.hdr::after{content:'810';position:absolute;right:-35px;bottom:-55px;font-family:'Spectral',serif;font-size:19rem;color:rgba(255,255,255,0.02);font-weight:700;line-height:1;pointer-events:none}
+.hdr-in{max-width:1260px;margin:0 auto;position:relative}
+.hdr h1{font-family:'Spectral',serif;font-size:3rem;color:#fff;line-height:1.2;font-weight:700}
+.hdr h1 span{color:#7ab8e8;font-weight:400}
+.hdr p{color:#a8c0d4;font-size:.96rem;margin-top:11px;font-weight:400}
+.hdr-tags{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.htag{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);color:#d8e8f0;font-size:.76rem;font-weight:700;padding:8px 16px;border-radius:26px;letter-spacing:.08em}
+
+/* NAV */
+.nav{background:#0f1824;border-top:1px solid rgba(255,255,255,.04);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:200;padding:0 28px}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;color:#7a8fa8;font-family:'Inter',sans-serif;font-size:.82rem;font-weight:700;padding:16px 18px;cursor:pointer;white-space:nowrap;transition:color .2s;letter-spacing:.03em}
+.nb:hover{color:#fff}
+.nb.on{color:#7ab8e8;border-bottom-color:#7ab8e8}
+
+/* PAGE */
+.page{max-width:1260px;margin:0 auto;padding:34px 26px 95px}
+.sec{display:none}.sec.on{display:block}
+
+/* MODULE HEADER */
+.mh{border-radius:18px;padding:34px 36px;margin-bottom:28px;color:#fff;position:relative;overflow:hidden}
+.mh::after{content:attr(data-n);position:absolute;right:24px;bottom:-32px;font-family:'Spectral',serif;font-size:13rem;color:rgba(255,255,255,.03);line-height:1;pointer-events:none;font-weight:700}
+.mtag{font-size:.73rem;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.45);display:inline-block;margin-bottom:10px}
+.mh h2{font-family:'Spectral',serif;font-size:2.1rem;line-height:1.4;font-weight:700}
+.mh .sub{color:rgba(255,255,255,.48);font-size:.92rem;margin-top:9px;font-weight:400}
+
+/* CARDS */
+.grid{display:grid;gap:17px}
+.card{background:var(--white);border-radius:15px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(15,24,36,.02)}
+.ch{display:flex;align-items:center;gap:14px;padding:17px 24px;cursor:pointer;user-select:none;transition:background .15s;border-bottom:1px solid transparent}
+.ch:hover{background:#f9fafb}
+.ch.on{background:var(--blue-light);border-bottom-color:var(--border)}
+.ci{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.12rem;flex-shrink:0}
+.ch h4{flex:1;font-size:.99rem;font-weight:700;color:var(--deep)}
+.cv{color:var(--muted);font-size:.77rem;transition:transform .2s}
+.ch.on .cv{transform:rotate(180deg)}
+.cb{display:none;padding:26px}
+.cb.on{display:block}
+
+/* TYPOGRAPHY */
+.cb p,.cb li{font-size:.9rem;color:var(--ink);line-height:1.8}
+.cb ul,.cb ol{padding-left:26px;margin:11px 0}
+.cb li{margin-bottom:8px}
+strong{color:var(--deep);font-weight:700}
+.lbl{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:17px 0 10px;display:block}
+
+/* BOXES */
+.box{border-radius:12px;padding:15px 19px;margin:13px 0;font-size:.88rem;line-height:1.75}
+.bi{background:var(--blue-light);border-left:4px solid var(--blue)}
+.bw{background:var(--orange-light);border-left:4px solid var(--orange)}
+.bd{background:var(--red-light);border-left:4px solid var(--red)}
+.bg{background:var(--green-light);border-left:4px solid var(--green)}
+.bt{background:var(--teal-light);border-left:4px solid var(--teal)}
+.bp{background:var(--purple-light);border-left:4px solid var(--purple)}
+.bgo{background:var(--gold-light);border-left:4px solid var(--gold)}
+
+/* GRIDS */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:13px 0}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:13px 0}
+@media(max-width:700px){.two,.three{grid-template-columns:1fr}}
+.mini{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.mini h5{font-size:.86rem;font-weight:700;color:var(--deep);margin-bottom:10px}
+.mini ul{list-style:none;padding:0}
+.mini ul li{font-size:.84rem;padding:6px 0 6px 18px;position:relative}
+.mini ul li::before{content:'›';position:absolute;left:0;color:var(--blue);font-weight:700;font-size:1.25rem}
+
+/* FLOW */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:13px 0}
+.fs{background:var(--blue-light);border:1px solid #b3d4f1;border-radius:11px;padding:10px 17px;font-size:.83rem;font-weight:700;color:#0d4374;white-space:nowrap}
+.fa{color:var(--orange);font-size:1.25rem;font-weight:700}
+
+/* PILLS */
+.pills{display:flex;flex-wrap:wrap;gap:10px;margin:11px 0}
+.pill{border-radius:26px;padding:8px 15px;font-size:.81rem;font-weight:700;border:1px solid}
+.pb{background:var(--blue-light);border-color:#9ac8e8;color:#0d4475}
+.pg{background:var(--green-light);border-color:#7ecfa0;color:#0e4023}
+.pr{background:var(--red-light);border-color:#e8a09a;color:#6e1a11}
+.pt{background:var(--teal-light);border-color:#7ed4d3;color:#084b4a}
+.pp{background:var(--purple-light);border-color:#b89cd8;color:#3b1557}
+.pgo{background:var(--gold-light);border-color:#e8c06a;color:#6b4400}
+.po{background:var(--orange-light);border-color:#f4c084;color:#6b3500}
+
+/* TABLE */
+.tw{overflow-x:auto;margin:13px 0}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{background:var(--deep);color:#fff;padding:13px 15px;text-align:left;font-weight:700;font-size:.81rem;letter-spacing:.04em}
+tbody tr:nth-child(even){background:#f9fafb}
+tbody td{padding:12px 15px;border-bottom:1px solid var(--border);vertical-align:top}
+
+/* CHECKLIST */
+.chk{list-style:none;padding:0}
+.chk li{font-size:.9rem;padding:10px 0 10px 34px;position:relative;border-bottom:1px dashed var(--border)}
+.chk li:last-child{border:none}
+.chk li::before{content:'✓';position:absolute;left:0;color:var(--green);font-size:1.1rem;font-weight:700}
+
+/* QUOTE / CASE */
+.qt{border-left:3px solid var(--gold);background:var(--gold-light);border-radius:0 11px 11px 0;padding:14px 18px;font-size:.88rem;font-style:italic;color:#4a3200;margin:13px 0}
+.qt cite{font-style:normal;font-size:.78rem;color:var(--muted);display:block;margin-top:6px}
+.casebox{background:var(--purple-light);border:1px solid #c8a8e8;border-radius:12px;padding:15px 18px;margin:12px 0;font-size:.88rem}
+.casebox .cn{font-weight:700;color:var(--purple);font-size:.89rem;margin-bottom:8px}
+
+/* OV GRID */
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:17px;margin-bottom:30px}
+.oc{background:var(--white);border:1px solid var(--border);border-radius:15px;padding:26px;cursor:pointer;transition:transform .2s,box-shadow .2s;border-left:9px solid}
+.oc:hover{transform:translateY(-2px);box-shadow:0 8px 34px rgba(15,24,36,.07)}
+.oc .mn{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.oc h3{font-family:'Spectral',serif;font-size:1.14rem;color:var(--deep);margin:8px 0 11px;font-weight:700}
+.oc p{font-size:.85rem;color:var(--muted);line-height:1.7}
+
+/* BACK */
+.back{background:none;border:1px solid var(--border);border-radius:11px;padding:9px 17px;font-size:.84rem;font-family:'Inter',sans-serif;color:var(--muted);cursor:pointer;margin-bottom:24px;transition:all .2s;font-weight:600}
+.back:hover{background:var(--blue-light);color:var(--deep);border-color:var(--blue)}
+
+/* SEARCH */
+.srch{margin-bottom:26px}
+.srch input{width:100%;padding:14px 24px;border:1px solid var(--border);border-radius:13px;font-family:'Inter',sans-serif;font-size:.94rem;background:var(--white);color:var(--ink);outline:none}
+.srch input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
+
+.yes{display:inline-block;background:var(--green-light);color:var(--green);border:1px solid #7ecfa0;border-radius:8px;padding:5px 11px;font-size:.8rem;font-weight:700}
+.no{display:inline-block;background:var(--red-light);color:var(--red);border:1px solid #e8a09a;border-radius:8px;padding:5px 11px;font-size:.8rem;font-weight:700}
+
+/* SECTION DIVIDER */
+.sdiv{height:2px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:26px 0}
+
+/* IRPA REFERENCE */
+.ref{display:inline-block;background:var(--teal-light);color:var(--teal);border:1px solid #7ed4d3;border-radius:9px;padding:5px 12px;font-size:.79rem;font-weight:700;font-family:monospace}
+
+/* FRAMEWORK */
+.framework{background:var(--purple-light);border:2px solid var(--purple);border-radius:13px;padding:18px 22px;margin:14px 0}
+.framework h6{font-size:.92rem;font-weight:700;color:var(--purple);margin-bottom:8px;letter-spacing:.03em}
+.framework ul{list-style:none;padding:0;margin:8px 0 0 0}
+.framework ul li{padding:6px 0 6px 20px;position:relative;font-size:.87rem}
+.framework ul li::before{content:'→';position:absolute;left:0;color:var(--purple);font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <h1>ICL 810 — <span>Foundations</span></h1>
+    <p>Complete Study Reference · Canadian Immigration Law Fundamentals · Tutorial + Plenary Combined · Queen's University GDipICL</p>
+    <div class="hdr-tags">
+      <span class="htag">🏛️ IRPA Framework</span>
+      <span class="htag">📚 Legal Skills (LR(R)W)</span>
+      <span class="htag">💚 H&C Applications</span>
+      <span class="htag">⚖️ Administrative Law</span>
+      <span class="htag">📋 Baker Factors</span>
+      <span class="htag">🎯 FILAC / CREAC</span>
+      <span class="htag">🔍 Legal Research</span>
+      <span class="htag">🛡️ Refugee Law (s.96)</span>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on" onclick="show('ov')">🏠 Overview</button>
+  <button class="nb" onclick="show('m1')">M1 Foundations</button>
+  <button class="nb" onclick="show('m2')">M2 Legal Skills & H&C</button>
+  <button class="nb" onclick="show('m3')">M3 Admin Law</button>
+  <button class="nb" onclick="show('m4')">M4 Entry & Misrep</button>
+  <button class="nb" onclick="show('m5')">M5 PR Classes</button>
+  <button class="nb" onclick="show('m6')">M6 Refugees</button>
+  <button class="nb" onclick="show('qr')">📊 Quick Ref</button>
+</div>
+
+<div class="page">
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<div class="sec on" id="ov">
+  <div class="srch"><input type="text" placeholder="🔍  Search any concept, framework, case, or statute…" oninput="srch(this.value)"></div>
+  <p style="font-size:.91rem;color:var(--muted);margin-bottom:24px">This course provides foundational knowledge of Canadian immigration law and essential legal skills. Each module combines Tutorial and Plenary content. Click any module card to explore.</p>
+  <div class="og">
+    <div class="oc" onclick="show('m1')" style="border-left-color:#1a5fa8">
+      <div class="mn">Module 1 — Tutorial + Plenary</div>
+      <h3>Foundations & Context</h3>
+      <p>Canada as settler state, migration in global context, IRPA objectives, key actors (IRCC/CBSA/IRB), immigration targets, philosophical debates on borders.</p>
+    </div>
+    <div class="oc" onclick="show('m2')" style="border-left-color:#1d6b3e">
+      <div class="mn">Module 2 — Tutorial + Plenary</div>
+      <h3>Legal Skills & H&C Applications</h3>
+      <p>Intro to LR(R)W, FILAC framework, keyword extraction, case briefing (SQ4R), secondary sources, H&C applications (s.25(1)), Baker & Kanthasamy.</p>
+    </div>
+    <div class="oc" onclick="show('m3')" style="border-left-color:#6d2e91">
+      <div class="mn">Module 3 — Tutorial + Plenary</div>
+      <h3>Administrative Law & Bias</h3>
+      <p>Why admin law matters, Baker factors (procedural fairness), reasonable apprehension of bias test, judicial review vs appeal, Cox case study, noting up legislation.</p>
+    </div>
+    <div class="oc" onclick="show('m4')" style="border-left-color:#c42a1e">
+      <div class="mn">Module 4 — Tutorial + Plenary</div>
+      <h3>Entry to Canada & Misrepresentation</h3>
+      <p>Entry requirements (citizens/PRs/FNs), inadmissibility (s.34-41), TRVs, misrepresentation (s.40(1)(a)), client interviewing, noting up legislation.</p>
+    </div>
+    <div class="oc" onclick="show('m5')" style="border-left-color:#0d6e6d">
+      <div class="mn">Module 5 — Tutorial + Plenary</div>
+      <h3>Permanent Residence Classes</h3>
+      <p>Economic/Family/Refugee classes, family class sponsorship, spouse/CL/conjugal definitions, R4 bad faith, CREAC framework, noting up case law.</p>
+    </div>
+    <div class="oc" onclick="show('m6')" style="border-left-color:#b87d00">
+      <div class="mn">Module 6 — Tutorial + Plenary</div>
+      <h3>Refugee Law & Legal Writing</h3>
+      <p>Convention refugee definition (s.96), inclusion/exclusion/cessation clauses, Safe Third Country Agreement, trauma-informed interviewing, putting FILAC/CREAC together.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--blue-light);color:var(--blue)">🎓</div>
+      <h4>Course Learning Outcomes — Foundational Knowledge</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <ul class="chk">
+        <li>Explain <strong>historical antecedents and theoretical underpinnings</strong> of Canadian immigration and citizenship law</li>
+        <li>Apply <strong>sources of law</strong>: statutes, regulations, policy instruments, case law</li>
+        <li>Identify and differentiate <strong>functions and powers</strong> of federal departments/agencies (IRCC, CBSA, IRB)</li>
+        <li>Apply <strong>administrative law principles</strong> to immigration context</li>
+        <li>Explain how <strong>Charter and international human rights norms</strong> apply to immigration decisions</li>
+        <li>Distinguish <strong>principal categories and classes</strong> of temporary and permanent immigration plus procedures for admission, admissibility, enforcement</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--green-light);color:var(--green)">🛠️</div>
+      <h4>Program Learning Outcomes — Skills & Values</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <ul class="chk">
+        <li>Use <strong>legal terminology</strong> to interpret and apply case law, legislation, regulatory and policy instruments</li>
+        <li>Synthesize and apply <strong>legal principles</strong> to analyze facts and issues using sound legal reasoning</li>
+        <li>Conduct <strong>case-related legal research</strong> on primary sources and legal commentary</li>
+        <li>Demonstrate <strong>critical thinking and problem solving</strong> to execute client-specific case strategy</li>
+        <li>Communicate and advocate effectively <strong>in person and in writing</strong></li>
+        <li>Reflect on and assess developing capabilities; create plan for <strong>professional development</strong></li>
+        <li>Utilize <strong>self-awareness and cultural competence</strong> to serve diverse clients (ethno-cultural, LGBTQ+)</li>
+        <li>Integrate <strong>ethical decision making</strong> and professional behaviours</li>
+        <li>Collaborate with peers/professionals; demonstrate <strong>leadership</strong> in practice settings</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════ MODULE 1 ═══════════════════════════ -->
+<div class="sec" id="m1">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="1" style="background:linear-gradient(130deg,#0a2540 0%,#1a5fa8 100%)">
+    <div class="mtag">Module 1 — Tutorial + Plenary</div>
+    <h2>Foundations & Historical Context</h2>
+    <div class="sub">Canada as settler state, migration in global context, IRPA framework, key actors, philosophical debates</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🌍</div>
+        <h4>Migration in Global Context</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi"><strong>"The overwhelming majority of people live in the country where they were born."</strong></div>
+        
+        <span class="lbl">Key Statistics</span>
+        <ul class="chk">
+          <li>International migration is NOT uniform across the world</li>
+          <li>Global displacement at record high: <strong>1 in every 78 people</strong> on earth</li>
+          <li>Only <strong>3.60% of world's population</strong> living outside country of birth</li>
+          <li>In 2017: ~15% answered "yes" to wanting to leave home country permanently</li>
+          <li>BUT fewer than 0.5% were actually preparing to migrate</li>
+          <li>The <strong>13.5% gap</strong> (>600 million people) = legal barriers constructed through immigration law & policies</li>
+        </ul>
+        
+        <div class="box bw">💡 Sources: <a href="https://worldmigrationreport.iom.int/wmr-2022-interactive/" target="_blank">IOM World Migration Report 2022</a> and <a href="https://www.unhcr.org/globaltrends.html" target="_blank">UNHCR Global Trends</a></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🏴</div>
+        <h4>Canada as a Settler State — Historical Context</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Pre-Confederation Goals</span>
+        <div class="box bd">Primary goal of Canadian immigration policy was to <strong>divest Indigenous population of "wild lands"</strong> and render them productive. Objective of building a <strong>white Canada</strong> translated to: (1) dispossession of Indigenous peoples from lands + (2) explicitly racist immigration policy post-Confederation.</div>
+        
+        <span class="lbl">Exclusionary Immigration Laws</span>
+        <ul class="chk">
+          <li>First iteration of <em>Indian Act</em> passed <strong>1876</strong> — pass & permit systems</li>
+          <li>Immigration laws utilized to encourage <strong>"desirable" immigrants</strong> (hegemonic white "race") and exclude "undesirable" ones</li>
+          <li>Admission restrictions based on <strong>"race"</strong>: People of African, Chinese, Japanese, Indian, Jewish, Caribbean ancestry subjected to discriminatory treatment</li>
+        </ul>
+        
+        <span class="lbl">Colonial Citizenship</span>
+        <div class="box bd"><em>Immigration Act</em> barred married women, minors, lunatics, and "idiots under a disability" from naturalization. <strong>"Canadians" were British subjects until 1947</strong> when Canada enacted first <em>Citizenship Act</em> and Canadians became citizens of own country. New Act was <strong>silent on persons registered as "Indians"</strong> under <em>Indian Act</em> — despite being born in Canada, NOT Canadian citizens.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">📜</div>
+        <h4>Turning Points: Immigration Act 1976 & IRPA 2002</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Immigration Act, 1976 — A Turning Point</span>
+        <div class="box bg">
+          <ul class="chk">
+            <li>Explicit objectives articulated in <span class="ref">s.3</span></li>
+            <li>Committed to <strong>non-discrimination</strong></li>
+            <li>Shift from overt racism and exclusionary policies to <strong>systemic racism</strong></li>
+          </ul>
+        </div>
+        
+        <span class="lbl">IRPA 2002 — Current Framework</span>
+        <div class="box bg"><span class="ref">s.3(3)</span> objectives include:</div>
+        <ul class="chk">
+          <li><strong>(d)</strong> Ensures decisions consistent with <strong>Canadian Charter</strong> including principles of equality and freedom from discrimination</li>
+          <li><strong>(f)</strong> Complies with <strong>international human rights instruments</strong> to which Canada is signatory</li>
+        </ul>
+      </div>
+    </card>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📊</div>
+        <h4>2023 Permanent Admissions by Category</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp"><strong>Total permanent residents: 471,808</strong></div>
+        <div class="tw"><table>
+          <thead><tr><th>Category</th><th>Number</th><th>Percentage</th></tr></thead>
+          <tbody>
+            <tr><td>Economic Class</td><td>242,744</td><td>51%</td></tr>
+            <tr><td>Family Class</td><td>109,730</td><td>23%</td></tr>
+            <tr><td>Refugees</td><td>74,979</td><td>16%</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🏛️</div>
+        <h4>Key Actors & Institutions</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="three">
+          <div class="mini">
+            <h5>IRCC</h5>
+            <ul>
+              <li>Immigration, Refugees and Citizenship Canada (formerly "CIC")</li>
+              <li><strong>Minister:</strong> Hon. Marc Miller</li>
+              <li>Visa offices & VACs worldwide</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>CBSA</h5>
+            <ul>
+              <li>Canada Border Services Agency</li>
+              <li>Under Public Safety Canada</li>
+              <li><strong>Minister:</strong> Hon. David McGuinty</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>IRB</h5>
+            <ul>
+              <li>Immigration & Refugee Board Canada</li>
+              <li>Independent tribunal</li>
+              <li>RPD, RAD, IAD, ID divisions</li>
+            </ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Court System</span>
+        <div class="pills">
+          <span class="pill pb">Federal Court (FC) — Judicial review with leave</span>
+          <span class="pill pp">Federal Court of Appeal (FCA) — Appeal if FC certifies question</span>
+          <span class="pill pt">Supreme Court of Canada (SCC) — Appeal with leave/high bar</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">💭</div>
+        <h4>Philosophical Debates: How Should We Regulate Migration?</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Three Theoretical Positions</span>
+        <div class="three">
+          <div class="mini">
+            <h5>Conventional View</h5>
+            <ul><li>States have broad discretion to control borders</li><li>National sovereignty paramount</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Open Borders Position</h5>
+            <ul><li>Freedom of movement fundamental right</li><li>Minimal restrictions justified</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Non-Ideal Approach</h5>
+            <ul><li>Balance between ideals and reality</li><li>Context-dependent solutions</li></ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Discussion Questions</span>
+        <div class="box bw">Should exceptions be made for:</div>
+        <ul class="chk">
+          <li>Political refugees?</li>
+          <li>People fleeing dire poverty and economic hardship?</li>
+          <li>Family members of residents?</li>
+          <li>Economic immigrants who will contribute to Canada's prosperity?</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 2 ═══════════════════════════ -->
+<div class="sec" id="m2">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="2" style="background:linear-gradient(130deg,#0d2817 0%,#1d6b3e 100%)">
+    <div class="mtag">Module 2 — Tutorial + Plenary</div>
+    <h2>Legal Skills & H&C Applications</h2>
+    <div class="sub">LR(R)W, FILAC, keyword extraction, case briefing (SQ4R), H&C applications (s.25(1)), Baker/Kanthasamy</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">💚</div>
+        <h4>Humanitarian & Compassionate (H&C) Applications</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg"><span class="ref">IRPA s.25(1)</span> allows Minister to grant permanent residence or exempt from IRPA requirements on <strong>humanitarian and compassionate grounds</strong>.</div>
+        
+        <span class="lbl">Key Characteristics</span>
+        <ul class="chk">
+          <li>Available for applications <strong>outside OR inside Canada</strong></li>
+          <li><strong>Discretionary process</strong> — decision by immigration officer at first instance</li>
+          <li>Based on <strong>written application and submissions</strong></li>
+          <li><strong>Onus on applicant</strong> to demonstrate H&C grounds</li>
+          <li>Subject to exceptions under <span class="ref">IRPA s.25(1.2)</span></li>
+        </ul>
+        
+        <div class="box bi">💡 H&C grounds are NOT defined in legislation — developed through case law (see <em>Baker</em> and <em>Kanthasamy</em>).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">🎯</div>
+        <h4>FILAC Framework — Legal Reasoning</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="framework">
+          <h6>FILAC — A Guide for Legal Reasoning (Thinking)</h6>
+          <ul>
+            <li><strong>F</strong> — Facts (legally relevant facts)</li>
+            <li><strong>I</strong> — Issues (legal questions to be answered)</li>
+            <li><strong>L</strong> — Law (statutes, regulations, case law, policy)</li>
+            <li><strong>A</strong> — Application (apply law to facts)</li>
+            <li><strong>C</strong> — Conclusion (answer to legal issues)</li>
+          </ul>
+        </div>
+        <div class="box bp">💡 FILAC is for <strong>thinking</strong> through legal problems. CREAC (covered in Module 6) is for <strong>writing</strong> persuasive arguments.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🔍</div>
+        <h4>McCormack's Steps in Legal Research</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="flow">
+          <span class="fs">1. Identify Facts</span>
+          <span class="fa">→</span>
+          <span class="fs">2. Classify Legal Issue</span>
+          <span class="fa">→</span>
+          <span class="fs">3. Extract Keywords</span>
+          <span class="fa">→</span>
+          <span class="fs">4. Search Secondary Sources</span>
+          <span class="fa">→</span>
+          <span class="fs">5. Find Primary Sources</span>
+          <span class="fa">→</span>
+          <span class="fs">6. Note Up</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🔑</div>
+        <h4>Keyword Extraction Strategy</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt">Extract keywords in <strong>three tiers</strong> based on specificity:</div>
+        
+        <div class="three">
+          <div class="mini">
+            <h5>1Y Keywords (Broad)</h5>
+            <ul>
+              <li>General legal area</li>
+              <li>Example: "immigration," "H&C"</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>2Y Keywords (Medium)</h5>
+            <ul>
+              <li>Specific legal concepts</li>
+              <li>Example: "establishment," "best interests of child"</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>3Y Keywords (Specific)</h5>
+            <ul>
+              <li>Unique fact patterns</li>
+              <li>Example: "single mother," "long-term residence"</li>
+            </ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Sources for Keywords</span>
+        <ul class="chk">
+          <li>Client's facts</li>
+          <li>Legislation (IRPA, IRPR)</li>
+          <li>Case law headnotes</li>
+          <li>Secondary sources (textbooks, encyclopedias)</li>
+          <li>Policy documents (IRCC operational instructions)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light);color:var(--gold)">📖</div>
+        <h4>SQ4R Approach to Reading & Briefing Case Law</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="framework">
+          <h6>SQ4R for Active Reading of Cases</h6>
+          <ul>
+            <li><strong>S</strong>urvey — Why am I reading this case? What's the point?</li>
+            <li><strong>Q</strong>uestion — Skim to see structure. How long? Headings? Where are key parts?</li>
+            <li><strong>R</strong>ead — Mark parts of case & elements for brief</li>
+            <li><strong>R</strong>ecite — Describe court's reasoning in own words</li>
+            <li><strong>R</strong>eflect — Relate case to larger area of law ("Observations")</li>
+            <li><strong>R</strong>eview — Identify relationship to other cases (pay attention to dates)</li>
+          </ul>
+        </div>
+        
+        <span class="lbl">Case Brief Elements</span>
+        <ul class="chk">
+          <li>Case name & citation</li>
+          <li>Procedural history</li>
+          <li>Facts</li>
+          <li>Issues</li>
+          <li>Decision (holding)</li>
+          <li>Reasoning (ratio decidendi)</li>
+          <li>Observations (significance, relationship to other cases)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">📚</div>
+        <h4>Secondary Sources in Legal Research</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Two Functions of Secondary Sources</span>
+        <div class="two">
+          <div class="mini">
+            <h5>1. Point-To Function</h5>
+            <ul><li>Direct you to relevant primary sources (cases, legislation)</li></ul>
+          </div>
+          <div class="mini">
+            <h5>2. Commentary Function</h5>
+            <ul><li>Explain and analyze the law</li></ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Traditional Secondary Sources</span>
+        <div class="pills">
+          <span class="pill pg">Legal Encyclopedias (CED, Halsbury's)</span>
+          <span class="pill pg">Books, Treatises, Textbooks</span>
+          <span class="pill pg">Government Documents</span>
+          <span class="pill pg">Scholarly Articles (peer-reviewed)</span>
+          <span class="pill pg">Practitioners' Guides</span>
+        </div>
+        
+        <span class="lbl">Non-Traditional Secondary Sources (Critically Assess!)</span>
+        <div class="pills">
+          <span class="pill po">Newsletters</span>
+          <span class="pill po">Social Media/Listservs</span>
+          <span class="pill po">Blogs and Podcasts</span>
+          <span class="pill po">News Media</span>
+          <span class="pill po">Law Firm Publications</span>
+        </div>
+        
+        <span class="lbl">Legal Encyclopedias</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Westlaw — CED</h5>
+            <ul><li>Canadian Encyclopedic Digest</li><li>Subject Title: "Immigration and Refugees"</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Lexis — Halsbury's</h5>
+            <ul><li>Halsbury's Laws of Canada</li><li>Subject Title: "Immigration and Citizenship"</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>Leading Cases: Baker & Kanthasamy</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="casebox">
+          <div class="cn">Baker v Canada (Minister of Citizenship and Immigration), 1999 CanLII 699 (SCC), [1999] 2 SCR 817</div>
+          Landmark case establishing procedural fairness requirements for H&C applications and factors for assessing best interests of the child.
+        </div>
+        
+        <div class="casebox">
+          <div class="cn">Kanthasamy v Canada (Citizenship and Immigration), 2015 SCC 61, [2015] 3 SCR 909</div>
+          Clarified that H&C relief should not be limited to "unusual and undeserved or disproportionate hardship" — a more flexible, compassionate approach required.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 3 ═══════════════════════════ -->
+<div class="sec" id="m3">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="3" style="background:linear-gradient(130deg,#2d0e3d 0%,#6d2e91 100%)">
+    <div class="mtag">Module 3 — Tutorial + Plenary</div>
+    <h2>Administrative Law & Procedural Fairness</h2>
+    <div class="sub">Baker factors, reasonable apprehension of bias, judicial review vs appeal, noting up legislation</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>Why You Need to Know Administrative Law</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp">Immigration decisions are made by <strong>administrative tribunals and officers</strong>, not courts. Understanding administrative law principles is essential for:</div>
+        <ul class="chk">
+          <li>Determining what <strong>procedural fairness</strong> is owed to clients</li>
+          <li>Identifying <strong>grounds for judicial review</strong> (bias, unreasonableness, procedural unfairness)</li>
+          <li>Understanding <strong>standard of review</strong> (correctness vs reasonableness)</li>
+          <li>Recognizing when decision-maker exceeded jurisdiction</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📋</div>
+        <h4>Baker v Canada — Five Factors for Procedural Fairness</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="casebox">
+          <div class="cn">Baker v Canada (Minister of Citizenship and Immigration), [1999] 2 SCR 817</div>
+          Established framework for determining what procedural fairness is required in administrative decisions.
+        </div>
+        
+        <span class="lbl">The Five Baker Factors</span>
+        <div class="framework">
+          <h6>1. Nature of the Decision</h6>
+          <ul>
+            <li>More important to individual = more fairness required</li>
+            <li>H&C decisions highly significant = higher fairness</li>
+          </ul>
+        </div>
+        
+        <div class="framework">
+          <h6>2. Nature of the Statutory Scheme</h6>
+          <ul>
+            <li>Does legislation provide appeal? If yes, less fairness at first instance</li>
+            <li>H&C has no appeal = more fairness required at decision stage</li>
+          </ul>
+        </div>
+        
+        <div class="framework">
+          <h6>3. Importance of Decision to Individual</h6>
+          <ul>
+            <li>Affects fundamental interests (family unity, safety) = more fairness</li>
+            <li>Baker: separation from children = highly important</li>
+          </ul>
+        </div>
+        
+        <div class="framework">
+          <h6>4. Legitimate Expectations</h6>
+          <ul>
+            <li>Did practices/representations create expectation of certain procedure?</li>
+            <li>Procedural (not substantive) expectations protected</li>
+          </ul>
+        </div>
+        
+        <div class="framework">
+          <h6>5. Choices of Procedures</h6>
+          <ul>
+            <li>What procedures has agency chosen? Are they appropriate?</li>
+            <li>Oral hearing not always required if written submissions sufficient</li>
+          </ul>
+        </div>
+        
+        <div class="box bg">✅ <strong>Application:</strong> All 5 factors considered together — no single factor determinative. More procedural protections required when factors weigh in favor of individual.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚖️</div>
+        <h4>Impartiality, Bias & Independence</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Reasonable Apprehension of Bias Test</span>
+        <div class="qt">"...what would an informed person, viewing the matter realistically and practically—and having thought the matter through—conclude..."<cite>— Justice de Grandpré in Committee for Justice and Liberty v National Energy Board, [1978] 1 SCR 369</cite></div>
+        
+        <div class="box bd">⚠️ Test is <strong>objective</strong> — not whether decision-maker was actually biased, but whether a reasonable, informed person would perceive bias.</div>
+        
+        <span class="lbl">Types of Bias</span>
+        <div class="three">
+          <div class="mini">
+            <h5>Actual Bias</h5>
+            <ul><li>Decision-maker has real prejudice or interest in outcome</li><li>Rarely proven</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Institutional Bias</h5>
+            <ul><li>Structure of tribunal creates appearance of bias</li><li>Example: investigator also adjudicates</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Reasonable Apprehension</h5>
+            <ul><li>Most common ground</li><li>Appearance of bias to reasonable observer</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">⚖️</div>
+        <h4>Judicial Review vs Appeal</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="two">
+          <div class="mini">
+            <h5>Judicial Review</h5>
+            <ul>
+              <li><strong>Narrower scope</strong> than full appeal</li>
+              <li>Reviews <strong>legality</strong> of decision (not merits)</li>
+              <li>Ensures decisions within authority, fair, correct or reasonable</li>
+              <li>Available in Federal Court for IRPA decisions</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Appeals (IAD, RAD)</h5>
+            <ul>
+              <li><strong>Full review</strong> of merits</li>
+              <li>Reviews decision-making process AND substance</li>
+              <li>Can substitute own decision</li>
+              <li>Only available where IRPA provides appeal right</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">📚</div>
+        <h4>Noting Up Legislation — Ensuring Currency</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Two-Part Process for Noting Up Legislation</span>
+        <div class="two">
+          <div class="mini">
+            <h5>1. Currency (In Force?)</h5>
+            <ul>
+              <li>Use <strong>Justice Laws</strong> (official source)</li>
+              <li>Plus <strong>LEGISinfo</strong> to backfill/enhance currency date</li>
+              <li>Provides official version with enhanced currency</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>2. Judicial Treatment</h5>
+            <ul>
+              <li>Use <strong>citator tool</strong> (CanLII, Westlaw KeyCite, Lexis QuickCITE)</li>
+              <li>How have courts interpreted/applied this provision?</li>
+              <li>Filter by jurisdiction, date, relevance</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="box bi">💡 <strong>CanLII Method:</strong> Search for provision → Click "Citing documents" → Filter to find judicial treatment → Keyword search within results.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 4 ═══════════════════════════ -->
+<div class="sec" id="m4">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="4" style="background:linear-gradient(130deg,#5a0e0a 0%,#c42a1e 100%)">
+    <div class="mtag">Module 4 — Tutorial + Plenary</div>
+    <h2>Entry to Canada & Misrepresentation</h2>
+    <div class="sub">Entry requirements, inadmissibility (s.34-41), TRVs, misrepresentation (s.40), client interviewing</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🛂</div>
+        <h4>Entry to Canada — Who Needs What?</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="three">
+          <div class="mini">
+            <h5>Canadian Citizens</h5>
+            <ul>
+              <li>Valid passport OR</li>
+              <li>Enhanced driver's license (land/sea from US)</li>
+              <li><strong>Right to enter</strong> — cannot be denied</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Indigenous Peoples (Registered)</h5>
+            <ul>
+              <li>"Indian Status" card OR</li>
+              <li>Valid passport</li>
+              <li><strong>Right to enter</strong> under <em>Indian Act</em> + IRPA s.19(1)</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Permanent Residents</h5>
+            <ul>
+              <li><strong>Valid PR card</strong> OR</li>
+              <li>Permanent Resident Travel Document (if card expired/lost)</li>
+              <li>Can be found inadmissible</li>
+            </ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Foreign Nationals</span>
+        <div class="box bi">Generally require: (1) <strong>Temporary Resident Visa (TRV)</strong> if from visa-required country, (2) <strong>eTA</strong> if visa-exempt and arriving by air, (3) Valid passport. May also need work permit, study permit, etc.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>Inadmissibility — IRPA s.34-41</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Section</th><th>Ground</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td><span class="ref">s.34</span></td><td>Security</td><td>Espionage, subversion, terrorism</td></tr>
+            <tr><td><span class="ref">s.35</span></td><td>Human/International Rights Violations</td><td>War crimes, crimes against humanity</td></tr>
+            <tr><td><span class="ref">s.36</span></td><td>Serious Criminality / Criminality</td><td>Conviction punishable ≥10 yrs (PR), indictable offence (FN)</td></tr>
+            <tr><td><span class="ref">s.37</span></td><td>Organized Criminality</td><td>Member of criminal organization</td></tr>
+            <tr><td><span class="ref">s.38</span></td><td>Health Grounds</td><td>Danger to public health/safety, excessive demand on services</td></tr>
+            <tr><td><span class="ref">s.39</span></td><td>Financial Reasons</td><td>Unable/unwilling to support self</td></tr>
+            <tr><td><span class="ref">s.40</span></td><td>Misrepresentation</td><td>Directly/indirectly misrepresenting or withholding material facts</td></tr>
+            <tr><td><span class="ref">s.41</span></td><td>Non-compliance</td><td>Failure to comply with Act (e.g., conditions on permit)</td></tr>
+          </tbody>
+        </table></div>
+        
+        <span class="lbl">Consequences of Inadmissibility</span>
+        <ul class="chk">
+          <li>Removal from Canada</li>
+          <li>Exclusion order, Deportation order, or Departure order</li>
+          <li>Bar from re-entry (1 year, 5 years, or permanent depending on ground)</li>
+          <li>Ineligibility for certain benefits</li>
+        </ul>
+      </div>
+    </card>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">📄</div>
+        <h4>Types of Temporary Resident Visas (TRVs)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="pills">
+          <span class="pill po">Visitor Visa — Tourism, visiting family/friends</span>
+          <span class="pill po">Study Permit — Post-secondary study in Canada</span>
+          <span class="pill po">Work Permit — Employment (LMIA-based or LMIA-exempt)</span>
+          <span class="pill po">Super Visa — Parents/grandparents (multi-entry, up to 5 years per visit)</span>
+          <span class="pill po">Transit Visa — Passing through Canada</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚠️</div>
+        <h4>Misrepresentation — IRPA s.40(1)(a)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd"><span class="ref">IRPA s.40(1)(a)</span> — PR or FN inadmissible for <strong>directly or indirectly misrepresenting or withholding material facts</strong> relating to relevant matter that <strong>induces or could induce</strong> error in administration of Act.</div>
+        
+        <span class="lbl">Key Elements</span>
+        <ul class="chk">
+          <li><strong>Direct OR indirect</strong> misrepresentation</li>
+          <li><strong>Withholding</strong> material facts also counts</li>
+          <li>Must be <strong>material</strong> — could affect decision</li>
+          <li>Induces or <strong>could induce</strong> error (doesn't need to actually induce)</li>
+          <li><strong>No intent required</strong> — innocent mistake still misrepresentation</li>
+        </ul>
+        
+        <span class="lbl">Case Studies — Is It Misrepresentation?</span>
+        
+        <div class="casebox">
+          <div class="cn">Wanda — Uncle Bob's Exaggeration</div>
+          Application for PR (skilled worker). Uncle Bob exaggerates Wanda's education (claims Harvard M.A. instead of state university M.A.). Wanda doesn't notice.<br><br>
+          <span class="yes">YES — Misrepresentation</span> — Indirect misrepresentation through representative. No intent required. Material fact (education) could induce error.
+        </div>
+        
+        <div class="casebox">
+          <div class="cn">Charlene — Forgot One Husband</div>
+          Married 5 times. Sponsored by Canadian husband Dan. Forgets one of her previous husbands on application.<br><br>
+          <span class="yes">YES — Misrepresentation</span> — Withholding material fact. Marital history relevant to family class sponsorship.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">👥</div>
+        <h4>Client-Centered Interviewing</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp">Client-centered interviewing focuses on <strong>client's goals, needs, and perspective</strong> rather than just gathering legal facts.</div>
+        
+        <span class="lbl">Key Principles</span>
+        <ul class="chk">
+          <li><strong>Active listening</strong> — Let client tell their story</li>
+          <li><strong>Open-ended questions</strong> — "Tell me about..." vs "Did you..."</li>
+          <li><strong>Empathy</strong> — Acknowledge emotions and concerns</li>
+          <li><strong>Cultural competence</strong> — Understand client's cultural context</li>
+          <li><strong>Clarification</strong> — Ensure you understand before giving advice</li>
+          <li><strong>Collaboration</strong> — Client is partner in decision-making</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 5 ═══════════════════════════ -->
+<div class="sec" id="m5">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="5" style="background:linear-gradient(130deg,#042d2d 0%,#0d6e6d 100%)">
+    <div class="mtag">Module 5 — Tutorial + Plenary</div>
+    <h2>Permanent Residence Classes</h2>
+    <div class="sub">Economic/Family/Refugee classes, sponsorship, CREAC framework, noting up case law</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🏛️</div>
+        <h4>Three Main Permanent Residence Classes</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="three">
+          <div class="mini">
+            <h5>Economic Class</h5>
+            <ul>
+              <li>Federal Skilled Worker</li>
+              <li>Federal Skilled Trades</li>
+              <li>Canadian Experience Class</li>
+              <li>Provincial Nominee Program (PNP)</li>
+              <li>Start-up Visa</li>
+              <li>Self-Employed</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Family Class</h5>
+            <ul>
+              <li>Spouse/Common-law/Conjugal Partner</li>
+              <li>Dependent Children</li>
+              <li>Parents & Grandparents</li>
+              <li>Orphaned relatives</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Refugee Class</h5>
+            <ul>
+              <li>Convention Refugees (s.96)</li>
+              <li>Persons in Need of Protection (s.97)</li>
+              <li>Government-Assisted Refugees</li>
+              <li>Privately Sponsored Refugees</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">👨‍👩‍👧</div>
+        <h4>Family Class — Who Can Sponsor & Be Sponsored?</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Who Can Be a Sponsor?</span>
+        <ul class="chk">
+          <li>Canadian citizen or PR <strong>≥18 years old</strong></li>
+          <li>If citizen: can be outside Canada (must intend to return)</li>
+          <li>If PR: must be residing in Canada</li>
+          <li>Not receiving social assistance (except disability)</li>
+          <li>Meet income requirements (for parents/grandparents: LICO + 30%)</li>
+          <li>No criminal prohibitions (see ICL 850)</li>
+        </ul>
+        
+        <span class="lbl">Who Can Be Sponsored?</span>
+        <div class="pills">
+          <span class="pill pg">Spouse (married/common-law/conjugal)</span>
+          <span class="pill pg">Dependent child</span>
+          <span class="pill pg">Parents & Grandparents</span>
+          <span class="pill pg">Orphaned sibling/niece/nephew/grandchild</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">💍</div>
+        <h4>Spouse Definitions — Married, Common-Law, Conjugal</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Type</th><th>Definition</th><th>Key Requirements</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Married</strong></td><td>Legally married</td><td>Marriage valid where performed AND under Canadian law</td></tr>
+            <tr><td><strong>Common-Law Partner</strong></td><td>Cohabiting relationship</td><td><strong>Continuous cohabitation ≥1 year</strong></td></tr>
+            <tr><td><strong>Conjugal Partner</strong></td><td>Committed relationship, cannot marry/cohabit</td><td><strong>Relationship ≥1 year</strong> + barrier to marriage/cohabitation (immigration, legal)</td></tr>
+          </tbody>
+        </table></div>
+        
+        <span class="lbl">R4 — Bad Faith & Genuineness</span>
+        <div class="box bd"><span class="ref">IRPR s.4(1)</span> — FN NOT member of family class if marriage/partnership: (a) entered into <strong>primarily for purpose of acquiring status</strong> (primary purpose test), OR (b) <strong>is not genuine</strong> (genuineness test).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">✍️</div>
+        <h4>CREAC Framework — Legal Writing Structure</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="framework">
+          <h6>CREAC — Persuasive Legal Writing</h6>
+          <ul>
+            <li><strong>C</strong>onclusion — State your answer first (point-first writing)</li>
+            <li><strong>R</strong>ule — State the relevant law (legislation, case law, policy)</li>
+            <li><strong>E</strong>xplanation — Explain how law is interpreted/applied</li>
+            <li><strong>A</strong>pplication — Apply law to your client's specific facts</li>
+            <li><strong>C</strong>onclusion — Restate conclusion with transitional phrase</li>
+          </ul>
+        </div>
+        
+        <span class="lbl">Example: Marsela Case (Family Class Sponsorship)</span>
+        <div class="box bi">
+          <strong>C:</strong> Marsela's marriage to Edon is genuine for purposes of family class sponsorship.<br><br>
+          <strong>R:</strong> IRPR s.4(1) states a FN is not member of family class if marriage "is not genuine."<br><br>
+          <strong>E:</strong> Courts assess genuineness using M v H factors + ongoing nature of relationship.<br><br>
+          <strong>A:</strong> Marsela and Edon have been in relationship for 3 years, have child together, communicate daily, share finances.<br><br>
+          <strong>C:</strong> Therefore, Marsela's application should be approved as marriage is genuine.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🔍</div>
+        <h4>Noting Up Case Law — Two-Part Process</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="two">
+          <div class="mini">
+            <h5>1. History</h5>
+            <ul>
+              <li><strong>Q:</strong> Has my target case been appealed?</li>
+              <li><strong>A:</strong> Go to full-text view of case</li>
+              <li>Look for "History" or "Subsequent history" at top</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>2. Judicial Consideration</h5>
+            <ul>
+              <li><strong>Q:</strong> How have other courts treated this case?</li>
+              <li><strong>A:</strong> Use citator tool</li>
+              <li>CanLII: "Cited by" tab</li>
+              <li>Westlaw: KeyCite</li>
+              <li>Lexis: QuickCITE</li>
+            </ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Treatment Categories</span>
+        <div class="pills">
+          <span class="pill pg">Followed — Applied reasoning positively</span>
+          <span class="pill pb">Distinguished — Case different on facts</span>
+          <span class="pill pr">Not followed — Disagreed with reasoning</span>
+          <span class="pill po">Mentioned — Cited but no substantive treatment</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 6 ═══════════════════════════ -->
+<div class="sec" id="m6">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="6" style="background:linear-gradient(130deg,#3d2900 0%,#b87d00 100%)">
+    <div class="mtag">Module 6 — Tutorial + Plenary</div>
+    <h2>Refugee Law & Putting It All Together</h2>
+    <div class="sub">Convention refugee (s.96), inclusion/exclusion/cessation, STCA, FILAC/CREAC integration</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light);color:var(--gold)">🛡️</div>
+        <h4>Convention Refugee Definition — IRPA s.96</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bgo"><span class="ref">IRPA s.96</span> — Convention refugee means person who, by reason of well-founded fear of persecution for reasons of race, religion, nationality, membership in particular social group, or political opinion:</div>
+        <ul class="chk">
+          <li>(a) is <strong>outside each of their countries of nationality</strong> and unable or unwilling to avail themself of protection of each of those countries; OR</li>
+          <li>(b) not having a country of nationality, is outside country of former habitual residence and unable or unwilling to return to that country.</li>
+        </ul>
+        
+        <span class="lbl">Five Elements to Establish</span>
+        <div class="framework">
+          <h6>Inclusion Clause — Article 1A(2) / IRPA s.96</h6>
+          <ul>
+            <li><strong>1. Outside Country</strong> — Alienage requirement</li>
+            <li><strong>2. Well-Founded Fear</strong> — Subjective + objective components</li>
+            <li><strong>3. Persecution</strong> — Serious harm, sustained/systemic violation of rights</li>
+            <li><strong>4. Nexus</strong> — Connected to one of 5 grounds (race, religion, nationality, PSG, political opinion)</li>
+            <li><strong>5. Unable/Unwilling to Seek State Protection</strong> — State unable or unwilling to protect</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">⚖️</div>
+        <h4>Well-Founded Fear & Persecution</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Well-Founded Fear (Two Components)</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Subjective Fear</h5>
+            <ul>
+              <li>Claimant genuinely fears persecution</li>
+              <li>Assessed through testimony, demeanor, actions</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Objective Basis</h5>
+            <ul>
+              <li>Reasonable person in claimant's circumstances would fear</li>
+              <li>Supported by country condition evidence</li>
+            </ul>
+          </div>
+        </div>
+        
+        <span class="lbl">What Constitutes Persecution?</span>
+        <div class="box bw">Persecution = <strong>serious harm</strong> + <strong>sustained or systemic violation of fundamental human rights</strong> demonstrative of failure of state protection.</div>
+        <ul class="chk">
+          <li>Threat to life or freedom</li>
+          <li>Torture, cruel/unusual treatment or punishment</li>
+          <li>Sustained discrimination or harassment</li>
+          <li>Cumulative effect of measures violating rights</li>
+        </ul>
+      </div>
+    </card>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">🔗</div>
+        <h4>Nexus — Five Convention Grounds</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="pills">
+          <span class="pill pp">Race</span>
+          <span class="pill pp">Religion</span>
+          <span class="pill pp">Nationality</span>
+          <span class="pill pp">Membership in Particular Social Group (PSG)</span>
+          <span class="pill pp">Political Opinion</span>
+        </div>
+        
+        <div class="box bp"><strong>Particular Social Group (PSG)</strong> — Most flexible ground. Requirements: (1) Innate/unchangeable characteristic OR fundamental to identity/conscience, (2) Social visibility or "at risk" test, (3) State unable/unwilling to protect.</div>
+        
+        <p style="margin:10px 0"><strong>Examples of PSGs:</strong> Women fleeing gender-based violence, LGBTQ+ persons, family members of dissidents, former gang members who refuse to rejoin.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>Exclusion & Cessation Clauses</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Exclusion Clauses (Article 1F) — NOT Entitled to Protection</span>
+        <ul class="chk">
+          <li><strong>1F(a):</strong> Committed crime against peace, war crime, or crime against humanity</li>
+          <li><strong>1F(b):</strong> Committed serious non-political crime outside country of refuge before admission</li>
+          <li><strong>1F(c):</strong> Guilty of acts contrary to purposes and principles of United Nations</li>
+        </ul>
+        
+        <span class="lbl">Cessation Clauses (Article 1C / IRPA s.108) — Protection Ends</span>
+        <ul class="chk">
+          <li>Voluntarily re-availed of protection of country of nationality</li>
+          <li>Voluntarily re-acquired lost nationality</li>
+          <li>Acquired new nationality and enjoys protection of new country</li>
+          <li>Voluntarily re-established in country of persecution</li>
+          <li>Circumstances that led to recognition have ceased to exist</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🇺🇸</div>
+        <h4>Safe Third Country Agreement (STCA)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt">Signed in <strong>2004</strong> between US and Canada. Refugee claimants arriving at land Port of Entry from US are <strong>ineligible</strong> to make claims in Canada.</div>
+        
+        <span class="lbl">Key Developments</span>
+        <ul class="chk">
+          <li>Challenged under Charter s.7 due to poor US detention conditions</li>
+          <li>SCC held STCA does NOT violate Charter (upheld)</li>
+          <li>Referred back to FC for review of whether violates s.15 (equality) — esp. re: US treatment of gender-based violence claims</li>
+        </ul>
+        
+        <span class="lbl">Exceptions</span>
+        <div class="pills">
+          <span class="pill pg">H&C considerations</span>
+          <span class="pill pg">Policy exemptions (unaccompanied minors, family members in Canada)</span>
+          <span class="pill pg">Administrative deferral of removals</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">💬</div>
+        <h4>Trauma-Informed Interviewing</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp">Refugee claimants often experienced trauma. Interviews must be conducted with sensitivity to trauma's effects on memory, disclosure, and trust.</div>
+        
+        <span class="lbl">Key Principles</span>
+        <ul class="chk">
+          <li><strong>Safety first</strong> — Create safe, comfortable environment</li>
+          <li><strong>Trustworthiness</strong> — Be transparent about process, confidentiality</li>
+          <li><strong>Peer support</strong> — Consider interpreter from same community (with caution)</li>
+          <li><strong>Collaboration</strong> — Empower claimant in process</li>
+          <li><strong>Cultural sensitivity</strong> — Understand cultural norms around disclosure</li>
+          <li><strong>Patience</strong> — Allow time, don't rush sensitive topics</li>
+          <li><strong>Understand trauma effects</strong> — Inconsistencies may result from trauma, not dishonesty</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🎯</div>
+        <h4>Putting FILAC & CREAC Together</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi"><strong>Remember:</strong> FILAC is for <strong>thinking</strong> (analytical process). CREAC is for <strong>writing</strong> (persuasive structure).</div>
+        
+        <span class="lbl">How FILAC Elements Map to CREAC</span>
+        <div class="tw"><table>
+          <thead><tr><th>FILAC (Thinking)</th><th>CREAC (Writing)</th><th>Where It Appears</th></tr></thead>
+          <tbody>
+            <tr><td>F — Facts</td><td>Application</td><td>A segment — connect law to client's facts</td></tr>
+            <tr><td>I — Issues</td><td>Conclusion (framed as answer)</td><td>First C — answer the issue</td></tr>
+            <tr><td>L — Law</td><td>Rule + Explanation</td><td>R segment (cite) + E segment (interpret)</td></tr>
+            <tr><td>A — Application</td><td>Application</td><td>A segment — synthesize law + facts</td></tr>
+            <tr><td>C — Conclusion</td><td>Conclusion</td><td>Final C — restate with transitional phrase</td></tr>
+          </tbody>
+        </table></div>
+        
+        <div class="box bg">✅ <strong>In legal writing, clarity is the guiding principle.</strong> Use plain language, avoid jargon when possible, cite correctly, and make your argument easy to follow.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ QUICK REF ═══════════════════════════ -->
+<div class="sec" id="qr">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="" style="background:linear-gradient(130deg,#0f1824 0%,#1e2d3d 100%)">
+    <div class="mtag">All Modules</div>
+    <h2>📊 Master Quick Reference</h2>
+    <div class="sub">All key frameworks, comparisons, and checklists at a glance</div>
+  </div>
+
+  <div style="display:grid;gap:18px">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">🎯</div>
+        <h4>FILAC vs CREAC — Complete Framework</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="two">
+          <div class="framework">
+            <h6>FILAC (Thinking)</h6>
+            <ul>
+              <li><strong>F</strong> — Facts</li>
+              <li><strong>I</strong> — Issues</li>
+              <li><strong>L</strong> — Law</li>
+              <li><strong>A</strong> — Application</li>
+              <li><strong>C</strong> — Conclusion</li>
+            </ul>
+          </div>
+          <div class="framework">
+            <h6>CREAC (Writing)</h6>
+            <ul>
+              <li><strong>C</strong> — Conclusion (answer first)</li>
+              <li><strong>R</strong> — Rule (state the law)</li>
+              <li><strong>E</strong> — Explanation (how law applies)</li>
+              <li><strong>A</strong> — Application (to facts)</li>
+              <li><strong>C</strong> — Conclusion (restate)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box bi">💡 <strong>Key Difference:</strong> FILAC is your analytical framework for thinking through legal problems. CREAC is your writing structure for persuasive legal arguments. CREAC uses "point-first" writing — state conclusion first, then prove it.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">📚</div>
+        <h4>Legal Research Tools & Strategies</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Tool/Strategy</th><th>When to Use</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>Secondary Sources</td><td>Starting from zero</td><td>Point-to function: find relevant primary sources + commentary</td></tr>
+            <tr><td>Note Up Legislation</td><td>Have provision, need cases</td><td>Find judicial treatment of specific section</td></tr>
+            <tr><td>Keyword Search (Full-text DB)</td><td>Have good keywords</td><td>Find cases using Boolean connectors, then filter</td></tr>
+            <tr><td>Citator Tools</td><td>Have one good case</td><td>Find citing cases (judicial consideration)</td></tr>
+            <tr><td>Case Digest Databases</td><td>Need organized summaries</td><td>Browse cases by topic/keyword</td></tr>
+          </tbody>
+        </table></div>
+        
+        <span class="lbl">Noting Up — Two-Part Process</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Legislation</h5>
+            <ul>
+              <li><strong>Currency:</strong> Is it in force? (Justice Laws + LEGISinfo)</li>
+              <li><strong>Judicial Treatment:</strong> How have courts interpreted it? (Citator tools)</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Case Law</h5>
+            <ul>
+              <li><strong>History:</strong> Has it been appealed? (Full-text view)</li>
+              <li><strong>Judicial Consideration:</strong> How have other courts treated it? (Citator tools)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">📊</div>
+        <h4>Key Assessments & Timelines</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Assessment</th><th>Module(s)</th><th>Key Skills Tested</th></tr></thead>
+          <tbody>
+            <tr><td>Week 3 Legal Skills Quiz</td><td>2</td><td>FILAC, case briefing, keyword extraction, secondary sources</td></tr>
+            <tr><td>Week 4 Midterm Quiz</td><td>1, 3</td><td>Historical context, IRPA framework, admin law, Baker factors</td></tr>
+            <tr><td>Oral Advocacy Assignment</td><td>5</td><td>CREAC framework, persuasive argument, presentation skills</td></tr>
+            <tr><td>Final Exam</td><td>1-6</td><td>All course content integrated</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+function show(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const map={ov:0,m1:1,m2:2,m3:3,m4:4,m5:5,m6:6,qr:7};
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  const btns=document.querySelectorAll('.nb');
+  if(btns[map[id]])btns[map[id]].classList.add('on');
+  window.scrollTo({top:66,behavior:'smooth'});
+}
+function tog(h){
+  h.classList.toggle('on');
+  h.nextElementSibling.classList.toggle('on');
+}
+function srch(q){
+  if(q.length<2)return;
+  const lo=q.toLowerCase();
+  const all=document.querySelectorAll('.cb,.mini,.casebox,.box');
+  for(let el of all){
+    if(el.textContent.toLowerCase().includes(lo)){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.style.outline='3px solid #d35f00';
+      setTimeout(()=>el.style.outline='',4200);
+      break;
+    }
+  }
+}
+document.querySelectorAll('.ch.on').forEach(h=>{
+  h.nextElementSibling.classList.add('on');
+});
+</script>
+</body>
+</html>

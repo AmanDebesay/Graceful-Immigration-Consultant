@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Vantage Immigration Services — Fort McMurray, AB</title>
+  <title>Graceful Immigration Consultant Inc. — Canada</title>
+  <link rel="icon" href="../logo.png">
   <style>
     :root{--navy:#1B3A5C;--navy-d:#152e4a;--gold:#C9A84C;--gold-d:#b8953d;--white:#fff;--gray-50:#f8f9fa;--gray-100:#f2f2f2;--gray-600:#666;--gray-800:#333;--green:#1E8449;--green-bg:#EAF3DE;--red:#C0392B;--border:#e0e0e0;--radius:8px;--shadow:0 1px 4px rgba(0,0,0,.09);--font:'Segoe UI',system-ui,Arial,sans-serif}
     *{box-sizing:border-box;margin:0;padding:0}
@@ -13,7 +14,8 @@
     /* NAV */
     nav{background:var(--navy);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
     .nav-logo{display:flex;align-items:center;gap:12px}
-    .nav-mark{width:40px;height:40px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;font-family:Georgia,serif;color:var(--white)}
+    .nav-mark{width:56px;height:56px;background:var(--white);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .nav-mark img{width:100%;height:100%;object-fit:contain;padding:2px}
     .nav-name{color:var(--white);font-size:16px;font-weight:700}
     .nav-sub{color:rgba(255,255,255,.55);font-size:11px}
     .nav-links{display:flex;align-items:center;gap:24px}
@@ -52,7 +54,6 @@
     .service-icon{font-size:32px;margin-bottom:14px}
     .service-name{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px}
     .service-desc{font-size:13px;color:var(--gray-600);line-height:1.6;margin-bottom:16px}
-    .service-fee{font-size:12px;font-weight:600;color:var(--gold)}
     .service-link{display:inline-flex;align-items:center;gap:4px;color:var(--navy);font-size:13px;font-weight:600;margin-top:12px;border-bottom:2px solid transparent;transition:.15s}
     .service-link:hover{border-color:var(--gold);color:var(--gold)}
 
@@ -97,7 +98,8 @@
     footer{background:var(--navy-d,#152e4a);padding:40px;color:rgba(255,255,255,.6);font-size:12px}
     .footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
     .footer-logo{display:flex;align-items:center;gap:10px}
-    .footer-mark{width:32px;height:32px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;font-family:Georgia,serif;color:var(--white)}
+    .footer-mark{width:44px;height:44px;background:var(--white);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .footer-mark img{width:100%;height:100%;object-fit:contain;padding:1px}
     .footer-name{color:var(--white);font-size:13px;font-weight:700}
     .footer-links{display:flex;gap:20px;flex-wrap:wrap}
     .footer-links a{color:rgba(255,255,255,.5);font-size:12px;transition:.15s}
@@ -129,10 +131,10 @@
 <!-- NAVIGATION -->
 <nav>
   <div class="nav-logo">
-    <div class="nav-mark">V</div>
+    <div class="nav-mark"><img src="../logo.png" alt="Graceful Immigration Consultant"></div>
     <div>
-      <div class="nav-name">Vantage Immigration</div>
-      <div class="nav-sub">Fort McMurray, Alberta</div>
+      <div class="nav-name">Graceful Immigration Consultant</div>
+      <div class="nav-sub">Canada</div>
     </div>
   </div>
   <div class="nav-links">
@@ -146,7 +148,7 @@
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-badge">CICC-Regulated RCIC · Fort McMurray, AB</div>
+  <div class="hero-badge">CICC-Regulated RCICs · Serving All of Canada</div>
   <h1>Your Canadian Immigration<br>Journey Starts <span>Here</span></h1>
   <p>Expert guidance for work permits, spousal sponsorship, Express Entry, study permits, and permanent residency — with full multilingual support in English, Tigrinya, Arabic, and Amharic.</p>
   <div class="hero-ctas">
@@ -156,7 +158,7 @@
   <div class="hero-trust">
     <div class="hero-trust-item"><span>✓</span> CICC-Regulated RCIC</div>
     <div class="hero-trust-item"><span>✓</span> Multilingual: EN · TI · AR · AM</div>
-    <div class="hero-trust-item"><span>✓</span> Fort McMurray Based</div>
+    <div class="hero-trust-item"><span>✓</span> Serving All of Canada</div>
     <div class="hero-trust-item"><span>✓</span> PIPEDA / PIPA Compliant</div>
   </div>
 </div>
@@ -172,42 +174,36 @@
         <div class="service-icon">💑</div>
         <div class="service-name">Spousal Sponsorship</div>
         <div class="service-desc">Bring your spouse or common-law partner to Canada. We guide both the sponsor and the applicant through every form and requirement.</div>
-        <div class="service-fee">Starting at $2,350 CAD</div>
         <div class="service-link">Start application →</div>
       </div>
       <div class="service-card" onclick="location.href='intake.html?type=express_entry'">
         <div class="service-icon">⭐</div>
         <div class="service-name">Express Entry PR</div>
         <div class="service-desc">Maximize your CRS score and get your Express Entry profile submission right. Federal Skilled Worker, CEC, and FSTP streams.</div>
-        <div class="service-fee">Starting at $2,800 CAD</div>
         <div class="service-link">Start application →</div>
       </div>
       <div class="service-card" onclick="location.href='intake.html?type=work_permit_overseas'">
         <div class="service-icon">💼</div>
         <div class="service-name">Work Permits</div>
         <div class="service-desc">LMIA-based and LMIA-exempt work permits for overseas applicants and in-Canada extensions. Oil sands and trades experience.</div>
-        <div class="service-fee">Starting at $1,200 CAD</div>
         <div class="service-link">Start application →</div>
       </div>
       <div class="service-card" onclick="location.href='intake.html?type=study_permit_overseas'">
         <div class="service-icon">🎓</div>
         <div class="service-name">Study Permits</div>
         <div class="service-desc">Study permit applications for overseas applicants and in-Canada extensions. Post-graduation work permit guidance included.</div>
-        <div class="service-fee">Starting at $900 CAD</div>
         <div class="service-link">Start application →</div>
       </div>
       <div class="service-card" onclick="location.href='intake.html?type=trv_supervisa'">
         <div class="service-icon">✈️</div>
         <div class="service-name">Visitor Visa / Super Visa</div>
         <div class="service-desc">Tourist visas, Super Visas for parents and grandparents, and visitor record extensions for those already in Canada.</div>
-        <div class="service-fee">Starting at $800 CAD</div>
         <div class="service-link">Start application →</div>
       </div>
       <div class="service-card" onclick="location.href='intake.html?type=pr_card_renewal'">
         <div class="service-icon">🍁</div>
         <div class="service-name">PR Card Renewal</div>
         <div class="service-desc">PR card renewal, travel document applications, and residency obligation assessments for permanent residents.</div>
-        <div class="service-fee">Starting at $700 CAD</div>
         <div class="service-link">Start application →</div>
       </div>
     </div>
@@ -251,7 +247,7 @@
   <div class="trust-inner">
     <div style="text-align:center;color:var(--white)">
       <div class="section-label" style="color:var(--gold)">Why Choose Us</div>
-      <div class="section-title" style="color:var(--white);margin:0 auto">Built for Fort McMurray's Community</div>
+      <div class="section-title" style="color:var(--white);margin:0 auto">Built for Canada's Immigrant Community</div>
     </div>
     <div class="trust-grid">
       <div class="trust-item">
@@ -267,7 +263,7 @@
       <div class="trust-item">
         <div class="trust-icon">🔒</div>
         <div class="trust-title">Your Data is Safe</div>
-        <div class="trust-desc">PIPEDA and Alberta PIPA compliant. Your information is never shared without your written consent.</div>
+        <div class="trust-desc">PIPEDA compliant. Your information is never shared without your written consent.</div>
       </div>
       <div class="trust-item">
         <div class="trust-icon">📱</div>
@@ -291,12 +287,12 @@
   <div class="section-title">Contact Us</div>
   <div class="contact-grid">
     <div class="contact-info">
-      <h3>Vantage Immigration Services</h3>
+      <h3>Graceful Immigration Consultant Inc.</h3>
       <div class="contact-detail">
         <div class="contact-detail-icon">📍</div>
         <div class="contact-detail-text">
           <strong>Location</strong>
-          <span>Fort McMurray, Alberta, Canada</span>
+          <span>Canada</span>
         </div>
       </div>
       <div class="contact-detail">
@@ -310,7 +306,7 @@
         <div class="contact-detail-icon">✉️</div>
         <div class="contact-detail-text">
           <strong>Email</strong>
-          <span>info@vantageimmigration.ca</span>
+          <span>info@gracefulimmigration.ca</span>
         </div>
       </div>
       <div class="contact-detail">
@@ -364,10 +360,10 @@
 <footer>
   <div class="footer-inner">
     <div class="footer-logo">
-      <div class="footer-mark">V</div>
+      <div class="footer-mark"><img src="../logo.png" alt="Graceful Immigration Consultant"></div>
       <div>
-        <div class="footer-name">Vantage Immigration Services</div>
-        <div>Fort McMurray, Alberta · CICC-Regulated RCIC</div>
+        <div class="footer-name">Graceful Immigration Consultant Inc.</div>
+        <div>Canada · CICC-Regulated RCICs</div>
       </div>
     </div>
     <div class="footer-links">
@@ -376,7 +372,10 @@
       <a href="portal/dashboard.html">Client Portal</a>
       <a href="#contact">Contact</a>
     </div>
-    <div>© 2026 Vantage Immigration Services. All rights reserved.<br>Regulated by the College of Immigration and Citizenship Consultants (CICC).</div>
+    <div>© 2026 Graceful Immigration Consultant Inc.. All rights reserved.<br>Regulated by the College of Immigration and Citizenship Consultants (CICC).</div>
+  </div>
+  <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
+    <a href="../admin/index.html" style="color:rgba(255,255,255,.2);font-size:11px;text-decoration:none;letter-spacing:.04em" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Staff Access</a>
   </div>
 </footer>
 

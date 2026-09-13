@@ -3,13 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vantage Immigration — Admin Panel</title>
+  <title>Graceful Immigration Consultant — Admin Panel</title>
   <link rel="stylesheet" href="../css/styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%231B3A5C' rx='6'/><text y='24' x='5' font-size='20' fill='%23C9A84C' font-family='Georgia'>V</text></svg>">
+  <link rel="icon" href="../logo.png">
   <style>
+    /* Login gate */
+    #adminLoginGate{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9999}
+    .admin-login-card{background:#fff;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.4)}
+    .admin-login-logo{width:84px;height:84px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto 16px}
+    .admin-login-logo img{width:100%;height:100%;object-fit:contain;padding:4px}
+    .admin-login-title{text-align:center;font-size:20px;font-weight:800;color:var(--navy);margin-bottom:4px}
+    .admin-login-sub{text-align:center;font-size:13px;color:var(--gray-600);margin-bottom:24px}
+    .admin-login-card label{font-size:11px;color:var(--gray-600);display:block;margin-bottom:3px;margin-top:14px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+    .admin-login-card input{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;font-family:var(--font);box-sizing:border-box}
+    .admin-login-card input:focus{outline:none;border-color:var(--navy)}
+    #adminLoginErr{display:none;margin-top:12px;padding:9px 13px;background:#fde8e8;border:1px solid #f5a5a5;border-radius:var(--radius);font-size:12px;color:#c0392b;text-align:center}
+
     /* Admin-only indicator */
     .admin-badge{
-      display:inline-block;background:#7d3c98;color:#fff;
+      display:inline-block;background:var(--red);color:#fff;
       font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;
       letter-spacing:.04em;text-transform:uppercase;margin-left:6px;vertical-align:middle;
     }
@@ -25,12 +37,28 @@
 </head>
 <body>
 
+<!-- ══ ADMIN LOGIN GATE ══════════════════════════════════════ -->
+<div id="adminLoginGate">
+  <div class="admin-login-card">
+    <div class="admin-login-logo"><img src="../logo.png" alt="Graceful Immigration Consultant"></div>
+    <div class="admin-login-title">Admin Panel</div>
+    <div class="admin-login-sub">Graceful Immigration Consultant Inc. — Staff Only</div>
+    <label>Username</label>
+    <input type="text" id="adminUser" placeholder="Enter username" autocomplete="username" onkeydown="if(event.key==='Enter')adminLogin()">
+    <label>Password</label>
+    <input type="password" id="adminPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()">
+    <div id="adminLoginErr"></div>
+    <button onclick="adminLogin()" style="width:100%;margin-top:20px;background:var(--navy);color:#fff;padding:12px;border:none;border-radius:var(--radius);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font)">Sign In →</button>
+    <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--gray-400)">Restricted access — authorized staff only</div>
+  </div>
+</div>
+
 <!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" style="display:none">
   <div class="sidebar-logo">
-    <div class="logo-mark">V</div>
+    <div class="logo-mark"><img src="../logo.png" alt="Graceful Immigration Consultant"></div>
     <div class="logo-text">
-      <div class="logo-name">Vantage <span class="admin-badge">Admin</span></div>
+      <div class="logo-name">Graceful <span class="admin-badge">Admin</span></div>
       <div class="logo-sub">Immigration · Internal</div>
     </div>
   </div>
@@ -96,6 +124,9 @@
       <button class="nav-item" onclick="showPage('reports')" id="nav-reports">
         <span class="nav-icon">📊</span><span class="nav-label">Reports</span>
       </button>
+      <a class="audit-link" href="references.html">
+        <span class="nav-icon">📚</span><span class="nav-label">RCIC Reference Library</span>
+      </a>
     </div>
   </nav>
 
@@ -109,7 +140,7 @@
 </aside>
 
 <!-- ══ MAIN ═════════════════════════════════════════════════ -->
-<div class="main-wrap">
+<div class="main-wrap" id="adminAppWrap" style="display:none">
 
   <!-- TOP BAR -->
   <header class="topbar">
@@ -125,6 +156,7 @@
       <button class="topbar-btn" onclick="showPage('calendar')">📅 Calendar</button>
       <a class="topbar-btn" href="https://ircc.canada.ca/english/information/applications/spouse.asp" target="_blank">⏱ IRCC Times</a>
       <a class="topbar-btn" href="../public/index.html" target="_blank">🌐 Public Site</a>
+      <a class="topbar-btn" href="references.html">📚 References</a>
     </div>
     <div class="topbar-right">
       <div class="search-wrap">
@@ -134,6 +166,7 @@
         🔔 <span class="notif-count" id="notifCount">2</span>
       </div>
       <div class="user-avatar-sm" id="topbarAvatar">RC</div>
+      <button onclick="adminLogout()" title="Sign Out" style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:5px 12px;border-radius:var(--radius);font-size:12px;cursor:pointer;font-family:var(--font)">Sign Out</button>
     </div>
   </header>
 
@@ -146,7 +179,7 @@
         <h1 class="page-title">Dashboard</h1>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="badge badge-gold" id="dashYear">2026</span>
-          <button class="btn btn-sm" onclick="window.open('audit.html','_blank')" style="background:#7d3c98;color:#fff;border-color:#7d3c98">🔍 Audit Dashboard</button>
+          <button class="btn btn-sm" onclick="window.open('audit.html','_blank')" style="background:var(--red);color:#fff;border-color:var(--red)">🔍 Audit Dashboard</button>
           <button class="btn btn-primary btn-sm" onclick="showPage('intake')">+ New Case</button>
         </div>
       </div>
@@ -358,6 +391,60 @@
 <script src="../js/notes.js"></script>
 <script src="../js/chat.js"></script>
 <script src="../js/documents.js"></script>
+
+<script>
+// ── ADMIN AUTH ────────────────────────────────────────────────────
+const ADMIN_CREDS = [
+  { user: 'admin',  pass: 'graceful2026', name: 'Admin',     initials: 'AD' },
+  { user: 'rcic',   pass: 'rcic2026',    name: 'RCIC',      initials: 'RC' },
+  { user: 'staff',  pass: 'staff2026',   name: 'Staff',     initials: 'ST' }
+];
+
+function adminLogin() {
+  const user = document.getElementById('adminUser').value.trim().toLowerCase();
+  const pass = document.getElementById('adminPass').value;
+  const err  = document.getElementById('adminLoginErr');
+  err.style.display = 'none';
+
+  const match = ADMIN_CREDS.find(c => c.user === user && c.pass === pass);
+  if (!match) {
+    err.textContent = 'Invalid username or password.';
+    err.style.display = 'block';
+    document.getElementById('adminPass').value = '';
+    return;
+  }
+
+  sessionStorage.setItem('graceful_admin_auth', '1');
+  sessionStorage.setItem('graceful_admin_name', match.name);
+  sessionStorage.setItem('graceful_admin_initials', match.initials);
+  showAdminApp(match);
+}
+
+function showAdminApp(match) {
+  document.getElementById('adminLoginGate').style.display = 'none';
+  document.getElementById('sidebar').style.display = '';
+  document.getElementById('adminAppWrap').style.display = '';
+  // Update name displays
+  const name = match ? match.name : sessionStorage.getItem('graceful_admin_name') || 'Admin';
+  const initials = match ? match.initials : sessionStorage.getItem('graceful_admin_initials') || 'AD';
+  const nameEl = document.getElementById('sidebarName');
+  const avatarEl = document.getElementById('topbarAvatar');
+  if (nameEl) nameEl.textContent = name;
+  if (avatarEl) avatarEl.textContent = initials;
+}
+
+function adminLogout() {
+  sessionStorage.removeItem('graceful_admin_auth');
+  sessionStorage.removeItem('graceful_admin_name');
+  sessionStorage.removeItem('graceful_admin_initials');
+  location.reload();
+}
+
+// Auto-login if session still active
+if (sessionStorage.getItem('graceful_admin_auth') === '1') {
+  showAdminApp(null);
+}
+</script>
 
 </body>
 </html>

@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CICC Rules – EEP Study Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0a0f1e;
+    --card: #0f1a2e;
+    --card2: #111d33;
+    --border: #1e3a5f;
+    --accent1: #00c8ff;
+    --accent2: #ff6b35;
+    --accent3: #7fff6b;
+    --accent4: #ffcc00;
+    --accent5: #bf7fff;
+    --accent6: #ff4fa3;
+    --text: #e8f4ff;
+    --muted: #6a8dad;
+    --highlight: #001f3f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 24px 16px;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 40px 20px 32px;
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, #0a1628 0%, #0d2040 50%, #0a1628 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: -40px; right: -40px;
+    height: 200px;
+    background: radial-gradient(ellipse at center, rgba(0,200,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero h1 {
+    font-size: clamp(22px, 5vw, 42px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(90deg, var(--accent1), #ffffff, var(--accent5));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0,200,255,0.08);
+  }
+
+  .card-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .card-header h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .card-body {
+    padding: 14px 18px;
+  }
+
+  .fact {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: flex-start;
+  }
+
+  .fact:last-child { border-bottom: none; }
+
+  .fact-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 90px;
+    padding-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .fact-value {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 2px 2px 2px 0;
+  }
+
+  .tag-blue { background: rgba(0,200,255,0.15); color: var(--accent1); border: 1px solid rgba(0,200,255,0.3); }
+  .tag-orange { background: rgba(255,107,53,0.15); color: var(--accent2); border: 1px solid rgba(255,107,53,0.3); }
+  .tag-green { background: rgba(127,255,107,0.15); color: var(--accent3); border: 1px solid rgba(127,255,107,0.3); }
+  .tag-yellow { background: rgba(255,204,0,0.15); color: var(--accent4); border: 1px solid rgba(255,204,0,0.3); }
+  .tag-purple { background: rgba(191,127,255,0.15); color: var(--accent5); border: 1px solid rgba(191,127,255,0.3); }
+  .tag-pink { background: rgba(255,79,163,0.15); color: var(--accent6); border: 1px solid rgba(255,79,163,0.3); }
+
+  .c1 .card-header { background: rgba(0,200,255,0.07); }
+  .c1 .card-header h2 { color: var(--accent1); }
+  .c2 .card-header { background: rgba(255,107,53,0.07); }
+  .c2 .card-header h2 { color: var(--accent2); }
+  .c3 .card-header { background: rgba(127,255,107,0.07); }
+  .c3 .card-header h2 { color: var(--accent3); }
+  .c4 .card-header { background: rgba(255,204,0,0.07); }
+  .c4 .card-header h2 { color: var(--accent4); }
+  .c5 .card-header { background: rgba(191,127,255,0.07); }
+  .c5 .card-header h2 { color: var(--accent5); }
+  .c6 .card-header { background: rgba(255,79,163,0.07); }
+  .c6 .card-header h2 { color: var(--accent6); }
+
+  .number-highlight {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .nh-blue { color: var(--accent1); }
+  .nh-orange { color: var(--accent2); }
+  .nh-green { color: var(--accent3); }
+  .nh-yellow { color: var(--accent4); }
+  .nh-purple { color: var(--accent5); }
+  .nh-pink { color: var(--accent6); }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin: 12px 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wide { grid-column: 1 / -1; }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  th {
+    background: rgba(255,255,255,0.05);
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .alert-box {
+    background: rgba(255,204,0,0.08);
+    border: 1px solid rgba(255,204,0,0.25);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 8px 0;
+    font-size: 12.5px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .alert-box .icon { font-size: 16px; flex-shrink: 0; }
+
+  .flow-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin: 6px 0;
+  }
+
+  .flow-arrow {
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  .step-box {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .penalty-row {
+    background: rgba(255,79,163,0.04);
+    border-left: 3px solid var(--accent6);
+    padding: 6px 10px;
+    border-radius: 0 6px 6px 0;
+    margin: 4px 0;
+    font-size: 12.5px;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📋 CICC Rules Study Map</h1>
+  <p>EEP Exam Prep · All Key Regulations · Important Facts Only</p>
+</div>
+
+<!-- ROW 1: Fees & Annual -->
+<div class="grid">
+
+  <!-- ANNUAL FEES -->
+  <div class="card c1">
+    <div class="card-header">
+      <span class="card-icon">💰</span>
+      <h2>Annual Fees & Payments</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">RCIC Fee</span>
+        <span class="fact-value"><span class="number-highlight nh-blue">$1,809.25</span>/yr — single July 1 OR 4 instalments (Jul/Oct/Jan/Apr)</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">RISIA Fee</span>
+        <span class="fact-value"><span class="number-highlight nh-blue">$913</span>/yr — single payment due July 1 only</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">New Licensee</span>
+        <span class="fact-value">Billed <strong>pro-rated</strong> from date of licensing to next July 1</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Late Fee</span>
+        <span class="fact-value"><span class="number-highlight nh-orange">$100</span> if not paid within <span class="number-highlight nh-orange">30 days</span> of due date</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Late Interest</span>
+        <span class="fact-value"><span class="number-highlight nh-orange">2%/month (24%/yr)</span> on any overdue amounts</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Payment Plan</span>
+        <span class="fact-value">Apply to Registrar in writing. Default if payment missed → <strong>15 days</strong> to fix or suspended</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Payment Methods</span>
+        <span class="fact-value">Cheque / Online banking / Visa or Mastercard</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">All fees</span>
+        <span class="fact-value">Payable in <strong>Canadian dollars</strong> + applicable taxes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENT ACCOUNT -->
+  <div class="card c2">
+    <div class="card-header">
+      <span class="card-icon">🏦</span>
+      <h2>Client Account Regulation</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Requirement</span>
+        <span class="fact-value">Every RCIC <strong>must maintain</strong> a Client Account at a Canadian financial institution</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Deposit By</span>
+        <span class="fact-value">All client money deposited within <span class="number-highlight nh-orange">14 calendar days</span> of receipt</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Two Models</span>
+        <span class="fact-value">
+          <span class="badge tag-blue">Model 1</span> All monies deposited to Client Account<br>
+          <span class="badge tag-orange">Model 2</span> Only unearned/unbilled monies deposited. Must apply consistently all year.
+        </span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Notify Council</span>
+        <span class="fact-value">Within <span class="number-highlight nh-orange">15 days</span> of opening or closing any Client Account</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Reconciliation</span>
+        <span class="fact-value">Monthly. Must be done within <span class="number-highlight nh-orange">90 days</span> after each month end</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Keep Records</span>
+        <span class="fact-value">Reconciliation records kept for <span class="number-highlight nh-green">6 years</span></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Withdrawal</span>
+        <span class="fact-value">Only for disbursements (with client permission), fees after invoice issued, refunds, or transfers to another RCIC/lawyer</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Cheques</span>
+        <span class="fact-value">Cannot be made payable to <strong>cash or bearer</strong>. Must be signed by a Licensee</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Interest</span>
+        <span class="fact-value">General account: interest goes to <strong>Licensee</strong>. Client-specific account: interest goes to <strong>Client</strong></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Exemption</span>
+        <span class="fact-value">Can apply to Registrar annually (declaration) if you never hold client money</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENT FILE MANAGEMENT -->
+  <div class="card c3">
+    <div class="card-header">
+      <span class="card-icon">📁</span>
+      <h2>Client File Management</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">Opening a File</div>
+      <div class="fact">
+        <span class="fact-label">When</span>
+        <span class="fact-value">Open file at time of <strong>signing the Retainer Agreement</strong></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Must Contain</span>
+        <span class="fact-value">Retainer Agreement, supporting docs, correspondence, billing docs, Client Property copies, authorization of designate, draft docs, applications</span>
+      </div>
+
+      <div class="section-title">Closing a File</div>
+      <div class="fact">
+        <span class="fact-label">3 Conditions</span>
+        <span class="fact-value">
+          1) All fees/refunds settled<br>
+          2) Client Property returned to client<br>
+          3) Client notified <strong>in writing</strong> that Retainer is terminated
+        </span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Keep For</span>
+        <span class="fact-value">Minimum <span class="number-highlight nh-green">6 years</span> after closing date</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">List</span>
+        <span class="fact-value">Must maintain list of all Closed Files including date closed</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Destruction Date</span>
+        <span class="fact-value">Set a Projected File Destruction Date and record it in the file at time of closing</span>
+      </div>
+
+      <div class="section-title">Destroying Files</div>
+      <div class="fact">
+        <span class="fact-label">Record Must Show</span>
+        <span class="fact-value">Client's name + address, description of service, File Closing Date, Actual File Destruction Date</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Confidentiality</span>
+        <span class="fact-value">Maintain client confidentiality during destruction</span>
+      </div>
+
+      <div class="section-title">Returning Property</div>
+      <div class="fact">
+        <span class="fact-label">Account For</span>
+        <span class="fact-value">Account for client property within <span class="number-highlight nh-orange">14 days</span> of request</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Deliver Within</span>
+        <span class="fact-value"><span class="number-highlight nh-orange">30 days</span> of request</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETAINER AGREEMENT -->
+  <div class="card c4">
+    <div class="card-header">
+      <span class="card-icon">📝</span>
+      <h2>Retainer Agreement</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">When</span>
+        <span class="fact-value">Provide within <span class="number-highlight nh-yellow">10 calendar days</span> of beginning any work</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Language</span>
+        <span class="fact-value">Must be in <strong>English or French</strong>, dated and signed by both Licensee and Client personally (not designate)</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Must Include</span>
+        <span class="fact-value">Parties, scope of services, fees, disbursements, payment terms, schedule, client obligations, dispute process, CICC contact, confidentiality, refund policy</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Contingency</span>
+        <span class="fact-value"><strong>NOT PERMITTED</strong> — cannot bill only if successful</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">All Fees</span>
+        <span class="fact-value">Must be <strong>fair and reasonable</strong></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">CICC Clause</span>
+        <span class="fact-value">Must include clause: if client can't reach Licensee (death/incapacity), contact the Council</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Changes</span>
+        <span class="fact-value">Any changes must be mutually agreed in writing + initialled by both parties</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Not Required</span>
+        <span class="fact-value">When Licensee is salaried employee of an entity whose primary business is NOT immigration services</span>
+      </div>
+      <div class="section-title">Withdrawal — MUST Withdraw If:</div>
+      <div class="fact">
+        <span class="fact-label">Mandatory</span>
+        <span class="fact-value">Discharged by client / instructed to do something illegal / conflict of interest / not competent</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Notify Gov't</span>
+        <span class="fact-value">Notify government agencies within <span class="number-highlight nh-yellow">10 days</span> of withdrawal where Licensee's name appears as representative</span>
+      </div>
+      <div class="section-title">Penalties for Breach</div>
+      <div class="fact">
+        <span class="fact-label">1st offence</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$250</span> fine + written warning (30 days to correct)</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">2nd+ offence</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$1,000</span> fine per incident</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CPD -->
+  <div class="card c5">
+    <div class="card-header">
+      <span class="card-icon">🎓</span>
+      <h2>CPD — Continuing Professional Development</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Hours Required</span>
+        <span class="fact-value"><span class="number-highlight nh-purple">16 CPD hours</span> per annual Term (fiscal year)</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Mandatory</span>
+        <span class="fact-value">At least <span class="number-highlight nh-purple">1 hour</span> must relate to <strong>professionalism / Code of Professional Conduct</strong></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Deadline</span>
+        <span class="fact-value">11:59 PM local time on last day of fiscal year</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">New Licensees</span>
+        <span class="fact-value">1 CPD hour per month remaining in Term. If licensed in April/May/June = 0 required that Term</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">On Leave</span>
+        <span class="fact-value">Still required, get 1-hr reduction per month on leave. Even full year leave ≠ 0 hours</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Suspended</span>
+        <span class="fact-value">Still must complete CPD. Must submit remedial plan before reinstatement</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Carry Over</span>
+        <span class="fact-value">Max <span class="number-highlight nh-purple">6 hours</span> can carry over to next Term</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Keep Records</span>
+        <span class="fact-value">Retain proof of CPD (receipts, attendance) for <span class="number-highlight nh-purple">5 years</span></span>
+      </div>
+
+      <div class="section-title">CPD Hour Multipliers</div>
+      <div class="fact">
+        <span class="fact-label">Teaching</span>
+        <span class="fact-value">1 hr = <span class="number-highlight nh-purple">3 CPD hrs</span> (first delivery), 1 hr = 1 CPD hr (repeat). Max 25% of yearly total</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Mentoring</span>
+        <span class="fact-value">1 hr = <span class="number-highlight nh-purple">3 CPD hrs</span> (as mentor). No max. Being a <strong>mentee</strong> = 0 CPD hours</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Writing</span>
+        <span class="fact-value">1 chapter/article = 3 CPD hrs. Max 50% from chapters. Book = no max</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Tribunal Obs.</span>
+        <span class="fact-value">1 hr = 1 CPD hr. Max 25% of yearly total</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Group Case</span>
+        <span class="fact-value">1 hr = 1 CPD hr. Must be 2+ RCICs, max 15 participants. Max 2 hrs/Term credited. Max 50% yearly</span>
+      </div>
+
+      <div class="section-title">NOT Eligible for CPD</div>
+      <div class="fact">
+        <span class="fact-label">Excluded</span>
+        <span class="fact-value">PME courses / Being a mentee / Marketing activities / Pro bono work / Same content different format (both can't count)</span>
+      </div>
+
+      <div class="section-title">Penalties</div>
+      <div class="fact">
+        <span class="fact-label">Incomplete</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$150</span> fine + outstanding hours carry over to next Term</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">2 Consecutive</span>
+        <span class="fact-value">Zero CPD 2 years in a row = <strong>Suspension</strong>. Need 25% of deficient hours + plan for remaining 75% before reinstatement</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFESSIONAL LIABILITY INSURANCE -->
+  <div class="card c6">
+    <div class="card-header">
+      <span class="card-icon">🛡️</span>
+      <h2>Professional Liability Insurance (PLI)</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">RCIC</span>
+        <span class="fact-value">Mandatory enrollment in Council's PLI Group Plan. Even if employer has coverage or on leave — still mandatory</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">RISIA</span>
+        <span class="fact-value">Must provide certificate from <strong>employer's</strong> PLI coverage — not the Council's plan</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Policy Term</span>
+        <span class="fact-value">July 1 → July 1 annually</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Limit</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$1,000,000</span> per claim/per period</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Aggregate</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$5,000,000</span> for entire member group annually</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Deductible</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$500</span> CAD</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">New RCIC</span>
+        <span class="fact-value">Must purchase within <span class="number-highlight nh-orange">30 days</span> of becoming licensed. Fail → 30-day notice → suspension → 90-day → revocation</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ROW 2 -->
+<div class="grid">
+
+  <!-- BUSINESS REGISTRATION -->
+  <div class="card c1">
+    <div class="card-header">
+      <span class="card-icon">🏢</span>
+      <h2>Business & Name Registration</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Rule</span>
+        <span class="fact-value">Cannot provide immigration services to public under an <strong>unregistered name</strong></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Business Name</span>
+        <span class="fact-value">Must include words that inform public it relates to <strong>immigration/citizenship consulting</strong></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">All Partners</span>
+        <span class="fact-value">All partners in a Firm <strong>must be Licensees</strong></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Firm Business</span>
+        <span class="fact-value">Articles must restrict Firm's business to immigration/citizenship consulting only</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Changes</span>
+        <span class="fact-value">Notify Council of any changes in writing to registration@college-ic.ca. Not effective until Council acknowledges by email</span>
+      </div>
+      <div class="section-title">Name CANNOT Suggest:</div>
+      <div class="fact">
+        <span class="fact-label">Prohibited</span>
+        <span class="fact-value">"Law office" / government connection / "the best" / "the only" / misleading number of partners / holding company / ethnic/racial endorsement</span>
+      </div>
+      <div class="section-title">Penalties</div>
+      <div class="fact">
+        <span class="fact-label">Unregistered Name</span>
+        <span class="fact-value">1st: <span class="number-highlight nh-pink">$500</span> | 2nd+: <span class="number-highlight nh-pink">$1,000</span></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Unregistered Firm</span>
+        <span class="fact-value">1st: <span class="number-highlight nh-pink">$500</span> | 2nd+: <span class="number-highlight nh-pink">$1,000</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGES IN INFORMATION -->
+  <div class="card c2">
+    <div class="card-header">
+      <span class="card-icon">📬</span>
+      <h2>Changes in Information</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Deadline</span>
+        <span class="fact-value">Notify Council within <span class="number-highlight nh-orange">15 calendar days</span> of any effective change</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">How to Notify</span>
+        <span class="fact-value">Email info@college-ic.ca — not effective until Council acknowledges by return email</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">What To Report</span>
+        <span class="fact-value">Legal name, residential/business address, phone numbers, email addresses, client account details, agents list, authorized representative for absence</span>
+      </div>
+      <div class="section-title">Penalties</div>
+      <div class="fact">
+        <span class="fact-label">1st offence</span>
+        <span class="fact-value">Written warning + 30 days to fix</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">2nd+ offence</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$100</span> per incident → possible suspension/revocation</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BANKRUPTCY & INSOLVENCY -->
+  <div class="card c3">
+    <div class="card-header">
+      <span class="card-icon">⚠️</span>
+      <h2>Bankruptcy & Insolvency</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Self-Report</span>
+        <span class="fact-value">Must notify Registrar in writing within <span class="number-highlight nh-green">15 calendar days</span> of becoming bankrupt, making creditor proposal, becoming insolvent, subject to garnishment, or business under receiving order</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Restrictions</span>
+        <span class="fact-value">Registrar may impose restrictions: (a) no Client Account, (b) supervised practice, or (c) must become employee of another RCIC</span>
+      </div>
+      <div class="section-title">Penalties</div>
+      <div class="fact">
+        <span class="fact-label">1st offence</span>
+        <span class="fact-value">Written warning + 30 days to fix</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">2nd+ offence</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$100</span> per incident</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLIANCE AUDIT -->
+  <div class="card c4">
+    <div class="card-header">
+      <span class="card-icon">🔍</span>
+      <h2>Compliance Audit</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Audit Cycle</span>
+        <span class="fact-value">Begins <strong>July 1</strong> of each calendar year</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">New Licensee</span>
+        <span class="fact-value">Submit all required docs on or before <strong>first anniversary</strong> of licensing</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Exempt</span>
+        <span class="fact-value">Medical leave licensees are exempt from Compliance Audit during approved leave</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Selection</span>
+        <span class="fact-value">Random or risk-based selection by Council</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Fix Issues</span>
+        <span class="fact-value">Must correct compliance issues within <span class="number-highlight nh-yellow">30 calendar days</span> of notice</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Documents</span>
+        <span class="fact-value">Must be in English or French. Translations must be by certified translator</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Annual Requirement</span>
+        <span class="fact-value">Must submit updated <strong>Background & Good Conduct Statutory Declaration</strong> annually</span>
+      </div>
+      <div class="section-title">Financial Inspection</div>
+      <div class="fact">
+        <span class="fact-label">Process</span>
+        <span class="fact-value">Inspector issues draft report → Licensee has <span class="number-highlight nh-yellow">21 days</span> to comment → Final report to Registrar</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Late Submission</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">$100</span> fine</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOOD CHARACTER -->
+  <div class="card c5">
+    <div class="card-header">
+      <span class="card-icon">⚖️</span>
+      <h2>Good Character & Conduct</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Requirement</span>
+        <span class="fact-value">Demonstrate good character as a <strong>prerequisite to licensing</strong> AND as an <strong>ongoing obligation</strong></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Applicants</span>
+        <span class="fact-value">Submit sworn statutory declaration with application</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Licensees</span>
+        <span class="fact-value">Complete prescribed declaration annually in Compliance Audit or at annual licence renewal</span>
+      </div>
+      <div class="section-title">7 Elements of Good Character</div>
+      <div class="fact">
+        <span class="fact-label">Elements</span>
+        <span class="fact-value">
+          <span class="badge tag-purple">Fairness</span>
+          <span class="badge tag-purple">Honesty</span>
+          <span class="badge tag-purple">Integrity</span>
+          <span class="badge tag-purple">Moral/Ethical Strength</span>
+          <span class="badge tag-purple">Respect for others</span>
+          <span class="badge tag-purple">Respect for Rule of Law</span>
+          <span class="badge tag-purple">Accountability</span>
+        </span>
+      </div>
+      <div class="section-title">Evidence Putting Character in Question Includes:</div>
+      <div class="fact">
+        <span class="fact-label">Examples</span>
+        <span class="fact-value">Criminal charges/convictions, open complaints, found guilty of fraud/dishonesty, disobeyed court orders, suspended by other regulatory body, previous licensing refusal, currently bankrupt/insolvent, represented clients for fee without IRPA authorization</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEAVE OF ABSENCE -->
+  <div class="card c6">
+    <div class="card-header">
+      <span class="card-icon">🌿</span>
+      <h2>Leave of Absence</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Types</span>
+        <span class="fact-value">Family / Medical / Retirement (age 60+, 2+ yrs licensed) / Full-time studies / Working for Gov't / Unemployed</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Duration</span>
+        <span class="fact-value">Max <span class="number-highlight nh-pink">12 months</span> at a time | Max <span class="number-highlight nh-pink">24 months</span> in any 5-year period</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Fee on Leave</span>
+        <span class="fact-value">Family/Medical/Retirement/Student/Unemployed = <span class="number-highlight nh-pink">$10/month</span></span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Gov't Leave</span>
+        <span class="fact-value"><span class="number-highlight nh-pink">25% of annual fee</span> per month</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Suspended</span>
+        <span class="fact-value">Cannot apply for leave while suspended</span>
+      </div>
+      <div class="section-title">Still Required While on Leave:</div>
+      <div class="fact">
+        <span class="fact-label">Must Still</span>
+        <span class="fact-value">Complete CPD hours / Maintain PLI / Complete Compliance Audit (except medical leave) / Notify clients / Maintain Client Account / Respond to conduct complaints</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Title</span>
+        <span class="fact-value">Can still use RCIC/RISIA title <strong>for biographical purposes only</strong></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ROW 3 -->
+<div class="grid">
+
+  <!-- RESIGNATION -->
+  <div class="card c1">
+    <div class="card-header">
+      <span class="card-icon">🚪</span>
+      <h2>RCIC Resignation</h2>
+    </div>
+    <div class="card-body">
+      <div class="section-title">2-Step Process</div>
+      <div class="flow-row">
+        <div class="step-box">Step 1: Intent Letter</div>
+        <span class="flow-arrow">→</span>
+        <div class="step-box">Registrar responds in 7 days</div>
+        <span class="flow-arrow">→</span>
+        <div class="step-box">Step 2: Acceptance by Council</div>
+      </div>
+
+      <div class="section-title">Must Complete Before Resignation Accepted:</div>
+      <div class="fact">
+        <span class="fact-label">Requirements</span>
+        <span class="fact-value">Pay all fees/fines / Acknowledge open complaints / Close/transfer all client files / Close Client Account(s) / Return Certificate of Licensing / Submit statutory declaration</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Open Complaint</span>
+        <span class="fact-value">Cannot resign <em>In Good Standing</em> if open complaint exists</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Jurisdiction</span>
+        <span class="fact-value">Council retains jurisdiction for <span class="number-highlight nh-blue">6 years</span> after Effective Date</span>
+      </div>
+
+      <div class="section-title">Re-Licensing</div>
+      <div class="fact">
+        <span class="fact-label">Within 1 Year</span>
+        <span class="fact-value">Pay back fees, catch up CPD/PME, sign new Agreement — no EPE required</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">After 1 Year</span>
+        <span class="fact-value">Must pass Entry-to-Practice Exam (EPE) again (unless waived by Registrar)</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Not Good Standing</span>
+        <span class="fact-value">Must pass EPE + pay all outstanding fees + complete/re-take PME</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- IRB CLASS L3 -->
+  <div class="card c2">
+    <div class="card-header">
+      <span class="card-icon">⚖️</span>
+      <h2>Class L3 Licence — IRB Practice</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">What It Is</span>
+        <span class="fact-value">Licence to represent clients before the <strong>Immigration and Refugee Board (IRB)</strong> — a Restricted Area of Practice as of July 1, 2023</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">IRB Divisions</span>
+        <span class="fact-value">
+          <span class="badge tag-orange">ID</span> Immigration Division
+          <span class="badge tag-orange">RPD</span> Refugee Protection Division
+          <span class="badge tag-orange">IAD</span> Immigration Appeal Division
+          <span class="badge tag-orange">RAD</span> Refugee Appeal Division
+        </span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">To Qualify</span>
+        <span class="fact-value">Must be In Good Standing + complete an approved pathway + pass Specialization Exam</span>
+      </div>
+      <div class="section-title">Education Pathway (5 Courses)</div>
+      <div class="fact">
+        <span class="fact-label">Courses</span>
+        <span class="fact-value">Foundations of the IRB / ID / IAD / RPD / RAD</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Full Program</span>
+        <span class="fact-value"><span class="number-highlight nh-orange">$1,000</span> (all 5 courses)</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Exam Fee</span>
+        <span class="fact-value"><span class="number-highlight nh-orange">$450</span> per attempt</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Max Attempts</span>
+        <span class="fact-value">4 attempts. After 4th failure → may need to re-enroll in courses before trying again</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">DNS = Fail</span>
+        <span class="fact-value">Starting but not completing the exam = uses one attempt</span>
+      </div>
+      <div class="section-title">Exemptions</div>
+      <div class="fact">
+        <span class="fact-label">Exempt</span>
+        <span class="fact-value">Graduates of Queen's University GDP or Université de Montréal D.E.S.S. who passed Entry-to-Practice Exam get L3 automatically</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Dual Licensee</span>
+        <span class="fact-value">Paralegal/Lawyer can practice at IRB under their law licence. Must disclose to clients which licence they're using</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- INDEPENDENT COMPLAINTS REVIEW OFFICER -->
+  <div class="card c3">
+    <div class="card-header">
+      <span class="card-icon">🔎</span>
+      <h2>Independent Complaints Review Officer (ICRO)</h2>
+    </div>
+    <div class="card-body">
+      <div class="fact">
+        <span class="fact-label">Purpose</span>
+        <span class="fact-value">Reviews complaints that were <strong>closed without referral</strong> to Discipline Committee (closed on/after July 1, 2018)</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Power</span>
+        <span class="fact-value">Can refuse review / review & investigate / mediate / stop review / refer complaint back to Council</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Scope</span>
+        <span class="fact-value">Reviews <strong>fairness of procedures</strong> only — cannot review the actual merits of a complaint</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Reports To</span>
+        <span class="fact-value">Reports to Council every <strong>quarter</strong> with stats and trends</span>
+      </div>
+      <div class="section-title">Appointment</div>
+      <div class="fact">
+        <span class="fact-label">Who Appoints</span>
+        <span class="fact-value"><strong>Board of Directors</strong> appoints ICRO for <span class="number-highlight nh-green">3-year terms</span> (renewable)</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Qualification</span>
+        <span class="fact-value">Expertise in admin law + professional regulation. Cannot be a Licensee, current/former Council staff, or Board member</span>
+      </div>
+      <div class="fact">
+        <span class="fact-label">Removal</span>
+        <span class="fact-value">Only by <span class="number-highlight nh-green">⅔</span> Board resolution</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PENALTIES MASTER TABLE -->
+<div class="grid">
+  <div class="card c4 wide">
+    <div class="card-header">
+      <span class="card-icon">🚨</span>
+      <h2>Penalties Quick Reference — Standard Pattern + Exceptions</h2>
+    </div>
+    <div class="card-body">
+      <div class="alert-box">
+        <span class="icon">💡</span>
+        <span>Most regulations follow the <strong>same 3-step penalty pattern</strong>: (1) Written warning + 30 days to fix → (2) $100 per incident → (3) Fail to fix = suspension → revocation. Exceptions are highlighted below.</span>
+      </div>
+      <div class="table-wrap" style="margin-top:12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Regulation</th>
+              <th>1st Offence</th>
+              <th>2nd+ Offence</th>
+              <th>Extreme</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge tag-blue">Annual Fees</span></td>
+              <td>$100 late fee</td>
+              <td>Interest 2%/month</td>
+              <td>Suspension → Revocation</td>
+            </tr>
+            <tr>
+              <td><span class="badge tag-orange">Bankruptcy</span></td>
+              <td>Written warning (30 days)</td>
+              <td>$100/incident</td>
+              <td>Suspension → Revocation</td>
+            </tr>
+            <tr>
+              <td><span class="badge tag-green">Business Registration</span></td>
+              <td>Written warning (30 days)</td>
+              <td>$100/incident</td>
+              <td>Suspension → Revocation</td>
+            </tr>
+            <tr style="background:rgba(255,107,53,0.06)">
+              <td><span class="badge tag-orange">Using Unregistered Name ⚡</span></td>
+              <td><strong>$500 fine</strong> + cease immediately</td>
+              <td><strong>$1,000 fine</strong></td>
+              <td>Suspension → Revocation</td>
+            </tr>
+            <tr>
+              <td><span class="badge tag-yellow">Changes in Info</span></td>
+              <td>Written warning (30 days)</td>
+              <td>$100/incident</td>
+              <td>Suspension → Revocation</td>
+            </tr>
+            <tr>
+              <td><span class="badge tag-blue">Client Account</span></td>
+              <td>Written warning (30 days)</td>
+              <td>$100/incident</td>
+              <td>Suspension → Revocation</td>
+            </tr>
+            <tr>
+              <td><span class="badge tag-blue">Client File Mgmt</span></td>
+              <td>Written warning (30 days)</td>
+              <td>$100/incident</td>
+              <td>Suspension → Revocation</td>
+            </tr>
+            <tr>
+              <td><span class="badge tag-yellow">Compliance Audit</span></td>
+              <td>$100 for late submission</td>
+              <td>Suspension</td>
+              <td>Revocation</td>
+            </tr>
+            <tr style="background:rgba(127,255,107,0.04)">
+              <td><span class="badge tag-green">CPD ⚡</span></td>
+              <td><strong>$150 fine</strong> + carry over hours</td>
+              <td>2 consecutive zero years = <strong>Suspension</strong></td>
+              <td>Must complete 25% + submit plan for rest</td>
+            </tr>
+            <tr style="background:rgba(255,79,163,0.04)">
+              <td><span class="badge tag-pink">Retainer Agreement ⚡</span></td>
+              <td><strong>$250 fine</strong> + 30 days to fix</td>
+              <td><strong>$1,000 fine</strong></td>
+              <td>Suspension → Revocation</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KEY NUMBERS -->
+<div class="grid">
+  <div class="card c5 wide">
+    <div class="card-header">
+      <span class="card-icon">🔢</span>
+      <h2>Critical Numbers to Memorize — EEP Exam Favourites</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Number</th>
+              <th>What It Refers To</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="number-highlight nh-green" style="font-size:16px;">6 years</span></td>
+              <td>Minimum retention of closed client files | Reconciliation records | Council jurisdiction after resignation</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-blue" style="font-size:16px;">16 CPD hours</span></td>
+              <td>Annual requirement (1 of which must be on professionalism/Code)</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-purple" style="font-size:16px;">15 days</span></td>
+              <td>Notify Council of: changes in info / bankruptcy / opening or closing Client Account</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-yellow" style="font-size:16px;">14 days</span></td>
+              <td>Deposit client money into Client Account after receipt | Account for client property on request</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-orange" style="font-size:16px;">30 days</span></td>
+              <td>Deliver client property after request | Late annual fee grace period | Buy PLI after licensing | Fix compliance issues | Payment of invoices</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-pink" style="font-size:16px;">90 days</span></td>
+              <td>Monthly Client Account reconciliation deadline (within 90 days of month end) | PLI suspension → revocation</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-blue" style="font-size:16px;">10 days</span></td>
+              <td>Provide Retainer Agreement to client (from start of work) | Notify gov't of withdrawal as representative</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-green" style="font-size:16px;">7 days</span></td>
+              <td>Registrar informs Licensee of resignation requirements after receiving intent letter</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-purple" style="font-size:16px;">21 days</span></td>
+              <td>Licensee has 21 days to comment on draft Financial Inspection report</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-orange" style="font-size:16px;">5 years</span></td>
+              <td>Keep CPD proof of attendance records</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-yellow" style="font-size:16px;">24 months</span></td>
+              <td>Maximum total leave in any 5-year period</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-pink" style="font-size:16px;">$1,809.25</span></td>
+              <td>Annual RCIC licence fee</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-blue" style="font-size:16px;">$913</span></td>
+              <td>Annual RISIA licence fee</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-green" style="font-size:16px;">6 CPD hrs</span></td>
+              <td>Max carry-over from one Term to the next</td>
+            </tr>
+            <tr>
+              <td><span class="number-highlight nh-orange" style="font-size:16px;">1 yr (resign)</span></td>
+              <td>Can re-license without EPE if resigned In Good Standing within 1 year. After 1 year → EPE required</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  CICC (College of Immigration and Citizenship Consultants) — All Regulations 2021-001 | Study Map for EEP Exam Prep
+</div>
+
+</body>
+</html>

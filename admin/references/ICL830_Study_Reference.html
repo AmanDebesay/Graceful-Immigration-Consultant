@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICL 830 – Temporary Entry Study Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --ink: #0f1923;
+  --slate: #1d3557;
+  --blue: #1a6bb5;
+  --sky: #e8f3fc;
+  --amber: #d4870a;
+  --amber-light: #fef3e0;
+  --red: #c0392b;
+  --red-light: #fdf0ef;
+  --green: #1a7a45;
+  --green-light: #edf7f2;
+  --purple: #5b2d8e;
+  --purple-light: #f3edfc;
+  --border: #dde8f2;
+  --muted: #6b7f96;
+  --bg: #f5f8fc;
+  --white: #ffffff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--slate);
+  padding: 36px 24px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 100% at 110% -20%, rgba(26,107,181,0.4) 0%, transparent 70%);
+}
+.header-inner { position: relative; max-width: 1120px; margin: 0 auto; }
+.header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.4rem;
+  color: #fff;
+  line-height: 1.15;
+}
+.header h1 em { color: #7ec8f8; font-style: normal; }
+.header p { color: #9ab8d4; font-size: 0.9rem; margin-top: 6px; }
+.header-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.badge {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #cde4f7;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background .2s;
+}
+.badge:hover { background: rgba(255,255,255,0.2); }
+
+/* ── NAV ── */
+.nav-bar {
+  background: var(--slate);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  padding: 0 24px;
+}
+.nav-bar::-webkit-scrollbar { display: none; }
+.nav-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #8aa8c4;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 12px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .2s;
+  letter-spacing: 0.02em;
+}
+.nav-btn:hover { color: #fff; }
+.nav-btn.active { color: #7ec8f8; border-bottom-color: #7ec8f8; }
+
+/* ── LAYOUT ── */
+.page { max-width: 1120px; margin: 0 auto; padding: 28px 20px 72px; }
+.section { display: none; }
+.section.on { display: block; }
+
+/* ── MODULE HEADER ── */
+.mod-header {
+  border-radius: 14px;
+  padding: 28px 30px;
+  margin-bottom: 22px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.mod-header::after {
+  content: attr(data-num);
+  position: absolute; right: 20px; bottom: -16px;
+  font-family: 'DM Serif Display', serif;
+  font-size: 9rem;
+  color: rgba(255,255,255,0.07);
+  line-height: 1;
+  pointer-events: none;
+  font-style: italic;
+}
+.mod-tag {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: rgba(255,255,255,0.65);
+  display: inline-block; margin-bottom: 6px;
+}
+.mod-header h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.8rem;
+  line-height: 1.2;
+}
+.mod-header .sub { color: rgba(255,255,255,0.7); font-size: 0.88rem; margin-top: 5px; }
+
+/* ── CARDS ── */
+.grid { display: grid; gap: 14px; }
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.card-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s;
+  border-bottom: 1px solid transparent;
+}
+.card-head:hover { background: var(--sky); }
+.card-head.open { background: var(--sky); border-bottom-color: var(--border); }
+.ci {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0;
+}
+.card-head h4 { flex: 1; font-size: 0.95rem; font-weight: 600; color: var(--slate); }
+.chev { color: var(--muted); font-size: 0.75rem; transition: transform .2s; }
+.card-head.open .chev { transform: rotate(180deg); }
+.card-body { display: none; padding: 20px; }
+.card-body.open { display: block; }
+
+/* ── TYPOGRAPHY INSIDE ── */
+.card-body p, .card-body li { font-size: 0.875rem; color: var(--ink); }
+.card-body ul, .card-body ol { padding-left: 18px; margin: 8px 0; }
+.card-body li { margin-bottom: 4px; }
+strong { color: var(--slate); }
+.lbl {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted);
+  margin: 14px 0 7px; display: block;
+}
+
+/* ── BOXES ── */
+.box {
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 10px 0;
+  font-size: 0.855rem;
+  line-height: 1.55;
+}
+.box-info { background: var(--sky); border-left: 4px solid var(--blue); }
+.box-warn { background: var(--amber-light); border-left: 4px solid var(--amber); }
+.box-danger { background: var(--red-light); border-left: 4px solid var(--red); }
+.box-good { background: var(--green-light); border-left: 4px solid var(--green); }
+.box-purple { background: var(--purple-light); border-left: 4px solid var(--purple); }
+
+/* ── TWO-COL ── */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+.three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 10px 0; }
+@media(max-width:620px) { .two, .three { grid-template-columns: 1fr; } }
+
+.mini {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 13px 15px;
+}
+.mini h5 { font-size: 0.82rem; font-weight: 700; color: var(--slate); margin-bottom: 7px; }
+.mini ul { list-style: none; padding: 0; }
+.mini ul li { font-size: 0.81rem; padding: 3px 0; padding-left: 14px; position: relative; }
+.mini ul li::before { content: '›'; position: absolute; left: 0; color: var(--blue); font-weight: 700; }
+
+/* ── FLOW ── */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 10px 0; }
+.fstep {
+  background: var(--sky);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--slate);
+  white-space: nowrap;
+}
+.farr { color: var(--amber); font-size: 1.1rem; font-weight: 700; }
+
+/* ── PILL ── */
+.pills { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0; }
+.pill {
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border: 1px solid;
+}
+.pill-b { background: var(--sky); border-color: #b0d4ee; color: #14527f; }
+.pill-g { background: var(--green-light); border-color: #8ed4ae; color: #0e5230; }
+.pill-r { background: var(--red-light); border-color: #f0a89e; color: #7d1c11; }
+.pill-a { background: var(--amber-light); border-color: #f0c478; color: #7d4a00; }
+.pill-p { background: var(--purple-light); border-color: #c5a8f0; color: #3c1a70; }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; margin: 10px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+thead th {
+  background: var(--slate);
+  color: white;
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+}
+tbody tr:nth-child(even) { background: var(--sky); }
+tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+
+/* ── CHECKLIST ── */
+.chk { list-style: none; padding: 0; }
+.chk li {
+  font-size: 0.875rem;
+  padding: 7px 0 7px 28px;
+  position: relative;
+  border-bottom: 1px dashed var(--border);
+}
+.chk li:last-child { border: none; }
+.chk li::before { content: '□'; position: absolute; left: 0; color: var(--blue); font-size: 1rem; }
+
+/* ── QUOTE ── */
+.quote {
+  border-left: 3px solid var(--amber);
+  background: var(--amber-light);
+  border-radius: 0 8px 8px 0;
+  padding: 11px 16px;
+  font-size: 0.86rem;
+  font-style: italic;
+  color: #4a3000;
+  margin: 10px 0;
+}
+.quote cite { font-style: normal; font-size: 0.75rem; color: var(--muted); display: block; margin-top: 4px; }
+
+/* ── CODE TREE ── */
+.tree {
+  background: #0f1923;
+  color: #7ec8f8;
+  border-radius: 10px;
+  padding: 16px 18px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+.tree .gr { color: #4ec9b0; }
+.tree .yw { color: #dcdcaa; }
+
+/* ── OVERVIEW GRID ── */
+.ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.ov-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  border-left: 5px solid;
+}
+.ov-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(29,53,87,0.1); }
+.ov-card .mn { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.ov-card h3 { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--slate); margin: 4px 0 8px; }
+.ov-card p { font-size: 0.82rem; color: var(--muted); }
+
+/* ── BACK BTN ── */
+.back {
+  background: none; border: 1px solid var(--border);
+  border-radius: 7px; padding: 6px 14px;
+  font-size: 0.81rem; font-family: 'DM Sans', sans-serif;
+  color: var(--muted); cursor: pointer;
+  margin-bottom: 18px;
+  transition: all .2s;
+}
+.back:hover { background: var(--sky); color: var(--slate); }
+
+/* ── SEARCH ── */
+.search-wrap { margin-bottom: 20px; }
+.search-wrap input {
+  width: 100%; padding: 11px 18px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  background: var(--white);
+  color: var(--ink);
+  outline: none;
+}
+.search-wrap input:focus { border-color: var(--blue); }
+
+/* ── QUICK REF TABLE ── */
+.qr-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+.qr-card-head { background: var(--slate); color: #fff; padding: 12px 18px; font-weight: 600; font-size: 0.9rem; }
+
+/* ── YES/NO CHIP ── */
+.yes { display: inline-block; background: var(--green-light); color: var(--green); border: 1px solid #8ed4ae; border-radius: 5px; padding: 1px 8px; font-size: 0.78rem; font-weight: 700; }
+.no  { display: inline-block; background: var(--red-light);   color: var(--red);   border: 1px solid #f0a89e; border-radius: 5px; padding: 1px 8px; font-size: 0.78rem; font-weight: 700; }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <h1>ICL 830 — <em>Temporary Entry</em></h1>
+    <p>Complete Study Guide · All 6 Modules · EPE / CICC Exam Preparation</p>
+    <div class="header-badges">
+      <span class="badge">⚖️ IRPA / IRPR Law</span>
+      <span class="badge">📋 TRVs & eTAs</span>
+      <span class="badge">🎓 Study Permits</span>
+      <span class="badge">💼 Work Permits</span>
+      <span class="badge">🏭 LMIA / TFWP</span>
+      <span class="badge">🌐 IMP / LMIA-Exempt</span>
+      <span class="badge">🔓 Open Work Permits</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-bar">
+  <button class="nav-btn active" onclick="show('ov')">🏠 Overview</button>
+  <button class="nav-btn" onclick="show('m1')">M1 TRVs</button>
+  <button class="nav-btn" onclick="show('m2')">M2 Study Permits</button>
+  <button class="nav-btn" onclick="show('m3')">M3 LMIA</button>
+  <button class="nav-btn" onclick="show('m4')">M4 IMP Agreements</button>
+  <button class="nav-btn" onclick="show('m5')">M5 Canadian Interests</button>
+  <button class="nav-btn" onclick="show('m6')">M6 Open Work Permits</button>
+  <button class="nav-btn" onclick="show('qr')">📊 Quick Ref Tables</button>
+</div>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════════
+     OVERVIEW
+══════════════════════════════════════════════ -->
+<div class="section on" id="ov">
+  <div class="search-wrap"><input type="text" placeholder="🔍  Search any concept, code, or section…" oninput="search(this.value)"></div>
+  <p style="font-size:0.87rem;color:var(--muted);margin-bottom:18px">Click a module card to explore its full content.</p>
+  <div class="ov-grid">
+    <div class="ov-card" onclick="show('m1')" style="border-left-color:#1a6bb5">
+      <div class="mn">Module 1</div>
+      <h3>Temporary Resident Visas (TRVs)</h3>
+      <p>Who needs a TRV vs eTA? R179 requirements, bona fide visitors, dual intent, refusals.</p>
+    </div>
+    <div class="ov-card" onclick="show('m2')" style="border-left-color:#1a7a45">
+      <div class="mn">Module 2</div>
+      <h3>Study Permits</h3>
+      <p>Legal framework, DLIs, 2024–25 policy changes (PAL, caps, off-campus work), study plan.</p>
+    </div>
+    <div class="ov-card" onclick="show('m3')" style="border-left-color:#d4870a">
+      <div class="mn">Module 3</div>
+      <h3>LMIA & LMIA-Based Work Permits</h3>
+      <p>TFWP vs IMP, ESDC process, genuineness factors, high-wage vs low-wage streams.</p>
+    </div>
+    <div class="ov-card" onclick="show('m4')" style="border-left-color:#5b2d8e">
+      <div class="mn">Module 4</div>
+      <h3>IMP – International Agreements</h3>
+      <p>R204 categories, CUSMA/CETA/FTA exemption codes, business visitors, employer compliance.</p>
+    </div>
+    <div class="ov-card" onclick="show('m5')" style="border-left-color:#c0392b">
+      <div class="mn">Module 5</div>
+      <h3>IMP – Canadian Interests & Benefits</h3>
+      <p>R205 significant benefit (C10), intra-company transferees (ICT), reciprocal employment, R186.</p>
+    </div>
+    <div class="ov-card" onclick="show('m6')" style="border-left-color:#1d7ea8">
+      <div class="mn">Module 6</div>
+      <h3>IMP – Open Work Permits (OWP)</h3>
+      <p>R206–R208 categories, restricted vs unrestricted OWPs, humanitarian and Canadian interest OWPs.</p>
+    </div>
+  </div>
+
+  <!-- Master Quick-Law Map -->
+  <div class="card">
+    <div class="card-head open" onclick="tog(this)">
+      <div class="ci" style="background:var(--sky)">⚖️</div>
+      <h4>Master Legal Quick Map — Key IRPA / IRPR Sections at a Glance</h4>
+      <span class="chev">▼</span>
+    </div>
+    <div class="card-body open">
+      <div class="two">
+        <div class="mini">
+          <h5>IRPA — Immigration and Refugee Protection Act</h5>
+          <ul>
+            <li><strong>A22</strong> — Temporary resident requirements; dual intent (A22(2))</li>
+            <li><strong>A30(1)</strong> — No work/study without authorization</li>
+            <li><strong>A30(2)</strong> — Minor children may study (K-12, no SP needed)</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>IRPR — Key Regulation Parts</h5>
+          <ul>
+            <li><strong>R7</strong> — General: TRV/eTA requirement</li>
+            <li><strong>R179</strong> — TRV issuance requirements (bona fide)</li>
+            <li><strong>R183/R185</strong> — WP conditions (general/specific)</li>
+            <li><strong>R186</strong> — Work without a work permit</li>
+            <li><strong>R190</strong> — Visa-exempt categories</li>
+            <li><strong>R197–199</strong> — Where to apply for WP</li>
+            <li><strong>R200</strong> — WP eligibility factors</li>
+            <li><strong>R204–208</strong> — IMP LMIA-exempt categories</li>
+            <li><strong>R216</strong> — Study permit requirements</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Three Categories of Temporary Residents</h5>
+          <ul>
+            <li><strong>Visitors</strong> → Part 10 – R191</li>
+            <li><strong>Workers</strong> → Part 11 – R194–209</li>
+            <li><strong>Students</strong> → Part 12 – R210–222</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Two Work Permit Programs</h5>
+          <ul>
+            <li><strong>TFWP</strong> — Temporary Foreign Worker Program (LMIA required; ESDC leads)</li>
+            <li><strong>IMP</strong> — International Mobility Program (LMIA exempt; IRCC leads)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODULE 1 – TRVs
+══════════════════════════════════════════════ -->
+<div class="section" id="m1">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mod-header" data-num="1" style="background:linear-gradient(130deg,#0d2540 0%,#1a6bb5 100%)">
+    <div class="mod-tag">Module 1</div>
+    <h2>Temporary Resident Visas (TRVs)</h2>
+    <div class="sub">Who can enter Canada temporarily, what documents they need, and what officers assess</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🛂</div>
+        <h4>What is a Temporary Resident?</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Category</th><th>IRPR Part</th></tr></thead>
+          <tbody>
+            <tr><td>Visitor</td><td>Part 10 – R191</td></tr>
+            <tr><td>Worker</td><td>Part 11 – R194–209</td></tr>
+            <tr><td>Student</td><td>Part 12 – R210–222</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box box-warn">⚠️ <strong>Key Point:</strong> Holding a TRV or eTA does <em>NOT</em> guarantee entry to Canada. The officer at the Port of Entry (POE) makes the final decision [A22, R179].</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">📄</div>
+        <h4>TRV vs eTA — Who Needs What?</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="tree">
+<span class="gr">General Rule (R7 & R179):</span>
+├── Temporary Resident Visa (TRV)
+│   └── <span class="yw">for visa-required nationals</span>
+└── Electronic Travel Authorization (eTA)
+    └── <span class="yw">for visa-exempt nationals flying to/through Canada</span>
+        </div>
+        <div class="two">
+          <div class="mini">
+            <h5>TRV — What It Is</h5>
+            <ul>
+              <li>Issued by a visa office</li>
+              <li>Placed in the FN's passport</li>
+              <li>Proves FN met requirements for temporary entry</li>
+              <li>R7(1): Cannot enter Canada on temporary basis without it</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Who is EXEMPT from TRV? – R190</h5>
+            <ul>
+              <li><strong>R190(1)</strong> — By nationality (US, UK, etc.)</li>
+              <li><strong>R190(2)</strong> — By documents held</li>
+              <li><strong>R190(2.1)</strong> — Certain Romanian passport holders</li>
+              <li><strong>R190(3)</strong> — By purpose of entry</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>eTA – R7.1</h5>
+            <ul>
+              <li>R7.1(1): Visa-exempt FNs travelling by air to/through Canada need eTA</li>
+              <li>R7.1(2)/(3): Some are also exempt from eTA</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>R180 – Continuing Obligation</h5>
+            <ul>
+              <li>(a) Must have met TRV requirements at time issued</li>
+              <li>(b) Must continue to meet requirements on entry</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--amber-light)">✅</div>
+        <h4>Requirements for Issuance of a TRV – R179</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Requirement</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Made a TRV application as a member of visitor, worker, or student class</td></tr>
+            <tr><td>2</td><td>Will leave Canada by the end of their authorized stay</td></tr>
+            <tr><td>3</td><td>Holds a passport or valid travel document</td></tr>
+            <tr><td>4</td><td>Meets the requirements applicable to that class</td></tr>
+            <tr><td>5</td><td>Is not inadmissible</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">🔍</div>
+        <h4>Bona Fide Visitors — What Officers Assess (R179)</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <p class="lbl">Officer checks whether applicant intends to:</p>
+        <div class="pills">
+          <span class="pill pill-r">Remain in Canada illegally</span>
+          <span class="pill pill-r">Claim refugee status</span>
+          <span class="pill pill-r">Overstay authorized period</span>
+        </div>
+        <p class="lbl">Factors Assessed</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Factor</th><th>What Officers Look For</th></tr></thead>
+          <tbody>
+            <tr><td>Valid passport</td><td>Current, not expiring soon</td></tr>
+            <tr><td>Length of stay</td><td>Reasonable for stated purpose</td></tr>
+            <tr><td>Means of support</td><td>Can afford trip/living costs</td></tr>
+            <tr><td>Ties to home country</td><td>Job, family, property, obligations</td></tr>
+            <tr><td>Purpose and context</td><td>Logical, genuine reason for visit</td></tr>
+            <tr><td>Credibility of documents</td><td>Authentic, consistent information</td></tr>
+            <tr><td>Past compliance</td><td>Previous compliance with IRPA/IRPR</td></tr>
+            <tr><td>Biographic/biometric info</td><td>Sharing and verification</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">🔄</div>
+        <h4>Dual Intent – A22(2)</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="box box-info">
+          <strong>Dual intent</strong> = FN who has applied (or may apply) for permanent residence, but also wants to enter Canada temporarily as a visitor, student, or worker.
+        </div>
+        <div class="box box-warn">⚠️ Intent to become a PR does <strong>NOT</strong> automatically prevent someone from entering as a temporary resident. But they still must meet TR requirements.</div>
+        <p class="lbl">Applicant Must Demonstrate</p>
+        <ul class="chk">
+          <li>They will leave Canada after their authorized stay</li>
+          <li>To what extent they have retained ties in their home country</li>
+          <li>What their plan is if their PR application is refused</li>
+        </ul>
+        <p class="lbl">Key Case Law Factors</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Case</th><th>Citation</th></tr></thead>
+          <tbody>
+            <tr><td>Ramos v Canada</td><td>2017 FC 768</td></tr>
+            <tr><td>Ul Zaman v Canada</td><td>2020 FC 268</td></tr>
+            <tr><td>Chowdhury v Canada</td><td>2019 FC 1417</td></tr>
+            <tr><td>Pisarevic v Canada</td><td>2019 FC 188</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light)">❌</div>
+        <h4>Common TRV Mistakes & How to Overcome Refusal</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Mistake</th><th>Explanation</th></tr></thead>
+          <tbody>
+            <tr><td>Unclear departure intent</td><td>Officer not convinced FN will leave</td></tr>
+            <tr><td>Ambiguous purpose</td><td>Vague or inconsistent reason for visit</td></tr>
+            <tr><td>Insufficient proof of funds</td><td>Cannot show they can support themselves</td></tr>
+            <tr><td>High-risk country</td><td>Applications from certain countries face extra scrutiny</td></tr>
+            <tr><td>Inadmissibility grounds</td><td>Criminal, medical, security, etc.</td></tr>
+          </tbody>
+        </table></div>
+        <p class="lbl">Options After Refusal</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Option</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>ATIP Request</td><td>Request Access to Information and Privacy to get officer's notes</td></tr>
+            <tr><td>Request Reconsideration</td><td>No formal process; highly discretionary</td></tr>
+            <tr><td>Federal Court</td><td>Seek judicial review</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODULE 2 – STUDY PERMITS
+══════════════════════════════════════════════ -->
+<div class="section" id="m2">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mod-header" data-num="2" style="background:linear-gradient(130deg,#0d2e1a 0%,#1a7a45 100%)">
+    <div class="mod-tag">Module 2</div>
+    <h2>Study Permits</h2>
+    <div class="sub">Legal framework, 2024–25 policy changes, DLIs, conditions, and study strategy</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">📊</div>
+        <h4>International Student Intake — Recent Numbers</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Year</th><th>Study Permits Issued</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>2019</td><td>404,000</td><td>Pre-pandemic</td></tr>
+            <tr><td>2020</td><td>256,540</td><td>COVID-19 drop</td></tr>
+            <tr><td>2021</td><td>445,776</td><td>Recovery</td></tr>
+            <tr><td>2022</td><td>550,187</td><td>Peak</td></tr>
+            <tr><td>2023</td><td>~486,000</td><td>—</td></tr>
+            <tr><td>2024</td><td>~360,000 (cap)</td><td>35% decrease from 2023</td></tr>
+            <tr><td>2025</td><td>~437,000 (cap)</td><td>10% reduction from 2024 target</td></tr>
+            <tr><td>2026</td><td>~437,000</td><td>Stabilization</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--amber-light)">📅</div>
+        <h4>Major Policy Changes 2024–2025</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Date</th><th>Change</th></tr></thead>
+          <tbody>
+            <tr><td>Jan 22, 2024</td><td>Provincial Attestation Letter (PAL) required for study permit applications</td></tr>
+            <tr><td>Jan 22, 2024</td><td>New financial requirements updated to reflect true cost of living (R220)</td></tr>
+            <tr><td>2024</td><td>DLIs must verify Letter of Acceptance within 10 calendar days</td></tr>
+            <tr><td>Nov 8, 2024</td><td>Off-campus work capped at <strong>24 hours/week</strong> while studying (R186(v)(iii))</td></tr>
+            <tr><td>Nov 8, 2024</td><td>Changing DLIs now requires new study permit application (not just online notification)</td></tr>
+            <tr><td>Sept 18, 2024</td><td>Goal to reduce temporary residents from 6.5% to 5% of population</td></tr>
+            <tr><td>Jan 21, 2025</td><td>Spousal OWP restricted — only spouses of master's/doctoral/professional degree students</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">⚖️</div>
+        <h4>Legal Framework — Studying in Canada</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="two">
+          <div class="mini">
+            <h5>IRPA Sections</h5>
+            <ul>
+              <li><strong>A30(1):</strong> FN may NOT work or study without authorization</li>
+              <li><strong>A30(1.1):</strong> Must meet conditions in Regulations</li>
+              <li><strong>A30(2):</strong> Minor children may study K-12 with no study permit</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>IRPR Sections</h5>
+            <ul>
+              <li><strong>R9(1):</strong> FN may not enter Canada to study without a study permit</li>
+              <li><strong>R9(2):</strong> R9(1) does not apply to FNs under R188 or R189</li>
+              <li><strong>R216(1):</strong> Requirements for study permit</li>
+            </ul>
+          </div>
+        </div>
+        <p class="lbl">Exemptions from Study Permit — R188</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Section</th><th>Exemption</th></tr></thead>
+          <tbody>
+            <tr><td>A30(2)</td><td>Minor children (pre-school and K-12)</td></tr>
+            <tr><td>R188(1)(a)</td><td>Family and private staff of foreign representatives</td></tr>
+            <tr><td>R188(1)(b)</td><td>Members of armed forces under Visiting Forces Act</td></tr>
+            <tr><td>R188(1)(c)</td><td>Short-term courses (6 months or less)</td></tr>
+            <tr><td>R188(1)(d)</td><td>Indigenous people described in federal legislation</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">📋</div>
+        <h4>Requirements for a Study Permit – R216(1)</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Requirement</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Application</td><td>Made in accordance with the applicable Part</td></tr>
+            <tr><td>Will leave</td><td>Demonstrate they will leave Canada by end of authorized stay</td></tr>
+            <tr><td>Meet requirements</td><td>Meet all requirements of applicable Part in IRPR</td></tr>
+            <tr><td>Medical exam</td><td>Submit if required</td></tr>
+            <tr><td>Proof of acceptance</td><td>Submit proof of acceptance at a Designated Learning Institution (DLI)</td></tr>
+          </tbody>
+        </table></div>
+        <p class="lbl">Other Key Regulations</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Section</th><th>What It Covers</th></tr></thead>
+          <tbody>
+            <tr><td>R216(3)</td><td>Requirements to study in Quebec (CAQ required)</td></tr>
+            <tr><td>R219(1)&(2)</td><td>Letter of Acceptance (LOA) – main components, who is exempt</td></tr>
+            <tr><td>R220</td><td>How to calculate financial capacity</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🏫</div>
+        <h4>Designated Learning Institutions (DLI) & Study Conditions</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="box box-info"><strong>DLI:</strong> A school approved by a provincial/territorial government to host international students. <em>Not all DLIs make students eligible for PGWP</em> — always check the specific list.</div>
+        <p class="lbl">Study Permit Conditions — R220.1(1) — Students SHALL:</p>
+        <ul class="chk">
+          <li>Enrol at a DLI</li>
+          <li>Remain at a DLI until they complete their studies</li>
+          <li>Actively pursue their course or program of studies</li>
+        </ul>
+        <p class="lbl">Changing DLIs — New Rules (Nov 8, 2024)</p>
+        <div class="box box-warn">Must now apply to <strong>extend the study permit</strong> (not just notify IRCC online). Relevant: R215.1, R216(1)(e), R217.1, R219(1), R222(1)</div>
+        <p class="lbl">Off-Campus Work — R186(v)(iii)</p>
+        <div class="box box-good">Effective Nov 8, 2024: Maximum <strong>24 hours per week</strong> off-campus while studying.</div>
+        <p class="lbl">Common Violations</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Issue</th><th>Consequence</th></tr></thead>
+          <tbody>
+            <tr><td>Unauthorized leave for more than 150 days</td><td>May lose status</td></tr>
+            <tr><td>Not extending status before it expires</td><td>Out of status</td></tr>
+            <tr><td>Changing status improperly</td><td>Violation</td></tr>
+            <tr><td>Working more than allotted hours</td><td>Violation of conditions</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">🗺️</div>
+        <h4>Study Permit as an Immigration Strategy</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Step</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Plan your academic program carefully</td></tr>
+            <tr><td>2</td><td>Choose school, location, and cost of living carefully</td></tr>
+            <tr><td>3</td><td>Ensure you can meet academic objectives</td></tr>
+            <tr><td>4</td><td>Decide whether you want to work — if so, check PGWP eligibility</td></tr>
+          </tbody>
+        </table></div>
+        <p class="lbl">What is a Study Plan?</p>
+        <div class="box box-info">A personal narrative in the student's own voice that explains the choice of program, how it benefits their goals, their purpose of studies, their intentions when they return home, and links facts to supporting evidence.</div>
+        <p class="lbl">Spousal OWP — Starting Jan 21, 2025</p>
+        <div class="two">
+          <div class="mini">
+            <h5>✅ Eligible (Spouses Of)</h5>
+            <ul>
+              <li>Master's or doctoral degree students</li>
+              <li>Eligible pilot programs</li>
+              <li>Professional degrees: DDS, LLB/JD, MD, OD, Pharmacy, DVM, BScN, BEd, BEng</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>❌ No Longer Eligible</h5>
+            <ul>
+              <li>Spouses of undergraduate students</li>
+              <li>Spouses of college program students</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODULE 3 – LMIA
+══════════════════════════════════════════════ -->
+<div class="section" id="m3">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mod-header" data-num="3" style="background:linear-gradient(130deg,#3d1f00 0%,#d4870a 100%)">
+    <div class="mod-tag">Module 3</div>
+    <h2>LMIA &amp; LMIA-Based Work Permits</h2>
+    <div class="sub">TFWP, ESDC assessment, genuineness factors, wage streams, and employer obligations</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--amber-light)">🏭</div>
+        <h4>What is an LMIA? — The Big Picture</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="box box-info">An <strong>LMIA (Labour Market Impact Assessment)</strong> is a document a Canadian employer may need before hiring a foreign national. The government is asking: <em>"Is there really no Canadian or PR who can do this job?"</em></div>
+        <div class="three">
+          <div class="mini"><h5>Who Applies?</h5><ul><li>The <strong>employer</strong> applies to ESDC</li></ul></div>
+          <div class="mini"><h5>Who Issues It?</h5><ul><li><strong>ESDC</strong> assesses and issues the LMIA</li></ul></div>
+          <div class="mini"><h5>What Happens Next?</h5><ul><li>Positive/neutral LMIA → FN applies for WP from <strong>IRCC/CBSA</strong></li></ul></div>
+        </div>
+        <p class="lbl">TFWP vs IMP — The Fundamental Difference</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Feature</th><th>TFWP</th><th>IMP</th></tr></thead>
+          <tbody>
+            <tr><td>LMIA Required?</td><td><span class="yes">YES</span></td><td><span class="no">NO</span></td></tr>
+            <tr><td>Purpose</td><td>Fill temporary labour/skill shortages</td><td>Advance Canada's economic & cultural interests</td></tr>
+            <tr><td>Lead Department</td><td>ESDC</td><td>IRCC</td></tr>
+            <tr><td>Type of WP</td><td>Employer-specific</td><td>Generally open permits</td></tr>
+            <tr><td>Skill Level</td><td>Majority low-skilled</td><td>Majority high-skilled/high-wage</td></tr>
+            <tr><td>Nature</td><td>Unilateral and discretionary</td><td>Based on bilateral/multilateral agreements</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--amber-light)">🌳</div>
+        <h4>Types of Work Permits — Full Tree</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="tree">
+<span class="gr">Work Permits (IMM1295e)</span>
+├── <span class="yw">Employer-Specific Work Permits</span> (tied to one employer)
+│   ├── LMIA-Based (under TFWP)
+│   └── LMIA-Exempt (under IMP) – uses exemption codes
+│
+├── <span class="yw">Open Work Permits (OWP)</span> – work for any employer
+│   ├── Spousal OWP
+│   ├── International Students (PGWP)
+│   ├── Refugee Claimants (S61, S62)
+│   ├── Vulnerable Workers (A72)
+│   └── H&C reasons (H81, H82)
+│
+├── <span class="yw">Seasonal Agricultural WP (SAWP)</span>
+├── <span class="yw">SUV WP</span> (A77 under R205)
+└── <span class="yw">Others</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🔎</div>
+        <h4>ESDC Assessment — What Factors Are Considered?</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="pills">
+          <span class="pill pill-b">Wages and working conditions</span>
+          <span class="pill pill-b">Available qualified Canadians/PRs</span>
+          <span class="pill pill-b">Skill/knowledge transfer to Canadians</span>
+          <span class="pill pill-b">Job creation for Canadians</span>
+          <span class="pill pill-b">Recruitment and advertisement efforts</span>
+          <span class="pill pill-b">Benefits to the labour market</span>
+          <span class="pill pill-b">Consultations with unions</span>
+          <span class="pill pill-b">Effects on labour disputes</span>
+        </div>
+        <p class="lbl">Main Steps in the LMIA Assessment Process</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Step</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Verify if the employer is eligible</td></tr>
+            <tr><td>2</td><td>Verify consistency of job offer with domestic agreements</td></tr>
+            <tr><td>3</td><td>Assess genuineness of job offer</td></tr>
+            <tr><td>4</td><td>Assess language requirements of job offer</td></tr>
+            <tr><td>5</td><td>Assess impact of hiring a TFW on the labour market</td></tr>
+            <tr><td>6</td><td>Confirm no available Canadian or PR in local market</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">✔️</div>
+        <h4>Assessing Genuineness — R200(5) — 4 Key Factors</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Factor</th><th>Key Questions</th></tr></thead>
+          <tbody>
+            <tr><td>1. Actively Engaged</td><td>Does the business legally exist? Operating? Can provide stable employment?</td></tr>
+            <tr><td>2. Reasonable Need</td><td>Is the job reasonable for this type of business? Can this occupation be expected in this sector?</td></tr>
+            <tr><td>3. Can Fulfil Terms</td><td>Can the employer deliver on hours, wages, benefits, and working conditions?</td></tr>
+            <tr><td>4. Employer Compliance</td><td>Any previous/current violations of employment/recruitment laws?</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--amber-light)">💰</div>
+        <h4>Wage Concepts &amp; High/Low Wage Streams</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="two">
+          <div class="mini">
+            <h5>Prevailing Provincial Wage</h5>
+            <ul><li>Wage rate for a specific occupation in a specific region</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Median Wage on Job Bank</h5>
+            <ul><li>Midpoint wage — threshold between high-wage and low-wage streams</li></ul>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Stream</th><th>Wage Level</th><th>Key Feature</th></tr></thead>
+          <tbody>
+            <tr><td>High-wage</td><td>At or above provincial/territorial median</td><td>Employer submits a transition plan</td></tr>
+            <tr><td>Low-wage</td><td>Below provincial/territorial median</td><td>Additional restrictions (caps, etc.)</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box box-warn">⚠️ <strong>Low-Wage Stream New Measures (Sept 26, 2024):</strong> Starting Sept 26, 2024, certain LMIA applications for low-wage positions face additional restrictions. Check ESDC operational guidelines.</div>
+        <div class="box box-info">💡 <strong>After a Positive LMIA:</strong> Employer gives LMIA confirmation number to FN → FN uses it to apply for a work permit from IRCC.</div>
+        <div class="box box-purple">⚠️ <strong>Professional Question:</strong> As a consultant, you must be clear — do you represent the <em>employer</em> (LMIA) or the <em>employee</em> (WP)? Watch for conflicts of interest.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODULE 4 – IMP INTERNATIONAL AGREEMENTS
+══════════════════════════════════════════════ -->
+<div class="section" id="m4">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mod-header" data-num="4" style="background:linear-gradient(130deg,#2a0d5e 0%,#5b2d8e 100%)">
+    <div class="mod-tag">Module 4</div>
+    <h2>IMP — International Agreements</h2>
+    <div class="sub">R204 categories, trade agreement exemption codes, business visitors, employer compliance</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">🌐</div>
+        <h4>What is the IMP?</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="box box-purple">The <strong>International Mobility Program (IMP)</strong> allows employers to hire foreign workers <em>without</em> an LMIA. These work permits serve Canada's broader economic and cultural interests.</div>
+        <p class="lbl">Legal Framework — R204 Categories</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Section</th><th>Category</th><th>Key Exemption Codes</th></tr></thead>
+          <tbody>
+            <tr><td>R204(a)</td><td>International free trade agreements</td><td>T21–T48, F10–F67</td></tr>
+            <tr><td>R204(b)</td><td>Provincial/territorial-international agreements</td><td>Various</td></tr>
+            <tr><td>R204(c)</td><td>Canada/provincial/territorial agreements</td><td>T13, C18, T10</td></tr>
+            <tr><td>R204(d)</td><td>Youth mobility – IEC</td><td>C21</td></tr>
+          </tbody>
+        </table></div>
+        <p class="lbl">How to Determine if LMIA-Exempt</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Step</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Contact the International Mobility Workers Unit (IMWU)</td></tr>
+            <tr><td>2</td><td>Review the list of LMIA exemption codes</td></tr>
+            <tr><td>3</td><td>Review the relevant sections in the IRPR</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box box-info"><strong>IMWU:</strong> Provides opinions on whether employer and TFW are exempt from LMIA or WP requirements. TFW must be outside Canada and from a visa-exempt country to make a request.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">📜</div>
+        <h4>Major International Agreements &amp; Exemption Codes</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Agreement</th><th>Exemption Codes</th></tr></thead>
+          <tbody>
+            <tr><td>CUSMA (Canada-US-Mexico)</td><td>T34, T35, T36, T37, T38</td></tr>
+            <tr><td>Canada-Chile FTA</td><td>F20, F21, F22, F23, F24</td></tr>
+            <tr><td>Canada-Peru FTA</td><td>F50, F51, F52, F53, F54, F55</td></tr>
+            <tr><td>Canada-Colombia FTA</td><td>F10, F11, F12, F13, F14, F15</td></tr>
+            <tr><td>Canada-EU CETA</td><td>T41, T42, T43, T44, T47, T48</td></tr>
+            <tr><td>Canada-UK</td><td>F60, F61, F62, F63, F64, F65, F66, F67</td></tr>
+            <tr><td>GATS</td><td>T33</td></tr>
+            <tr><td>CPTPP</td><td>T61, T62, T63</td></tr>
+          </tbody>
+        </table></div>
+        <p class="lbl">Common Exemption Codes to Know</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Code</th><th>Category</th></tr></thead>
+          <tbody>
+            <tr><td>T21</td><td>Trader</td></tr>
+            <tr><td>T22</td><td>Investor</td></tr>
+            <tr><td>T23</td><td>Professional/Technician</td></tr>
+            <tr><td>T24</td><td>Intra-company Transferee</td></tr>
+            <tr><td>T25</td><td>Colombian or Korean spouse</td></tr>
+            <tr><td>T33</td><td>GATS Professionals</td></tr>
+            <tr><td>T37</td><td>ICT: Senior/executive managers, specialized knowledge (GATS)</td></tr>
+            <tr><td>T38</td><td>Specialized knowledge (CUSMA)</td></tr>
+            <tr><td>T48</td><td>Engineering/scientific technologists (CETA)</td></tr>
+            <tr><td>T13</td><td>Provincial nominee / Significant projects</td></tr>
+            <tr><td>C18</td><td>Atlantic Immigration Program</td></tr>
+            <tr><td>C21</td><td>International Experience Canada (IEC)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">💼</div>
+        <h4>Business Visitors — Key Concepts</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="box box-info"><strong>Simple Rule:</strong> A business visitor's economic home base stays <em>outside</em> Canada. They're not competing with Canadian workers.</div>
+        <p class="lbl">Three General Criteria</p>
+        <ul class="chk">
+          <li>No intent to enter the Canadian labour market</li>
+          <li>Activity must be international in scope: primary remuneration outside Canada; principal place of business outside Canada; accrual of profits outside Canada</li>
+          <li>Employer must be foreign</li>
+        </ul>
+        <div class="box box-warn">⚠️ Business visitor categories exist under CUSMA and Canada-Korea FTA (among others). No work permit required.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--amber-light)">📝</div>
+        <h4>WP Applications — Where, How, and Eligibility Factors</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="three">
+          <div class="mini"><h5>Outside Canada</h5><ul><li>Apply via visa office abroad</li></ul></div>
+          <div class="mini"><h5>At Port of Entry</h5><ul><li>Certain eligible categories</li></ul></div>
+          <div class="mini"><h5>Inside Canada</h5><ul><li>If already in Canada with valid status</li></ul></div>
+        </div>
+        <p class="lbl">WP Eligibility — Grounds for Refusal (R200(3))</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Factor</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Reasonable grounds FN cannot perform the work</td></tr>
+            <tr><td>2</td><td>Would be a strike-breaker</td></tr>
+            <tr><td>3</td><td>Engaged in unauthorized work or study</td></tr>
+            <tr><td>4</td><td>Employer provides striptease, escort services, etc.</td></tr>
+            <tr><td>5</td><td>Employer ineligible</td></tr>
+            <tr><td>6</td><td>Intends to work in Quebec (special rules)</td></tr>
+            <tr><td>7</td><td>Offer doesn't comply with federal-provincial agreements</td></tr>
+            <tr><td>8</td><td>Employer didn't provide Offer of Employment / didn't pay compliance fee</td></tr>
+          </tbody>
+        </table></div>
+        <p class="lbl">Employer Compliance (IMP)</p>
+        <ul class="chk">
+          <li>Submit an Offer of Employment through the Employer Portal</li>
+          <li>Pay the employer compliance fee</li>
+          <li>Meet all conditions stated in the offer</li>
+          <li>Be subject to inspections</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODULE 5 – CANADIAN INTERESTS
+══════════════════════════════════════════════ -->
+<div class="section" id="m5">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mod-header" data-num="5" style="background:linear-gradient(130deg,#5c0011 0%,#c0392b 100%)">
+    <div class="mod-tag">Module 5</div>
+    <h2>IMP — Canadian Interests &amp; Benefits</h2>
+    <div class="sub">R205 significant benefit, intra-company transferees, reciprocal employment, R186</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light)">🗺️</div>
+        <h4>IMP Categories Overview</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="tree">
+<span class="gr">IMP (LMIA-Exempt)</span>
+├── R204 – International Agreements <span class="yw">← Module 4</span>
+├── R205 – Canadian Interests <span class="yw">← Module 5</span>
+├── R206 – No Other Means of Support <span class="yw">← Module 6</span>
+├── R207 – PR Applicants in Canada <span class="yw">← Module 6</span>
+├── R207.1 – Vulnerable Workers <span class="yw">← Module 6</span>
+└── R208 – Humanitarian Reasons <span class="yw">← Module 6</span>
+        </div>
+        <p class="lbl">Types of WP Under "Canadian Interests" — R205</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Category</th><th>Section</th><th>Key Codes</th></tr></thead>
+          <tbody>
+            <tr><td>Significant Benefit</td><td>R205(a)</td><td>C10, C61, C62, C63</td></tr>
+            <tr><td>Reciprocal Employment</td><td>R205(b)</td><td>C20, C22, C23, C24, C26</td></tr>
+            <tr><td>Designated by Minister</td><td>R205(c)</td><td>Research; Competitiveness &amp; Public Policy</td></tr>
+            <tr><td>Charitable or Religious Work</td><td>R205(d)</td><td>—</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light)">⭐</div>
+        <h4>Significant Benefit — R205(a) &amp; C10</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="box box-info"><strong>Purpose:</strong> To create or maintain significant social, cultural, or economic benefits or opportunities for Canadian citizens, Indigenous people registered under the Indian Act, or permanent residents.</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Types of "Significant" Benefit</h5>
+            <ul>
+              <li><strong>Economic:</strong> General economic support, advancement of industry</li>
+              <li><strong>Social:</strong> Increased health and well-being</li>
+              <li><strong>Cultural:</strong> Increased tolerance, knowledge, connections to similar culture</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Five Key Officer Questions</h5>
+            <ul>
+              <li>Can the employer get an LMIA? If yes, why not?</li>
+              <li>What are the social/cultural benefits — really "significant"?</li>
+              <li>Is the applicant a leader or have particular expertise?</li>
+              <li>Is there sufficient objective evidence?</li>
+              <li>Am I convinced? (Overall assessment)</li>
+            </ul>
+          </div>
+        </div>
+        <p class="lbl">Key Supporting Documents for C10</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Document Type</th></tr></thead>
+          <tbody>
+            <tr><td>Education, certification, or membership documents</td></tr>
+            <tr><td>Proof of experience (&gt;10 years)</td></tr>
+            <tr><td>International awards, patents, or evidence of recognition</td></tr>
+            <tr><td>Evidence applicant has been a judge of others in the field</td></tr>
+            <tr><td>Evidence of scientific or scholarly contributions</td></tr>
+            <tr><td>Publications in academia or industry</td></tr>
+            <tr><td>Explanation why an LMIA was not filed or why it's not practical</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🏢</div>
+        <h4>Intra-Company Transferees (ICT) — R205(a) — C61, C62, C63</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <p class="lbl">5 General Requirements</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Requirement</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Employed by a multi-national company</td></tr>
+            <tr><td>2</td><td>Seeking entry to work in a parent, subsidiary, branch, or affiliate</td></tr>
+            <tr><td>3</td><td>Enterprise has a qualifying relationship with current enterprise</td></tr>
+            <tr><td>4</td><td>Transferred to executive, senior managerial, or specialized knowledge position</td></tr>
+            <tr><td>5</td><td>Employed continuously outside Canada for at least 1 year by the transferring company</td></tr>
+          </tbody>
+        </table></div>
+        <div class="two">
+          <div class="mini">
+            <h5>Duration Limits</h5>
+            <ul>
+              <li>Executives &amp; Senior Managers: <strong>max 7 years</strong></li>
+              <li>Specialized Knowledge Workers: <strong>max 5 years</strong></li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Wages</h5>
+            <ul><li>Must be consistent with <strong>prevailing wage</strong> to avoid wage suppression</li></ul>
+          </div>
+        </div>
+        <p class="lbl">What is "Specialized Knowledge"?</p>
+        <div class="box box-info"><strong>In simple terms:</strong> This person knows something very specific about how <em>this particular company</em> works — knowledge you can't easily find in Canada. Must show: high degree of proprietary knowledge, company-specific expertise, advanced expertise, significant and recent experience.</div>
+        <p class="lbl">ICT Under Trade Agreements vs Canadian Interests</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Code</th><th>Agreement</th><th>Categories</th></tr></thead>
+          <tbody>
+            <tr><td>T37</td><td>GATS</td><td>ICT: Senior/exec managers, management trainee, specialized knowledge</td></tr>
+            <tr><td>T24</td><td>Various FTAs</td><td>Intra-company transferee</td></tr>
+            <tr><td>T38</td><td>CUSMA</td><td>Specialized knowledge</td></tr>
+            <tr><td>C61, C62, C63</td><td>Canadian Interests R205(a)</td><td>ICT under significant benefit</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">🔁</div>
+        <h4>Reciprocal Employment — R205(b)</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="box box-good">The idea: Canada allows foreign workers in <em>because</em> other countries allow Canadians in similar roles.</div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Code</th><th>Category</th></tr></thead>
+          <tbody>
+            <tr><td>C20</td><td>Reciprocal employment / Unique situations (fishing guides on border lakes, US gov't personnel family members)</td></tr>
+            <tr><td>C22</td><td>Academic exchanges (professors, visiting lecturers)</td></tr>
+            <tr><td>C23</td><td>Performing arts</td></tr>
+            <tr><td>C24</td><td>Residential summer camp counsellors</td></tr>
+            <tr><td>C26</td><td>Coaches and athletes</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--amber-light)">🚫</div>
+        <h4>Working WITHOUT a Work Permit — R186</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="box box-warn">Some FNs are authorized to work in Canada <strong>without a work permit</strong> under prescribed circumstances in R186. This is different from having a work permit — it's an authorization by operation of law.</div>
+        <div class="pills">
+          <span class="pill pill-b">Business visitors (R186(a))</span>
+          <span class="pill pill-b">Foreign representatives (R186(b))</span>
+          <span class="pill pill-b">Military (R186(c))</span>
+          <span class="pill pill-b">On-campus work by students (R186(f))</span>
+          <span class="pill pill-b">Certain short-term workers (R186(s))</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODULE 6 – OPEN WORK PERMITS
+══════════════════════════════════════════════ -->
+<div class="section" id="m6">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mod-header" data-num="6" style="background:linear-gradient(130deg,#093a52 0%,#1d7ea8 100%)">
+    <div class="mod-tag">Module 6</div>
+    <h2>IMP — Open Work Permits (OWP)</h2>
+    <div class="sub">R206–R208 humanitarian and Canadian interest categories, conditions, and validity</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🔓</div>
+        <h4>What is an Open Work Permit?</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="box box-info">An <strong>Open Work Permit (OWP)</strong> is issued under one of the LMIA exemptions and allows a foreign national to work <em>without being tied to a specific employer</em>.</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Unrestricted OWP</h5>
+            <ul><li>Can work in <strong>any occupation</strong> and <strong>any location</strong></li><li>(Medical conditions may still apply)</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Restricted OWP</h5>
+            <ul>
+              <li>Restricts occupation (based on medical status per R185(b))</li>
+              <li>May restrict location depending on category</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head open" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">📋</div>
+        <h4>Conditions on Work Permits — R183 &amp; R185</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body open">
+        <div class="two">
+          <div class="mini">
+            <h5>R183 — General Conditions (Automatic)</h5>
+            <ul>
+              <li>Imposed by operation of law</li>
+              <li>Apply regardless of what officer writes</li>
+              <li>E.g., must not work without authorization, must comply with conditions</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>R185 — Specific Conditions (By Officer)</h5>
+            <ul>
+              <li>(a) Period of authorized stay</li>
+              <li>(b) Type of work / employer / location of work / times and period of work</li>
+            </ul>
+          </div>
+        </div>
+        <p class="lbl">Validity Period — What Officers Consider</p>
+        <ul class="chk">
+          <li>Passport validity</li>
+          <li>Expected duration of employment in the LMIA-exempt offer</li>
+          <li>Maximum time allowed by the particular program or agreement</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--amber-light)">❤️</div>
+        <h4>Humanitarian OWP Categories — R206–R208</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Section</th><th>Category</th><th>Plain Language</th></tr></thead>
+          <tbody>
+            <tr><td>R206</td><td>No other means of support</td><td>FN has no way to support themselves</td></tr>
+            <tr><td>R207</td><td>PR applicants in Canada</td><td>FNs waiting for PR processing</td></tr>
+            <tr><td>R207.1</td><td>Vulnerable workers</td><td>Exploited or at-risk workers</td></tr>
+            <tr><td>R208</td><td>Humanitarian reasons</td><td>Other compassionate circumstances</td></tr>
+          </tbody>
+        </table></div>
+        <div class="pills" style="margin-top:12px">
+          <span class="pill pill-a">S61 – Refugee claimants</span>
+          <span class="pill pill-a">S62 – Refugee claimants</span>
+          <span class="pill pill-a">A72 – Vulnerable workers</span>
+          <span class="pill pill-a">H81 – H&C reasons</span>
+          <span class="pill pill-a">H82 – H&C reasons</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">🇨🇦</div>
+        <h4>Canadian Interests OWP Categories — R205</h4><span class="chev">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Section</th><th>Category</th></tr></thead>
+          <tbody>
+            <tr><td>R205(b)</td><td>Reciprocal Employment</td></tr>
+            <tr><td>R205(c)(i)</td><td>Designated by Minister – Research</td></tr>
+            <tr><td>R205(c)(ii)</td><td>Designated by Minister – Competitiveness and Public Policy</td></tr>
+          </tbody>
+        </table></div>
+        <p class="lbl">How Does an FN Qualify for an OWP? — Key Assessment</p>
+        <div class="box box-info">Officer must determine which specific OWP category applies, then assess whether the FN meets the requirements of that category. The FN must demonstrate: the basis for the OWP, eligibility under the regulation, and that all general admissibility requirements are met.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     QUICK REFERENCE TABLES
+══════════════════════════════════════════════ -->
+<div class="section" id="qr">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mod-header" data-num="" style="background:linear-gradient(130deg,#0f1923 0%,#1d3557 100%)">
+    <div class="mod-tag">All Modules</div>
+    <h2>📊 Master Quick Reference Tables</h2>
+    <div class="sub">All key distinctions, codes, and rules at a glance — ideal for last-minute review</div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-head">TRV vs eTA — Who Needs What?</div>
+    <div style="padding:14px">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Type</th><th>Who Needs It</th><th>Authority</th><th>Where Applied</th></tr></thead>
+        <tbody>
+          <tr><td>TRV</td><td>Visa-required nationals</td><td>R7(1)</td><td>Visa office abroad</td></tr>
+          <tr><td>eTA</td><td>Visa-exempt nationals travelling by air</td><td>R7.1(1)</td><td>Online before travel</td></tr>
+          <tr><td>Neither</td><td>US citizens (by land/air/sea)</td><td>R190(1)</td><td>POE</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-head">TFWP vs IMP — Core Comparison</div>
+    <div style="padding:14px">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Feature</th><th>TFWP</th><th>IMP</th></tr></thead>
+        <tbody>
+          <tr><td>LMIA Required</td><td><span class="yes">YES</span></td><td><span class="no">NO</span></td></tr>
+          <tr><td>Lead Dept</td><td>ESDC</td><td>IRCC</td></tr>
+          <tr><td>Purpose</td><td>Fill labour shortages</td><td>Advance economic/cultural interests</td></tr>
+          <tr><td>WP Type</td><td>Employer-specific</td><td>Generally open</td></tr>
+          <tr><td>Nature</td><td>Unilateral/discretionary</td><td>Based on agreements</td></tr>
+          <tr><td>Skill level</td><td>Majority low-skilled</td><td>Majority high-skilled</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-head">Study Permit — Key Dates (2024–2025)</div>
+    <div style="padding:14px">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Date</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>Jan 22, 2024</td><td>PAL required; new financial requirements</td></tr>
+          <tr><td>Nov 8, 2024</td><td>Off-campus work: max 24 hrs/week; DLI changes require SP extension</td></tr>
+          <tr><td>Jan 21, 2025</td><td>Spousal OWP restricted to master's/doctoral/professional only</td></tr>
+          <tr><td>2025–2026</td><td>Intake cap ~437,000; master's/doctoral now need PAL</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-head">IMP Categories — R204 to R208 Cheat Sheet</div>
+    <div style="padding:14px">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Section</th><th>Category</th><th>Key Feature</th></tr></thead>
+        <tbody>
+          <tr><td>R204</td><td>International agreements</td><td>Trade deals (CUSMA, CETA, etc.)</td></tr>
+          <tr><td>R205(a)</td><td>Significant benefit (C10)</td><td>Social/cultural/economic benefit</td></tr>
+          <tr><td>R205(a)</td><td>ICT (C61/C62/C63)</td><td>Intra-company transferee</td></tr>
+          <tr><td>R205(b)</td><td>Reciprocal employment</td><td>Mutual benefit with other countries</td></tr>
+          <tr><td>R205(c)</td><td>Designated by Minister</td><td>Research; competitiveness</td></tr>
+          <tr><td>R205(d)</td><td>Charitable/religious</td><td>Non-profit/religious organizations</td></tr>
+          <tr><td>R206</td><td>No other means of support</td><td>Cannot support themselves otherwise</td></tr>
+          <tr><td>R207</td><td>PR applicants in Canada</td><td>Waiting for PR processing</td></tr>
+          <tr><td>R207.1</td><td>Vulnerable workers</td><td>Exploited/at-risk workers</td></tr>
+          <tr><td>R208</td><td>Humanitarian reasons</td><td>H&C grounds</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-head">ICT Duration Limits</div>
+    <div style="padding:14px">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Position Type</th><th>Max WP Duration</th></tr></thead>
+        <tbody>
+          <tr><td>Executives &amp; Senior Managers</td><td>7 years</td></tr>
+          <tr><td>Specialized Knowledge Workers</td><td>5 years</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-head">Study Permit Exemptions — R188</div>
+    <div style="padding:14px">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Section</th><th>Who is Exempt</th></tr></thead>
+        <tbody>
+          <tr><td>A30(2)</td><td>Minor children (pre-school and K-12)</td></tr>
+          <tr><td>R188(1)(a)</td><td>Family and private staff of foreign representatives</td></tr>
+          <tr><td>R188(1)(b)</td><td>Members of armed forces under Visiting Forces Act</td></tr>
+          <tr><td>R188(1)(c)</td><td>Short-term courses (6 months or less)</td></tr>
+          <tr><td>R188(1)(d)</td><td>Indigenous people described in federal legislation</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-head">Key LMIA Assessment Factors (R200(5) — Genuineness)</div>
+    <div style="padding:14px">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Factor</th><th>Key Question</th></tr></thead>
+        <tbody>
+          <tr><td>1. Actively Engaged</td><td>Is the business real, operating, and able to provide stable employment?</td></tr>
+          <tr><td>2. Reasonable Need</td><td>Is this job reasonable for this type of business?</td></tr>
+          <tr><td>3. Can Fulfil Terms</td><td>Can the employer deliver on hours, wages, and conditions?</td></tr>
+          <tr><td>4. Employer Compliance</td><td>Any previous/current violations of employment or recruitment laws?</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-head">OWP Types — Unrestricted vs Restricted</div>
+    <div style="padding:14px">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Unrestricted</td><td>Can work in any occupation and any location (medical conditions may still apply)</td></tr>
+          <tr><td>Restricted</td><td>Restricts occupation (R185(b) medical) or location (depending on category)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+</div><!-- end qr -->
+
+</div><!-- end page -->
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const map = { ov:0, m1:1, m2:2, m3:3, m4:4, m5:5, m6:6, qr:7 };
+  const btns = document.querySelectorAll('.nav-btn');
+  if (btns[map[id]]) btns[map[id]].classList.add('active');
+  window.scrollTo({ top: 56, behavior: 'smooth' });
+}
+
+function tog(head) {
+  head.classList.toggle('open');
+  head.nextElementSibling.classList.toggle('open');
+}
+
+function search(q) {
+  if (q.length < 2) return;
+  const lower = q.toLowerCase();
+  const els = document.querySelectorAll('.card-body, .qr-card');
+  for (let el of els) {
+    if (el.textContent.toLowerCase().includes(lower)) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.style.outline = '2px solid #d4870a';
+      setTimeout(() => el.style.outline = '', 3000);
+      break;
+    }
+  }
+}
+
+// Open first card in each module by default
+document.querySelectorAll('.card-head.open').forEach(h => {
+  h.nextElementSibling.classList.add('open');
+});
+</script>
+</body>
+</html>

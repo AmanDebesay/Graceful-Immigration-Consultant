@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICL 880 – Citizenship Study Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Work+Sans:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --ink: #1a1f2e;
+  --deep: #2a344a;
+  --navy: #3d4e6f;
+  --red: #c41e3a;
+  --red-light: #fcebee;
+  --blue: #1854a8;
+  --blue-light: #e8f1fb;
+  --teal: #0d6e6d;
+  --teal-light: #e5f5f5;
+  --green: #1d6b3e;
+  --green-light: #ebf6ee;
+  --purple: #6d2e91;
+  --purple-light: #f4ecf9;
+  --gold: #b87d00;
+  --gold-light: #fef9e7;
+  --orange: #d35f00;
+  --orange-light: #fff5ea;
+  --border: #d2dce8;
+  --muted: #5e6d82;
+  --bg: #f8fafb;
+  --white: #fff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Work Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#1a1f2e 0%,#2a344a 45%,#3d4e6f 100%);padding:48px 26px 38px;position:relative;overflow:hidden}
+.hdr::after{content:'880';position:absolute;right:-25px;bottom:-45px;font-family:'Playfair Display',serif;font-size:17rem;color:rgba(255,255,255,0.03);font-weight:700;line-height:1;pointer-events:none}
+.hdr-in{max-width:1220px;margin:0 auto;position:relative}
+.hdr h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:#fff;line-height:1.15;font-weight:700}
+.hdr h1 span{color:#f5a623;font-weight:400}
+.hdr p{color:#a2b5ca;font-size:.94rem;margin-top:9px;font-weight:400}
+.hdr-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.htag{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#d4e1ed;font-size:.74rem;font-weight:700;padding:6px 14px;border-radius:24px;letter-spacing:.06em}
+
+/* NAV */
+.nav{background:#1a1f2e;border-top:1px solid rgba(255,255,255,.05);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:200;padding:0 24px}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;color:#7a8fa8;font-family:'Work Sans',sans-serif;font-size:.8rem;font-weight:700;padding:14px 16px;cursor:pointer;white-space:nowrap;transition:color .2s;letter-spacing:.02em}
+.nb:hover{color:#fff}
+.nb.on{color:#f5a623;border-bottom-color:#f5a623}
+
+/* PAGE */
+.page{max-width:1220px;margin:0 auto;padding:30px 22px 85px}
+.sec{display:none}.sec.on{display:block}
+
+/* MODULE HEADER */
+.mh{border-radius:16px;padding:30px 32px;margin-bottom:24px;color:#fff;position:relative;overflow:hidden}
+.mh::after{content:attr(data-n);position:absolute;right:20px;bottom:-28px;font-family:'Playfair Display',serif;font-size:11rem;color:rgba(255,255,255,.04);line-height:1;pointer-events:none;font-weight:700}
+.mtag{font-size:.71rem;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.5);display:inline-block;margin-bottom:8px}
+.mh h2{font-family:'Playfair Display',serif;font-size:1.95rem;line-height:1.3;font-weight:700}
+.mh .sub{color:rgba(255,255,255,.55);font-size:.9rem;margin-top:7px;font-weight:400}
+
+/* CARDS */
+.grid{display:grid;gap:15px}
+.card{background:var(--white);border-radius:13px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(26,31,46,.03)}
+.ch{display:flex;align-items:center;gap:12px;padding:15px 20px;cursor:pointer;user-select:none;transition:background .15s;border-bottom:1px solid transparent}
+.ch:hover{background:#f9fafb}
+.ch.on{background:var(--blue-light);border-bottom-color:var(--border)}
+.ci{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.08rem;flex-shrink:0}
+.ch h4{flex:1;font-size:.97rem;font-weight:700;color:var(--deep)}
+.cv{color:var(--muted);font-size:.75rem;transition:transform .2s}
+.ch.on .cv{transform:rotate(180deg)}
+.cb{display:none;padding:22px}
+.cb.on{display:block}
+
+/* TYPOGRAPHY */
+.cb p,.cb li{font-size:.88rem;color:var(--ink);line-height:1.7}
+.cb ul,.cb ol{padding-left:22px;margin:9px 0}
+.cb li{margin-bottom:6px}
+strong{color:var(--deep);font-weight:700}
+.lbl{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:15px 0 8px;display:block}
+
+/* BOXES */
+.box{border-radius:10px;padding:13px 17px;margin:11px 0;font-size:.86rem;line-height:1.65}
+.bi{background:var(--blue-light);border-left:4px solid var(--blue)}
+.bw{background:var(--orange-light);border-left:4px solid var(--orange)}
+.bd{background:var(--red-light);border-left:4px solid var(--red)}
+.bg{background:var(--green-light);border-left:4px solid var(--green)}
+.bt{background:var(--teal-light);border-left:4px solid var(--teal)}
+.bp{background:var(--purple-light);border-left:4px solid var(--purple)}
+.bgo{background:var(--gold-light);border-left:4px solid var(--gold)}
+
+/* GRIDS */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:11px 0}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:11px 0}
+@media(max-width:660px){.two,.three{grid-template-columns:1fr}}
+.mini{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.mini h5{font-size:.84rem;font-weight:700;color:var(--deep);margin-bottom:8px}
+.mini ul{list-style:none;padding:0}
+.mini ul li{font-size:.82rem;padding:4px 0 4px 16px;position:relative}
+.mini ul li::before{content:'›';position:absolute;left:0;color:var(--blue);font-weight:700;font-size:1.15rem}
+
+/* FLOW */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:11px 0}
+.fs{background:var(--blue-light);border:1px solid #b3d4f1;border-radius:9px;padding:8px 15px;font-size:.81rem;font-weight:700;color:#0d4374;white-space:nowrap}
+.fa{color:var(--orange);font-size:1.18rem;font-weight:700}
+
+/* PILLS */
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:9px 0}
+.pill{border-radius:24px;padding:6px 13px;font-size:.79rem;font-weight:700;border:1px solid}
+.pb{background:var(--blue-light);border-color:#9ac8e8;color:#0d4475}
+.pg{background:var(--green-light);border-color:#7ecfa0;color:#0e4023}
+.pr{background:var(--red-light);border-color:#e8a09a;color:#6e1a11}
+.pt{background:var(--teal-light);border-color:#7ed4d3;color:#084b4a}
+.pp{background:var(--purple-light);border-color:#b89cd8;color:#3b1557}
+.pgo{background:var(--gold-light);border-color:#e8c06a;color:#6b4400}
+.po{background:var(--orange-light);border-color:#f4c084;color:#6b3500}
+
+/* TABLE */
+.tw{overflow-x:auto;margin:11px 0}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+thead th{background:var(--deep);color:#fff;padding:11px 13px;text-align:left;font-weight:700;font-size:.79rem;letter-spacing:.03em}
+tbody tr:nth-child(even){background:#f9fafb}
+tbody td{padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:top}
+
+/* CHECKLIST */
+.chk{list-style:none;padding:0}
+.chk li{font-size:.88rem;padding:8px 0 8px 30px;position:relative;border-bottom:1px dashed var(--border)}
+.chk li:last-child{border:none}
+.chk li::before{content:'✓';position:absolute;left:0;color:var(--green);font-size:1.05rem;font-weight:700}
+
+/* QUOTE / CASE */
+.qt{border-left:3px solid var(--gold);background:var(--gold-light);border-radius:0 9px 9px 0;padding:12px 16px;font-size:.86rem;font-style:italic;color:#4a3200;margin:11px 0}
+.qt cite{font-style:normal;font-size:.76rem;color:var(--muted);display:block;margin-top:5px}
+.casebox{background:var(--purple-light);border:1px solid #c8a8e8;border-radius:10px;padding:13px 16px;margin:10px 0;font-size:.86rem}
+.casebox .cn{font-weight:700;color:var(--purple);font-size:.87rem;margin-bottom:6px}
+
+/* OV GRID */
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:15px;margin-bottom:26px}
+.oc{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:22px;cursor:pointer;transition:transform .2s,box-shadow .2s;border-left:7px solid}
+.oc:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(26,31,46,.08)}
+.oc .mn{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.oc h3{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--deep);margin:6px 0 9px;font-weight:700}
+.oc p{font-size:.83rem;color:var(--muted);line-height:1.6}
+
+/* BACK */
+.back{background:none;border:1px solid var(--border);border-radius:9px;padding:7px 15px;font-size:.82rem;font-family:'Work Sans',sans-serif;color:var(--muted);cursor:pointer;margin-bottom:20px;transition:all .2s;font-weight:600}
+.back:hover{background:var(--blue-light);color:var(--deep);border-color:var(--blue)}
+
+/* SEARCH */
+.srch{margin-bottom:22px}
+.srch input{width:100%;padding:12px 20px;border:1px solid var(--border);border-radius:11px;font-family:'Work Sans',sans-serif;font-size:.92rem;background:var(--white);color:var(--ink);outline:none}
+.srch input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
+
+.yes{display:inline-block;background:var(--green-light);color:var(--green);border:1px solid #7ecfa0;border-radius:6px;padding:3px 9px;font-size:.78rem;font-weight:700}
+.no{display:inline-block;background:var(--red-light);color:var(--red);border:1px solid #e8a09a;border-radius:6px;padding:3px 9px;font-size:.78rem;font-weight:700}
+
+/* SECTION DIVIDER */
+.sdiv{height:2px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:22px 0}
+
+/* CA REFERENCE */
+.ref{display:inline-block;background:var(--teal-light);color:var(--teal);border:1px solid #7ed4d3;border-radius:7px;padding:3px 10px;font-size:.77rem;font-weight:700;font-family:monospace}
+
+/* FORMULA */
+.formula{background:var(--purple-light);border:2px solid var(--purple);border-radius:10px;padding:16px 20px;margin:12px 0;text-align:center;font-size:1.05rem;font-weight:700;color:var(--purple)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <h1>ICL 880 — <span>Citizenship</span></h1>
+    <p>Complete Study Reference · Acquisition, Grants, Prohibitions, Revocation · Queen's University GDipICL</p>
+    <div class="hdr-tags">
+      <span class="htag">🍁 Citizenship Act</span>
+      <span class="htag">👶 Jus Soli / Jus Sanguinis</span>
+      <span class="htag">📋 Grant Requirements</span>
+      <span class="htag">⏱️ 1095 Days / 3 of 5 Years</span>
+      <span class="htag">🚫 Prohibitions (4 yrs)</span>
+      <span class="htag">⚖️ Revocation</span>
+      <span class="htag">🔄 Renunciation / Resumption</span>
+      <span class="htag">👨‍👩‍👧 Second Gen Cut-Off</span>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on" onclick="show('ov')">🏠 Overview</button>
+  <button class="nb" onclick="show('m1')">M1 Acquisition</button>
+  <button class="nb" onclick="show('m2')">M2 Grants & Waivers</button>
+  <button class="nb" onclick="show('m3')">M3 Prohibitions</button>
+  <button class="nb" onclick="show('m4')">M4 Revocation</button>
+  <button class="nb" onclick="show('qr')">📊 Quick Ref</button>
+</div>
+
+<div class="page">
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<div class="sec on" id="ov">
+  <div class="srch"><input type="text" placeholder="🔍  Search any concept, section, requirement, or case…" oninput="srch(this.value)"></div>
+  <p style="font-size:.89rem;color:var(--muted);margin-bottom:20px">Click any module card to explore detailed content. Use Quick Ref for instant comparison tables and formulas.</p>
+  <div class="og">
+    <div class="oc" onclick="show('m1')" style="border-left-color:#1854a8">
+      <div class="mn">Module 1</div>
+      <h3>Who Is a Canadian & Acquisition</h3>
+      <p>Jus soli (birth in Canada), jus sanguinis (descent), second generation cut-off, Bill C-3 substantial connection test, residency for grants.</p>
+    </div>
+    <div class="oc" onclick="show('m2')" style="border-left-color:#1d6b3e">
+      <div class="mn">Module 2</div>
+      <h3>Grants, Waivers & Special Cases</h3>
+      <p>Adoptions, minors (s.5(1) vs s.5(2)), special grants, CAF fast-track, language/knowledge waivers, Indigenous applicants.</p>
+    </div>
+    <div class="oc" onclick="show('m3')" style="border-left-color:#c41e3a">
+      <div class="mn">Module 3</div>
+      <h3>Prohibitions & Investigations</h3>
+      <p>11 prohibitions (criminality, misrepresentation), 4-year bars, foreign vs domestic criminality, investigations, suspensions, abandonment.</p>
+    </div>
+    <div class="oc" onclick="show('m4')" style="border-left-color:#6d2e91">
+      <div class="mn">Module 4</div>
+      <h3>Revocation, Renunciation & Resumption</h3>
+      <p>Revocation grounds (false rep, fraud, concealment), mens rea requirement, procedural rights, renunciation eligibility, resumption.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--blue-light);color:var(--blue)">🍁</div>
+      <h4>Citizenship Act — Core Framework</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <div class="box bi"><strong>Separate and apart from IRPA.</strong> Related statutes, but diverge in certain key areas. Primary focus: Citizenship Act ss.1–6, 12, plus Citizenship Regulations ss.2, 5, 11, 14–24.</div>
+      <div class="three">
+        <div class="mini">
+          <h5>Acquisition (s.3)</h5>
+          <ul>
+            <li><span class="ref">s.3(1)(a)</span> — Birth in Canada (jus soli)</li>
+            <li><span class="ref">s.3(1)(b)</span> — Birth abroad to Canadian (jus sanguinis)</li>
+            <li><span class="ref">s.3(1)(e)</span> — Grant of citizenship</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Grants (s.5)</h5>
+          <ul>
+            <li><span class="ref">s.5(1)</span> — Adults (≥18)</li>
+            <li><span class="ref">s.5(2)</span> — Minors (with parent)</li>
+            <li><span class="ref">s.5(4)</span> — Special grants (Minister)</li>
+            <li><span class="ref">s.5.1</span> — Adopted children</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Loss (s.9–10)</h5>
+          <ul>
+            <li><span class="ref">s.9</span> — Renunciation</li>
+            <li><span class="ref">s.10</span> — Revocation (false rep, fraud, concealment)</li>
+            <li><span class="ref">s.11</span> — Resumption</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--gold-light);color:var(--gold)">📐</div>
+      <h4>Key Formulas & Calculations</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <div class="formula">PHYSICAL PRESENCE: 1,095 days in last 5 years before application</div>
+      <div class="two">
+        <div class="mini">
+          <h5>Time as Temporary Resident / Protected Person</h5>
+          <ul>
+            <li>Each day = <strong>½ day</strong> (max 365 days)</li>
+            <li>Example: 730 days as TR = 365 days credit</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Time NOT Counted</h5>
+          <ul>
+            <li>Time on probation (except conditional discharge)</li>
+            <li>Time on parole</li>
+            <li>Time serving imprisonment</li>
+          </ul>
+        </div>
+      </div>
+      <div class="box bw">💡 <strong>Exit tracking since 2015:</strong> CBSA now tracks both entries AND exits, reducing uncertainty. Can request "Travel History Report" via Representative Portal.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════ MODULE 1 ═══════════════════════════ -->
+<div class="sec" id="m1">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="1" style="background:linear-gradient(130deg,#0a2540 0%,#1854a8 100%)">
+    <div class="mtag">Module 1</div>
+    <h2>Who Is a Canadian Citizen & Acquisition</h2>
+    <div class="sub">Jus soli, jus sanguinis, second generation cut-off, Bill C-3, grant requirements, residency</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">👶</div>
+        <h4>Three Ways to Acquire Canadian Citizenship</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="three">
+          <div class="mini">
+            <h5>Jus Soli (Law of the Soil)</h5>
+            <ul>
+              <li>Birth in Canada</li>
+              <li>Automatic citizenship</li>
+              <li><strong>Exception:</strong> Children of foreign diplomats</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Jus Sanguinis (Law of the Blood)</h5>
+            <ul>
+              <li>Birth to Canadian citizen abroad</li>
+              <li>Subject to second generation cut-off</li>
+              <li>See Bill C-3 reforms below</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Naturalization</h5>
+            <ul>
+              <li>Grant of citizenship (s.5)</li>
+              <li>Must be PR first</li>
+              <li>Meet all s.5(1) requirements</li>
+            </ul>
+          </div>
+        </div>
+        <span class="lbl">Special Circumstances — s.2(2)(a)</span>
+        <div class="box bi">A person is deemed to be born in Canada if born on a <strong>Canadian vessel</strong> or on an <strong>aircraft registered in Canada</strong>.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">🌍</div>
+        <h4>Second Generation Cut-Off & Bill C-3 (2025)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Previous Law (Limited Citizenship by Descent)</span>
+        <div class="box bw">Child born outside Canada would be a Canadian citizen if at time of birth: (1) One parent was <strong>born in Canada</strong> OR (2) One parent became citizen by <strong>naturalization</strong>.</div>
+        <p style="margin:10px 0"><strong>Example:</strong> Linda born in Canada → marries non-Canadian Jack → son Dean born in Philippines → Dean is Canadian by descent.</p>
+        
+        <span class="lbl">New Law — Second Generation Cut-Off (In Effect Since 2008)</span>
+        <div class="box bd">⚠️ Second generation born abroad generally NOT entitled to citizenship by descent. <em>Bjorkquist v. AG Canada</em> (2023 ONSC 7152) found this <strong>unconstitutional</strong> under Charter ss.6 and 15.</div>
+        
+        <span class="lbl">Bill C-3 (June 2025 Reforms)</span>
+        <div class="pills">
+          <span class="pill pg">Citizenship for those previously denied under second generation rule</span>
+          <span class="pill pb">Substantial connection test going forward</span>
+        </div>
+        <div class="box bg">✅ <strong>Substantial Connection Test:</strong> Parent must demonstrate <strong>1,095 days of physical presence in Canada</strong> prior to child's birth to pass citizenship to second generation born abroad.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">📋</div>
+        <h4>Grant of Citizenship — s.5(1) Requirements (Adults ≥18)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <ul class="chk">
+          <li><strong>A.</strong> Minimum 18 years of age</li>
+          <li><strong>B.</strong> Permanent resident</li>
+          <li><strong>C.</strong> Resident in Canada for <strong>3 years (1,095 days)</strong> out of 5 years prior to application date</li>
+          <li><strong>D.</strong> Meet income tax filing obligations for each of 3 years (if required by CRA)</li>
+          <li><strong>E.</strong> Count time as temporary resident (each day = ½ day, max 365 days)</li>
+          <li><strong>F.</strong> Knowledge of English OR French</li>
+          <li><strong>G.</strong> Knowledge of Canada and responsibilities/privileges of citizenship</li>
+          <li><strong>H.</strong> NOT under removal order or other prohibitions under the Citizenship Act</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">⏱️</div>
+        <h4>Residency Calculation & Evidence</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="formula">1,095 days physically present in Canada during 5 years immediately before application</div>
+        <span class="lbl">Temporary Resident / Protected Person Credit</span>
+        <div class="box bt">If you were a TR or protected person during the 5 years before application: Each day counts as <strong>½ day</strong>, with a maximum of <strong>365 days</strong> towards physical presence calculation.</div>
+        
+        <span class="lbl">Travel History Report</span>
+        <div class="box bi">CBSA now tracks exits in addition to entries (since 2015). Can request "Travel History Report" through Representative Portal — details all CBSA Entry/Exit records. Reduces uncertainty about days accumulated.</div>
+        
+        <span class="lbl">Types of Evidence</span>
+        <div class="tw"><table>
+          <thead><tr><th>Evidence Type</th><th>Examples</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Active</strong></td><td>College transcript showing French course completion, employment records, rental agreements</td></tr>
+            <tr><td><strong>Passive</strong></td><td>Utility bills (hydro receipt), credit card statements from local businesses, bank records</td></tr>
+            <tr><td><strong>Negative</strong></td><td>Letter from daycare about lack of attendance records (shows child was in Canada)</td></tr>
+            <tr><td><strong>Social Media</strong></td><td>Facebook posts at local basketball game (timestamped proof of presence)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">🗣️</div>
+        <h4>Language Requirements (Ages 18–54)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp">Must demonstrate <strong>CLB Level 4</strong> in speaking and listening.</div>
+        <span class="lbl">Four Ways to Prove Language Proficiency</span>
+        <div class="tw"><table>
+          <thead><tr><th>Method</th><th>Requirements</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1. Third-party test (English)</strong></td><td>• CELPIP-G or CELPIP-General LS: min level 4<br>• IELTS general: min 4.0 speaking, 4.5 listening</td></tr>
+            <tr><td><strong>2. Third-party test (French)</strong></td><td>• TEF: Niveau B1, B2, C1 or C2 in Compréhension de l'oral and Expression orale</td></tr>
+            <tr><td><strong>3. Proof of education</strong></td><td>Diploma/transcript/certificate from secondary or post-secondary school indicating successful completion of program in English/French (in Canada or abroad) — NOT just one course</td></tr>
+            <tr><td><strong>4. Government program</strong></td><td>Certificate showing CLB 4 in speaking/listening from LINC (Language Instruction for Newcomers) or CLIC (Cours de Langue pour Immigrants au Canada)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">📖</div>
+        <h4>Citizenship Test & Application Process</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Citizenship Test (Ages 18–54)</span>
+        <ul class="chk">
+          <li>Based on study guide: <em>Discover Canada — The Rights and Responsibilities of Citizenship</em></li>
+          <li>20 multiple choice questions</li>
+          <li>30 minutes to complete</li>
+          <li>Must correctly answer <strong>15 out of 20</strong> (75%)</li>
+          <li>On test date: present ID, short interview about life in Canada (job, residence, etc.)</li>
+        </ul>
+        
+        <span class="lbl">Application Process Flow</span>
+        <div class="flow">
+          <span class="fs">1. Submit Application<br><small>CPC-Sydney, NS<br>Fee: $649.75</small></span>
+          <span class="fa">→</span>
+          <span class="fs">2. Completeness Check<br><small>If incomplete: returned<br>If complete: AOR sent</small></span>
+          <span class="fa">→</span>
+          <span class="fs">3. Transfer to Local Office<br><small>Notice to appear for test</small></span>
+          <span class="fa">→</span>
+          <span class="fs">4. Test & Interview<br><small>Pass: Oath ceremony<br>Fail: 2nd test or hearing</small></span>
+          <span class="fa">→</span>
+          <span class="fs">5. Oath of Citizenship<br><small>Certificate issued</small></span>
+        </div>
+        <div class="box bd">⚠️ If one family member's application is incomplete, applications for <strong>entire family</strong> are returned.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 2 ═══════════════════════════ -->
+<div class="sec" id="m2">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="2" style="background:linear-gradient(130deg,#0d2817 0%,#1d6b3e 100%)">
+    <div class="mtag">Module 2</div>
+    <h2>Grants, Waivers & Special Cases</h2>
+    <div class="sub">Adoptions, minors (s.5(1) vs s.5(2)), special grants, CAF fast-track, waivers, Indigenous applicants</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">👨‍👩‍👧</div>
+        <h4>Citizenship for Adopted Children — s.5.1(1)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Six Requirements for Adopted Children</span>
+        <ul class="chk">
+          <li>Full adoption for child <strong>under 18 years of age</strong></li>
+          <li>At least one adoptive parent is a <strong>Canadian citizen</strong></li>
+          <li>Adoption must be in the <strong>best interests of the child</strong></li>
+          <li>Adoption must be <strong>valid in the country where it took place</strong></li>
+          <li>Must create a <strong>parent-child relationship in law and in fact</strong></li>
+          <li>Cannot be a <strong>relationship of convenience</strong> for immigration/citizenship purposes</li>
+        </ul>
+        
+        <span class="lbl">Adoption of Convenience (Red Flag)</span>
+        <div class="box bd">⚠️ Exists when Canadians adopt a child of their relatives outside Canada solely to assist child's admission to Canada. Legal, emotional, financial ties with biological parents have NOT ceased and adoptive couple has NOT established genuine parent-child relationship.</div>
+        
+        <span class="lbl">Two Routes for Adopted Children</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Direct Route</h5>
+            <ul><li>Directly apply for citizenship certificate</li><li>⚠️ Limited ability to pass citizenship to own children born abroad (unless other parent born/naturalized in Canada)</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Regular Route (Recommended)</h5>
+            <ul><li>Sponsored by adoptive parents → become PR → apply for citizenship</li><li>✅ Can pass citizenship to children born abroad + apply for direct grant for adopted children</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">👶</div>
+        <h4>Minors — s.5(1) vs s.5(2) Applications</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Criteria</th><th>s.5(2) — With Parent</th><th>s.5(1) — Minors Standalone</th></tr></thead>
+          <tbody>
+            <tr><td>Form</td><td>Form 5(2)</td><td>Form 5(1) minors</td></tr>
+            <tr><td>Fee</td><td>$100</td><td>$100</td></tr>
+            <tr><td>Must be PR</td><td><span class="yes">YES</span></td><td><span class="yes">YES</span></td></tr>
+            <tr><td>Language/knowledge requirements</td><td><span class="no">NO</span></td><td><span class="no">NO</span></td></tr>
+            <tr><td>Physical presence (3 of 5 years)</td><td><span class="no">NO</span></td><td><span class="yes">YES</span></td></tr>
+            <tr><td>Filed income tax (if required)</td><td><span class="no">NO</span></td><td><span class="yes">YES</span></td></tr>
+            <tr><td>Oath requirement (if 14+)</td><td><span class="yes">YES</span></td><td><span class="yes">YES</span></td></tr>
+            <tr><td>Signature</td><td>Parent/guardian + minor (if 14+) must sign</td><td>Person with custody/empowered to act + minor (if 14+)</td></tr>
+            <tr><td>Residency waiver available?</td><td>N/A (not required)</td><td><span class="yes">YES (Minister discretion)</span></td></tr>
+          </tbody>
+        </table></div>
+        <span class="lbl">s.5(2) Eligibility — Minors Applying WITH Parent</span>
+        <div class="pills">
+          <span class="pill pg">Applying at same time as parent who is applying for citizenship (concurrent)</span>
+          <span class="pill pg">OR already have living parent (natural/adoptive) who is Canadian citizen (non-concurrent)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🎖️</div>
+        <h4>Special Cases — Exceptions to Residency</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Three Categories Exempt from Physical Presence Requirement</span>
+        <ul class="chk">
+          <li><strong>A.</strong> PR employed with <strong>Canadian Armed Forces</strong>, federal public administration, or public service of province/territory</li>
+          <li><strong>B.</strong> Applicant outside Canada accompanying Canadian citizen/PR <strong>spouse/common-law partner/parent</strong> employed with CAF, federal public admin, or provincial/territorial public service</li>
+          <li><strong>C.</strong> Minor child (under 18) who is PR applying with a PR parent (child does NOT need to meet residency)</li>
+        </ul>
+        
+        <span class="lbl">Fast-Track — Canadian Armed Forces (2014/2015 Amendments)</span>
+        <div class="box bi">Expedited access to citizenship for persons serving or who have served in/with CAF.</div>
+        <div class="box bg">✅ <span class="ref">s.5(1.2)</span> and <span class="ref">s.5(1.3)</span> exempt physical presence requirement of s.5(1)(c) if applicant served in/with CAF for <strong>3 years (1,095 days)</strong> out of last <strong>6-year period</strong>. All other requirements apply (language, knowledge, prohibitions).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">✨</div>
+        <h4>Special Grants — s.5(4) & s.5(5)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">s.5(4) — Minister's Discretionary Special Grant</span>
+        <div class="box bp">Minister may grant citizenship at their discretion to any person to: (1) alleviate cases of <strong>statelessness</strong>, (2) alleviate <strong>special and unusual hardship</strong>, or (3) reward <strong>services of exceptional nature to Canada</strong>.</div>
+        <p style="margin:8px 0"><strong>Rare and exceptional grant.</strong> Examples where it may be considered:</p>
+        <div class="pills">
+          <span class="pill pp">UN official whose primary residence/family in Canada but must work abroad in conflict zones</span>
+          <span class="pill pp">Potential Olympic athlete who competes abroad and cannot meet residency</span>
+        </div>
+        
+        <span class="lbl">s.5(5) — Special Grants for Statelessness</span>
+        <div class="box bp">Applicable to those born outside Canada on/after April 17, 2009. Requirements:</div>
+        <ul class="chk">
+          <li>Born outside Canada on or after April 17, 2009</li>
+          <li>Birth parent was Canadian citizen at time of birth</li>
+          <li>Less than 23 years of age at time of application</li>
+          <li>Meet residence requirement</li>
+          <li>Have <strong>always been stateless</strong></li>
+          <li>NOT convicted of terrorism, treason, national security offences, war crimes, etc.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">🛡️</div>
+        <h4>Waivers — Language, Knowledge, Oath, Prohibitions, Financial</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Language/Knowledge Waivers — s.5(3)(a)</span>
+        <div class="box bw">Can be granted for language OR knowledge requirement due to: (1) <strong>medical condition</strong> (medical waiver) OR (2) <strong>compassionate grounds</strong> to alleviate special/unusual hardship (compassionate waiver).</div>
+        <div class="box bi">💡 <strong>Medical Waiver Documents:</strong> Completed Request for Medical Opinion form [CIT 0547], medical opinion by physician, all supporting medical records/reports/evidence.</div>
+        
+        <span class="lbl">Officer Considerations for Waivers</span>
+        <ul class="chk">
+          <li>Age of applicant</li>
+          <li>Personal situation of applicant and family</li>
+          <li>Presence of other non-medical hardship factors</li>
+          <li>Past living conditions (how did person become PR? Protected person?)</li>
+          <li>Length of time applicant has been in Canada</li>
+        </ul>
+        
+        <span class="lbl">Oath Waiver — s.5(3)(c)</span>
+        <div class="box bt">Requirement to take Oath may be waived on compassionate grounds if applicant prevented from understanding significance by reason of <strong>mental disability</strong>. Must provide: (1) medical opinion form + documentation of mental disability, (2) evidence of identity of legal guardian applying on behalf of applicant.</div>
+        
+        <span class="lbl">Minors Waivers — s.5(3)(b)</span>
+        <div class="pills">
+          <span class="pill pg">Person with custody to submit application on behalf of minor</span>
+          <span class="pill pg">Residency (ONLY for minors — NO discretion for adults)</span>
+          <span class="pill pg">Oath requirement (minors 14–17) due to mental disability</span>
+        </div>
+        
+        <span class="lbl">Prohibitions Waiver</span>
+        <div class="box bw">Waiver on compassionate grounds for prohibitions where applicant currently charged/on trial/subject to appeal for indictable offence <strong>outside Canada</strong>. Examples: unfounded charge, unlikely to ever receive trial due to foreign judicial process. <span class="ref">s.22(5)</span> allows Minister to waive s.22(4) permanent prohibitions for "acts against Canada's national interests" (terrorism, treason, etc.).</div>
+        
+        <span class="lbl">Financial Waiver (2019)</span>
+        <div class="box bg">✅ <em>Mayes and JFCY v. Minister</em> (consent order Jan 2019): Minister may waive citizenship processing fees to alleviate statelessness, special/unusual hardship, or reward exceptional services to Canada.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🪶</div>
+        <h4>Indigenous Applicants — Special Protocols</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt">Unique protocols for persons registered as Indian under <em>Indian Act</em> seeking Canadian citizenship.</div>
+        <span class="lbl">Key Points</span>
+        <ul class="chk">
+          <li>Registration under <em>Indian Act</em> requires certain number of grandparents registered</li>
+          <li>If member of First Nation → right to reside on reserve lands</li>
+          <li>Entitlement to enter/remain in Canada confirmed by <strong>IRPA s.19(1)</strong></li>
+          <li><strong>NO requirement to apply for PR</strong> — time in Canada while registered = time as PR</li>
+          <li>Residency period deemed to commence: (a) upon entering Canada (if already registered) OR (b) date became registered (if not registered when entered)</li>
+          <li>Any day lawfully in Canada <strong>prior to registration</strong> counts as <strong>½ day</strong> toward residency (if within assessment period)</li>
+        </ul>
+        <div class="box bg">✅ Process is same as for all PRs, except residency calculation accommodates time registered under <em>Indian Act</em>.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 3 ═══════════════════════════ -->
+<div class="sec" id="m3">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="3" style="background:linear-gradient(130deg,#5a0e0a 0%,#c41e3a 100%)">
+    <div class="mtag">Module 3</div>
+    <h2>Prohibitions, Investigations & Suspensions</h2>
+    <div class="sub">11 prohibitions, 4-year bars, foreign vs domestic criminality, investigations, suspensions, abandonment</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>11 Prohibitions Under the Citizenship Act</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Three Main Categories</span>
+        <div class="pills">
+          <span class="pill pr">Criminality in Canada</span>
+          <span class="pill pr">Foreign Criminality</span>
+          <span class="pill pr">Misrepresentation</span>
+        </div>
+        
+        <span class="lbl">Complete List of 11 Prohibitions</span>
+        <ul class="chk">
+          <li><strong>(1)</strong> Being in jail, on probation, or parole in Canada</li>
+          <li><strong>(2)</strong> Serving a sentence outside Canada</li>
+          <li><strong>(3)</strong> Charged/on trial for/subject of appeal for indictable offence in or outside Canada</li>
+          <li><strong>(4)</strong> In 4 years before application, convicted of indictable offence OR offence under Citizenship Act <strong>in Canada</strong></li>
+          <li><strong>(5)</strong> In 4 years before application, convicted of indictable offence <strong>outside Canada</strong></li>
+          <li><strong>(6)</strong> Being under a removal order</li>
+          <li><strong>(7)</strong> Subject of war crimes/crimes against humanity investigation or charge in Canada</li>
+          <li><strong>(8)</strong> Convicted of war crimes in Canada</li>
+          <li><strong>(9)</strong> Had citizenship refused for misrepresentation in past <strong>5 years</strong></li>
+          <li><strong>(10)</strong> Had citizenship revoked for false representation, fraud, or knowingly concealing material circumstances in past <strong>10 years</strong></li>
+          <li><strong>(11)</strong> As PR, convicted of terrorism, high treason, treason, spying offences OR served as member of armed forces of country engaged in armed conflict against Canada</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚖️</div>
+        <h4>Criminality in Canada — s.22(2)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">Conviction for <strong>indictable offence</strong> under Act of Parliament leads to <strong>4-year prohibition</strong> from applying for or being granted citizenship.</div>
+        
+        <span class="lbl">Two Key Distinctions from IRPA</span>
+        <div class="two">
+          <div class="mini">
+            <h5>A. When Prohibition Runs</h5>
+            <ul>
+              <li><strong>Citizenship Act:</strong> From date of <strong>conviction</strong></li>
+              <li><strong>IRPA:</strong> From <strong>completion of sentence</strong></li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>B. Hybrid Offences</h5>
+            <ul>
+              <li><strong>Citizenship Act:</strong> No deeming provision — Crown's election is dispositive</li>
+              <li><strong>IRPA:</strong> Hybrid = automatically indictable</li>
+            </ul>
+          </div>
+        </div>
+        <div class="casebox">
+          <div class="cn">Ahmed, 2009 FC 672</div>
+          Election of Crown prosecutor (whether to pursue as indictable or summary) is dispositive under Citizenship Act.
+        </div>
+        
+        <span class="lbl">Time NOT Counted Toward Residency — s.21(a)–(c)</span>
+        <div class="box bd">Cannot count any time spent under probation, on parole, or serving term of imprisonment.</div>
+        <div class="pills">
+          <span class="pill pg">Exception: Time on probation for conditional discharge</span>
+          <span class="pill pg">Exception: If pardon/record suspension granted</span>
+          <span class="pill pg">Exception: If convicted under Youth Criminal Justice Act (or previous Young Offenders Act)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">🌍</div>
+        <h4>Foreign Criminality</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Foreign Charge — s.22(1)(b.1)</span>
+        <div class="box bw">Prohibited from citizenship while ongoing charge, trial, or appeal for foreign offence that could be equivalent of <strong>indictable offence</strong> under Act of Parliament.</div>
+        <div class="box bg">✅ <strong>Discretionary waiver by Minister is possible</strong> (e.g., unfounded charge abroad, unlikely to receive trial due to foreign judicial process).</div>
+        
+        <span class="lbl">Foreign Conviction — s.22(3)</span>
+        <div class="box bd">Conviction for foreign offence that could be equivalent of indictable offence under Act of Parliament leads to <strong>4-year prohibition</strong> to being granted citizenship. Also prohibited while serving sentence abroad for such offence (s.19(1)(a.1)).</div>
+        <ul class="chk">
+          <li>Recall equivalency analysis under IRPA s.36(1)(b), (2)(b) [Hill approach]</li>
+          <li>Unlike domestic criminality, does NOT matter how prosecutor treated charge abroad or how it may have been treated in Canada</li>
+        </ul>
+        <div class="box bd">⚠️ <strong>No discretion or H&C waiver possible</strong> for foreign conviction prohibition.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📄</div>
+        <h4>Misrepresentation — s.22(1)(e.1)(e.2)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp">Prohibited from citizenship for <strong>5 years</strong> if person directly or indirectly misrepresents or withholds material circumstances relating to relevant matter, which induces or <strong>could induce</strong> an error in administration of Act.</div>
+        
+        <span class="lbl">Key Principles (Contrast with Revocation)</span>
+        <ul class="chk">
+          <li><strong>No mens rea</strong> or intent required (unlike revocation cases)</li>
+          <li>Sufficient if <strong>could induce</strong> an error (doesn't need to actually induce error)</li>
+          <li><strong>Indirect</strong> misrepresentation counts</li>
+          <li><strong>Withholding or omitting</strong> material circumstances counts</li>
+        </ul>
+        
+        <span class="lbl">How This Differs from IRPA</span>
+        <div class="tw"><table>
+          <thead><tr><th>Provision</th><th>Duration</th><th>Mens Rea Required?</th></tr></thead>
+          <tbody>
+            <tr><td>Citizenship Act s.22 (prohibition)</td><td>5 years</td><td><span class="no">NO</span></td></tr>
+            <tr><td>IRPA s.40 (inadmissibility)</td><td>5 years</td><td><span class="no">NO</span></td></tr>
+            <tr><td>Citizenship Act s.10 (revocation)</td><td>10 years</td><td><span class="yes">YES</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🔍</div>
+        <h4>Investigations — s.23.1</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">Minister may require applicant to provide any additional information or evidence relevant to their application and require applicant to appear <strong>in person or by telecommunication</strong> to be examined before Minister (citizenship official) or citizenship judge.</div>
+        <div class="box bw">⚠️ Counsel should caution clients of consequences — statements made can be used against them.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">⏸️</div>
+        <h4>Suspensions — s.13.1</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt">Minister may suspend processing of application for <strong>as long as necessary</strong> to receive any information or evidence or results of any investigation/inquiry for purpose of ascertaining whether applicant meets requirements or should be subject to admissibility hearing or removal order under IRPA.</div>
+        <div class="box bw">💡 Significant latitude for Minister to suspend applications pending investigations. No fixed timeline.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">📭</div>
+        <h4>Abandonment</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">Application can be treated as <strong>abandoned</strong> when applicant does NOT comply with s.23.1 by failing to provide requested documentation/information or to attend event when requested.</div>
+        
+        <span class="lbl">Abandonment Process</span>
+        <ul class="chk">
+          <li>30 days to provide response</li>
+          <li>2 notices may be sent with additional 30 days provided</li>
+          <li><strong>Reasonable explanation</strong> for inability to comply is required</li>
+        </ul>
+        
+        <span class="lbl">Controversial Policy — Zhao (2016 FC 207), Kamel (2017 FC 946)</span>
+        <div class="box bw">Cases litigated Minister's authority to declare abandonment and what constitutes "reasonable explanation."</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>Federal Court Options</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Judicial Review</span>
+        <div class="box bp">Available if application is refused, declared abandoned, or negative decision made (e.g., denying medical/compassionate waiver). Must apply within <strong>30 days</strong>.</div>
+        
+        <span class="lbl">Mandamus Application</span>
+        <div class="box bt">Request to Federal Court to compel Minister to perform a duty owed. See <em>Gentile v. MCI</em>, 2020 FC 452.</div>
+        
+        <div class="box bw">⚠️ <strong>RCIC Role:</strong> RCICs can assist in preparing applications but should refer clients to lawyer for Federal Court litigation.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 4 ═══════════════════════════ -->
+<div class="sec" id="m4">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="4" style="background:linear-gradient(130deg,#2d0e3d 0%,#6d2e91 100%)">
+    <div class="mtag">Module 4</div>
+    <h2>Revocation, Renunciation & Resumption</h2>
+    <div class="sub">Revocation grounds (false rep, fraud, concealment), mens rea, procedural rights, renunciation, resumption</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>Revocation — Three Grounds Under s.10(1)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="pills">
+          <span class="pill pp">False representation</span>
+          <span class="pill pp">Fraud</span>
+          <span class="pill pp">Knowingly concealing material circumstances</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📊</div>
+        <h4>Revocation — Burden of Proof & Elements</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Burden of Proof</span>
+        <div class="box bp">Minister's burden to establish required elements on <strong>balance of probabilities</strong> (<em>Canada (MCI) v. Halindintwali</em>, 2015 FC 390 at para.32).</div>
+        <div class="box bi">💡 Balance of probabilities standard satisfied if evidence establishes it is <strong>more probable than not</strong> that something occurred (<em>Rogan v. Canada (MCI)</em>, 2011 FC 1007 at paras.27–29).</div>
+        
+        <span class="lbl">Materiality</span>
+        <div class="box bp">Misrepresentation of material fact includes: (1) an <strong>untruth</strong>, (2) <strong>withholding</strong> of truthful information, or (3) <strong>misleading answer</strong> which has effect of foreclosing or averting further inquiries (<em>Canada v. Brooks</em>, 1973 CanLII 5 (SCC) at 873).</div>
+        <p style="margin:8px 0">Includes material <strong>omissions</strong> where there is duty of candour and providing intentionally misleading answers.</p>
+        <div class="box bt">Material character of concealed facts depends on "significance for purposes of decision in question of information not disclosed" (<em>Odynsky</em>, 2001 FCT 138 at para.156).</div>
+        
+        <span class="lbl">Mens Rea (Intent) — KEY DIFFERENCE from Prohibition</span>
+        <div class="box bd">⚠️ Minister must establish individual acted <strong>intentionally</strong> by deliberately concealing material circumstances or making false representations with <strong>intent to mislead</strong> decision maker (<em>Canada (MCI) v. Savic</em>, 2014 FC 523 at paras.66–76).</div>
+        <div class="box bw">💡 This mens rea requirement <strong>differs from</strong> misrepresentation under s.22 of Citizenship Act or s.40 of IRPA, which do NOT require intent to mislead and encompass even unintentional, inadvertent, or indirect misrepresentations.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">⚖️</div>
+        <h4>Revocation — Procedural Rights (Hassouna, 2017 FC 473)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">According to <em>Hassouna</em>, procedurally fair revocation process requires:</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Core Procedural Rights</h5>
+            <ul>
+              <li>Oral hearing before Court OR fair opportunity before independent tribunal</li>
+              <li>Fair opportunity to state case and know case to be met</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Additional Requirements</h5>
+            <ul>
+              <li>Right to impartial and independent decision-maker</li>
+              <li>Consideration of personal interests or H&C factors</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📋</div>
+        <h4>Revocation Process — s.18</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="flow">
+          <span class="fs">1. "Request for Information"<br><small>(Fishing expedition)</small></span>
+          <span class="fa">→</span>
+          <span class="fs">2. Notice of Intent to Revoke<br><small>s.10(3)</small></span>
+          <span class="fa">→</span>
+          <span class="fs">3. Two Options<br><small>Choose one:</small></span>
+        </div>
+        <div class="two">
+          <div class="mini">
+            <h5>Option A — Minister Decides</h5>
+            <ul>
+              <li>Request Minister make final decision</li>
+              <li>Taking personal circumstances into consideration (H&C grounds)</li>
+              <li>s.10(3.1)</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Option B — Federal Court Hearing</h5>
+            <ul>
+              <li>Full hearing before Federal Court</li>
+              <li>On merits of allegation</li>
+              <li>s.10.1(1)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚠️</div>
+        <h4>Revocation — Consequences</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Situation</th><th>Status After Revocation</th><th>Waiting Period</th></tr></thead>
+          <tbody>
+            <tr><td>If entry was based on misrepresentation</td><td>Revert to <strong>foreign national</strong> status</td><td>10 years</td></tr>
+            <tr><td>If entry was lawful but citizenship based on misrep</td><td>Lose citizenship, revert to <strong>PR status</strong></td><td>10 years</td></tr>
+            <tr><td>If citizenship is revoked (any reason)</td><td>Varies (FN or PR depending on above)</td><td><strong>10-year wait</strong> to reapply for citizenship</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">👶</div>
+        <h4>Changing Legal Landscape — Children & Revocation</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">⚠️ Under s.10 of Citizenship Act and <em>Zakaria</em>, 2014 FC 864: A child may be vulnerable to <strong>revocation of citizenship</strong> for misrepresentations or omissions made by their <strong>parents</strong> many years in the past when the family obtained citizenship.</div>
+        <p style="margin:8px 0">This is true regardless of:</p>
+        <ul class="chk">
+          <li>How many years ago it occurred</li>
+          <li>Whether the child had any personal culpability</li>
+          <li>Whether the child had intention to mislead</li>
+        </ul>
+        <div class="box bw">💡 This area of law is evolving and may be subject to Charter challenges in the future.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">🔄</div>
+        <h4>Renunciation of Citizenship — s.9</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg">A person may give up citizenship if they are:</div>
+        <ul class="chk">
+          <li><strong>(a)</strong> Citizen of another country</li>
+          <li><strong>(b)</strong> NOT subject of declaration by Governor in Council under s.20 (security/organized criminality)</li>
+          <li><strong>(c)</strong> NOT a minor</li>
+          <li><strong>(d)</strong> NOT having mental disability that prevents understanding significance of renunciation</li>
+          <li><strong>(e)</strong> Does NOT reside in Canada</li>
+        </ul>
+        <div class="box bg">✅ Waiver on H&C grounds for (d) and (e) is possible.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">↩️</div>
+        <h4>Resumption of Citizenship — s.11</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt">Person may resume citizenship if they meet ALL requirements:</div>
+        <ul class="chk">
+          <li>Submit an application</li>
+          <li>Were NOT subject of order under s.10 (citizenship was not revoked)</li>
+          <li>NOT subject to declaration under s.20 (security declaration)</li>
+          <li>NOT prohibited</li>
+          <li>NOT under removal order</li>
+          <li>Have become <strong>permanent resident</strong> after ceasing to be Canadian citizen (no unfulfilled conditions)</li>
+          <li>Physically present in Canada as PR for at least <strong>365 days during 2 years</strong> immediately before application</li>
+          <li>Met applicable Income Tax Act requirement to file return for taxation year immediately before application year</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚖️</div>
+        <h4>Citizenship Offences — s.29–31</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="pills">
+          <span class="pill pr">False representation, fraud, or knowingly concealing material circumstances</span>
+          <span class="pill pr">Use or allow fraudulent use of Canadian citizenship certificate</span>
+        </div>
+        <div class="box bd"><strong>Punishment:</strong> Maximum fines of <strong>$100,000</strong> and jail of up to <strong>5 years</strong>.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">👥</div>
+        <h4>Who Decides? — Decision Makers</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Decision Maker</th><th>Jurisdiction</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Citizenship Judge</strong></td><td>• Cases referred by citizenship officer for final determination<br>• Presides over citizenship ceremonies<br>• Administers Oath of Citizenship</td></tr>
+            <tr><td><strong>Citizenship Officer / Minister's Delegate</strong></td><td>• Knowledge and language requirements<br>• Waivers (medical, compassionate, financial)<br>• Applicability of prohibitions<br>• Investigations, suspensions, abandonment, withdrawal<br>• Renunciation, resumption<br>• Special grants (s.5(4))<br>• Revocations (if individual opted for Minister to decide with H&C consideration)</td></tr>
+            <tr><td><strong>Federal Court</strong></td><td>• Revocations (default entitlement to full hearing on merits if individual has NOT opted for Minister)<br>• Judicial review of any determination (if filed within 30 days)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ QUICK REF ═══════════════════════════ -->
+<div class="sec" id="qr">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="" style="background:linear-gradient(130deg,#1a1f2e 0%,#2a344a 100%)">
+    <div class="mtag">All Modules</div>
+    <h2>📊 Master Quick Reference</h2>
+    <div class="sub">All key comparisons, formulas, and checklists at a glance</div>
+  </div>
+
+  <div style="display:grid;gap:16px">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🍁</div>
+        <h4>Three Ways to Acquire Citizenship — At a Glance</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Method</th><th>Latin Name</th><th>Requirements</th><th>Exceptions/Notes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Birth in Canada</strong></td><td>Jus Soli (law of soil)</td><td>Automatic citizenship</td><td>Exception: children of foreign diplomats</td></tr>
+            <tr><td><strong>Birth to Canadian abroad</strong></td><td>Jus Sanguinis (law of blood)</td><td>Parent was born in Canada OR naturalized</td><td>Second generation cut-off (unless substantial connection test met — 1,095 days)</td></tr>
+            <tr><td><strong>Naturalization</strong></td><td>Grant</td><td>Must be PR + meet all s.5(1) requirements</td><td>Different requirements for minors, adoptees, special grants</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light);color:var(--gold)">📐</div>
+        <h4>Grant Requirements Checklist — s.5(1) Adults</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <ul class="chk">
+          <li>✓ Min. 18 years of age</li>
+          <li>✓ Permanent resident</li>
+          <li>✓ <strong>1,095 days</strong> physical presence in last <strong>5 years</strong></li>
+          <li>✓ Income tax filed for <strong>3 of 5 years</strong> (if required)</li>
+          <li>✓ Time as TR/protected person counts as ½ day (max 365 days credit)</li>
+          <li>✓ Language: CLB 4 in speaking & listening (ages 18–54)</li>
+          <li>✓ Knowledge test: 15/20 questions in 30 min (ages 18–54)</li>
+          <li>✓ NOT under removal order or prohibitions</li>
+        </ul>
+        <div class="formula">KEY FORMULA: 1,095 days ÷ 5 years = ~3 years physical presence</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">👶</div>
+        <h4>Minors — s.5(1) vs s.5(2) Full Comparison</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Criteria</th><th>s.5(2) With Parent</th><th>s.5(1) Standalone</th></tr></thead>
+          <tbody>
+            <tr><td>Form</td><td>Form 5(2)</td><td>Form 5(1) minors</td></tr>
+            <tr><td>Fee</td><td>$100</td><td>$100</td></tr>
+            <tr><td>PR required?</td><td><span class="yes">YES</span></td><td><span class="yes">YES</span></td></tr>
+            <tr><td>Physical presence?</td><td><span class="no">NO</span></td><td><span class="yes">YES (3 of 5 yrs)</span></td></tr>
+            <tr><td>Language/knowledge?</td><td><span class="no">NO</span></td><td><span class="no">NO</span></td></tr>
+            <tr><td>Tax filing?</td><td><span class="no">NO</span></td><td><span class="yes">YES (if required)</span></td></tr>
+            <tr><td>Oath (if 14+)?</td><td><span class="yes">YES</span></td><td><span class="yes">YES</span></td></tr>
+            <tr><td>Signature</td><td>Parent/guardian + minor (14+)</td><td>Custody/empowered person + minor (14+)</td></tr>
+            <tr><td>Residency waiver?</td><td>N/A</td><td><span class="yes">YES (Minister)</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>11 Prohibitions — Summary Table</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>#</th><th>Prohibition</th><th>Duration</th><th>Waiver?</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>In jail, on probation, or parole in Canada</td><td>During period</td><td>No</td></tr>
+            <tr><td>2</td><td>Serving sentence outside Canada</td><td>During period</td><td>No</td></tr>
+            <tr><td>3</td><td>Charged/trial/appeal for indictable offence</td><td>During period</td><td>Yes (foreign only)</td></tr>
+            <tr><td>4</td><td>Convicted of indictable offence in Canada</td><td>4 years from conviction</td><td>No</td></tr>
+            <tr><td>5</td><td>Convicted of indictable offence outside Canada</td><td>4 years from conviction</td><td>No</td></tr>
+            <tr><td>6</td><td>Under removal order</td><td>Until order executed/set aside</td><td>No</td></tr>
+            <tr><td>7</td><td>War crimes investigation/charge</td><td>During investigation</td><td>No</td></tr>
+            <tr><td>8</td><td>Convicted of war crimes</td><td>Permanent</td><td>No</td></tr>
+            <tr><td>9</td><td>Citizenship refused for misrep</td><td>5 years</td><td>No</td></tr>
+            <tr><td>10</td><td>Citizenship revoked for false rep/fraud</td><td>10 years</td><td>No</td></tr>
+            <tr><td>11</td><td>Terrorism/treason/spying conviction as PR</td><td>Permanent</td><td>Yes (s.22(5))</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">⚖️</div>
+        <h4>Prohibition vs Revocation — Key Distinctions</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Aspect</th><th>Prohibition (s.22)</th><th>Revocation (s.10)</th></tr></thead>
+          <tbody>
+            <tr><td>When applies</td><td>Prevents obtaining/applying for citizenship</td><td>Removes citizenship already obtained</td></tr>
+            <tr><td>Duration (misrep)</td><td>5 years</td><td>10 years</td></tr>
+            <tr><td>Mens rea required?</td><td><span class="no">NO</span> — no intent needed</td><td><span class="yes">YES</span> — must prove intent to mislead</td></tr>
+            <tr><td>"Could induce" enough?</td><td><span class="yes">YES</span></td><td><span class="no">NO</span> — actual inducement needed</td></tr>
+            <tr><td>Burden of proof</td><td>Balance of probabilities</td><td>Balance of probabilities</td></tr>
+            <tr><td>Procedural rights</td><td>Standard admin fairness</td><td>Enhanced (Hassouna): hearing, H&C consideration</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🛡️</div>
+        <h4>Waivers — Complete Summary</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Waiver Type</th><th>Section</th><th>Grounds</th><th>Documents Required</th></tr></thead>
+          <tbody>
+            <tr><td>Language/Knowledge</td><td>s.5(3)(a)</td><td>Medical condition OR compassionate</td><td>CIT 0547 form, medical opinion, supporting records</td></tr>
+            <tr><td>Oath</td><td>s.5(3)(c)</td><td>Mental disability preventing understanding</td><td>Medical opinion, legal guardian ID</td></tr>
+            <tr><td>Minors — Residency</td><td>s.5(3)(b)</td><td>Compassionate</td><td>Varies by circumstance</td></tr>
+            <tr><td>Minors — Custody signature</td><td>s.5(3)(b)(v)</td><td>Compassionate</td><td>Varies</td></tr>
+            <tr><td>Minors — Oath (14-17)</td><td>s.5(3)(b)</td><td>Mental disability</td><td>Medical documentation</td></tr>
+            <tr><td>Prohibitions (foreign charge)</td><td>Discretionary</td><td>Unfounded charge, no trial expected</td><td>Evidence of foreign proceedings</td></tr>
+            <tr><td>Prohibitions (s.22(4))</td><td>s.22(5)</td><td>Compassionate (terrorism/treason)</td><td>Varies</td></tr>
+            <tr><td>Financial (fees)</td><td>Mayes 2019</td><td>Statelessness, hardship, exceptional service</td><td>Evidence of circumstances</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">📅</div>
+        <h4>Key Timelines & Waiting Periods</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Situation</th><th>Timeline / Period</th></tr></thead>
+          <tbody>
+            <tr><td>Physical presence requirement</td><td>1,095 days in last 5 years</td></tr>
+            <tr><td>Tax filing requirement</td><td>3 of last 5 years</td></tr>
+            <tr><td>TR/protected person credit</td><td>Each day = ½ day (max 365 days)</td></tr>
+            <tr><td>CAF fast-track service</td><td>1,095 days in last 6 years</td></tr>
+            <tr><td>Substantial connection test (2nd gen abroad)</td><td>1,095 days before child's birth</td></tr>
+            <tr><td>Prohibition — domestic conviction</td><td>4 years from conviction date</td></tr>
+            <tr><td>Prohibition — foreign conviction</td><td>4 years from conviction date</td></tr>
+            <tr><td>Prohibition — citizenship refused (misrep)</td><td>5 years</td></tr>
+            <tr><td>Prohibition — citizenship revoked</td><td>10 years</td></tr>
+            <tr><td>Resumption — physical presence as PR</td><td>365 days in last 2 years</td></tr>
+            <tr><td>JR or mandamus application to Federal Court</td><td>30 days from decision</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+function show(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const map={ov:0,m1:1,m2:2,m3:3,m4:4,qr:5};
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  const btns=document.querySelectorAll('.nb');
+  if(btns[map[id]])btns[map[id]].classList.add('on');
+  window.scrollTo({top:62,behavior:'smooth'});
+}
+function tog(h){
+  h.classList.toggle('on');
+  h.nextElementSibling.classList.toggle('on');
+}
+function srch(q){
+  if(q.length<2)return;
+  const lo=q.toLowerCase();
+  const all=document.querySelectorAll('.cb,.mini,.casebox,.box');
+  for(let el of all){
+    if(el.textContent.toLowerCase().includes(lo)){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.style.outline='3px solid #d35f00';
+      setTimeout(()=>el.style.outline='',3800);
+      break;
+    }
+  }
+}
+document.querySelectorAll('.ch.on').forEach(h=>{
+  h.nextElementSibling.classList.add('on');
+});
+</script>
+</body>
+</html>

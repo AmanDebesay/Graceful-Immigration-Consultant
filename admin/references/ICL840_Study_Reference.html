@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICL 840 – Economic Immigration Study Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Mulish:wght@300;400;600;700&display=swap');
+
+:root {
+  --ink: #12202f;
+  --deep: #0b3d5e;
+  --blue: #1565a8;
+  --sky: #e6f2fb;
+  --teal: #0e7c7b;
+  --teal-light: #e2f5f5;
+  --gold: #c78a00;
+  --gold-light: #fef6e0;
+  --red: #b92d1a;
+  --red-light: #fdf1ef;
+  --green: #1a6b3c;
+  --green-light: #eaf5ef;
+  --purple: #5a2580;
+  --purple-light: #f2ebfb;
+  --border: #d6e6f4;
+  --muted: #5c7488;
+  --bg: #f4f8fc;
+  --white: #fff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Mulish',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.65}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#07253d 0%,#0b3d5e 55%,#1565a8 100%);padding:40px 24px 30px;overflow:hidden;position:relative}
+.hdr::after{content:'840';position:absolute;right:-10px;bottom:-30px;font-family:'Libre Baskerville',serif;font-size:14rem;color:rgba(255,255,255,0.04);font-weight:700;line-height:1;pointer-events:none}
+.hdr-in{max-width:1140px;margin:0 auto;position:relative}
+.hdr h1{font-family:'Libre Baskerville',serif;font-size:2.5rem;color:#fff;line-height:1.15}
+.hdr h1 span{color:#7ec9f8}
+.hdr p{color:#8fb8d8;font-size:.9rem;margin-top:6px}
+.hdr-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.htag{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#c8dfee;font-size:.73rem;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.04em}
+
+/* NAV */
+.nav{background:#07253d;border-top:1px solid rgba(255,255,255,.08);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:200;padding:0 20px}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;color:#7a9fb8;font-family:'Mulish',sans-serif;font-size:.78rem;font-weight:700;padding:12px 14px;cursor:pointer;white-space:nowrap;transition:color .2s;letter-spacing:.03em}
+.nb:hover{color:#fff}
+.nb.on{color:#7ec9f8;border-bottom-color:#7ec9f8}
+
+/* PAGE */
+.page{max-width:1140px;margin:0 auto;padding:26px 18px 72px}
+.sec{display:none}.sec.on{display:block}
+
+/* MODULE HEADER */
+.mh{border-radius:14px;padding:26px 28px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden}
+.mh::after{content:attr(data-n);position:absolute;right:16px;bottom:-20px;font-family:'Libre Baskerville',serif;font-size:9rem;color:rgba(255,255,255,.06);line-height:1;pointer-events:none;font-style:italic}
+.mtag{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.6);display:inline-block;margin-bottom:6px}
+.mh h2{font-family:'Libre Baskerville',serif;font-size:1.75rem;line-height:1.2}
+.mh .sub{color:rgba(255,255,255,.65);font-size:.87rem;margin-top:5px}
+
+/* CARDS */
+.grid{display:grid;gap:13px}
+.card{background:var(--white);border-radius:11px;border:1px solid var(--border);overflow:hidden}
+.ch{display:flex;align-items:center;gap:10px;padding:13px 17px;cursor:pointer;user-select:none;transition:background .15s;border-bottom:1px solid transparent}
+.ch:hover{background:var(--sky)}
+.ch.on{background:var(--sky);border-bottom-color:var(--border)}
+.ci{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.ch h4{flex:1;font-size:.93rem;font-weight:700;color:var(--deep)}
+.cv{color:var(--muted);font-size:.72rem;transition:transform .2s}
+.ch.on .cv{transform:rotate(180deg)}
+.cb{display:none;padding:18px}
+.cb.on{display:block}
+
+/* TYPOGRAPHY */
+.cb p,.cb li{font-size:.86rem;color:var(--ink)}
+.cb ul,.cb ol{padding-left:18px;margin:7px 0}
+.cb li{margin-bottom:4px}
+strong{color:var(--deep)}
+.lbl{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:13px 0 6px;display:block}
+
+/* BOXES */
+.box{border-radius:8px;padding:11px 15px;margin:9px 0;font-size:.84rem;line-height:1.55}
+.bi{background:var(--sky);border-left:4px solid var(--blue)}
+.bw{background:var(--gold-light);border-left:4px solid var(--gold)}
+.bd{background:var(--red-light);border-left:4px solid var(--red)}
+.bg{background:var(--green-light);border-left:4px solid var(--green)}
+.bt{background:var(--teal-light);border-left:4px solid var(--teal)}
+.bp{background:var(--purple-light);border-left:4px solid var(--purple)}
+
+/* GRIDS */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:9px 0}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:9px 0}
+@media(max-width:620px){.two,.three{grid-template-columns:1fr}}
+.mini{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.mini h5{font-size:.81rem;font-weight:700;color:var(--deep);margin-bottom:6px}
+.mini ul{list-style:none;padding:0}
+.mini ul li{font-size:.8rem;padding:2px 0 2px 14px;position:relative}
+.mini ul li::before{content:'›';position:absolute;left:0;color:var(--blue);font-weight:700}
+
+/* FLOW */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:9px 0}
+.fs{background:var(--sky);border:1px solid var(--border);border-radius:7px;padding:6px 13px;font-size:.79rem;font-weight:700;color:var(--deep);white-space:nowrap}
+.fa{color:var(--gold);font-size:1.1rem;font-weight:700}
+
+/* PILLS */
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0}
+.pill{border-radius:20px;padding:4px 11px;font-size:.77rem;font-weight:600;border:1px solid}
+.pb{background:var(--sky);border-color:#9ac8e8;color:#0d4475}
+.pg{background:var(--green-light);border-color:#7ecfa0;color:#0e4023}
+.pr{background:var(--red-light);border-color:#e8a09a;color:#6e1a11}
+.pt{background:var(--teal-light);border-color:#7ed4d3;color:#084b4a}
+.pp{background:var(--purple-light);border-color:#b89cd8;color:#3b1557}
+.pgo{background:var(--gold-light);border-color:#e8c06a;color:#6b4400}
+
+/* TABLE */
+.tw{overflow-x:auto;margin:9px 0}
+table{width:100%;border-collapse:collapse;font-size:.81rem}
+thead th{background:var(--deep);color:#fff;padding:9px 11px;text-align:left;font-weight:700;font-size:.77rem;letter-spacing:.03em}
+tbody tr:nth-child(even){background:var(--sky)}
+tbody td{padding:8px 11px;border-bottom:1px solid var(--border);vertical-align:top}
+
+/* CHECKLIST */
+.chk{list-style:none;padding:0}
+.chk li{font-size:.86rem;padding:6px 0 6px 26px;position:relative;border-bottom:1px dashed var(--border)}
+.chk li:last-child{border:none}
+.chk li::before{content:'□';position:absolute;left:0;color:var(--blue);font-size:.95rem}
+
+/* QUOTE / CASE */
+.qt{border-left:3px solid var(--gold);background:var(--gold-light);border-radius:0 7px 7px 0;padding:10px 14px;font-size:.84rem;font-style:italic;color:#4a3200;margin:9px 0}
+.qt cite{font-style:normal;font-size:.74rem;color:var(--muted);display:block;margin-top:3px}
+.casebox{background:var(--purple-light);border:1px solid #c8a8e8;border-radius:8px;padding:11px 14px;margin:8px 0;font-size:.84rem}
+.casebox .cn{font-weight:700;color:var(--purple);font-size:.85rem;margin-bottom:4px}
+
+/* OV GRID */
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px;margin-bottom:22px}
+.oc{background:var(--white);border:1px solid var(--border);border-radius:11px;padding:18px;cursor:pointer;transition:transform .2s,box-shadow .2s;border-left:5px solid}
+.oc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(11,61,94,.1)}
+.oc .mn{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.oc h3{font-family:'Libre Baskerville',serif;font-size:1rem;color:var(--deep);margin:4px 0 7px}
+.oc p{font-size:.8rem;color:var(--muted)}
+
+/* BACK */
+.back{background:none;border:1px solid var(--border);border-radius:7px;padding:5px 13px;font-size:.8rem;font-family:'Mulish',sans-serif;color:var(--muted);cursor:pointer;margin-bottom:16px;transition:all .2s}
+.back:hover{background:var(--sky);color:var(--deep)}
+
+/* SEARCH */
+.srch{margin-bottom:18px}
+.srch input{width:100%;padding:10px 17px;border:1px solid var(--border);border-radius:9px;font-family:'Mulish',sans-serif;font-size:.9rem;background:var(--white);color:var(--ink);outline:none}
+.srch input:focus{border-color:var(--blue)}
+
+/* SCORE BOX */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:10px 0}
+.score-item{background:var(--sky);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
+.score-item .sv{font-family:'Libre Baskerville',serif;font-size:1.6rem;font-weight:700;color:var(--blue)}
+.score-item .sl{font-size:.74rem;color:var(--muted);margin-top:2px}
+
+.yes{display:inline-block;background:var(--green-light);color:var(--green);border:1px solid #7ecfa0;border-radius:4px;padding:1px 7px;font-size:.76rem;font-weight:700}
+.no{display:inline-block;background:var(--red-light);color:var(--red);border:1px solid #e8a09a;border-radius:4px;padding:1px 7px;font-size:.76rem;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <h1>ICL 840 — <span>Economic Immigration</span></h1>
+    <p>Complete Study Reference · All 6 Modules · Queen's University GDipICL</p>
+    <div class="hdr-tags">
+      <span class="htag">⚖️ IRPA / IRPR</span>
+      <span class="htag">🏆 Express Entry</span>
+      <span class="htag">📊 CRS / Points</span>
+      <span class="htag">🎓 FSW / CEC / FST</span>
+      <span class="htag">🗺️ PNP / Quebec / AIP</span>
+      <span class="htag">💼 Business Immigration</span>
+      <span class="htag">📋 NOC / CLB / ECA</span>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on" onclick="show('ov')">🏠 Overview</button>
+  <button class="nb" onclick="show('m1')">M1 Intro</button>
+  <button class="nb" onclick="show('m2')">M2 Cross-Program Tools</button>
+  <button class="nb" onclick="show('m3')">M3 Express Entry</button>
+  <button class="nb" onclick="show('m4')">M4 Skilled Categories</button>
+  <button class="nb" onclick="show('m5')">M5 PNP / Quebec / AIP</button>
+  <button class="nb" onclick="show('m6')">M6 Business Immigration</button>
+  <button class="nb" onclick="show('qr')">📊 Quick Ref</button>
+</div>
+
+<div class="page">
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<div class="sec on" id="ov">
+  <div class="srch"><input type="text" placeholder="🔍  Search any concept, case, regulation, or acronym…" oninput="srch(this.value)"></div>
+  <p style="font-size:.87rem;color:var(--muted);margin-bottom:16px">Click any module card to explore its full content in detail.</p>
+  <div class="og">
+    <div class="oc" onclick="show('m1')" style="border-left-color:#1565a8">
+      <div class="mn">Module 1</div>
+      <h3>Introduction to Economic Immigration</h3>
+      <p>IRPA objectives, economic class overview, FSW/FST/CEC basics, Express Entry intro, statutory trail.</p>
+    </div>
+    <div class="oc" onclick="show('m2')" style="border-left-color:#0e7c7b">
+      <div class="mn">Module 2</div>
+      <h3>Cross-Program Tools</h3>
+      <p>NOC 2021 (TEER), CLBs, ECA, employment reference letters, medical exams, police certs, biometrics.</p>
+    </div>
+    <div class="oc" onclick="show('m3')" style="border-left-color:#c78a00">
+      <div class="mn">Module 3</div>
+      <h3>Express Entry Deep Dive</h3>
+      <p>CRS calculation, MI framework, ITA rules, arranged employment, A11.2 assessment, key cases.</p>
+    </div>
+    <div class="oc" onclick="show('m4')" style="border-left-color:#5a2580">
+      <div class="mn">Module 4</div>
+      <h3>Skilled Immigration Categories</h3>
+      <p>CEC vs FSW vs FST in depth, settlement funds, substituted evaluation, PFL responses, standard of review.</p>
+    </div>
+    <div class="oc" onclick="show('m5')" style="border-left-color:#1a6b3c">
+      <div class="mn">Module 5</div>
+      <h3>PNP / Quebec / AIP</h3>
+      <p>Provincial Nominee Program, Quebec Skilled Workers, Atlantic Immigration Program, shared jurisdiction.</p>
+    </div>
+    <div class="oc" onclick="show('m6')" style="border-left-color:#b92d1a">
+      <div class="mn">Module 6</div>
+      <h3>Business Immigration Programs</h3>
+      <p>Start-Up Visa, Self-Employed Persons, Manitoba Entrepreneur, Province of Choice programs.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--sky)">⚖️</div>
+      <h4>Master Legal Framework — Key IRPA/IRPR Provisions</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <div class="two">
+        <div class="mini">
+          <h5>IRPA — Core Sections</h5>
+          <ul>
+            <li><strong>s.3(1)</strong> — Objectives of Immigration Act</li>
+            <li><strong>s.3(3)</strong> — How Act must be construed</li>
+            <li><strong>s.12(2)</strong> — Economic class selection (ability to establish)</li>
+            <li><strong>s.10.1–10.4</strong> — Express Entry authority</li>
+            <li><strong>s.11.2</strong> — EE minimum entry criteria assessment</li>
+            <li><strong>s.14.1</strong> — Ministerial Instructions (temp programs)</li>
+            <li><strong>s.87.3</strong> — Ministerial Instructions (processing)</li>
+            <li><strong>s.38</strong> — Medical inadmissibility</li>
+            <li><strong>s.42</strong> — Family member inadmissibility</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>IRPR — Key Regulations</h5>
+          <ul>
+            <li><strong>R70–R75</strong> — FSW: admissibility & skilled worker definition</li>
+            <li><strong>R79</strong> — Language requirements / CLBs</li>
+            <li><strong>R86</strong> — Quebec skilled worker class</li>
+            <li><strong>R87.1–87.2</strong> — Provincial Nominee Class</li>
+            <li><strong>R88</strong> — Business immigration definitions</li>
+            <li><strong>R98.03</strong> — Start-Up Visa designated entities</li>
+            <li><strong>R204–205</strong> — IMP work permit categories</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Three Federal Economic Programs</h5>
+          <ul>
+            <li><strong>FSW</strong> — Federal Skilled Worker</li>
+            <li><strong>FST</strong> — Federal Skilled Trades</li>
+            <li><strong>CEC</strong> — Canadian Experience Class</li>
+            <li>+ PNPs via Express Entry (enhanced nominations)</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Key Acronyms</h5>
+          <ul>
+            <li><strong>EE</strong> — Express Entry</li>
+            <li><strong>CRS</strong> — Comprehensive Ranking System</li>
+            <li><strong>ITA</strong> — Invitation to Apply</li>
+            <li><strong>NOC</strong> — National Occupational Classification</li>
+            <li><strong>CLB</strong> — Canadian Language Benchmark</li>
+            <li><strong>ECA</strong> — Educational Credential Assessment</li>
+            <li><strong>PNP</strong> — Provincial Nominee Program</li>
+            <li><strong>AIP</strong> — Atlantic Immigration Program</li>
+            <li><strong>PFL</strong> — Procedural Fairness Letter</li>
+            <li><strong>SUV</strong> — Start-Up Visa</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 1 ═══════════════════════════ -->
+<div class="sec" id="m1">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="1" style="background:linear-gradient(130deg,#071e35 0%,#1565a8 100%)">
+    <div class="mtag">Module 1</div>
+    <h2>Introduction to Economic Immigration</h2>
+    <div class="sub">IRPA objectives, program overview, Express Entry intro, and the statutory trail</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🎯</div>
+        <h4>IRPA Objectives — Why Economic Immigration?</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">IRPA s.3(1) — Objectives of the Act (Selected)</span>
+        <ul class="chk">
+          <li><strong>s.3(1)(a)</strong> — Permit Canada to pursue maximum social, cultural and economic benefits of immigration</li>
+          <li><strong>s.3(1)(c)</strong> — Support development of a strong and prosperous Canadian economy, with benefits shared across all regions</li>
+          <li><strong>s.3(1)(e)</strong> — Promote successful integration of PRs into Canada (mutual obligations)</li>
+          <li><strong>s.3(1)(j)</strong> — Work with provinces to recognize foreign credentials and support rapid integration</li>
+        </ul>
+        <span class="lbl">IRPA s.3(3) — How the Act Must Be Applied</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Key Principles</h5>
+            <ul>
+              <li>Furthers domestic and international interests of Canada</li>
+              <li>Promotes accountability and transparency</li>
+              <li>Consistent with the Canadian Charter of Rights and Freedoms</li>
+              <li>Complies with international human rights instruments</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>IRPA s.12(2) — Economic Class</h5>
+            <ul><li>A foreign national may be selected as a member of the economic class on the basis of their ability to <strong>become economically established in Canada</strong></li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">📊</div>
+        <h4>The Three Federal Economic Programs — At a Glance</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Program</th><th>Key Requirement</th><th>Language</th><th>EE?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>FSW</strong> — Federal Skilled Worker</td><td>Min. 1 yr skilled work exp (TEER 0/1/2/3) in last 10 yrs; 67+ points grid</td><td>CLB 7+</td><td><span class="yes">YES</span></td></tr>
+            <tr><td><strong>FST</strong> — Federal Skilled Trades</td><td>2 yrs full-time trade exp in last 5 yrs; valid job offer OR certificate of qualification</td><td>CLB 4 (R/W) CLB 5 (L/S)</td><td><span class="yes">YES</span></td></tr>
+            <tr><td><strong>CEC</strong> — Canadian Experience Class</td><td>1 yr (1,560 hrs) skilled work in Canada in last 3 yrs; TEER 0/1/2/3</td><td>CLB 7 (TEER 0/1) CLB 5 (TEER 2/3)</td><td><span class="yes">YES</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="box bi">💡 <strong>Express Entry is NOT an immigration program.</strong> It is an online application management system that facilitates applications under FSW, CEC, FST, and some PNPs.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light)">🗺️</div>
+        <h4>Following the Statutory Trail — Legal Authority Structure</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <p>Every immigration decision must trace back to legal authority. The "statutory trail" means identifying the specific provision that authorizes a decision or requirement.</p>
+        <div class="flow">
+          <span class="fs">Constitution s.95<br><small>Federal + Provincial</small></span>
+          <span class="fa">→</span>
+          <span class="fs">IRPA<br><small>Primary legislation</small></span>
+          <span class="fa">→</span>
+          <span class="fs">IRPR<br><small>Detailed regulations</small></span>
+          <span class="fa">→</span>
+          <span class="fs">Ministerial Instructions<br><small>s.14.1 / s.87.3</small></span>
+          <span class="fa">→</span>
+          <span class="fs">Policy / Operational Instructions<br><small>PNP sites, IRCC guidelines</small></span>
+        </div>
+        <div class="box bw">📌 Example: Quebec Skilled Worker Class — IRPR R86(2): A foreign national is a member of the Quebec skilled worker class if they (a) intend to reside in Quebec; and (b) are named in a <em>Certificat de sélection du Québec</em>.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🌐</div>
+        <h4>Express Entry — How It Works</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="flow">
+          <span class="fs">1. Create EE Profile<br><small>Expression of Interest</small></span>
+          <span class="fa">→</span>
+          <span class="fs">2. CRS Score<br><small>Calculated automatically</small></span>
+          <span class="fa">→</span>
+          <span class="fs">3. Draw<br><small>IRCC invites top scorers</small></span>
+          <span class="fa">→</span>
+          <span class="fs">4. ITA<br><small>Invitation to Apply</small></span>
+          <span class="fa">→</span>
+          <span class="fs">5. Apply for PR<br><small>60 days to submit</small></span>
+        </div>
+        <div class="box bi">EE launched January 2015. Manages FSW, FST, CEC, and some PNPs. <strong>Note:</strong> Express Entry does NOT apply to those intending to live in Quebec.</div>
+        <span class="lbl">Timeline Milestones</span>
+        <div class="tw"><table>
+          <thead><tr><th>Year</th><th>Event</th></tr></thead>
+          <tbody>
+            <tr><td>Jan 2015</td><td>Express Entry launched</td></tr>
+            <tr><td>2021</td><td>Only CEC and PNP draws (COVID)</td></tr>
+            <tr><td>July 2022</td><td>Resumed all program draws</td></tr>
+            <tr><td>2023</td><td>Category-based selection introduced — increased ITA draw cutoffs</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 2 ═══════════════════════════ -->
+<div class="sec" id="m2">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="2" style="background:linear-gradient(130deg,#052b2b 0%,#0e7c7b 100%)">
+    <div class="mtag">Module 2</div>
+    <h2>Cross-Program Tools</h2>
+    <div class="sub">NOC, CLBs, ECA, employment letters, medical exams, police certs, biometrics</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light)">📋</div>
+        <h4>National Occupational Classification (NOC 2021)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">NOC 2021 replaced NOC 2016. The key change: TEER (Training, Education, Experience, and Responsibilities) categories replace old Skill Levels 0, A, B, C, D.</div>
+        <span class="lbl">TEER Categories — Second digit of the NOC code</span>
+        <div class="tw"><table>
+          <thead><tr><th>TEER</th><th>Description</th><th>Eligible for Economic PR?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>0</strong></td><td>Management occupations</td><td><span class="yes">YES</span></td></tr>
+            <tr><td><strong>1</strong></td><td>University degree typically required</td><td><span class="yes">YES</span></td></tr>
+            <tr><td><strong>2</strong></td><td>College diploma or apprenticeship (2+ yrs)</td><td><span class="yes">YES</span></td></tr>
+            <tr><td><strong>3</strong></td><td>College diploma or apprenticeship (&lt;2 yrs)</td><td><span class="yes">YES</span></td></tr>
+            <tr><td><strong>4</strong></td><td>High school diploma or on-job training</td><td><span class="no">NO (generally)</span></td></tr>
+            <tr><td><strong>5</strong></td><td>Short work demonstration or no formal education</td><td><span class="no">NO (generally)</span></td></tr>
+          </tbody>
+        </table></div>
+        <span class="lbl">IRPR R75 — Skilled Worker Definition (NOC)</span>
+        <div class="box bt">Under R75(2), a foreign national is a skilled worker if within the last 10 years they have: (a) accumulated 1 year full-time work in a TEER 0/1/2/3 occupation; (b) performed actions described in the <strong>lead statement</strong>; (c) performed a <strong>substantial number of main duties</strong>, including all essential duties.</div>
+        <span class="lbl">Key Cases on NOC</span>
+        <div class="casebox">
+          <div class="cn">Potla v. Canada — Lead Statements</div>
+          Officer can refuse if applicant doesn't meet the NOC lead statement. No duty to alert applicant to deficiencies before refusing <em>(no procedural fairness obligation for sufficiency issues)</em>.
+        </div>
+        <div class="casebox">
+          <div class="cn">Kumar v. Canada — "Substantial" Main Duties</div>
+          Officer must assess the "pith and substance" of work performed. Whether applicant performed a "substantial number of main duties" is a discretionary judgment call — court gives deference. <strong>Onus is on applicant to present sufficient evidence.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light)">🗣️</div>
+        <h4>Canadian Language Benchmarks (CLBs)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <p>IRPR R79(1) — A skilled worker must have language proficiency evaluated by a <strong>designated organization</strong> using an <strong>approved language test</strong>.</p>
+        <span class="lbl">Minimum CLB Requirements by Program</span>
+        <div class="tw"><table>
+          <thead><tr><th>Program</th><th>Skill Area</th><th>Min. CLB</th></tr></thead>
+          <tbody>
+            <tr><td>FSW</td><td>All four skills</td><td>CLB 7</td></tr>
+            <tr><td>FST</td><td>Speaking & Listening</td><td>CLB 5</td></tr>
+            <tr><td>FST</td><td>Reading & Writing</td><td>CLB 4</td></tr>
+            <tr><td>CEC (TEER 0 or 1)</td><td>All four skills</td><td>CLB 7</td></tr>
+            <tr><td>CEC (TEER 2 or 3)</td><td>All four skills</td><td>CLB 5</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box bw">💡 Language proficiency is also a major CRS factor — higher scores = significantly more points for Express Entry.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light)">🎓</div>
+        <h4>Educational Credential Assessment (ECA)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <p>Required for FSW applicants to have foreign credentials recognized. Must be done through a <strong>designated organization</strong>.</p>
+        <span class="lbl">Designated ECA Organizations</span>
+        <div class="pills">
+          <span class="pill pt">Comparative Education Service (U of T)</span>
+          <span class="pill pt">International Credential Assessment Service (ICAS)</span>
+          <span class="pill pt">World Education Services (WES) — $240 / ~30 days</span>
+          <span class="pill pt">IQAS (Alberta)</span>
+          <span class="pill pt">International Credential Evaluation Service</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light)">✉️</div>
+        <h4>Employment Reference Letters — Pitfalls &amp; Ethics</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bd">⚠️ Employment reference letters are among the most problematic documents in economic immigration applications.</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Why They're Risky</h5>
+            <ul>
+              <li>Must confirm <strong>all NOC lead statement duties</strong></li>
+              <li>Must confirm <strong>substantial main duties</strong></li>
+              <li>Officers compare letter to NOC description precisely</li>
+              <li>Potla: No duty to notify of deficiency before refusing</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Ethical Issues to Navigate</h5>
+            <ul>
+              <li>Client may ask you to help "improve" a letter</li>
+              <li>Letters from foreign employers hard to verify</li>
+              <li>Risk of fraud / misrepresentation (IRPA s.40)</li>
+              <li>Consultant must not assist in misrepresentation</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box bg">✅ <strong>Best Practices:</strong> Review letter against NOC before submission; ensure all essential duties are specifically mentioned; flag deficiencies to client early; never alter or fabricate documents.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light)">🏥</div>
+        <h4>Medical Exams, Police Certs &amp; Biometrics</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <span class="lbl">Medical Inadmissibility — IRPA s.38</span>
+        <p>A foreign national is inadmissible on health grounds if their health condition:</p>
+        <div class="pills" style="margin:8px 0">
+          <span class="pill pr">(a) Likely danger to public health</span>
+          <span class="pill pr">(b) Likely danger to public safety</span>
+          <span class="pill pr">(c) Might cause excessive demand on health/social services</span>
+        </div>
+        <div class="box bi">R70(1) + IRPA ss.20(1)(a) and 21(1): To obtain a PR visa, applicant must NOT be inadmissible. Family members (accompanying or not) must also not be inadmissible — IRPA s.42.</div>
+        <span class="lbl">Biometrics — IRPA s.10.01 / IRPR s.12.1–12.91</span>
+        <div class="box bt">Biometrics = fingerprints + photograph + biographic data. Required for ages 14–79 (R12.2(1)(a) and (b)). Purpose: ensure person granted PR visa is same person who arrives in Canada. Connects to misrepresentation under IRPA s.40(1)(a).</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 3 ═══════════════════════════ -->
+<div class="sec" id="m3">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="3" style="background:linear-gradient(130deg,#3d2500 0%,#c78a00 100%)">
+    <div class="mtag">Module 3</div>
+    <h2>Express Entry — Deep Dive</h2>
+    <div class="sub">CRS calculation, Ministerial Instructions, ITA rules, A11.2, arranged employment, key cases</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light)">🏆</div>
+        <h4>Comprehensive Ranking System (CRS) — How Points Are Calculated</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>CRS Factor</th><th>Max Points (Single)</th><th>Max Points (With Spouse)</th></tr></thead>
+          <tbody>
+            <tr><td>Age</td><td>110</td><td>100</td></tr>
+            <tr><td>Education</td><td>150</td><td>140</td></tr>
+            <tr><td>Official Language (1st)</td><td>136</td><td>128</td></tr>
+            <tr><td>Official Language (2nd)</td><td>24</td><td>22</td></tr>
+            <tr><td>Canadian Work Experience</td><td>80</td><td>70</td></tr>
+            <tr><td>Spouse: Education</td><td>—</td><td>10</td></tr>
+            <tr><td>Spouse: Language</td><td>—</td><td>20</td></tr>
+            <tr><td>Spouse: Canadian Work Exp.</td><td>—</td><td>10</td></tr>
+            <tr><td>Skill Transferability</td><td>100</td><td>100</td></tr>
+            <tr><td>Arranged Employment (LMIA)</td><td>200</td><td>200</td></tr>
+            <tr><td>Arranged Employment (other)</td><td>50</td><td>50</td></tr>
+            <tr><td>PNP Nomination</td><td>600</td><td>600</td></tr>
+            <tr><td>Canadian Sibling</td><td>15</td><td>15</td></tr>
+            <tr><td>French Language Ability</td><td>50</td><td>50</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box bw">💡 <strong>Case Study — Isaac Newton (27 yr old, US engineer, CLB 9, Master's degree):</strong><br>Without employment: ~469 pts | After 1 yr Canadian work exp + CUSMA WP → 559 pts</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light)">💼</div>
+        <h4>Qualifying Arranged Employment — MI EE s.29(2)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <span class="lbl">Two Types of Arranged Employment &amp; Points</span>
+        <div class="two">
+          <div class="mini">
+            <h5>LMIA-Based (200 pts)</h5>
+            <ul>
+              <li>Valid LMIA from ESDC</li>
+              <li>Offer must be full-time, continuous, non-seasonal</li>
+              <li>NOC TEER 0, 1, 2, or 3</li>
+              <li>At least 1 year employment</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Non-LMIA (50 pts)</h5>
+            <ul>
+              <li>Work permit under R204 (international agreements)</li>
+              <li>Work permit under R205 (Canadian interests)</li>
+              <li>Must have worked with employer for 1 year</li>
+              <li>Offer must meet same conditions</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box bd">⚠️ <strong>Agbai v. Canada (2019 FC 886):</strong> Applicant lost 200 arranged employment points because LMIA expired before e-APR submission. Score dropped below lowest-ranked person in her ITA round — application refused.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light)">⚖️</div>
+        <h4>IRPA s.11.2 — The Post-ITA Assessment</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bi">Officers assess whether the applicant STILL meets EE requirements at time of ITA AND at time of e-APR submission.</div>
+        <span class="lbl">Two-Part Test (s.11.2)</span>
+        <ul class="chk">
+          <li>Did applicant possess the qualifications declared in their e-APR, corroborated by supporting documentation?</li>
+          <li>Has information changed materially since the ITA such that they would NOT have been issued an ITA?</li>
+        </ul>
+        <span class="lbl">Outcomes</span>
+        <div class="tw"><table>
+          <thead><tr><th>Situation</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>CRS at e-APR ≥ lowest-ranked score in ITA round</td><td><span class="yes">May proceed</span> if documentation corroborates claims</td></tr>
+            <tr><td>CRS at e-APR &lt; lowest-ranked score in ITA round</td><td><span class="no">REFUSED</span> — did not maintain qualifying score</td></tr>
+            <tr><td>Birthday between ITA and e-APR causes score drop</td><td><span class="yes">Exception — will not cause refusal</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="casebox">
+          <div class="cn">Singh v. Canada, 2017 FC 266</div>
+          No duty to assist applicant or advise of concerns arising from applicant's failure to submit sufficient evidence. Officer was not satisfied that applicant had a qualifying offer of employment — no obligation to notify.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light)">🗂️</div>
+        <h4>Membership Class Requirements — Beyond CRS</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bw">CRS score alone is not enough — applicants must also meet the requirements of their specific immigration program (FSW, CEC, or FST).</div>
+        <span class="lbl">FSW — 67 Point Grid (Selection Factors)</span>
+        <div class="score-grid">
+          <div class="score-item"><div class="sv">28</div><div class="sl">Language (max)</div></div>
+          <div class="score-item"><div class="sv">25</div><div class="sl">Education (max)</div></div>
+          <div class="score-item"><div class="sv">15</div><div class="sl">Work Experience (max)</div></div>
+          <div class="score-item"><div class="sv">12</div><div class="sl">Age (max)</div></div>
+          <div class="score-item"><div class="sv">10</div><div class="sl">Arranged Employment</div></div>
+          <div class="score-item"><div class="sv">10</div><div class="sl">Adaptability (max)</div></div>
+          <div class="score-item"><div class="sv" style="color:var(--red)">67</div><div class="sl">Minimum to qualify</div></div>
+        </div>
+        <div class="box bg">💡 If a PNP nomination is obtained through EE, the applicant also needs to meet one of the three federal program requirements (CEC, FSW, or FST) — not just the PNP criteria.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 4 ═══════════════════════════ -->
+<div class="sec" id="m4">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="4" style="background:linear-gradient(130deg,#220c40 0%,#5a2580 100%)">
+    <div class="mtag">Module 4</div>
+    <h2>Skilled Immigration Categories</h2>
+    <div class="sub">CEC vs FSW vs FST in depth · settlement funds · substituted evaluation · PFLs · standard of review</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">🆚</div>
+        <h4>CEC vs FSW vs FST — Full Comparison</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Feature</th><th>CEC</th><th>FSW</th><th>FST</th></tr></thead>
+          <tbody>
+            <tr><td>Work experience location</td><td>Must be IN Canada</td><td>Foreign or Canadian</td><td>Foreign or Canadian</td></tr>
+            <tr><td>Experience required</td><td>1 yr / 1,560 hrs in last 3 yrs</td><td>1 yr in last 10 yrs</td><td>2 yrs in last 5 yrs</td></tr>
+            <tr><td>TEER eligible</td><td>0, 1, 2, 3</td><td>0, 1, 2, 3</td><td>2, 3 (specific NOC groups)</td></tr>
+            <tr><td>Language min.</td><td>CLB 7 (TEER 0/1), CLB 5 (TEER 2/3)</td><td>CLB 7 all skills</td><td>CLB 5 (L/S), CLB 4 (R/W)</td></tr>
+            <tr><td>Points grid (67 pts)</td><td>No</td><td>Yes</td><td>No</td></tr>
+            <tr><td>Job offer requirement</td><td>No</td><td>No (but helps)</td><td>Yes (1 yr) OR cert of qualification</td></tr>
+            <tr><td>Settlement funds</td><td>No (if valid job offer)</td><td>Yes (unless valid job offer)</td><td>Yes (unless valid job offer)</td></tr>
+            <tr><td>ECA required</td><td>No</td><td>Yes</td><td>No</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">👷</div>
+        <h4>CEC — Employee vs Self-Employed</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bp">Officers must determine whether CEC work experience was as an <strong>employee</strong> (qualifies) or <strong>self-employed</strong> (does NOT qualify). Key factors:</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Points Toward Employee</h5>
+            <ul>
+              <li>Employer controls how/when work is done</li>
+              <li>Tools/equipment provided by employer</li>
+              <li>Work integrated into employer's business</li>
+              <li>Fixed hours and location</li>
+              <li>Payroll deductions (CPP, EI, taxes)</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Points Toward Self-Employed</h5>
+            <ul>
+              <li>Provides own tools</li>
+              <li>Hires own helpers</li>
+              <li>Can profit or suffer losses</li>
+              <li>Works for multiple clients</li>
+              <li>Sets own hours/location</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">💰</div>
+        <h4>FSW — Settlement Funds &amp; Substituted Evaluation</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <span class="lbl">Settlement Funds</span>
+        <ul class="chk">
+          <li>Must be applicant's own readily available funds (cannot be borrowed)</li>
+          <li>Exempt IF working in Canada AND have a valid job offer</li>
+          <li>"Valid" = LMIA-based WP, or employer-based WP with 1+ year of experience</li>
+          <li>Job must be TEER 0/1/2/3 — cannot just be LMIA alone, must be working too</li>
+        </ul>
+        <span class="lbl">Substituted Evaluation</span>
+        <div class="box bd">⚠️ Substituted evaluation is limited in scope:
+          <ul style="margin-top:6px">
+            <li>Can ONLY overcome the points assessment (67-point grid)</li>
+            <li>CANNOT overcome failure to meet minimum eligibility criteria or settlement fund requirements</li>
+            <li>Fact that applicant "almost met" requirements is NOT sufficient grounds alone</li>
+            <li>It is NOT humanitarian and compassionate authority (A25(1))</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">📬</div>
+        <h4>Procedural Fairness Letters (PFLs)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">A PFL is issued when an officer has concerns that may lead to refusal — the officer must give the applicant a chance to respond before deciding. This is the <strong>"right to be heard."</strong></div>
+        <span class="lbl">When Is a PFL Required?</span>
+        <div class="tw"><table>
+          <thead><tr><th>Type of Concern</th><th>PFL Required?</th></tr></thead>
+          <tbody>
+            <tr><td>Sufficiency (duties don't match NOC)</td><td><span class="no">NO</span> — no PFL needed (Potla)</td></tr>
+            <tr><td>Credibility (applicant not believable)</td><td><span class="yes">YES</span> — PFL required</td></tr>
+            <tr><td>Veracity (truthfulness/accuracy)</td><td><span class="yes">YES</span> — PFL required</td></tr>
+            <tr><td>Authenticity (document may be fake)</td><td><span class="yes">YES</span> — PFL required</td></tr>
+          </tbody>
+        </table></div>
+        <span class="lbl">Steps to Respond to a PFL</span>
+        <ul class="chk">
+          <li>Request the GCMS notes (via ATIP) to understand officer's full concerns</li>
+          <li>Identify all specific concerns raised in the PFL</li>
+          <li>Research applicable regulations and operational instructions</li>
+          <li>Gather responsive documents and evidence for each concern</li>
+          <li>Draft a detailed letter addressing each concern with legal references</li>
+          <li>Submit response before the deadline</li>
+        </ul>
+        <div class="casebox">
+          <div class="cn">Kapoor Decision — Key Warning</div>
+          Failure to respond effectively to a PFL may lead to refusal. Such refusals are difficult to challenge on judicial review due to the deference courts show immigration officers.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light)">⚖️</div>
+        <h4>Standard of Review — Reasonableness vs Correctness</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="two">
+          <div class="mini">
+            <h5>Reasonableness</h5>
+            <ul>
+              <li>More than one "reasonable" outcome possible</li>
+              <li>Court must accept any decision in the range of acceptable outcomes</li>
+              <li>Decision must show: justification, transparency, intelligibility</li>
+              <li>Standard for most administrative decisions (Dunsmuir)</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Correctness</h5>
+            <ul>
+              <li>Only ONE right answer in light of law and facts</li>
+              <li>Court may substitute its own view</li>
+              <li>Applied to constitutional questions, jurisdictional issues</li>
+            </ul>
+          </div>
+        </div>
+        <span class="lbl">Procedural Fairness Requirements</span>
+        <ul class="chk">
+          <li>Meaningful opportunity to take part in the process</li>
+          <li>Essence of decision-maker's concerns communicated to applicant</li>
+          <li>Applicant advised of specific provisions of the Act at issue</li>
+          <li>Reasonable opportunity to respond given</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 5 ═══════════════════════════ -->
+<div class="sec" id="m5">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="5" style="background:linear-gradient(130deg,#082217 0%,#1a6b3c 100%)">
+    <div class="mtag">Module 5</div>
+    <h2>PNP / Quebec / Atlantic Immigration Program</h2>
+    <div class="sub">Provincial Nominee Program · Quebec Skilled Workers · AIP · shared jurisdiction</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">🗺️</div>
+        <h4>Provincial Nominee Program (PNP) — Overview</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg">Constitution s.95 gives provinces shared jurisdiction over immigration. PNP allows provinces to nominate foreign nationals for PR based on their own criteria.</div>
+        <span class="lbl">Shared Jurisdiction — Who Does What</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Province / Territory</h5>
+            <ul>
+              <li>Establishes own nomination criteria</li>
+              <li>Criteria must NOT be incompatible with IRPA/IRPR</li>
+              <li>Must align with federal-provincial bilateral agreements</li>
+              <li>Issues nomination certificate</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Federal (IRCC)</h5>
+            <ul>
+              <li>Assesses eligibility for Provincial Nominee Class</li>
+              <li>Assesses admissibility under IRPA/IRPR</li>
+              <li>Makes final decision on PR application</li>
+              <li>Controls processing via IRPR 87.1–87.2</li>
+            </ul>
+          </div>
+        </div>
+        <span class="lbl">Two Streams</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Base Nominations (Non-EE)</h5>
+            <ul>
+              <li>Province nominates applicant</li>
+              <li>FN applies directly to IRCC for PR</li>
+              <li>Slower processing — not prioritized</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Enhanced Nominations (via EE)</h5>
+            <ul>
+              <li>PNP nomination = +600 CRS points</li>
+              <li>Virtually guarantees ITA</li>
+              <li>FN must still meet FSW/CEC/FST requirements</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">🍁</div>
+        <h4>Quebec Skilled Workers — Special Framework</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bg">Quebec has a unique, autonomous selection system under the Canada-Quebec Accord. IRCC does NOT use Express Entry for Quebec applicants.</div>
+        <span class="lbl">IRPR R86(2) — Membership in Quebec Skilled Worker Class</span>
+        <div class="box bi">A foreign national is a member of the Quebec skilled worker class if they: (a) intend to reside in the Province of Quebec; and (b) are named in a <em>Certificat de sélection du Québec (CSQ)</em> issued to them by that Province.</div>
+        <div class="box bw">⚠️ <strong>2025 Note:</strong> The Regular Skilled Worker Program is being replaced by the Skilled Worker Selection Program. Invitations to apply are currently suspended until June 2025 or until new guidelines are announced.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">🌊</div>
+        <h4>Atlantic Immigration Program (AIP)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bt">Established January 2022 under IRPR 87.3. Covers the four Atlantic provinces: Nova Scotia, New Brunswick, Prince Edward Island, and Newfoundland and Labrador.</div>
+        <span class="lbl">AIP Requirements</span>
+        <ul class="chk">
+          <li>Provincial endorsement certificate and intention to reside in that province</li>
+          <li>One year work experience requirement OR international graduate pathway</li>
+          <li>Full-time job offer from a designated Atlantic employer</li>
+          <li>Meet language and education requirements</li>
+          <li>3-step application process: employer offer → provincial endorsement → IRCC application</li>
+        </ul>
+        <span class="lbl">Exemption Code</span>
+        <div class="pills">
+          <span class="pill pg">C18 — Atlantic Immigration Program (IMP work permit for AIP applicants)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light)">🏙️</div>
+        <h4>BC PNP — Skills Immigration Streams (Example)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bw">⚠️ BC PNP example: The International Graduate and Post-Graduate streams are currently closed and will be replaced in 2025 by three new streams: Bachelor's stream, Master's stream, and Doctorate stream.</div>
+        <p style="font-size:.85rem;margin-top:8px">Each province has its own nominee streams. As a consultant, you must always check the specific provincial website for current eligibility criteria — they change frequently.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 6 ═══════════════════════════ -->
+<div class="sec" id="m6">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="6" style="background:linear-gradient(130deg,#3d0b06 0%,#b92d1a 100%)">
+    <div class="mtag">Module 6</div>
+    <h2>Business Immigration Programs</h2>
+    <div class="sub">Start-Up Visa · Self-Employed Persons · Manitoba Entrepreneur · Province of Choice</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light)">🚀</div>
+        <h4>Start-Up Visa (SUV) Program</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">4 Core Eligibility Requirements</span>
+        <ul class="chk">
+          <li>Have a <strong>qualifying business</strong></li>
+          <li>Get a <strong>letter of support</strong> from a designated organization</li>
+          <li>Meet <strong>language requirements</strong></li>
+          <li>Bring <strong>sufficient settlement funds</strong></li>
+        </ul>
+        <span class="lbl">Designated Organizations — IRPR R98.03</span>
+        <div class="tw"><table>
+          <thead><tr><th>Type</th><th># Designated</th><th>Min. Investment Threshold</th></tr></thead>
+          <tbody>
+            <tr><td>Business Incubators</td><td>42</td><td>Acceptance into program (no min. $)</td></tr>
+            <tr><td>Angel Investor Groups</td><td>8</td><td>$75,000 minimum</td></tr>
+            <tr><td>Venture Capital Funds</td><td>26</td><td>$200,000 minimum</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box bi">To be designated, an organization must belong to: the Canadian Venture Capital &amp; Private Equity Association (VCs) or the National Angel Capital Organization (angel investors and business incubators).</div>
+        <span class="lbl">Qualifying Business Requirements</span>
+        <ul class="chk">
+          <li>Applicant must hold at least 10% of voting rights in the business</li>
+          <li>Designated organization + all applicants together must hold more than 50% of voting rights</li>
+          <li>Business must be incorporated in Canada</li>
+          <li>Must be an "essential person" — active and central role in the business</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light)">🎭</div>
+        <h4>Self-Employed Persons Program</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bd">⚠️ <strong>Currently PAUSED until January 2027.</strong> Know the requirements for exam purposes.</div>
+        <span class="lbl">IRPR R88(1) — Definition of "Self-Employed Person"</span>
+        <div class="box bi">A foreign national who has: (1) relevant experience; (2) intention and ability to be self-employed in Canada; (3) intention and ability to make a <strong>significant contribution</strong> to specified economic activities in Canada.</div>
+        <span class="lbl">Relevant Experience Requirements</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Cultural Activities</h5>
+            <ul>
+              <li>2 one-year periods of self-employment in cultural activities, OR</li>
+              <li>2 one-year periods at world-class level in cultural activities, OR</li>
+              <li>Combination of 1 year each</li>
+              <li>E.g., music teachers, painters, filmmakers, choreographers, set designers</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Athletics</h5>
+            <ul>
+              <li>2 one-year periods of self-employment in athletics, OR</li>
+              <li>2 one-year periods at world-class level in athletics, OR</li>
+              <li>Combination of 1 year each</li>
+              <li>"World class" = known internationally OR performs at highest levels in discipline</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box bw">💡 Minimum 2 years of relevant experience in the 5 years before the application date.</div>
+        <span class="lbl">Key Data</span>
+        <p style="font-size:.84rem">2018: 757 admissions (Start-Up + Self-Employed combined) | 2022: 1,364 admissions</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light)">🏗️</div>
+        <h4>Manitoba Business Investor Stream — Entrepreneur Pathway</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <span class="lbl">Minimum Eligibility Requirements</span>
+        <div class="score-grid">
+          <div class="score-item"><div class="sv">3 yrs</div><div class="sl">Business experience in last 5 yrs (≥33% ownership OR senior management)</div></div>
+          <div class="score-item"><div class="sv">$500K</div><div class="sl">Minimum net worth</div></div>
+          <div class="score-item"><div class="sv">CLB 5</div><div class="sl">Min. language proficiency</div></div>
+          <div class="score-item"><div class="sv">HS Equiv.</div><div class="sl">Min. education (Canadian HS certificate equivalent)</div></div>
+        </div>
+        <div class="box bg">Entrepreneur pathway requires applicants to run a business in Manitoba. This is a <strong>provincial program</strong> — federal PNP regulations provide the framework, but Manitoba sets the specific criteria.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light)">📋</div>
+        <h4>Key Cases — Business Immigration</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="casebox">
+          <div class="cn">Zhang v. Canada — WIN ✅</div>
+          Applicant succeeded — demonstrates how courts can overturn officer decisions where the assessment was unreasonable. Study this case to understand what a successful challenge looks like.
+        </div>
+        <div class="casebox">
+          <div class="cn">Wei v. Canada — LOSS ❌</div>
+          Applicant's challenge failed — demonstrates limits of judicial review. Study this case to understand where courts will defer to officer discretion.
+        </div>
+        <div class="box bw">💡 <strong>PNP Federal Entrepreneur Regulations (IRPR):</strong> Federal regulations provide the framework for provincial entrepreneur programs, but provinces have significant latitude in setting their own detailed criteria.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ QUICK REF ═══════════════════════════ -->
+<div class="sec" id="qr">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="" style="background:linear-gradient(130deg,#07253d 0%,#12202f 100%)">
+    <div class="mtag">All Modules</div>
+    <h2>📊 Master Quick Reference</h2>
+    <div class="sub">All key comparisons, checklists, and rules at a glance — ideal for last-minute review</div>
+  </div>
+
+  <div style="display:grid;gap:14px">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🏆</div>
+        <h4>The Three Programs — Ultimate Comparison Table</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Criteria</th><th>CEC</th><th>FSW</th><th>FST</th></tr></thead>
+          <tbody>
+            <tr><td>Work exp. location</td><td>IN Canada only</td><td>Foreign OK</td><td>Foreign OK</td></tr>
+            <tr><td>Years required</td><td>1 yr (last 3)</td><td>1 yr (last 10)</td><td>2 yrs (last 5)</td></tr>
+            <tr><td>Min. hours</td><td>1,560 hrs</td><td>1,560 hrs</td><td>Full-time</td></tr>
+            <tr><td>Language</td><td>CLB 7/5</td><td>CLB 7</td><td>CLB 5(L/S) CLB 4(R/W)</td></tr>
+            <tr><td>67-pt grid?</td><td>No</td><td>Yes</td><td>No</td></tr>
+            <tr><td>Job offer required?</td><td>No</td><td>No</td><td>Yes or cert.</td></tr>
+            <tr><td>ECA required?</td><td>No</td><td>Yes</td><td>No</td></tr>
+            <tr><td>Settlement funds?</td><td>No</td><td>Yes (with exceptions)</td><td>Yes (with exceptions)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">📋</div>
+        <h4>NOC TEER Categories Cheat Sheet</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>TEER</th><th>Typical Education</th><th>Examples</th><th>Qualifies for Economic PR?</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>—</td><td>Managers, directors, executives</td><td><span class="yes">YES</span></td></tr>
+            <tr><td>1</td><td>University degree</td><td>Engineers, lawyers, doctors, software developers</td><td><span class="yes">YES</span></td></tr>
+            <tr><td>2</td><td>College diploma (2+ yrs)</td><td>Technicians, paralegals, chefs</td><td><span class="yes">YES</span></td></tr>
+            <tr><td>3</td><td>College diploma (&lt;2 yrs)</td><td>Cooks, dental assistants</td><td><span class="yes">YES</span></td></tr>
+            <tr><td>4</td><td>High school + on-job training</td><td>Retail sales, administrative support</td><td><span class="no">NO</span></td></tr>
+            <tr><td>5</td><td>Short demo / no formal</td><td>Labouring, cleaning, food prep</td><td><span class="no">NO</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">⚖️</div>
+        <h4>Key Cases Summary</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Case</th><th>Citation</th><th>Key Rule</th></tr></thead>
+          <tbody>
+            <tr><td>Potla v. Canada</td><td>FC</td><td>No duty to notify of NOC <em>sufficiency</em> issues before refusing. Officer can refuse if lead statement not met.</td></tr>
+            <tr><td>Kumar v. Canada</td><td>FC</td><td>"Substantial" main duties = discretionary judgment. Officer's call is given deference. Onus on applicant.</td></tr>
+            <tr><td>Agbai v. Canada</td><td>2019 FC 886</td><td>LMIA expired before e-APR = lost 200 pts for arranged employment → score below ITA round minimum → refused.</td></tr>
+            <tr><td>Singh v. Canada</td><td>2017 FC 266</td><td>No duty to assist applicant or advise of concerns from failure to submit sufficient evidence re: job offer.</td></tr>
+            <tr><td>Kapoor decision</td><td>FC</td><td>Failure to respond effectively to PFL → refusal. Difficult to overturn on JR due to deference to officers.</td></tr>
+            <tr><td>Zhang v. Canada</td><td>FC</td><td>Business immigration — applicant WIN. Unreasonable officer decision overturned.</td></tr>
+            <tr><td>Wei v. Canada</td><td>FC</td><td>Business immigration — applicant LOSS. Court deferred to officer discretion.</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">🌊</div>
+        <h4>AIP, PNP, Quebec — Key Distinctions</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Program</th><th>Federal Reg</th><th>Key Feature</th><th>Express Entry?</th></tr></thead>
+          <tbody>
+            <tr><td>PNP (Base)</td><td>IRPR 87.1–87.2</td><td>Province nominates; IRCC decides; province sets criteria</td><td><span class="no">NO</span></td></tr>
+            <tr><td>PNP (Enhanced)</td><td>IRPR 87.1–87.2</td><td>Same as above but candidate in EE pool → +600 CRS pts</td><td><span class="yes">YES</span></td></tr>
+            <tr><td>Quebec SW</td><td>IRPR 86(2)</td><td>CSQ certificate from Quebec; NO EE; special Canada-Quebec Accord</td><td><span class="no">NO</span></td></tr>
+            <tr><td>AIP</td><td>IRPR 87.3</td><td>Job offer + provincial endorsement; 4 Atlantic provinces only</td><td><span class="no">NO</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">💼</div>
+        <h4>Business Immigration — Quick Comparison</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Program</th><th>Status</th><th>Key Criteria</th></tr></thead>
+          <tbody>
+            <tr><td>Start-Up Visa</td><td><span class="yes">Active</span></td><td>Qualifying business + letter of support from designated org ($75K–$200K)</td></tr>
+            <tr><td>Self-Employed Persons</td><td><span class="no">Paused until Jan 2027</span></td><td>Cultural/athletic experience + ability to make significant contribution</td></tr>
+            <tr><td>Manitoba Entrepreneur</td><td><span class="yes">Active</span></td><td>3 yrs business exp + $500K net worth + CLB 5 + HS equivalent</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--sky)">📬</div>
+        <h4>PFL — When Required &amp; How to Respond</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Concern Type</th><th>PFL Required?</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Sufficiency (duties vs NOC)</td><td><span class="no">NO (Potla)</span></td><td>Officer may refuse without PFL</td></tr>
+            <tr><td>Credibility</td><td><span class="yes">YES</span></td><td>PFL must be issued; applicant must respond</td></tr>
+            <tr><td>Veracity (truthfulness)</td><td><span class="yes">YES</span></td><td>PFL must be issued; applicant must respond</td></tr>
+            <tr><td>Authenticity (fake document)</td><td><span class="yes">YES</span></td><td>PFL must be issued; applicant must respond</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+function show(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const map={ov:0,m1:1,m2:2,m3:3,m4:4,m5:5,m6:6,qr:7};
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  const btns=document.querySelectorAll('.nb');
+  if(btns[map[id]])btns[map[id]].classList.add('on');
+  window.scrollTo({top:56,behavior:'smooth'});
+}
+function tog(h){
+  h.classList.toggle('on');
+  h.nextElementSibling.classList.toggle('on');
+}
+function srch(q){
+  if(q.length<2)return;
+  const lo=q.toLowerCase();
+  const all=document.querySelectorAll('.cb,.mini,.casebox,.box');
+  for(let el of all){
+    if(el.textContent.toLowerCase().includes(lo)){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.style.outline='2px solid #c78a00';
+      setTimeout(()=>el.style.outline='',3000);
+      break;
+    }
+  }
+}
+document.querySelectorAll('.ch.on').forEach(h=>{
+  h.nextElementSibling.classList.add('on');
+});
+</script>
+</body>
+</html>

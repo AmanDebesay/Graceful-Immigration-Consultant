@@ -272,21 +272,21 @@ function calNext() {
 
 // ── EXPORT ICS ───────────────────────────────────────────────────
 function exportICS() {
-  let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Vantage Immigration//Portal//EN\n';
+  let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Graceful Immigration Consultant//Portal//EN\n';
   getEvents().forEach(e => {
     const dt = e.date.replace(/-/g, '');
     const priority = e.priority === 'high' ? 'PRIORITY:1\n' : e.priority === 'medium' ? 'PRIORITY:5\n' : '';
     const notes = e.notes ? `\nDESCRIPTION:${e.notes.replace(/\n/g,' ')}` : '';
     const alarm = e.reminder ? `\nBEGIN:VALARM\nTRIGGER:-PT1H\nACTION:DISPLAY\nDESCRIPTION:Reminder: ${e.title}\nEND:VALARM` : '';
-    ics += `BEGIN:VEVENT\nUID:${e.id}@vantage\nDTSTART;VALUE=DATE:${dt}\nSUMMARY:${e.flagged ? '★ ' : ''}${e.title}${notes}\n${priority}END:VEVENT${alarm}\n`;
+    ics += `BEGIN:VEVENT\nUID:${e.id}@graceful\nDTSTART;VALUE=DATE:${dt}\nSUMMARY:${e.flagged ? '★ ' : ''}${e.title}${notes}\n${priority}END:VEVENT${alarm}\n`;
   });
   ics += 'END:VCALENDAR';
   if (typeof downloadFile === 'function') {
-    downloadFile('vantage-calendar.ics', ics, 'text/calendar');
+    downloadFile('graceful-calendar.ics', ics, 'text/calendar');
   } else {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
-    a.download = 'vantage-calendar.ics';
+    a.download = 'graceful-calendar.ics';
     a.click();
   }
 }

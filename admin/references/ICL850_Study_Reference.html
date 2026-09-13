@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICL 850 – Family Class Immigration Study Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Lato:wght@300;400;700;900&display=swap');
+
+:root {
+  --ink: #1c2127;
+  --deep: #2d3748;
+  --navy: #3d4e6f;
+  --red: #c4321e;
+  --red-light: #fcedeb;
+  --blue: #1a5fa8;
+  --blue-light: #e9f2fb;
+  --teal: #0d6e6d;
+  --teal-light: #e5f5f5;
+  --green: #1d6b3e;
+  --green-light: #ebf6ee;
+  --purple: #6d2e91;
+  --purple-light: #f4ecf9;
+  --gold: #b87d00;
+  --gold-light: #fef9e7;
+  --orange: #d35f00;
+  --orange-light: #fff5ea;
+  --border: #d2dce8;
+  --muted: #5e6d82;
+  --bg: #f8fafb;
+  --white: #fff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#1c2127 0%,#2d3748 50%,#3d4e6f 100%);padding:50px 28px 40px;position:relative;overflow:hidden}
+.hdr::after{content:'850';position:absolute;right:-30px;bottom:-50px;font-family:'Merriweather',serif;font-size:18rem;color:rgba(255,255,255,0.025);font-weight:700;line-height:1;pointer-events:none}
+.hdr-in{max-width:1240px;margin:0 auto;position:relative}
+.hdr h1{font-family:'Merriweather',serif;font-size:2.9rem;color:#fff;line-height:1.2;font-weight:700}
+.hdr h1 span{color:#f59e6c;font-weight:400}
+.hdr p{color:#a8bed4;font-size:.95rem;margin-top:10px;font-weight:400}
+.hdr-tags{display:flex;flex-wrap:wrap;gap:11px;margin-top:24px}
+.htag{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#d8e5f0;font-size:.75rem;font-weight:700;padding:7px 15px;border-radius:25px;letter-spacing:.07em}
+
+/* NAV */
+.nav{background:#1c2127;border-top:1px solid rgba(255,255,255,.04);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:200;padding:0 26px}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;color:#7a8fa8;font-family:'Lato',sans-serif;font-size:.81rem;font-weight:700;padding:15px 17px;cursor:pointer;white-space:nowrap;transition:color .2s;letter-spacing:.03em}
+.nb:hover{color:#fff}
+.nb.on{color:#f59e6c;border-bottom-color:#f59e6c}
+
+/* PAGE */
+.page{max-width:1240px;margin:0 auto;padding:32px 24px 90px}
+.sec{display:none}.sec.on{display:block}
+
+/* MODULE HEADER */
+.mh{border-radius:17px;padding:32px 34px;margin-bottom:26px;color:#fff;position:relative;overflow:hidden}
+.mh::after{content:attr(data-n);position:absolute;right:22px;bottom:-30px;font-family:'Merriweather',serif;font-size:12rem;color:rgba(255,255,255,.035);line-height:1;pointer-events:none;font-weight:700}
+.mtag{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.48);display:inline-block;margin-bottom:9px}
+.mh h2{font-family:'Merriweather',serif;font-size:2rem;line-height:1.35;font-weight:700}
+.mh .sub{color:rgba(255,255,255,.52);font-size:.91rem;margin-top:8px;font-weight:400}
+
+/* CARDS */
+.grid{display:grid;gap:16px}
+.card{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(28,33,39,.025)}
+.ch{display:flex;align-items:center;gap:13px;padding:16px 22px;cursor:pointer;user-select:none;transition:background .15s;border-bottom:1px solid transparent}
+.ch:hover{background:#f9fafb}
+.ch.on{background:var(--blue-light);border-bottom-color:var(--border)}
+.ci{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.ch h4{flex:1;font-size:.98rem;font-weight:700;color:var(--deep)}
+.cv{color:var(--muted);font-size:.76rem;transition:transform .2s}
+.ch.on .cv{transform:rotate(180deg)}
+.cb{display:none;padding:24px}
+.cb.on{display:block}
+
+/* TYPOGRAPHY */
+.cb p,.cb li{font-size:.89rem;color:var(--ink);line-height:1.75}
+.cb ul,.cb ol{padding-left:24px;margin:10px 0}
+.cb li{margin-bottom:7px}
+strong{color:var(--deep);font-weight:700}
+.lbl{font-size:.71rem;font-weight:800;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin:16px 0 9px;display:block}
+
+/* BOXES */
+.box{border-radius:11px;padding:14px 18px;margin:12px 0;font-size:.87rem;line-height:1.7}
+.bi{background:var(--blue-light);border-left:4px solid var(--blue)}
+.bw{background:var(--orange-light);border-left:4px solid var(--orange)}
+.bd{background:var(--red-light);border-left:4px solid var(--red)}
+.bg{background:var(--green-light);border-left:4px solid var(--green)}
+.bt{background:var(--teal-light);border-left:4px solid var(--teal)}
+.bp{background:var(--purple-light);border-left:4px solid var(--purple)}
+.bgo{background:var(--gold-light);border-left:4px solid var(--gold)}
+
+/* GRIDS */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin:12px 0}
+@media(max-width:680px){.two,.three{grid-template-columns:1fr}}
+.mini{background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:15px 17px}
+.mini h5{font-size:.85rem;font-weight:700;color:var(--deep);margin-bottom:9px}
+.mini ul{list-style:none;padding:0}
+.mini ul li{font-size:.83rem;padding:5px 0 5px 17px;position:relative}
+.mini ul li::before{content:'›';position:absolute;left:0;color:var(--blue);font-weight:700;font-size:1.2rem}
+
+/* FLOW */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:12px 0}
+.fs{background:var(--blue-light);border:1px solid #b3d4f1;border-radius:10px;padding:9px 16px;font-size:.82rem;font-weight:700;color:#0d4374;white-space:nowrap}
+.fa{color:var(--orange);font-size:1.2rem;font-weight:700}
+
+/* PILLS */
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0}
+.pill{border-radius:25px;padding:7px 14px;font-size:.8rem;font-weight:700;border:1px solid}
+.pb{background:var(--blue-light);border-color:#9ac8e8;color:#0d4475}
+.pg{background:var(--green-light);border-color:#7ecfa0;color:#0e4023}
+.pr{background:var(--red-light);border-color:#e8a09a;color:#6e1a11}
+.pt{background:var(--teal-light);border-color:#7ed4d3;color:#084b4a}
+.pp{background:var(--purple-light);border-color:#b89cd8;color:#3b1557}
+.pgo{background:var(--gold-light);border-color:#e8c06a;color:#6b4400}
+.po{background:var(--orange-light);border-color:#f4c084;color:#6b3500}
+
+/* TABLE */
+.tw{overflow-x:auto;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+thead th{background:var(--deep);color:#fff;padding:12px 14px;text-align:left;font-weight:700;font-size:.8rem;letter-spacing:.04em}
+tbody tr:nth-child(even){background:#f9fafb}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+
+/* CHECKLIST */
+.chk{list-style:none;padding:0}
+.chk li{font-size:.89rem;padding:9px 0 9px 32px;position:relative;border-bottom:1px dashed var(--border)}
+.chk li:last-child{border:none}
+.chk li::before{content:'✓';position:absolute;left:0;color:var(--green);font-size:1.08rem;font-weight:700}
+
+/* QUOTE / CASE */
+.qt{border-left:3px solid var(--gold);background:var(--gold-light);border-radius:0 10px 10px 0;padding:13px 17px;font-size:.87rem;font-style:italic;color:#4a3200;margin:12px 0}
+.qt cite{font-style:normal;font-size:.77rem;color:var(--muted);display:block;margin-top:5px}
+.casebox{background:var(--purple-light);border:1px solid #c8a8e8;border-radius:11px;padding:14px 17px;margin:11px 0;font-size:.87rem}
+.casebox .cn{font-weight:700;color:var(--purple);font-size:.88rem;margin-bottom:7px}
+
+/* OV GRID */
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:28px}
+.oc{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;cursor:pointer;transition:transform .2s,box-shadow .2s;border-left:8px solid}
+.oc:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(28,33,39,.075)}
+.oc .mn{font-size:.73rem;font-weight:800;text-transform:uppercase;letter-spacing:.11em;color:var(--muted)}
+.oc h3{font-family:'Merriweather',serif;font-size:1.12rem;color:var(--deep);margin:7px 0 10px;font-weight:700}
+.oc p{font-size:.84rem;color:var(--muted);line-height:1.65}
+
+/* BACK */
+.back{background:none;border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-size:.83rem;font-family:'Lato',sans-serif;color:var(--muted);cursor:pointer;margin-bottom:22px;transition:all .2s;font-weight:600}
+.back:hover{background:var(--blue-light);color:var(--deep);border-color:var(--blue)}
+
+/* SEARCH */
+.srch{margin-bottom:24px}
+.srch input{width:100%;padding:13px 22px;border:1px solid var(--border);border-radius:12px;font-family:'Lato',sans-serif;font-size:.93rem;background:var(--white);color:var(--ink);outline:none}
+.srch input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
+
+.yes{display:inline-block;background:var(--green-light);color:var(--green);border:1px solid #7ecfa0;border-radius:7px;padding:4px 10px;font-size:.79rem;font-weight:700}
+.no{display:inline-block;background:var(--red-light);color:var(--red);border:1px solid #e8a09a;border-radius:7px;padding:4px 10px;font-size:.79rem;font-weight:700}
+
+/* SECTION DIVIDER */
+.sdiv{height:2px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:24px 0}
+
+/* IRPA REFERENCE */
+.ref{display:inline-block;background:var(--teal-light);color:var(--teal);border:1px solid #7ed4d3;border-radius:8px;padding:4px 11px;font-size:.78rem;font-weight:700;font-family:monospace}
+
+/* FACTORS */
+.factors{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.factor{background:var(--bg);border:2px solid var(--blue);border-radius:10px;padding:12px 15px;text-align:center}
+.factor h6{font-size:.88rem;font-weight:700;color:var(--blue);margin-bottom:4px}
+.factor p{font-size:.8rem;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <h1>ICL 850 — <span>Family Class Immigration</span></h1>
+    <p>Complete Study Reference · Sponsorship, Relationships, IAD Appeals, Evidence · Queen's University GDipICL</p>
+    <div class="hdr-tags">
+      <span class="htag">👨‍👩‍👧 Family Class</span>
+      <span class="htag">💍 Conjugal Relationships</span>
+      <span class="htag">📋 IRPR s.117</span>
+      <span class="htag">🚫 R117(9) Exclusions</span>
+      <span class="htag">⚖️ IAD Appeals</span>
+      <span class="htag">📊 Evidence & Burden of Proof</span>
+      <span class="htag">🤝 ADR Process</span>
+      <span class="htag">⚖️ M v H Factors</span>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on" onclick="show('ov')">🏠 Overview</button>
+  <button class="nb" onclick="show('m1')">M1 Who Can Sponsor</button>
+  <button class="nb" onclick="show('m2')">M2 Inadmissibility</button>
+  <button class="nb" onclick="show('m3')">M3 Evidence & Apps</button>
+  <button class="nb" onclick="show('m4')">M4 Burden & Proof</button>
+  <button class="nb" onclick="show('m5')">M5 IAD & FC Appeals</button>
+  <button class="nb" onclick="show('m6')">M6 Oral Advocacy</button>
+  <button class="nb" onclick="show('qr')">📊 Quick Ref</button>
+</div>
+
+<div class="page">
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<div class="sec on" id="ov">
+  <div class="srch"><input type="text" placeholder="🔍  Search any concept, section, factor, or case…" oninput="srch(this.value)"></div>
+  <p style="font-size:.9rem;color:var(--muted);margin-bottom:22px">Click any module card to explore detailed content. Use Quick Ref for comprehensive comparison tables and factors.</p>
+  <div class="og">
+    <div class="oc" onclick="show('m1')" style="border-left-color:#1a5fa8">
+      <div class="mn">Module 1</div>
+      <h3>Who Can Sponsor & Family Class</h3>
+      <p>Sponsor eligibility (IRPR 130/133), Family Class definition (R117), conjugal relationships, M v H 7 factors, R117(9) exclusions.</p>
+    </div>
+    <div class="oc" onclick="show('m2')" style="border-left-color:#c4321e">
+      <div class="mn">Module 2</div>
+      <h3>Complex Issues & Inadmissibility</h3>
+      <p>Misrepresentation (s.40), criminality (s.36), health grounds (s.38), financial inadmissibility (s.39), sponsor prohibitions, consultation checklists.</p>
+    </div>
+    <div class="oc" onclick="show('m3')" style="border-left-color:#1d6b3e">
+      <div class="mn">Module 3</div>
+      <h3>Evidence & Sponsorship Applications</h3>
+      <p>In-Canada vs overseas applications, R4 bad faith, genuineness test, primary purpose test, evidence assessment, completing sponsorship forms.</p>
+    </div>
+    <div class="oc" onclick="show('m4')" style="border-left-color:#6d2e91">
+      <div class="mn">Module 4</div>
+      <h3>Burden & Standard of Proof</h3>
+      <p>Magonza framework, credibility vs probative value vs weight vs sufficiency, burden allocation (appellant vs Minister), de novo hearings.</p>
+    </div>
+    <div class="oc" onclick="show('m5')" style="border-left-color:#0d6e6d">
+      <div class="mn">Module 5</div>
+      <h3>IAD & Federal Court Appeals</h3>
+      <p>Right of appeal (s.62/63), IAD jurisdiction, H&C considerations (s.65), Federal Court JR (s.72), ADR benefits/drawbacks, timelines.</p>
+    </div>
+    <div class="oc" onclick="show('m6')" style="border-left-color:#b87d00">
+      <div class="mn">Module 6</div>
+      <h3>Oral Advocacy & IAD Hearings</h3>
+      <p>Minister's counsel role, designated representatives, effective advocacy strategies, appearance/language/speaking, IAD procedures.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--blue-light);color:var(--blue)">🏛️</div>
+      <h4>IRPA Family Class Framework — Core Structure</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <div class="three">
+        <div class="mini">
+          <h5>Who Can Sponsor (IRPR 130)</h5>
+          <ul>
+            <li>≥18 years old</li>
+            <li>Canadian citizen, PR, or registered Indian</li>
+            <li>If citizen abroad: must show plan to live in Canada</li>
+            <li>Not on social assistance (except disability)</li>
+            <li>Can provide for basic needs</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Who Can Be Sponsored (R117)</h5>
+          <ul>
+            <li>Spouse (married/common-law/conjugal)</li>
+            <li>Dependent child</li>
+            <li>Parents & grandparents</li>
+            <li>Orphaned sibling/niece/nephew/grandchild</li>
+            <li>Person <18 to adopt</li>
+            <li>One other relative (if no other sponsorable)</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Sponsor Prohibitions (R133)</h5>
+          <ul>
+            <li>Sexual offence conviction</li>
+            <li>Violence (≥10 yrs max) against person</li>
+            <li>Bodily harm to family/relative/conjugal partner</li>
+            <li>Default on previous sponsorship</li>
+            <li>Under removal order</li>
+            <li>In detention</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--purple-light);color:var(--purple)">💍</div>
+      <h4>M v H — Seven Factors for Conjugal Relationships</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <div class="factors">
+        <div class="factor">
+          <h6>Shared Shelter</h6>
+          <p>Living arrangements, cohabitation</p>
+        </div>
+        <div class="factor">
+          <h6>Sexual & Personal Behaviour</h6>
+          <p>Intimate relationship, fidelity</p>
+        </div>
+        <div class="factor">
+          <h6>Services</h6>
+          <p>Mutual care, domestic responsibilities</p>
+        </div>
+        <div class="factor">
+          <h6>Social Activities</h6>
+          <p>Joint social life, shared interests</p>
+        </div>
+        <div class="factor">
+          <h6>Economic Support</h6>
+          <p>Financial interdependence, shared assets</p>
+        </div>
+        <div class="factor">
+          <h6>Children</h6>
+          <p>Parenting, attitude toward children</p>
+        </div>
+        <div class="factor">
+          <h6>Social Perception</h6>
+          <p>How society views the relationship</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════ MODULE 1 ═══════════════════════════ -->
+<div class="sec" id="m1">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="1" style="background:linear-gradient(130deg,#0a2540 0%,#1a5fa8 100%)">
+    <div class="mtag">Module 1</div>
+    <h2>Who Can Sponsor & Family Class Definition</h2>
+    <div class="sub">Sponsor eligibility (IRPR 130/133), Family Class (R117), conjugal relationships, M v H, R117(9) exclusions</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">✅</div>
+        <h4>Sponsor Eligibility — IRPR s.130</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">You can sponsor your spouse, partner, or dependent child if:</div>
+        <ul class="chk">
+          <li>You're at least <strong>18 years old</strong></li>
+          <li>You're a <strong>Canadian citizen</strong>, <strong>permanent resident</strong> of Canada, OR person registered in Canada as an Indian under the <em>Canadian Indian Act</em></li>
+          <li>If you're a Canadian citizen living outside Canada: must show you <strong>plan to live in Canada</strong> when sponsored persons become PRs (cannot sponsor if PR living outside Canada)</li>
+          <li>You're <strong>not receiving social assistance</strong> for reasons other than disability</li>
+          <li>You can <strong>provide for the basic needs</strong> of persons you want to sponsor</li>
+        </ul>
+        
+        <span class="lbl">Sponsor Not Residing in Canada — s.130(2)</span>
+        <div class="box bt">A sponsor who is a <strong>Canadian citizen</strong> and does NOT reside in Canada may sponsor a foreign national who is the sponsor's <strong>spouse, common-law partner, conjugal partner, or dependent child with no dependent children</strong>, if the sponsor <strong>will reside in Canada</strong> when the FN becomes PR.</div>
+        
+        <span class="lbl">Special Income Requirements</span>
+        <div class="box bw">💡 <strong>Parents/Grandparents:</strong> Income requirement of <strong>LICO + 30%</strong></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>Sponsor Prohibitions — IRPR s.133(1)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">A sponsorship application shall only be approved if, on the day application filed AND from that day until decision is made, there is evidence that sponsor:</div>
+        
+        <ul class="chk">
+          <li><strong>(b)</strong> Intends to fulfill obligations in sponsorship undertaking</li>
+          <li><strong>(c)</strong> Is NOT subject to removal order</li>
+          <li><strong>(d)</strong> Is NOT detained in any penitentiary, jail, reformatory, or prison</li>
+          <li><strong>(e)</strong> Has NOT been convicted under <em>Criminal Code</em> of:</li>
+        </ul>
+        
+        <span class="lbl">Three Categories of Criminal Convictions That Prohibit Sponsorship</span>
+        <div class="three">
+          <div class="mini">
+            <h5>(i) Sexual Offences</h5>
+            <ul>
+              <li>Offence of sexual nature</li>
+              <li>Attempt or threat to commit such offence</li>
+              <li>Against ANY person</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>(i.1) Indictable Violence</h5>
+            <ul>
+              <li>Indictable offence involving violence</li>
+              <li>Punishable by max ≥10 years</li>
+              <li>Or attempt to commit</li>
+              <li>Against ANY person</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>(ii) Bodily Harm to Specific Persons</h5>
+            <ul>
+              <li>Offence resulting in bodily harm</li>
+              <li>Or attempt/threat to commit</li>
+              <li>Against specific listed persons (see below)</li>
+            </ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Specific Persons for Bodily Harm Prohibition — s.133(1)(e)(ii)</span>
+        <ul class="chk">
+          <li><strong>(A)</strong> Current or former family member of sponsor</li>
+          <li><strong>(B)</strong> Relative of sponsor + current/former family member of that relative</li>
+          <li><strong>(C)</strong> Relative of sponsor's family member + current/former family member of that relative</li>
+          <li><strong>(D)</strong> Current or former conjugal partner of sponsor</li>
+          <li><strong>(E)</strong> Current or former family member of sponsor's family member or conjugal partner</li>
+          <li><strong>(F)</strong> Relative of sponsor's conjugal partner + current/former family member of that relative</li>
+          <li><strong>(G)</strong> Child under current/former care and control of sponsor, family member, or conjugal partner</li>
+          <li><strong>(H)</strong> Child under current/former care and control of sponsor's relative or family member of that relative</li>
+          <li><strong>(I)</strong> Someone sponsor is dating or has dated (whether or not lived together) + family member of that person</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">👨‍👩‍👧</div>
+        <h4>Family Class Members — IRPR s.117(1)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg">According to <span class="ref">IRPR 117(1)</span>, who qualifies as a member of the Family Class?</div>
+        
+        <div class="tw"><table>
+          <thead><tr><th>Category</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>(a) Spouse</strong></td><td>Common-law partner or conjugal partner</td></tr>
+            <tr><td><strong>(b) Dependent Child</strong></td><td>See detailed definition below</td></tr>
+            <tr><td><strong>(c) Parents</strong></td><td>Sponsor's parents</td></tr>
+            <tr><td><strong>(d) Grandparents</strong></td><td>Sponsor's grandparents</td></tr>
+            <tr><td><strong>(f) Orphaned Relatives</strong></td><td>Orphaned sibling, niece, nephew, or grandchild</td></tr>
+            <tr><td><strong>(g) Adoption</strong></td><td>Person under 18 whom sponsor intends to adopt in Canada</td></tr>
+            <tr><td><strong>(h) One Other Relative</strong></td><td>If sponsor has NO other sponsorable relative</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">👶</div>
+        <h4>Dependent Child — IRPR s.2 Definition</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi"><strong>Dependent child</strong> means a child who has one of the following relationships with parent AND is in one of the following situations of dependency:</div>
+        
+        <span class="lbl">(a) Relationship with Parent</span>
+        <div class="pills">
+          <span class="pill pb">(i) Biological child of parent (if not adopted by person other than spouse/CL partner of parent)</span>
+          <span class="pill pb">(ii) Adopted child of parent</span>
+        </div>
+        
+        <span class="lbl">(b) Situation of Dependency</span>
+        <div class="two">
+          <div class="mini">
+            <h5>(i) Under 22 Years Old</h5>
+            <ul>
+              <li>Less than 22 years of age</li>
+              <li>AND is NOT spouse or common-law partner</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>(ii) 22+ Years Old (Exception)</h5>
+            <ul>
+              <li>22 years or older</li>
+              <li>Depended substantially on financial support of parent since before age 22</li>
+              <li>Unable to be financially self-supporting due to physical or mental condition</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">💍</div>
+        <h4>Spouse: Married, Common-Law, Conjugal</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="three">
+          <div class="mini">
+            <h5>Married</h5>
+            <ul>
+              <li>In respect of marriage that took place <strong>outside Canada</strong>:</li>
+              <li>Marriage that is <strong>valid both</strong> under laws of jurisdiction where it took place <strong>AND under Canadian law</strong></li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Common-Law Partner</h5>
+            <ul>
+              <li><strong>Continuous cohabitation</strong> for at least <strong>one year</strong></li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Conjugal Partner (IRPR s.2)</h5>
+            <ul>
+              <li>Foreign national residing <strong>outside Canada</strong></li>
+              <li>In conjugal relationship with sponsor</li>
+              <li>Relationship for at least <strong>one year</strong></li>
+            </ul>
+          </div>
+        </div>
+        
+        <span class="lbl">What Does "Conjugal" Mean?</span>
+        <div class="box bp"><strong>NOT defined in legislation.</strong> Determined by factors from <em>M v H</em> decision.</div>
+        <div class="box bi">💡 <strong>IRCC Assessment:</strong> Conjugal partner category used when <strong>neither common-law partner status NOR marriage is possible</strong> (usually because of marital status or sexual orientation, combined with immigration barrier).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>M v H — Seven Factors for Assessing Conjugal Relationships</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="casebox">
+          <div class="cn">M v H (Supreme Court of Canada)</div>
+          Established 7 factors that must be considered in assessing whether a conjugal relationship exists. These factors are NOT a checklist — all may not apply, and no single factor is determinative.
+        </div>
+        
+        <div class="factors">
+          <div class="factor">
+            <h6>1. Shared Shelter</h6>
+            <p>Do the parties live together? What are the living arrangements?</p>
+          </div>
+          <div class="factor">
+            <h6>2. Sexual & Personal Behaviour</h6>
+            <p>Intimate relationship, fidelity, commitment to each other</p>
+          </div>
+          <div class="factor">
+            <h6>3. Services</h6>
+            <p>Conduct and habits relating to preparation of meals, household tasks, mutual care</p>
+          </div>
+          <div class="factor">
+            <h6>4. Social Activities</h6>
+            <p>Joint social life, participation in each other's social circles, shared interests</p>
+          </div>
+          <div class="factor">
+            <h6>5. Economic Support</h6>
+            <p>Financial arrangements, ownership of property, sharing of household expenses</p>
+          </div>
+          <div class="factor">
+            <h6>6. Children</h6>
+            <p>Attitude and conduct toward children, parenting responsibilities</p>
+          </div>
+          <div class="factor">
+            <h6>7. Social Perception</h6>
+            <p>How the couple presents themselves publicly, reputation in the community</p>
+          </div>
+        </div>
+        
+        <span class="lbl">Critical Reflections on M v H</span>
+        <div class="box bw">⚠️ <strong>Modern Relationship Challenges:</strong> The 7 factors were developed in context of traditional, cohabiting relationships. How well do they apply to: long-distance relationships, culturally diverse partnerships, non-traditional family structures, relationships affected by immigration barriers? Consider which factors you would add/remove for modern assessment.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>Excluded Relationships — R117(9) & Pilot Program</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd"><strong>R117(9)</strong> lists relationships that are excluded from Family Class sponsorship, even if they would otherwise qualify.</div>
+        
+        <span class="lbl">Pilot Program — R117(9)(d) Exemption</span>
+        <div class="box bg">✅ Pilot program to exempt permanent residence applicants in Family Class or SCLPC (Spouse or Common-Law Partner in Canada) class from paragraph <strong>R117(9)(d)</strong> exclusion.</div>
+        
+        <span class="lbl">Critical Questions About the Pilot</span>
+        <ul class="chk">
+          <li>What are main goals and requirements associated with the pilot?</li>
+          <li>What is IRCC trying to signal with this pilot?</li>
+          <li>What concerns exist with the pilot (if any)?</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 2 ═══════════════════════════ -->
+<div class="sec" id="m2">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="2" style="background:linear-gradient(130deg,#5a0e0a 0%,#c4321e 100%)">
+    <div class="mtag">Module 2</div>
+    <h2>Complex Issues & Inadmissibility</h2>
+    <div class="sub">Misrepresentation (s.40), criminality (s.36), health (s.38), financial (s.39), consultation checklists</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚠️</div>
+        <h4>Misrepresentation — IRPA s.40</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">When is a PR or FN inadmissible for misrepresentation under <span class="ref">s.40 IRPA</span>?</div>
+        
+        <ul class="chk">
+          <li>For <strong>directly or indirectly misrepresenting or withholding material facts</strong> relating to relevant matter that induces or could induce error in administration of Act</li>
+          <li>For being, or having been, <strong>sponsored by person who is inadmissible</strong> for misrepresentation</li>
+          <li>For having <strong>decision on claim/application for refugee protection vacated</strong></li>
+          <li>For <strong>ceasing to be a citizen</strong> (under Citizenship Act)</li>
+        </ul>
+        
+        <span class="lbl">Impact on Sponsorship</span>
+        <div class="box bd">⚠️ <strong>Five-year ban</strong> (see s.40 IRPA). Cannot be sponsored to Canada during this period.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚖️</div>
+        <h4>Criminal Inadmissibility — IRPA s.36(2) for FNs</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">In-Canada Offences</span>
+        <div class="pills">
+          <span class="pill pr">Convicted of indictable offence</span>
+          <span class="pill pr">Convicted of two offences not arising from single occurrence</span>
+        </div>
+        
+        <span class="lbl">Foreign Offences</span>
+        <div class="pills">
+          <span class="pill pr">Convicted of (or committing) offence that, if in Canada, would be indictable</span>
+          <span class="pill pr">Convicted of two offences not arising from single occurrence</span>
+        </div>
+        
+        <span class="lbl">On Entering Canada</span>
+        <div class="box bd">Committing offence under Act of Parliament prescribed by regulations</div>
+        
+        <span class="lbl">Sponsor Prohibitions — s.133 IRPR</span>
+        <div class="box bw">⚠️ <strong>s.133 IRPR</strong> prohibits sponsorship under certain conditions where sponsor has <strong>criminal convictions</strong> (see Module 1 for details on sexual offences, violence, bodily harm to family members).</div>
+        
+        <span class="lbl">Impact on Sponsorship</span>
+        <div class="box bd"><strong>Permanent bar</strong> unless cured by way of <strong>criminal rehabilitation or record suspension</strong>.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">🏥</div>
+        <h4>Health Inadmissibility — IRPA s.38</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bw">When is FN inadmissible on health grounds under <span class="ref">s.38 IRPA</span>?</div>
+        
+        <div class="three">
+          <div class="mini">
+            <h5>Danger to Public Health</h5>
+            <ul><li>Health condition likely danger to public health</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Danger to Public Safety</h5>
+            <ul><li>Health condition likely danger to public safety</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Excessive Demand</h5>
+            <ul><li>Might reasonably be expected to cause excessive demand on health or social services</li></ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Exemptions from s.38(1) — Who is Exempt?</span>
+        <ul class="chk">
+          <li>Member of <strong>Family Class</strong> + their dependent children</li>
+          <li>Applicant for PR visa as <strong>protected person</strong></li>
+          <li><strong>Protected person</strong></li>
+          <li><strong>Spouse, common-law partner, child, or family member</strong> of above categories</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">💰</div>
+        <h4>Financial Inadmissibility — IRPA s.39</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bw">When is FN inadmissible for financial reasons under <span class="ref">s.39 IRPA</span>?</div>
+        
+        <ul class="chk">
+          <li>Are, or will be, <strong>unable or unwilling to support themselves or any dependent person</strong></li>
+          <li>Have NOT satisfied <strong>officer</strong> that adequate arrangements for care and support (other than social assistance) have been made</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">📋</div>
+        <h4>Building a Consultation Checklist</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">When consulting with potential sponsors and applicants, systematically gather information to identify issues early.</div>
+        
+        <span class="lbl">Sample Consultation Questions</span>
+        <ul class="chk">
+          <li>1. Is the sponsor a Canadian citizen or permanent resident?</li>
+          <li>2. If citizen: do they reside in Canada? If not, will they return when applicant becomes PR?</li>
+          <li>3. Is the sponsor ≥18 years old?</li>
+          <li>4. Is the sponsor on social assistance (except for disability)?</li>
+          <li>5. Does the sponsor have any criminal convictions? (Sexual offences? Violence? Bodily harm to family members?)</li>
+          <li>6. Is the sponsor subject to a removal order?</li>
+          <li>7. Is the sponsor in detention?</li>
+          <li>8. Has the sponsor defaulted on previous sponsorship undertakings?</li>
+          <li>9. What is the relationship between sponsor and applicant? (Spouse/CL/conjugal/child/parent/etc.)</li>
+          <li>10. How long has the relationship existed?</li>
+          <li>11. If married: was marriage valid in jurisdiction where it took place? Valid under Canadian law?</li>
+          <li>12. If common-law: have they cohabited continuously for ≥1 year?</li>
+          <li>13. If conjugal: why can't they marry or cohabit? Immigration barrier? Legal barrier?</li>
+          <li>14. Does the applicant have any inadmissibility issues? (Criminal? Medical? Misrepresentation? Financial?)</li>
+          <li>15. Has the applicant ever been refused a Canadian visa or found inadmissible?</li>
+          <li>16. What evidence exists to prove genuineness of relationship?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📖</div>
+        <h4>Case Study: Chernenko v Canada</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Analysis Questions</span>
+        <ul class="chk">
+          <li>What is your summary of the IAD decision?</li>
+          <li>What was counsel's role at the sponsorship appeal?</li>
+          <li>Do you believe counsel played a positive or negative role in the outcome and why?</li>
+        </ul>
+        
+        <div class="box bp">💡 <strong>Critical Reflection:</strong> Application of <strong>R117(9)(d)</strong> in IAD decision. Consider how excluded relationships impact sponsorship eligibility and whether exceptions (like pilot program) address policy concerns.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 3 ═══════════════════════════ -->
+<div class="sec" id="m3">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="3" style="background:linear-gradient(130deg,#0d2817 0%,#1d6b3e 100%)">
+    <div class="mtag">Module 3</div>
+    <h2>Evidence & Sponsorship Applications</h2>
+    <div class="sub">In-Canada vs overseas, R4 bad faith, genuineness test, primary purpose test, evidence assessment</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">🇨🇦</div>
+        <h4>In-Canada vs Overseas Applications</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="two">
+          <div class="mini">
+            <h5>In-Canada Application</h5>
+            <ul>
+              <li>Sponsored spouse must <strong>remain in Canada</strong> until decision</li>
+              <li>Cannot exit Canada or application may be <strong>abandoned</strong></li>
+              <li>May be eligible for <strong>work permit</strong> (pilot project)</li>
+              <li><span class="no">NO right of appeal to IAD</span></li>
+              <li>Difficulty overcoming inadmissibility</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Overseas Application</h5>
+            <ul>
+              <li><span class="yes">Right of appeal to IAD</span></li>
+              <li>Often <strong>faster processing times</strong></li>
+              <li><strong>Only option</strong> for conjugal partners</li>
+              <li>Applicant can travel freely</li>
+              <li>Forms differ slightly — check IRCC website</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>Bad Faith Relationships — R4(1) IRPR</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">How does <span class="ref">s.4(1) IRPR</span> define "bad faith" relationships?</div>
+        <p style="margin:10px 0">A foreign national is <strong>not a member of the family class</strong> if the marriage, common-law partnership, or conjugal partnership:</p>
+        <ul class="chk">
+          <li>Was entered into <strong>primarily for the purpose of acquiring status or privilege</strong> under the Act (primary purpose test)</li>
+          <li>Is <strong>not genuine</strong> (genuineness test)</li>
+        </ul>
+        
+        <span class="lbl">Relevant Time-Frames — Zhou v Canada (2020 FC 633, para 44)</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Primary Purpose Test</h5>
+            <ul><li>Assessed at <strong>time relationship entered into</strong></li></ul>
+          </div>
+          <div class="mini">
+            <h5>Genuineness Test</h5>
+            <ul><li>Assessed <strong>ongoing</strong> — at time of application and decision</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">📊</div>
+        <h4>Evidence to Assess Genuineness</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Acceptable Evidence for Genuineness</span>
+        <div class="pills">
+          <span class="pill pb">Birth certificates for children</span>
+          <span class="pill pb">Statutory declaration of common-law union</span>
+          <span class="pill pb">Proof of cohabitation for 1-year period (common-law partners)</span>
+          <span class="pill pb">Proof of financial transfers, visits, communication</span>
+          <span class="pill pb">Joint bank accounts, shared assets</span>
+          <span class="pill pb">Photos together with family/friends over time</span>
+          <span class="pill pb">Travel itineraries and boarding passes</span>
+          <span class="pill pb">Phone records, chat logs, emails</span>
+        </div>
+        
+        <span class="lbl">Officer Subjectivity — Van v Canada (2009 CanLII 93234, paras 33-34)</span>
+        <div class="box bw">⚠️ <strong>Potential for negative outcomes:</strong> Officers' personal biases and cultural assumptions can influence assessment of relationship evidence. Be aware of how evidence may be perceived and provide context where cultural practices differ from Canadian norms.</div>
+        
+        <span class="lbl">Birth of Child — Gill v Canada (2010 FC 122, para 8)</span>
+        <div class="box bg">✅ Birth of child is <strong>relevant evidence</strong> of genuineness but is <strong>not determinative</strong> on its own. Officer must still assess all factors.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>Negative Inferences from Previous History</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Can Negative Inferences Be Drawn?</span>
+        <div class="two">
+          <div class="casebox">
+            <div class="cn">Thach v Canada (2008 FC 658, para 26)</div>
+            <span class="yes">YES</span> — It was open to IAD to examine the <strong>immigration history</strong> of parties in assessing credibility and as one of relevant factors in assessing <strong>bona fides</strong> of marriage.
+          </div>
+          <div class="casebox">
+            <div class="cn">Zhou v Canada (2020 FC 633, para 61)</div>
+            <span class="no">NOT AUTOMATIC</span> — "I fail to see how it follows from the fact that Ms. Zhou married her second husband to secure PR for herself that she therefore married her third husband to secure PR for him."
+          </div>
+        </div>
+        <div class="box bw">💡 <strong>Key Takeaway:</strong> Previous immigration or marital history can be considered BUT cannot be the sole basis for negative inference. Each relationship must be assessed on its own merits.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">📝</div>
+        <h4>Completing Sponsorship Forms & Client Consultation</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Mock Sponsorship Application — Discussion Points</span>
+        <ul class="chk">
+          <li>What areas were difficult to complete?</li>
+          <li>What questions were missing from application forms that should have been asked?</li>
+          <li>What questions were confusing or unclear?</li>
+        </ul>
+        
+        <span class="lbl">Consultant-Client Roleplay Activity</span>
+        <div class="box bt"><strong>Practice Objective:</strong> Ask questions that would assist in completing government application forms. Focus on gathering relevant information efficiently and accurately.</div>
+        
+        <span class="lbl">How to Avoid Refusal Under R4</span>
+        <ul class="chk">
+          <li>Provide comprehensive evidence of genuineness (photos, communication, visits over time)</li>
+          <li>Address relationship development timeline clearly</li>
+          <li>Explain any red flags proactively (age difference, short courtship, cultural practices)</li>
+          <li>Demonstrate commitment beyond immigration benefit</li>
+          <li>Include credible third-party evidence (family, friends who know relationship)</li>
+          <li>Be consistent across all forms and supporting documents</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 4 ═══════════════════════════ -->
+<div class="sec" id="m4">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="4" style="background:linear-gradient(130deg,#2d0e3d 0%,#6d2e91 100%)">
+    <div class="mtag">Module 4</div>
+    <h2>Burden & Standard of Proof</h2>
+    <div class="sub">Magonza framework: credibility, probative value, weight, sufficiency, de novo hearings</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>Evidence Admissibility — IRPA s.175(1) & s.182(1)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Rules of Evidence — s.182(1)</span>
+        <div class="box bp">The IAD:</div>
+        <ul class="chk">
+          <li><strong>(a)</strong> Must hold a hearing (appeals under s.63(4))</li>
+          <li><strong>(b)</strong> Is <strong>NOT bound</strong> by any legal or technical rules of evidence</li>
+          <li><strong>(c)</strong> Use evidence that it considers <strong>credible or trustworthy</strong></li>
+        </ul>
+        
+        <div class="box bi">💡 <strong>IAD hearings are de novo</strong> — fresh hearing on merits, not review of officer's decision. New evidence can be introduced.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📊</div>
+        <h4>Magonza v Canada (2019 FC 14) — Four Key Concepts</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="casebox">
+          <div class="cn">Magonza v. Canada (Citizenship and Immigration), 2019 FC 14</div>
+          Context: Challenges of fact-finding in refugee law. Statements by relatives/friends take place outside Canada. Hard to deploy common fact-finding tools. Context of uncertainty leads to credibility questions.
+        </div>
+        
+        <span class="lbl">Balancing Two IRPA Goals</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Goal 1</h5>
+            <ul><li>Fair consideration to those who come claiming persecution</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Goal 2</h5>
+            <ul><li>Fair and efficient procedures that maintain integrity of system</li></ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Four Concepts to Balance These Goals</span>
+        <div class="tw"><table>
+          <thead><tr><th>Concept</th><th>Definition</th><th>Question Asked</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Credibility</strong></td><td>Trustworthiness and reliability of evidence</td><td>"Is this a trustworthy source of information?" / "Is the witness honest and telling the truth?" / "Does testimony provide accurate account of material facts?"</td></tr>
+            <tr><td><strong>Probative Value</strong></td><td>Capacity of evidence to establish the fact it is offered to prove</td><td>"To what degree is this information useful in answering the question I have to address?"</td></tr>
+            <tr><td><strong>Weight</strong></td><td>Persuasiveness of evidence in comparison with other evidence</td><td>"What counts in the ultimate balancing?" <strong>Weight = Credibility × Probative Value</strong></td></tr>
+            <tr><td><strong>Sufficiency</strong></td><td>Whether evidence has enough weight to meet standard of proof</td><td>"Am I convinced by the evidence that a fact is proven?"</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🎯</div>
+        <h4>Credibility Assessment Factors</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">According to <em>Magonza</em>, what factors are used to assess credibility?</div>
+        
+        <div class="three">
+          <div class="mini">
+            <h5>Demeanor of Witness</h5>
+            <ul><li>Body language, eye contact, tone, hesitation, confidence</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Plausibility</h5>
+            <ul><li>Does the account make sense? Is it consistent with known facts?</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Bias, Interest & Motivation</h5>
+            <ul><li>Does witness have reason to be untruthful? Stake in outcome?</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>Burden of Proof — Who Bears It?</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="two">
+          <div class="mini">
+            <h5>Burden Rests with APPELLANT</h5>
+            <ul>
+              <li><strong>Sponsorship appeals</strong> under s.63(1)</li>
+              <li><strong>Residency obligation appeals</strong> under s.63(4)</li>
+              <li><strong>Assessments of H&C</strong> under s.67(1)</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Burden Rests with MINISTER</h5>
+            <ul>
+              <li>In a <strong>removal order appeal</strong> where:</li>
+              <li>Removal order made by ID under s.45(d)</li>
+              <li>Subject of s.44 report is a PR</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="box bd">⚠️ It is <strong>NOT</strong> up to Hearings Officer or Panel to identify issues or ask required questions (<em>Vo v. MCI</em>, 2014 FC 816). Burden is on the party who must prove the case.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">📐</div>
+        <h4>Standard of Proof</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="qt">"In the IAD, the panel must determine whether the necessary elements of the issues in the appellant's case have been established by the facts as found. The standard of proof varies according to the legal issue before the panel. As in the ID, some provisions of IRPA specify the applicable standard of proof."<cite>— IRB, "Weighing Evidence - Chapter 4: Standard of proof and burden of proof"</cite></div>
+        
+        <div class="box bi">💡 Generally <strong>balance of probabilities</strong> standard applies in sponsorship appeals — more likely than not that the fact exists.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">📖</div>
+        <h4>Legal Principles</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bw">A <strong>legal principle</strong> is any statement which is used, along with facts, to reach a conclusion.</div>
+        
+        <span class="lbl">Examples of Legal Principles</span>
+        <ul class="chk">
+          <li>Laches (delay in asserting rights)</li>
+          <li>Good faith</li>
+          <li>Res judicata (matter already judged)</li>
+          <li>Impartiality of judges</li>
+          <li>Natural justice / procedural fairness</li>
+        </ul>
+        
+        <p style="margin:10px 0"><strong>In immigration law:</strong> Principles like "family reunification," "best interests of the child," "genuineness of relationship" guide decision-making.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 5 ═══════════════════════════ -->
+<div class="sec" id="m5">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="5" style="background:linear-gradient(130deg,#042d2d 0%,#0d6e6d 100%)">
+    <div class="mtag">Module 5</div>
+    <h2>IAD & Federal Court Appeals</h2>
+    <div class="sub">Right of appeal (s.62/63), IAD jurisdiction, H&C (s.65), Federal Court JR, ADR process</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">⚖️</div>
+        <h4>IAD Right of Appeal — IRPA s.62 & s.63</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">s.62 — IAD Jurisdiction</span>
+        <div class="box bt">IAD is the <strong>competent Division</strong> of the Board with respect to appeals under this Division.</div>
+        
+        <span class="lbl">s.63(1) — Right of Appeal</span>
+        <div class="box bt">A person who has filed (in prescribed manner) an application to sponsor a FN as member of <strong>Family Class</strong> may appeal to IAD against decision <strong>not to issue</strong> the FN a permanent resident visa.</div>
+      </div>
+    </card>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>No Right of Appeal — IRPA s.64(1)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">No right to appeal if FN or PR has been found to be inadmissible on grounds of:</div>
+        
+        <div class="pills">
+          <span class="pill pr">Security</span>
+          <span class="pill pr">Violating human or international rights</span>
+          <span class="pill pr">Serious criminality</span>
+          <span class="pill pr">Organized criminality</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">💚</div>
+        <h4>H&C Considerations — IRPA s.65</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg"><span class="ref">s.65</span> — In an appeal under s.63(1) or (2), the IAD may <strong>NOT</strong> consider H&C considerations unless it has decided:</div>
+        
+        <ul class="chk">
+          <li>FN <strong>is a member of the Family Class</strong></li>
+          <li>Sponsor <strong>is a sponsor</strong> within the meaning of the regulations</li>
+        </ul>
+        
+        <div class="box bw">💡 <strong>Two-Stage Analysis:</strong> IAD must first determine validity of refusal. Only if FN qualifies as Family Class member and sponsor is eligible can IAD proceed to H&C assessment to potentially allow appeal despite valid refusal.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">📋</div>
+        <h4>Filing an IAD Appeal</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Notice of Appeal — s.13 IAD Rules, 2022</span>
+        <div class="box bt">To file appeal of decision, person must provide to Division a <strong>notice of appeal</strong> together with:</div>
+        <ul class="chk">
+          <li><strong>(a)</strong> In case of sponsorship appeal: officer's decision AND written reasons (if any) for refusal</li>
+        </ul>
+        
+        <span class="lbl">Time Limit — s.16 IAD Rules, 2022</span>
+        <div class="box bt">Unless notice provided to ID member under subrule 14(1), notice of appeal and accompanying documents must be received by Division no later than:</div>
+        <ul class="chk">
+          <li><strong>(a)</strong> In case of sponsorship appeal: <strong>30 days</strong> after day on which appellant receives officer's decision and written reasons (if any) for refusal</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">⚖️</div>
+        <h4>Federal Court — Right of Judicial Review</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Application for JR — IRPA s.72</span>
+        <div class="box bi"><span class="ref">s.72(1)</span> — Judicial review by FC subject to s.86.1, commenced by making of <strong>application for leave</strong> to Court.</div>
+        <div class="box bi"><span class="ref">s.72(2)(a)</span> — Application for JR may <strong>NOT</strong> be made until <strong>right of appeal is exhausted</strong>.</div>
+        
+        <span class="lbl">Jurisdiction — Federal Courts Act s.18.1</span>
+        <div class="box bi"><span class="ref">s.18.1(1)</span> — Application for JR may be made by <strong>Attorney General of Canada</strong> OR by anyone <strong>directly affected</strong> by the matter.</div>
+        <div class="box bi"><span class="ref">s.18.1(2)</span> — Application for JR shall be made:</div>
+        <ul class="chk">
+          <li>Within <strong>30 days</strong> after time decision/order was first communicated to party directly affected</li>
+          <li>Within any further time that FC judge may fix or allow before or after end of those 30 days</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🔨</div>
+        <h4>Federal Court Powers — s.18.1(3) Federal Courts Act</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">On application for judicial review, FC may:</div>
+        
+        <ul class="chk">
+          <li><strong>(a)</strong> Order federal board/commission/tribunal to do any act or thing it has unlawfully failed/refused to do or unreasonably delayed in doing</li>
+          <li><strong>(b)</strong> Declare invalid or unlawful, or quash, set aside, or set aside and refer back for determination (with directions), prohibit or restrain, a decision/order/act/proceeding of federal board/commission/tribunal</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">🤝</div>
+        <h4>ADR (Alternative Dispute Resolution) Process</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Getting to ADR</span>
+        <ul class="chk">
+          <li>Can be selected by IAD on their own initiative</li>
+          <li>Counsel can request ADR</li>
+          <li><strong>Lower threshold</strong> than full hearing — <em>Jugpall v Canada (Citizenship and Immigration)</em>, 1999 CanLII 20685 (CA IRB)</li>
+        </ul>
+        
+        <span class="lbl">Benefits and Drawbacks</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Pros</h5>
+            <ul>
+              <li>Faster resolution</li>
+              <li>Less adversarial</li>
+              <li>Cost-effective</li>
+              <li>Parties have more control over outcome</li>
+              <li>Can preserve relationships</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Cons</h5>
+            <ul>
+              <li>May feel pressured to settle</li>
+              <li>Power imbalances</li>
+              <li>No precedent set</li>
+              <li>Limited appeal rights if settled</li>
+              <li>May not address systemic issues</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 6 ═══════════════════════════ -->
+<div class="sec" id="m6">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="6" style="background:linear-gradient(130deg,#3d2900 0%,#b87d00 100%)">
+    <div class="mtag">Module 6</div>
+    <h2>Oral Advocacy & IAD Hearings</h2>
+    <div class="sub">Minister's counsel role, designated representatives, effective advocacy, IAD procedures</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light);color:var(--gold)">⚖️</div>
+        <h4>CBSA Hearings Officer — Minister's Counsel Role</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Whom Does the CBSA Hearings Officer Represent?</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Minister of Citizenship & Immigration</h5>
+            <ul>
+              <li>Appeals pertaining to <strong>visa refusal</strong> of Family Class</li>
+              <li><strong>Residency obligation appeals</strong> re decisions made abroad</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Minister of Public Safety</h5>
+            <ul>
+              <li><strong>Removal order appeals</strong></li>
+              <li><strong>Ministerial appeals</strong> against decision by IRB Immigration Division</li>
+            </ul>
+          </div>
+        </div>
+        
+        <span class="lbl">Role of Hearings Officer as Minister's Counsel</span>
+        <ul class="chk">
+          <li>Ensure <strong>integrity of the system</strong> is upheld</li>
+          <li>Ensure <strong>justice is served</strong></li>
+          <li>Defend decisions of officer not to issue visa</li>
+          <li>Defend decisions of Minister's delegate or ID to issue removal order</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">📊</div>
+        <h4>Evidence & Burden in IAD Proceedings</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Can Hearings Officer Present New Evidence?</span>
+        <div class="box bt"><span class="yes">YES</span> — Due to <strong>de novo nature</strong> of IAD hearings. New evidence often introduced through documentation at hearing.</div>
+        
+        <span class="lbl">Who Carries Burden of Proof?</span>
+        <div class="box bt"><strong>Appellant</strong> (in sponsorship appeals under s.63(1)). It is NOT up to Hearings Officer or Panel to identify issues or ask required questions (<em>Vo v. MCI</em>, 2014 FC 816).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">👤</div>
+        <h4>Designated Representatives</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Who Decides Whether DR is Necessary?</span>
+        <div class="box bp"><strong>IAD Member</strong> determines whether designated representative is necessary (e.g., for minors, persons with mental disability).</div>
+        
+        <span class="lbl">What Should Counsel Do?</span>
+        <div class="box bp">If counsel knows of someone in Canada who meets requirements of DR, provide <strong>name and contact information</strong> to IAD [IAD Rule 46(a)].</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">⚖️</div>
+        <h4>What Does the IAD Do?</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">IAD examines cases for possible errors:</div>
+        
+        <ul class="chk">
+          <li><strong>1.</strong> Error in law</li>
+          <li><strong>2.</strong> Error in fact</li>
+          <li><strong>3.</strong> Error in mixed fact and law</li>
+          <li><strong>4.</strong> Failure to observe principle of natural justice</li>
+        </ul>
+        
+        <div class="box bg">✅ IAD has authority to <strong>reverse valid decisions on H&C grounds</strong> — considers factors that may warrant appeal despite fact decision is valid in law.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light);color:var(--gold)">🎤</div>
+        <h4>Effective Advocacy — Best Practices</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Appearance & Body Language</span>
+        <ul class="chk">
+          <li>Make a good first impression (professional attire)</li>
+          <li>Be aware of your mannerisms</li>
+          <li>Don't walk around hearing room too much</li>
+          <li>Maintain appropriate posture</li>
+        </ul>
+        
+        <span class="lbl">Language</span>
+        <ul class="chk">
+          <li>Use introductory sentences to take place of headings</li>
+          <li>Ensure language is appropriate — don't use "I believe," "I think," or "in my opinion"</li>
+          <li>Start with <strong>"I submit"</strong> or <strong>"It is the [party's] position that..."</strong> when expressing position/argument</li>
+        </ul>
+        
+        <span class="lbl">Speaking & Delivery</span>
+        <ul class="chk">
+          <li>Adjust volume to the room</li>
+          <li>Speak <strong>more slowly</strong> than you think necessary</li>
+          <li>Think of pacing as punctuation of spoken presentation — pause briefly between sentences, longer between ideas</li>
+          <li>Use voice expressively — do NOT speak in monotone</li>
+          <li>Raise and lower voice as appropriate</li>
+        </ul>
+        
+        <span class="lbl">Additional Tips</span>
+        <ul class="chk">
+          <li>Be attentive to decision-maker</li>
+          <li>Maintain direct eye contact with decision-maker while speaking</li>
+          <li><strong>Don't memorize a prepared script</strong> — use outline instead</li>
+          <li>Practice your presentation</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ QUICK REF ═══════════════════════════ -->
+<div class="sec" id="qr">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="" style="background:linear-gradient(130deg,#1c2127 0%,#2d3748 100%)">
+    <div class="mtag">All Modules</div>
+    <h2>📊 Master Quick Reference</h2>
+    <div class="sub">All key comparisons, factors, timelines, and checklists at a glance</div>
+  </div>
+
+  <div style="display:grid;gap:17px">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">✅</div>
+        <h4>Sponsor Eligibility vs Prohibitions — Complete Checklist</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="two">
+          <div class="mini">
+            <h5>✓ Eligible to Sponsor If:</h5>
+            <ul>
+              <li>≥18 years old</li>
+              <li>Canadian citizen, PR, or registered Indian</li>
+              <li>If citizen abroad: plan to return to Canada</li>
+              <li>Not on social assistance (except disability)</li>
+              <li>Can provide for basic needs</li>
+              <li>Parents/grandparents: LICO + 30%</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>✗ Prohibited from Sponsoring If:</h5>
+            <ul>
+              <li>Sexual offence conviction</li>
+              <li>Violence (≥10 yrs max) against person</li>
+              <li>Bodily harm to family/relative/conjugal partner</li>
+              <li>Default on previous sponsorship</li>
+              <li>Under removal order</li>
+              <li>In detention</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </card>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">💍</div>
+        <h4>Spouse Categories — Complete Comparison</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Category</th><th>Requirements</th><th>Key Features</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Married</strong></td><td>Marriage valid in jurisdiction where took place AND under Canadian law</td><td>Recognized worldwide; proxy marriages accepted if valid; same-sex marriages recognized</td></tr>
+            <tr><td><strong>Common-Law</strong></td><td>Continuous cohabitation ≥1 year</td><td>Must prove shared residence; statutory declaration required</td></tr>
+            <tr><td><strong>Conjugal Partner</strong></td><td>FN residing outside Canada + conjugal relationship ≥1 year + barrier to marriage/cohabitation</td><td>Use M v H factors; must show immigration or legal barrier preventing marriage/cohabitation</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">🇨🇦</div>
+        <h4>In-Canada vs Overseas Applications — Full Comparison</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Aspect</th><th>In-Canada</th><th>Overseas</th></tr></thead>
+          <tbody>
+            <tr><td>Applicant location</td><td>Must stay in Canada</td><td>Can be anywhere</td></tr>
+            <tr><td>Exit Canada</td><td>Cannot exit or application abandoned</td><td>Can travel freely</td></tr>
+            <tr><td>Work permit</td><td>May be eligible (pilot project)</td><td>Not available until PR granted</td></tr>
+            <tr><td>IAD appeal right</td><td><span class="no">NO</span></td><td><span class="yes">YES</span></td></tr>
+            <tr><td>Inadmissibility</td><td>Difficult to overcome</td><td>Can be addressed through appeal</td></tr>
+            <tr><td>Processing time</td><td>Varies</td><td>Often faster</td></tr>
+            <tr><td>Conjugal partners</td><td>Not eligible</td><td>Only option</td></tr>
+            <tr><td>Forms</td><td>Specific in-Canada forms</td><td>Specific overseas forms</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🚫</div>
+        <h4>Inadmissibility Grounds & Impact on Sponsorship</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Ground</th><th>IRPA Section</th><th>Duration</th><th>Can Be Overcome?</th></tr></thead>
+          <tbody>
+            <tr><td>Misrepresentation</td><td>s.40</td><td>5 years</td><td>No — must wait</td></tr>
+            <tr><td>Criminality</td><td>s.36(2)</td><td>Permanent</td><td>Yes — criminal rehabilitation or record suspension</td></tr>
+            <tr><td>Health (excessive demand)</td><td>s.38</td><td>While condition exists</td><td>Family Class exempt from excessive demand provision</td></tr>
+            <tr><td>Health (danger to public)</td><td>s.38</td><td>While condition exists</td><td>No exemptions</td></tr>
+            <tr><td>Financial</td><td>s.39</td><td>While unable to support</td><td>Sponsor's undertaking addresses this</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📊</div>
+        <h4>Magonza Framework — Four Concepts</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Concept</th><th>Question</th><th>Factors</th><th>Formula</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Credibility</strong></td><td>Is this trustworthy?</td><td>Demeanor, plausibility, bias/interest/motivation</td><td>—</td></tr>
+            <tr><td><strong>Probative Value</strong></td><td>How useful is this?</td><td>Relevance to issue, capacity to prove fact</td><td>—</td></tr>
+            <tr><td><strong>Weight</strong></td><td>How persuasive?</td><td>Comparison with other evidence</td><td>Credibility × Probative Value</td></tr>
+            <tr><td><strong>Sufficiency</strong></td><td>Am I convinced?</td><td>Cumulative weight of all evidence</td><td>Meets standard of proof?</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">⏱️</div>
+        <h4>Key Timelines & Deadlines</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Action</th><th>Timeline</th></tr></thead>
+          <tbody>
+            <tr><td>File IAD appeal (sponsorship)</td><td>30 days from receipt of refusal decision</td></tr>
+            <tr><td>File Federal Court JR</td><td>30 days after decision communicated (or as extended by judge)</td></tr>
+            <tr><td>Common-law relationship</td><td>Continuous cohabitation ≥1 year</td></tr>
+            <tr><td>Conjugal partner relationship</td><td>In relationship ≥1 year</td></tr>
+            <tr><td>Dependent child age limit</td><td>&lt;22 years (unless 22+ with disability + financially dependent since before 22)</td></tr>
+            <tr><td>Misrepresentation ban</td><td>5 years</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">⚖️</div>
+        <h4>Burden of Proof Summary</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Proceeding Type</th><th>Burden Rests With</th></tr></thead>
+          <tbody>
+            <tr><td>Sponsorship appeals (s.63(1))</td><td><strong>Appellant</strong></td></tr>
+            <tr><td>Residency obligation appeals (s.63(4))</td><td><strong>Appellant</strong></td></tr>
+            <tr><td>H&C assessment (s.67(1))</td><td><strong>Appellant</strong></td></tr>
+            <tr><td>Removal order appeal (ID issued under s.45(d), subject is PR)</td><td><strong>Minister</strong></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+function show(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const map={ov:0,m1:1,m2:2,m3:3,m4:4,m5:5,m6:6,qr:7};
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  const btns=document.querySelectorAll('.nb');
+  if(btns[map[id]])btns[map[id]].classList.add('on');
+  window.scrollTo({top:64,behavior:'smooth'});
+}
+function tog(h){
+  h.classList.toggle('on');
+  h.nextElementSibling.classList.toggle('on');
+}
+function srch(q){
+  if(q.length<2)return;
+  const lo=q.toLowerCase();
+  const all=document.querySelectorAll('.cb,.mini,.casebox,.box');
+  for(let el of all){
+    if(el.textContent.toLowerCase().includes(lo)){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.style.outline='3px solid #d35f00';
+      setTimeout(()=>el.style.outline='',4000);
+      break;
+    }
+  }
+}
+document.querySelectorAll('.ch.on').forEach(h=>{
+  h.nextElementSibling.classList.add('on');
+});
+</script>
+</body>
+</html>

@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My Portal — Vantage Immigration</title>
+  <title>My Portal — Graceful Immigration Consultant</title>
+  <link rel="icon" href="../../logo.png">
   <link rel="stylesheet" href="../../shared/css/portal.css">
   <style>
     body{display:flex;min-height:100vh}
     .client-wrap{flex:1;display:flex;flex-direction:column;min-height:100vh;background:var(--gray-50)}
     .client-topbar{background:var(--navy);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
     .client-logo{display:flex;align-items:center;gap:10px}
-    .client-mark{width:36px;height:36px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;font-family:Georgia,serif;color:var(--white)}
+    .client-mark{width:50px;height:50px;background:var(--white);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .client-mark img{width:100%;height:100%;object-fit:contain;padding:2px}
     .client-name{color:var(--white);font-size:15px;font-weight:700}
     .client-nav-links{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
     .client-nav-btn{background:transparent;border:none;color:rgba(255,255,255,.7);padding:8px 14px;border-radius:var(--radius);font-size:13px;font-family:var(--font);cursor:pointer;transition:.15s}
@@ -94,7 +96,8 @@
     /* Login gate */
     #loginGate{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--gray-50)}
     .login-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;width:100%;max-width:400px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-    .login-mark{width:52px;height:52px;background:var(--navy);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;font-family:Georgia,serif;color:var(--gold);margin:0 auto 12px}
+    .login-mark{width:72px;height:72px;background:var(--white);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto 12px}
+    .login-mark img{width:100%;height:100%;object-fit:contain;padding:3px}
     .login-form label{font-size:11px;color:var(--gray-600);display:block;margin-bottom:3px;margin-top:14px;font-weight:500}
     .login-form input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:var(--font)}
     .login-form input:focus{outline:none;border-color:var(--navy)}
@@ -108,13 +111,13 @@
 <div id="loginGate">
   <div class="login-card">
     <div style="text-align:center;margin-bottom:20px">
-      <div class="login-mark">V</div>
+      <div class="login-mark"><img src="../../logo.png" alt="Graceful Immigration Consultant"></div>
       <div style="font-size:18px;font-weight:700;color:var(--navy)">Client Portal Login</div>
-      <div style="font-size:13px;color:var(--gray-600);margin-top:4px">Vantage Immigration Services</div>
+      <div style="font-size:13px;color:var(--gray-600);margin-top:4px">Graceful Immigration Consultant Inc.</div>
     </div>
     <div class="login-form">
-      <label>Email Address</label>
-      <input type="email" id="loginEmail" placeholder="your@email.com">
+      <label>Username (provided by consultant)</label>
+      <input type="text" id="loginEmail" placeholder="Enter your username" autocomplete="username">
       <label>Password</label>
       <input type="password" id="loginPass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
@@ -124,7 +127,8 @@
     <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--gray-600)">
       Don't have an account? <a href="../intake.html" style="color:var(--navy);font-weight:600">Start your application →</a>
     </div>
-    <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--gray-400)">Demo: any email + password "password123"</div>
+    <div id="loginError" style="display:none;margin-top:10px;padding:9px 12px;background:#fde8e8;border:1px solid #f5a5a5;border-radius:6px;font-size:12px;color:#c0392b;text-align:center"></div>
+    <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--gray-400)">Use the credentials sent by your consultant after intake review.</div>
   </div>
 </div>
 
@@ -132,8 +136,8 @@
 <div class="client-wrap" id="appWrap" style="display:none">
   <div class="client-topbar">
     <div class="client-logo">
-      <div class="client-mark">V</div>
-      <div class="client-name">Vantage Immigration</div>
+      <div class="client-mark"><img src="../../logo.png" alt="Graceful Immigration Consultant"></div>
+      <div class="client-name">Graceful Immigration Consultant</div>
     </div>
     <div class="client-nav-links">
       <button class="client-nav-btn active" id="cnav-dashboard" onclick="clientPage('dashboard')">🏠 My Case</button>
@@ -194,11 +198,11 @@
       <div class="card">
         <div class="card-title">Your Consultant</div>
         <div style="display:flex;align-items:center;gap:16px;margin-top:8px">
-          <div style="width:52px;height:52px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:22px;font-weight:700;font-family:Georgia,serif;flex-shrink:0">V</div>
+          <div style="width:52px;height:52px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:22px;font-weight:700;font-family:Georgia,serif;flex-shrink:0">G</div>
           <div>
-            <div style="font-size:14px;font-weight:700;color:var(--navy)">Vantage Immigration RCIC</div>
+            <div style="font-size:14px;font-weight:700;color:var(--navy)">Graceful Immigration Consultant RCIC</div>
             <div style="font-size:12px;color:var(--gray-600)">Regulated Canadian Immigration Consultant (RCIC)</div>
-            <div style="font-size:12px;color:var(--gray-600);margin-top:2px">📍 Fort McMurray, Alberta &nbsp; 📞 +1 (780) 000-0000</div>
+            <div style="font-size:12px;color:var(--gray-600);margin-top:2px">📍 Canada &nbsp; 📞 +1 (780) 000-0000</div>
           </div>
         </div>
         <div style="margin-top:14px;background:var(--navy-l);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--navy)">
@@ -251,14 +255,12 @@
           <p>This Agreement is for a <strong>one-time initial consultation only</strong>. No application preparation or ongoing representation is included. Any further services require a separate written retainer agreement.</p>
           <h4>2. No Guarantee</h4>
           <p>Opinions are based solely on information provided at time of consultation. The RCIC does <strong>not guarantee</strong> eligibility, approval, processing times, or any particular outcome.</p>
-          <h4>3. Consultation Fee</h4>
-          <p>The consultation fee is <strong id="consultFeeDisplay"></strong> and is earned once the consultation has taken place. It is <strong>non-refundable</strong>, unless otherwise required by law.</p>
-          <h4>4. Confidentiality (CICC Code s.28)</h4>
+          <h4>3. Confidentiality (CICC Code s.28)</h4>
           <p>All information relating to the Client acquired during the professional relationship is kept strictly confidential.</p>
-          <h4>5. Privacy (PIPEDA / PIPA Alberta)</h4>
+          <h4>5. Privacy (PIPEDA)</h4>
           <p>The Client consents to collection, use, and storage of personal information for immigration consulting purposes.</p>
           <h4>6. Governing Law</h4>
-          <p>This Agreement is governed by the laws of the Province of Alberta and the federal laws of Canada.</p>
+          <p>This Agreement is governed by the federal laws of Canada.</p>
         </div>
         <div class="agr-confirm" id="consultConfirmRow">
           <input type="checkbox" id="consultChk" style="margin-top:2px">
@@ -295,12 +297,8 @@
         <div class="agr-text" id="serviceAgrText">
           <div id="serviceFilledFields" style="background:var(--navy-l);border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:12px;line-height:2;display:none"></div>
           <h4>1. Authorization and Retainer</h4>
-          <p>The Client retains <strong>Vantage Immigration Services</strong> (<strong id="saRcicDisplay"></strong>) to provide immigration consulting services for: <strong id="saAppTypeDisplay"></strong></p>
-          <h4>2. Professional Fees</h4>
-          <p>Total fee: <strong id="saTotalFeeDisplay"></strong><br>
-          Stage 1 (on signing): <strong id="saStage1Display"></strong><br>
-          Stage 2 (at IRCC submission): <strong id="saStage2Display"></strong></p>
-          <h4>3. 48-Hour Cooling-Off Period</h4>
+          <p>The Client retains <strong>Graceful Immigration Consultant Inc.</strong> (<strong id="saRcicDisplay"></strong>) to provide immigration consulting services for: <strong id="saAppTypeDisplay"></strong></p>
+          <h4>2. 48-Hour Cooling-Off Period</h4>
           <p>The Client may cancel within <strong>48 hours</strong> of signing for a full refund. After 48 hours, fees for work performed are non-refundable.</p>
           <h4>4. Fees and Trust Account</h4>
           <p>All advance payments are deposited into the Consultant's trust account. Government IRCC fees are separate and non-refundable once paid.</p>
@@ -308,7 +306,7 @@
           <p>The Client agrees to provide accurate, complete, and honest information. <strong>Misrepresentation Warning:</strong> False or misleading information may lead to refusal, loss of status, and future ineligibility. <em>Client initials: _______</em></p>
           <h4>6. Scope of Services</h4>
           <p>Services include: (a) assessment and advice; (b) preparation and submission of the application; (c) IRCC communication; (d) IMM 5476 Use of Representative.</p>
-          <h4>7. Confidentiality (CICC Code s.28 / PIPEDA / PIPA Alberta)</h4>
+          <h4>7. Confidentiality (CICC Code s.28 / PIPEDA)</h4>
           <p>All client information kept strictly confidential. Shared only with IRCC and necessary authorities.</p>
           <h4>8. Dispute Resolution</h4>
           <p>Complaints: CICC — 5500 North Service Road, Suite 1002, Burlington ON L7L 6W6 — 1-877-836-7543 — college-ic.ca</p>
@@ -456,32 +454,75 @@
 <script>
 // ── SESSION ──────────────────────────────────────────────────────
 const session = {
-  name:    sessionStorage.getItem('vantage_name')    || 'Test Client',
-  email:   sessionStorage.getItem('vantage_email')   || 'client@demo.com',
-  fileId:  sessionStorage.getItem('vantage_fileId')  || 'VIS-2026-AB-TC-001',
-  appType: sessionStorage.getItem('vantage_appType') || 'express_entry',
-  loggedIn: sessionStorage.getItem('vantage_loggedIn') === '1'
+  name:    sessionStorage.getItem('graceful_name')    || '',
+  email:   sessionStorage.getItem('graceful_email')   || '',
+  fileId:  sessionStorage.getItem('graceful_fileId')  || '',
+  appType: sessionStorage.getItem('graceful_appType') || 'express_entry',
+  loggedIn: sessionStorage.getItem('graceful_loggedIn') === '1'
 };
 
 const PORTAL_STATE = {
-  consultationSigned: sessionStorage.getItem('vantage_consultSigned') === '1',
-  serviceSigned:      sessionStorage.getItem('vantage_serviceSigned') === '1',
+  consultationSigned: sessionStorage.getItem('graceful_consultSigned') === '1',
+  serviceSigned:      sessionStorage.getItem('graceful_serviceSigned') === '1',
   currentStage: 2
 };
 
+// ── CREDENTIAL LOGIN ──────────────────────────────────────────────
+// Find the client record whose credentials match the typed username+password
+function findClientByCredentials(username, password) {
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key.startsWith('graceful_client_')) continue;
+    try {
+      const d = JSON.parse(localStorage.getItem(key));
+      if (d && d.credentials &&
+          d.credentials.username === username &&
+          d.credentials.password === password &&
+          d.credentials.approved === true) {
+        return d;
+      }
+    } catch(e) {}
+  }
+  return null;
+}
+
 function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPass').value;
-  if (!email || pass.length < 6) { alert('Please enter your email and a valid password (min 6 chars).'); return; }
-  sessionStorage.setItem('vantage_loggedIn','1');
-  sessionStorage.setItem('vantage_email', email);
+  const username = document.getElementById('loginEmail').value.trim();
+  const pass     = document.getElementById('loginPass').value;
+  const errEl    = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!username || !pass) {
+    errEl.textContent = 'Please enter your username and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const clientData = findClientByCredentials(username, pass);
+  if (!clientData) {
+    errEl.textContent = 'Invalid credentials or your account has not been approved yet. Contact your consultant.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Successful login — store session
+  sessionStorage.setItem('graceful_loggedIn', '1');
+  sessionStorage.setItem('graceful_fileId',   clientData.fileId);
+  sessionStorage.setItem('graceful_name',     clientData.fullName || '');
+  sessionStorage.setItem('graceful_email',    clientData.email    || '');
+  sessionStorage.setItem('graceful_appType',  clientData.appType  || '');
+
   session.loggedIn = true;
-  session.email = email;
+  session.fileId   = clientData.fileId;
+  session.name     = clientData.fullName || '';
+  session.email    = clientData.email    || '';
+  session.appType  = clientData.appType  || 'express_entry';
+
   showPortal();
 }
 
 function logout() {
-  sessionStorage.removeItem('vantage_loggedIn');
+  sessionStorage.clear();
   location.reload();
 }
 
@@ -492,7 +533,7 @@ function showPortal() {
   initPortal();
 }
 
-if (session.loggedIn) showPortal();
+if (session.loggedIn && session.fileId) showPortal();
 
 // ── PAGE NAV ─────────────────────────────────────────────────────
 function clientPage(id) {
@@ -522,7 +563,7 @@ function initPortal() {
 
 function loadStaffData() {
   try {
-    const raw = localStorage.getItem('vantage_client_' + session.fileId);
+    const raw = localStorage.getItem('graceful_client_' + session.fileId);
     if (raw) {
       const d = JSON.parse(raw);
       // Sync name and app type from staff data if richer
@@ -542,9 +583,7 @@ function loadStaffData() {
           ff.innerHTML = `<strong style="color:var(--navy)">Pre-filled by your consultant:</strong><br>
             Client: <strong>${d.fullName||''}</strong> · DOB: <strong>${d.dob||''}</strong><br>
             RCIC: <strong>${d.rcic_name||''}</strong> · CICC#: <strong>${d.rcic_cicc||''}</strong><br>
-            Purpose: <strong>${d.purpose||''}</strong> · Fee: <strong>${d.consultFee||''}</strong>`;
-          const feeEl = document.getElementById('consultFeeDisplay');
-          if (feeEl) feeEl.textContent = d.consultFee || '$150 CAD';
+            Purpose: <strong>${d.purpose||''}</strong>`;
         }
       }
       if (d.serviceReady) {
@@ -553,28 +592,21 @@ function loadStaffData() {
           sf.style.display = 'block';
           sf.innerHTML = `<strong style="color:var(--navy)">Pre-filled by your consultant:</strong><br>
             Client: <strong>${d.fullName||''}</strong> · Passport: <strong>${d.passport||''}</strong><br>
-            Application: <strong>${d.appTypeLabel||''}</strong><br>
-            Total Fee: <strong>${d.totalFee||''}</strong>`;
+            Application: <strong>${d.appTypeLabel||''}</strong>`;
         }
         const rcicEl = document.getElementById('saRcicDisplay');
         const appEl  = document.getElementById('saAppTypeDisplay');
-        const feeEl  = document.getElementById('saTotalFeeDisplay');
-        const s1El   = document.getElementById('saStage1Display');
-        const s2El   = document.getElementById('saStage2Display');
         if (rcicEl)  rcicEl.textContent  = d.rcic_name || '';
         if (appEl)   appEl.textContent   = d.appTypeLabel || appTypeLabel(session.appType);
-        if (feeEl)   feeEl.textContent   = d.totalFee || '';
-        if (s1El)    s1El.textContent    = d.stage1Fee || '';
-        if (s2El)    s2El.textContent    = d.stage2Fee || '';
       }
       // Sync signed status from staff data too
       if (d.consultSigned) {
         PORTAL_STATE.consultationSigned = true;
-        sessionStorage.setItem('vantage_consultSigned','1');
+        sessionStorage.setItem('graceful_consultSigned','1');
       }
       if (d.serviceSigned) {
         PORTAL_STATE.serviceSigned = true;
-        sessionStorage.setItem('vantage_serviceSigned','1');
+        sessionStorage.setItem('graceful_serviceSigned','1');
       }
     }
   } catch(e) {}
@@ -714,14 +746,14 @@ function signConsultation() {
   const name = document.getElementById('consultSigInput').value.trim();
   if (!name) { alert('Please type your full legal name to sign.'); return; }
   PORTAL_STATE.consultationSigned = true;
-  sessionStorage.setItem('vantage_consultSigned','1');
+  sessionStorage.setItem('graceful_consultSigned','1');
   // Write back to staff data bridge
   try {
-    const d = JSON.parse(localStorage.getItem('vantage_client_' + session.fileId)||'{}');
+    const d = JSON.parse(localStorage.getItem('graceful_client_' + session.fileId)||'{}');
     d.consultSigned = true;
     d.consultSignedBy = name;
     d.consultSignedAt = new Date().toISOString();
-    localStorage.setItem('vantage_client_' + session.fileId, JSON.stringify(d));
+    localStorage.setItem('graceful_client_' + session.fileId, JSON.stringify(d));
   } catch(e) {}
   applyAgreementState();
   buildStageTracker();
@@ -734,14 +766,14 @@ function signService() {
   const name = document.getElementById('serviceSigInput').value.trim();
   if (!name) { alert('Please type your full legal name to sign.'); return; }
   PORTAL_STATE.serviceSigned = true;
-  sessionStorage.setItem('vantage_serviceSigned','1');
+  sessionStorage.setItem('graceful_serviceSigned','1');
   // Write back to staff data bridge
   try {
-    const d = JSON.parse(localStorage.getItem('vantage_client_' + session.fileId)||'{}');
+    const d = JSON.parse(localStorage.getItem('graceful_client_' + session.fileId)||'{}');
     d.serviceSigned = true;
     d.serviceSignedBy = name;
     d.serviceSignedAt = new Date().toISOString();
-    localStorage.setItem('vantage_client_' + session.fileId, JSON.stringify(d));
+    localStorage.setItem('graceful_client_' + session.fileId, JSON.stringify(d));
   } catch(e) {}
   applyAgreementState();
   buildStageTracker();
@@ -775,7 +807,7 @@ function buildChecklist() {
 
   // Load saved check state
   let checks = {};
-  try { checks = JSON.parse(localStorage.getItem('vantage_checks_'+session.fileId)||'{}'); } catch(e) {}
+  try { checks = JSON.parse(localStorage.getItem('graceful_checks_'+session.fileId)||'{}'); } catch(e) {}
 
   let html = `<div class="alert alert-success" style="margin-bottom:14px">✓ Service agreement signed — your checklist is now active. Check off items as you prepare them and upload in the Documents tab.</div>`;
 
@@ -787,7 +819,7 @@ function buildChecklist() {
       // Get staff review status
       let staffStatus = '';
       try {
-        const d = JSON.parse(localStorage.getItem('vantage_client_'+session.fileId)||'{}');
+        const d = JSON.parse(localStorage.getItem('graceful_client_'+session.fileId)||'{}');
         const ds = (d.uploadedDocs||{})[key];
         if (ds === 'accepted') staffStatus = '<span class="badge badge-green" style="margin-left:6px">✓ Accepted</span>';
         else if (ds === 'reupload') staffStatus = '<span class="badge badge-red" style="margin-left:6px">Re-upload needed</span>';
@@ -818,9 +850,9 @@ function toggleCheck(key, el) {
   if (chk) chk.checked = !chk.checked;
   // Save state
   try {
-    const checks = JSON.parse(localStorage.getItem('vantage_checks_'+session.fileId)||'{}');
+    const checks = JSON.parse(localStorage.getItem('graceful_checks_'+session.fileId)||'{}');
     checks[key] = chk ? chk.checked : false;
-    localStorage.setItem('vantage_checks_'+session.fileId, JSON.stringify(checks));
+    localStorage.setItem('graceful_checks_'+session.fileId, JSON.stringify(checks));
   } catch(e) {}
 }
 
@@ -871,12 +903,12 @@ function buildDocChecklist() {
 // ── MESSAGES ───────────────────────────────────────────────────────
 function buildMessages() {
   const defaultMsgs = [
-    { from:'Vantage Immigration', text:'Welcome to your portal! Please sign the Consultation Agreement to get started. I will be in touch within 24 hours.', time:'Upon account creation', unread:true },
-    { from:'Vantage Immigration', text:'Ensure your passport is valid for at least 6 months before we submit.', time:'Reminder', unread:false }
+    { from:'Graceful Immigration Consultant', text:'Welcome to your portal! Please sign the Consultation Agreement to get started. I will be in touch within 24 hours.', time:'Upon account creation', unread:true },
+    { from:'Graceful Immigration Consultant', text:'Ensure your passport is valid for at least 6 months before we submit.', time:'Reminder', unread:false }
   ];
   // Merge staff-pushed messages
   const staffMsgs = (session.staffMessages||[]).map(m => ({
-    from: m.from || 'Vantage Immigration',
+    from: m.from || 'Graceful Immigration Consultant',
     text: m.text, time: m.time, unread: true
   }));
   const all = [...staffMsgs, ...defaultMsgs];
@@ -986,10 +1018,10 @@ function submitDocuments() {
   if (confirm) confirm.style.display = 'block';
   // Write submission flag to staff bridge
   try {
-    const d = JSON.parse(localStorage.getItem('vantage_client_' + session.fileId)||'{}');
+    const d = JSON.parse(localStorage.getItem('graceful_client_' + session.fileId)||'{}');
     d.docsSubmitted = true;
     d.docsSubmittedAt = new Date().toISOString();
-    localStorage.setItem('vantage_client_' + session.fileId, JSON.stringify(d));
+    localStorage.setItem('graceful_client_' + session.fileId, JSON.stringify(d));
   } catch(e) {}
   setTimeout(() => { if (confirm) confirm.style.display = 'none'; }, 5000);
 }

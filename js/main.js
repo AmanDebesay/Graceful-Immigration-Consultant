@@ -370,7 +370,7 @@ function buildIntake() {
       <div style="font-weight:600;font-size:13px;color:var(--navy);margin-bottom:4px">Contact & address (sponsor / principal applicant)</div>
       <div><label>Street address</label><input type="text" id="intAddr" placeholder="123 Main St"></div>
       <div class="row-3">
-        <div><label>City</label><input type="text" id="intCity" placeholder="Fort McMurray"></div>
+        <div><label>City</label><input type="text" id="intCity" placeholder="City"></div>
         <div><label>Province</label><select id="intProvAddr">${provOptions}</select></div>
         <div><label>Postal code</label><input type="text" id="intPostal" placeholder="T9H 0A1"></div>
       </div>
@@ -663,7 +663,7 @@ function buildAgreement() {
         <div class="row-3">
           <div><label>RCIC Full Name</label><input type="text" id="ca_rcicName" value="${co.rcic}" readonly></div>
           <div><label>CICC Licence No.</label><input type="text" id="ca_cicc" value="${co.cicc}" readonly></div>
-          <div><label>Province</label><input type="text" id="ca_province" value="Alberta" readonly></div>
+          <div><label>Province</label><input type="text" id="ca_province" value="" placeholder="Province"></div>
         </div>
         <div class="row-2">
           <div><label>Business Address</label><input type="text" id="ca_addr" value="${co.location}" readonly></div>
@@ -699,10 +699,10 @@ function buildAgreement() {
           <p>The Client agrees to pay the consultation fee noted above. This fee is earned once the consultation has taken place and is <strong>non-refundable</strong>, unless otherwise required by law.</p>
           <h4>5. Confidentiality (Code of Professional Conduct — s.28)</h4>
           <p>The RCIC must keep confidential all information relating to the Client acquired in the course of the professional relationship, unless disclosure is authorized by the Client or required by law.</p>
-          <h4>6. Privacy &amp; Consent (PIPEDA / PIPA Alberta)</h4>
-          <p>The Client consents to the collection, use, and storage of personal information for the purpose of providing this consultation, in accordance with PIPEDA and Alberta PIPA.</p>
+          <h4>6. Privacy &amp; Consent (PIPEDA)</h4>
+          <p>The Client consents to the collection, use, and storage of personal information for the purpose of providing this consultation, in accordance with PIPEDA.</p>
           <h4>7. Governing Law</h4>
-          <p>This Agreement shall be governed by the laws in force in the Province of Alberta, and the federal laws of Canada applicable therein.</p>
+          <p>This Agreement shall be governed by the federal laws of Canada applicable therein.</p>
           <h4>8. Acknowledgement</h4>
           <p>The Client acknowledges that they have read and understood this Agreement, had the opportunity to ask questions, and agree to be bound by its terms.</p>
         </div>
@@ -742,7 +742,7 @@ function buildAgreement() {
         <div class="row-3">
           <div><label>RCIC Full Name</label><input type="text" id="sa_rcicName" value="${co.rcic}" readonly></div>
           <div><label>CICC Membership No.</label><input type="text" id="sa_cicc" value="${co.cicc}" readonly></div>
-          <div><label>Province</label><input type="text" id="sa_province" value="Alberta" readonly></div>
+          <div><label>Province</label><input type="text" id="sa_province" value="" placeholder="Province"></div>
         </div>
         <div class="row-2">
           <div><label>Business Address</label><input type="text" id="sa_addr" value="${co.location}" readonly></div>
@@ -782,7 +782,7 @@ function buildAgreement() {
           <p><strong>Misrepresentation Warning:</strong> Providing false or misleading information may lead to application refusal, loss of status, and future ineligibility. <em>Client initials: _______</em></p>
           <h4>6. Fees, Trust Account and Refund Policy</h4>
           <p>All advance payments will be deposited into the Consultant's trust account. Fees are earned upon completion of each stage. <strong>48-hour cooling-off period:</strong> The Client may cancel within 48 hours for a full refund. After 48 hours, fees for work performed are non-refundable. Government IRCC fees are non-refundable once paid.</p>
-          <h4>7. Confidentiality and Privacy (PIPEDA / PIPA Alberta)</h4>
+          <h4>7. Confidentiality and Privacy (PIPEDA)</h4>
           <p>All client information kept strictly confidential per CICC Code of Professional Conduct s.28. Information shared only with IRCC and necessary authorities as required for the application.</p>
           <h4>8. Government Fees</h4>
           <p>Government fees (IRCC processing, biometrics, right of PR, etc.) are separate from the Consultant's professional fees and are paid directly to IRCC by the Client.</p>
@@ -791,7 +791,7 @@ function buildAgreement() {
           <h4>10. Dispute Resolution</h4>
           <p>Complaints may be filed with the CICC — 5500 North Service Road, Suite 1002, Burlington ON L7L 6W6 — Toll-free: 1-877-836-7543 — info@college-ic.ca — college-ic.ca</p>
           <h4>11. Governing Law</h4>
-          <p>This Agreement is governed by the laws of the Province of Alberta and the federal laws of Canada applicable therein.</p>
+          <p>This Agreement is governed by the federal laws of Canada applicable therein.</p>
         </div>
         <div class="sig-confirm-row">
           <input type="checkbox" id="sa_readChk">

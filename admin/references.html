@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RCIC Reference Library — Graceful Admin</title>
+  <link rel="icon" href="../logo.png">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    body { background: var(--gray-50); font-family: var(--font); margin: 0; }
+
+    /* Topbar */
+    .topbar { background: var(--navy); padding: 0 28px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-title { color: #fff; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .topbar a { color: rgba(255,255,255,.7); font-size: 13px; text-decoration: none; }
+    .topbar a:hover { color: #fff; }
+
+    /* Login gate */
+    #loginGate { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 56px); }
+    .login-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; width: 100%; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+    .login-card h2 { color: var(--navy); font-size: 18px; margin-bottom: 4px; }
+    .login-card p { color: var(--gray-600); font-size: 13px; margin-bottom: 20px; }
+    .login-card label { font-size: 11px; color: var(--gray-600); display: block; margin-bottom: 3px; margin-top: 12px; font-weight: 500; }
+    .login-card input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; box-sizing: border-box; }
+    .login-card input:focus { outline: none; border-color: var(--navy); }
+    #loginErr { display: none; margin-top: 10px; padding: 8px 12px; background: #fde8e8; border: 1px solid #f5a5a5; border-radius: var(--radius); font-size: 12px; color: #c0392b; }
+
+    /* Main layout */
+    #refApp { display: none; }
+    .page-wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+    /* Search bar */
+    .search-bar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; box-shadow: var(--shadow); }
+    .search-bar input { flex: 1; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: var(--font); }
+    .search-bar input:focus { outline: none; border-color: var(--navy); }
+    .search-bar button { background: var(--navy); color: #fff; border: none; border-radius: var(--radius); padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+    /* Section headers */
+    .section-title { font-size: 14px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: .06em; margin: 24px 0 12px; border-left: 3px solid var(--gold); padding-left: 10px; }
+
+    /* Course cards */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .ref-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); transition: .15s; }
+    .ref-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.12); transform: translateY(-1px); }
+    .ref-card-header { background: var(--navy); padding: 14px 16px; display: flex; align-items: flex-start; gap: 10px; }
+    .ref-card-code { background: var(--gold); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+    .ref-card-title { color: #fff; font-size: 13px; font-weight: 700; line-height: 1.4; }
+    .ref-card-body { padding: 14px 16px; }
+    .ref-card-desc { font-size: 12px; color: var(--gray-600); line-height: 1.6; margin-bottom: 12px; }
+    .ref-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ref-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: var(--radius); font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: .15s; }
+    .ref-btn-primary { background: var(--navy); color: #fff; }
+    .ref-btn-primary:hover { background: #243f6a; }
+    .ref-btn-secondary { background: var(--gray-100); color: var(--navy); border: 1px solid var(--border); }
+    .ref-btn-secondary:hover { background: var(--navy-l); }
+
+    /* Viewer modal */
+    .viewer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 500; }
+    .viewer-overlay.open { display: flex; flex-direction: column; }
+    .viewer-bar { background: var(--navy); color: #fff; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .viewer-bar-title { font-size: 14px; font-weight: 700; }
+    .viewer-bar-close { background: rgba(255,255,255,.15); border: none; color: #fff; padding: 6px 14px; border-radius: var(--radius); cursor: pointer; font-size: 13px; }
+    .viewer-frame { flex: 1; border: none; width: 100%; background: #fff; }
+
+    /* External resource cards */
+    .ext-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .ext-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); display: flex; gap: 14px; align-items: flex-start; }
+    .ext-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .ext-icon.justice { background: #e3f2fd; }
+    .ext-icon.canlii { background: #e8f5e9; }
+    .ext-info h3 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .ext-info p { font-size: 12px; color: var(--gray-600); line-height: 1.6; margin-bottom: 10px; }
+
+    /* Quick links */
+    .quick-links { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 20px; }
+    .quick-links h3 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+    .ql-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+    .ql-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 12px; color: var(--navy); text-decoration: none; transition: .15s; }
+    .ql-item:hover { background: var(--navy-l); border-color: var(--navy); }
+    .ql-item-icon { font-size: 15px; flex-shrink: 0; }
+
+    @media(max-width:600px) { .cards-grid { grid-template-columns: 1fr; } .ext-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-title">
+    <span>📚</span> RCIC Reference Library
+  </div>
+  <div style="display:flex;gap:16px;align-items:center">
+    <a href="../public/index.html" target="_blank" style="color:var(--gold);font-weight:600">🌐 Public Site</a>
+    <a href="index.html">← Admin Panel</a>
+    <a href="clients.html">👥 Clients</a>
+    <button id="logoutBtn" onclick="staffLogout()" style="display:none;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:var(--radius);font-size:12px;cursor:pointer">Sign Out</button>
+  </div>
+</div>
+
+<!-- LOGIN GATE -->
+<div id="loginGate">
+  <div class="login-card">
+    <div style="font-size:36px;text-align:center;margin-bottom:12px">📚</div>
+    <h2 style="text-align:center">RCIC Reference Library</h2>
+    <p style="text-align:center">Staff login required to access study materials.</p>
+    <label>Username</label>
+    <input type="text" id="refUser" placeholder="Staff username" onkeydown="if(event.key==='Enter')refLogin()">
+    <label>Password</label>
+    <input type="password" id="refPass" placeholder="Staff password" onkeydown="if(event.key==='Enter')refLogin()">
+    <div id="loginErr"></div>
+    <button onclick="refLogin()" style="width:100%;margin-top:16px;background:var(--navy);color:#fff;padding:11px;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer">Access Library →</button>
+    <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--gray-400)">Default: admin / graceful2026</div>
+  </div>
+</div>
+
+<!-- REFERENCE APP -->
+<div id="refApp">
+<div class="page-wrap">
+
+  <!-- Page heading -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <div style="font-size:22px;font-weight:800;color:var(--navy)">RCIC Reference Library</div>
+      <div style="font-size:13px;color:var(--gray-600)">Queen's GDipICL course materials · Canadian immigration law · CICC rules</div>
+    </div>
+    <div id="staffLabel" style="font-size:12px;color:var(--gray-600)"></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search course modules, topics, or keywords..." oninput="filterCards()">
+    <button onclick="filterCards()">Search</button>
+    <button onclick="clearSearch()" style="background:var(--gray-100);color:var(--navy);border:1px solid var(--border);">Clear</button>
+  </div>
+
+  <!-- Quick links -->
+  <div class="quick-links">
+    <h3>Quick Jump</h3>
+    <div class="ql-grid">
+      <a class="ql-item" onclick="openViewer('references/CICC_Study_Map.html','CICC Study Map')"><span class="ql-item-icon">🗺</span> CICC Study Map</a>
+      <a class="ql-item" href="https://laws-lois.justice.gc.ca/eng/" target="_blank"><span class="ql-item-icon">⚖</span> Justice Laws Website ↗</a>
+      <a class="ql-item" href="https://www.canlii.org/" target="_blank"><span class="ql-item-icon">📖</span> CanLII ↗</a>
+      <a class="ql-item" href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank"><span class="ql-item-icon">🇨🇦</span> IRCC Website ↗</a>
+      <a class="ql-item" href="https://www.canada.ca/en/immigration-refugees-citizenship/corporate/partners-service-providers/authorized-paid-representatives-policy.html" target="_blank"><span class="ql-item-icon">📋</span> CICC Rules ↗</a>
+      <a class="ql-item" href="https://cicc-ccic.ca/" target="_blank"><span class="ql-item-icon">🏛</span> CICC Official Site ↗</a>
+    </div>
+  </div>
+
+  <!-- CICC + ICL Courses -->
+  <div class="section-title">Queen's GDipICL — Course Study Modules</div>
+  <div class="cards-grid" id="courseCards">
+
+    <div class="ref-card" data-tags="cicc rules exam epe study map overview">
+      <div class="ref-card-header">
+        <div class="ref-card-code">CICC</div>
+        <div class="ref-card-title">CICC Study Map — EPE Exam Prep</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">Comprehensive visual map of CICC rules and regulations for the Entry-to-Practice Exam. Topics: Code of Professional Conduct, complaints, fees, trust accounts.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/CICC_Study_Map.html','CICC Study Map')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/CICC_Study_Map.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-card" data-tags="icl810 foundations context history immigration law">
+      <div class="ref-card-header">
+        <div class="ref-card-code">ICL810</div>
+        <div class="ref-card-title">Foundations &amp; Context of Canadian Immigration Law</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">History of Canadian immigration law, constitutional framework, the Charter, IRPA structure, federal/provincial jurisdiction, and key principles.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/ICL810_Study_Reference.html','ICL810 — Foundations & Context')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/ICL810_Study_Reference.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-card" data-tags="icl820 ethics code of conduct cicc professional">
+      <div class="ref-card-header">
+        <div class="ref-card-code">ICL820</div>
+        <div class="ref-card-title">Ethics &amp; Professional Responsibility (CICC Code)</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">CICC Code of Professional Conduct, competency requirements, conflicts of interest, fees, trust accounting, client files, advertising rules.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/ICL820_Study_Reference.html','ICL820 — Ethics & Professional Responsibility')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/ICL820_Study_Reference.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-card" data-tags="icl830 temporary entry visitor work study permit trv tfw">
+      <div class="ref-card-header">
+        <div class="ref-card-code">ICL830</div>
+        <div class="ref-card-title">Temporary Entry — Visitors, Workers &amp; Students</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">Temporary Resident Visas, Electronic Travel Authorization, work permits (LMIA/LMIA-exempt), study permits, extensions, restoration of status.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/ICL830_Study_Reference.html','ICL830 — Temporary Entry')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/ICL830_Study_Reference.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-card" data-tags="icl840 economic immigration express entry provincial nominee pgp fsw">
+      <div class="ref-card-header">
+        <div class="ref-card-code">ICL840</div>
+        <div class="ref-card-title">Economic Immigration — Express Entry &amp; PNP</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">Express Entry system, Federal Skilled Worker, Canadian Experience Class, Federal Skilled Trades, Provincial Nominee Programs, Quebec streams.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/ICL840_Study_Reference.html','ICL840 — Economic Immigration')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/ICL840_Study_Reference.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-card" data-tags="icl850 family class sponsorship spousal dependent children parents">
+      <div class="ref-card-header">
+        <div class="ref-card-code">ICL850</div>
+        <div class="ref-card-title">Family Class Immigration &amp; Sponsorship</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">Spousal/partner/dependent child sponsorship, parent and grandparent program, adoption, sponsorship eligibility, undertaking obligations.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/ICL850_Study_Reference.html','ICL850 — Family Class Immigration')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/ICL850_Study_Reference.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-card" data-tags="icl860 refugee protection convention persecution asylum irb">
+      <div class="ref-card-header">
+        <div class="ref-card-code">ICL860</div>
+        <div class="ref-card-title">Refugee Protection</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">Convention Refugees, Persons in Need of Protection, Refugee Protection Division, Humanitarian &amp; Compassionate, Pre-Removal Risk Assessment.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/ICL860_Study_Reference.html','ICL860 — Refugee Protection')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/ICL860_Study_Reference.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-card" data-tags="icl870 enforcement removal inadmissibility detention cbsa appeals">
+      <div class="ref-card-header">
+        <div class="ref-card-code">ICL870</div>
+        <div class="ref-card-title">Enforcement — Inadmissibility &amp; Removal</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">Grounds of inadmissibility (criminality, security, health), detention, examination, removal orders, appeals at IAD, judicial review, stays.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/ICL870_Study_Reference.html','ICL870 — Enforcement')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/ICL870_Study_Reference.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-card" data-tags="icl880 citizenship naturalization grant renunciation revocation oath">
+      <div class="ref-card-header">
+        <div class="ref-card-code">ICL880</div>
+        <div class="ref-card-title">Citizenship — Grant, Renunciation &amp; Revocation</div>
+      </div>
+      <div class="ref-card-body">
+        <div class="ref-card-desc">Citizenship Act, grant of citizenship, physical presence requirement, renunciation, revocation, statelessness, appeals and judicial review.</div>
+        <div class="ref-card-actions">
+          <button class="ref-btn ref-btn-primary" onclick="openViewer('references/ICL880_Study_Reference.html','ICL880 — Citizenship')">📖 Open in Viewer</button>
+          <a class="ref-btn ref-btn-secondary" href="references/ICL880_Study_Reference.html" target="_blank">↗ New Tab</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /course cards -->
+
+  <!-- External Resources -->
+  <div class="section-title">External Legal Resources</div>
+  <div class="ext-grid">
+
+    <div class="ext-card">
+      <div class="ext-icon justice">⚖</div>
+      <div class="ext-info">
+        <h3>Justice Laws Website</h3>
+        <p>Official Government of Canada consolidated statutes and regulations. Search IRPA, IRPR, Citizenship Act, and all other federal legislation. Always up to date.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="ref-btn ref-btn-primary" href="https://laws-lois.justice.gc.ca/eng/" target="_blank">Open Justice Laws ↗</a>
+          <button class="ref-btn ref-btn-secondary" onclick="openViewer('https://laws-lois.justice.gc.ca/eng/','Justice Laws Website')">📖 Embedded View</button>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+          <a href="https://laws-lois.justice.gc.ca/eng/acts/I-2.5/" target="_blank" style="font-size:11px;color:var(--navy)">→ IRPA (Immigration and Refugee Protection Act)</a>
+          <a href="https://laws-lois.justice.gc.ca/eng/regulations/SOR-2002-227/" target="_blank" style="font-size:11px;color:var(--navy)">→ IRPR (Immigration and Refugee Protection Regulations)</a>
+          <a href="https://laws-lois.justice.gc.ca/eng/acts/C-29/" target="_blank" style="font-size:11px;color:var(--navy)">→ Citizenship Act</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ext-card">
+      <div class="ext-icon canlii">📖</div>
+      <div class="ext-info">
+        <h3>CanLII — Canadian Legal Information Institute</h3>
+        <p>Free access to Canadian court decisions, tribunal decisions (IRB, IAD, RAD, FC), and legislation. Essential for case law research and precedents.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="ref-btn ref-btn-primary" href="https://www.canlii.org/" target="_blank">Open CanLII ↗</a>
+          <button class="ref-btn ref-btn-secondary" onclick="openViewer('https://www.canlii.org/','CanLII')">📖 Embedded View</button>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+          <a href="https://www.canlii.org/en/ca/irb/" target="_blank" style="font-size:11px;color:var(--navy)">→ Immigration and Refugee Board decisions</a>
+          <a href="https://www.canlii.org/en/ca/fct/" target="_blank" style="font-size:11px;color:var(--navy)">→ Federal Court of Canada decisions</a>
+          <a href="https://www.canlii.org/en/ca/fca/" target="_blank" style="font-size:11px;color:var(--navy)">→ Federal Court of Appeal decisions</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ext-card">
+      <div class="ext-icon" style="background:#e3f2fd;">🏛</div>
+      <div class="ext-info">
+        <h3>IRCC — Immigration, Refugees and Citizenship Canada</h3>
+        <p>Official IRCC guidance documents, policy manuals (ENF, OP, IP), processing times, fee schedules, and operational instructions.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="ref-btn ref-btn-primary" href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank">Open IRCC ↗</a>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+          <a href="https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/operational-bulletins-manuals.html" target="_blank" style="font-size:11px;color:var(--navy)">→ Operational Bulletins &amp; Manuals</a>
+          <a href="https://www.canada.ca/en/immigration-refugees-citizenship/services/application/check-processing-times.html" target="_blank" style="font-size:11px;color:var(--navy)">→ Processing Times</a>
+          <a href="https://ircc.canada.ca/english/helpcentre/index-featured-can.asp" target="_blank" style="font-size:11px;color:var(--navy)">→ IRCC Help Centre</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ext-card">
+      <div class="ext-icon" style="background:#f3e5f5;">📋</div>
+      <div class="ext-info">
+        <h3>CICC — College of Immigration and Citizenship Consultants</h3>
+        <p>Regulator for RCICs. Access the Code of Professional Conduct, public register, complaints, CPD requirements, and practice management resources.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="ref-btn ref-btn-primary" href="https://cicc-ccic.ca/" target="_blank">Open CICC ↗</a>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+          <a href="https://cicc-ccic.ca/en/for-members/code-of-professional-conduct/" target="_blank" style="font-size:11px;color:var(--navy)">→ Code of Professional Conduct</a>
+          <a href="https://cicc-ccic.ca/en/for-members/continuing-professional-development/" target="_blank" style="font-size:11px;color:var(--navy)">→ CPD Requirements</a>
+          <a href="https://cicc-ccic.ca/en/public-register/" target="_blank" style="font-size:11px;color:var(--navy)">→ Public Register (verify RCICs)</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ext-grid -->
+
+</div><!-- /page-wrap -->
+</div><!-- /refApp -->
+
+<!-- VIEWER MODAL -->
+<div class="viewer-overlay" id="viewerOverlay">
+  <div class="viewer-bar">
+    <div class="viewer-bar-title" id="viewerTitle">Reference Viewer</div>
+    <div style="display:flex;gap:8px">
+      <a id="viewerNewTabBtn" href="#" target="_blank" style="background:rgba(255,255,255,.15);color:#fff;border:none;padding:6px 14px;border-radius:var(--radius);cursor:pointer;font-size:12px;text-decoration:none;display:inline-flex;align-items:center">↗ New Tab</a>
+      <button class="viewer-bar-close" onclick="closeViewer()">✕ Close</button>
+    </div>
+  </div>
+  <iframe class="viewer-frame" id="viewerFrame" src="about:blank" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+</div>
+
+<script>
+// ── STAFF AUTH ────────────────────────────────────────────────────
+// Simple staff credentials — stored in sessionStorage per session
+const STAFF_CREDS = [
+  { user: 'admin',   pass: 'graceful2026', name: 'Admin' },
+  { user: 'staff',   pass: 'rcic2026',    name: 'Staff' },
+  { user: 'rcic',    pass: 'graceful2026', name: 'RCIC' }
+];
+
+function refLogin() {
+  const user = document.getElementById('refUser').value.trim().toLowerCase();
+  const pass = document.getElementById('refPass').value;
+  const err  = document.getElementById('loginErr');
+  err.style.display = 'none';
+
+  const match = STAFF_CREDS.find(c => c.user === user && c.pass === pass);
+  if (!match) {
+    err.textContent = 'Invalid username or password.';
+    err.style.display = 'block';
+    return;
+  }
+  sessionStorage.setItem('graceful_staff_auth', '1');
+  sessionStorage.setItem('graceful_staff_name', match.name);
+  showRefApp(match.name);
+}
+
+function showRefApp(name) {
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('refApp').style.display = 'block';
+  document.getElementById('logoutBtn').style.display = 'inline-block';
+  document.getElementById('staffLabel').textContent = 'Logged in as: ' + name;
+}
+
+function staffLogout() {
+  sessionStorage.removeItem('graceful_staff_auth');
+  sessionStorage.removeItem('graceful_staff_name');
+  location.reload();
+}
+
+// Auto-login if session active
+if (sessionStorage.getItem('graceful_staff_auth') === '1') {
+  showRefApp(sessionStorage.getItem('graceful_staff_name') || 'Staff');
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  document.querySelectorAll('.ref-card').forEach(card => {
+    const text = (card.textContent + ' ' + (card.dataset.tags || '')).toLowerCase();
+    card.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.querySelectorAll('.ref-card').forEach(c => c.style.display = '');
+}
+
+// ── VIEWER ────────────────────────────────────────────────────────
+function openViewer(url, title) {
+  document.getElementById('viewerTitle').textContent = title;
+  document.getElementById('viewerFrame').src = url;
+  document.getElementById('viewerNewTabBtn').href = url;
+  document.getElementById('viewerOverlay').classList.add('open');
+}
+
+function closeViewer() {
+  document.getElementById('viewerOverlay').classList.remove('open');
+  document.getElementById('viewerFrame').src = 'about:blank';
+}
+
+// Close viewer on Escape
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeViewer(); });
+</script>
+</body>
+</html>

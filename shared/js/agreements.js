@@ -13,15 +13,15 @@ const AGR_FIELDS = {
     { id:'ca_rcic_name',   label:'RCIC Full Name',           key:'rcic_name',   default:'[YOUR FULL NAME]' },
     { id:'ca_rcic_cicc',   label:'CICC Membership #',        key:'rcic_cicc',   default:'[CICC #]' },
     { id:'ca_rcic_phone',  label:'RCIC Phone',               key:'rcic_phone',  default:'+1 (780) 000-0000' },
-    { id:'ca_rcic_email',  label:'RCIC Email',               key:'rcic_email',  default:'info@vantageimmigration.ca' },
-    { id:'ca_rcic_addr',   label:'Business Address',         key:'rcic_addr',   default:'Fort McMurray, Alberta, Canada' },
+    { id:'ca_rcic_email',  label:'RCIC Email',               key:'rcic_email',  default:'info@gracefulimmigration.ca' },
+    { id:'ca_rcic_addr',   label:'Business Address',         key:'rcic_addr',   default:'Canada' },
     { id:'ca_client_name', label:'Client Full Legal Name',   key:'fullName',    default:'' },
     { id:'ca_client_dob',  label:'Date of Birth',            key:'dob',         default:'' },
     { id:'ca_client_addr', label:'Client Address',           key:'address',     default:'' },
     { id:'ca_client_phone',label:'Client Phone',             key:'phone',       default:'' },
     { id:'ca_client_email',label:'Client Email',             key:'email',       default:'' },
     { id:'ca_purpose',     label:'Purpose of Consultation',  key:'purpose',     default:'' },
-    { id:'ca_fee',         label:'Consultation Fee (CAD)',   key:'consultFee',  default:'$150 CAD' },
+    { id:'ca_fee',         label:'Consultation Fee (CAD)',   key:'consultFee',  default:'' },
     { id:'ca_file_id',     label:'File ID',                  key:'fileId',      default:'' }
   ],
 
@@ -31,8 +31,8 @@ const AGR_FIELDS = {
     { id:'sa_rcic_name',   label:'RCIC Full Name',           key:'rcic_name',   default:'[YOUR FULL NAME]' },
     { id:'sa_rcic_cicc',   label:'CICC Membership #',        key:'rcic_cicc',   default:'[CICC #]' },
     { id:'sa_rcic_phone',  label:'RCIC Phone',               key:'rcic_phone',  default:'+1 (780) 000-0000' },
-    { id:'sa_rcic_email',  label:'RCIC Email',               key:'rcic_email',  default:'info@vantageimmigration.ca' },
-    { id:'sa_rcic_addr',   label:'Business Address',         key:'rcic_addr',   default:'Fort McMurray, Alberta, Canada' },
+    { id:'sa_rcic_email',  label:'RCIC Email',               key:'rcic_email',  default:'info@gracefulimmigration.ca' },
+    { id:'sa_rcic_addr',   label:'Business Address',         key:'rcic_addr',   default:'Canada' },
     { id:'sa_client_name', label:'Client Full Legal Name',   key:'fullName',    default:'' },
     { id:'sa_client_dob',  label:'Date of Birth',            key:'dob',         default:'' },
     { id:'sa_client_addr', label:'Client Address',           key:'address',     default:'' },
@@ -53,25 +53,25 @@ const COMPANY_DEFAULTS = {
   rcic_name:  '[YOUR FULL NAME]',
   rcic_cicc:  '[CICC LICENSE #]',
   rcic_phone: '+1 (780) 000-0000',
-  rcic_email: 'info@vantageimmigration.ca',
-  rcic_addr:  'Fort McMurray, Alberta, Canada'
+  rcic_email: 'info@gracefulimmigration.ca',
+  rcic_addr:  'Canada'
 };
 
 // ── DATA BRIDGE (localStorage per file ID) ────────────────────────
-// Key: vantage_client_{fileId}
+// Key: graceful_client_{fileId}
 // Value: JSON of all client + agreement fields
 
 function saveClientData(fileId, data) {
   if (!fileId) return;
   const existing = loadClientData(fileId);
   const merged = { ...existing, ...data, fileId, updatedAt: new Date().toISOString() };
-  localStorage.setItem('vantage_client_' + fileId, JSON.stringify(merged));
+  localStorage.setItem('graceful_client_' + fileId, JSON.stringify(merged));
 }
 
 function loadClientData(fileId) {
   if (!fileId) return {};
   try {
-    return JSON.parse(localStorage.getItem('vantage_client_' + fileId) || '{}');
+    return JSON.parse(localStorage.getItem('graceful_client_' + fileId) || '{}');
   } catch(e) { return {}; }
 }
 
@@ -79,7 +79,7 @@ function getAllClients() {
   const clients = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith('vantage_client_')) {
+    if (key && key.startsWith('graceful_client_')) {
       try {
         const data = JSON.parse(localStorage.getItem(key));
         if (data && data.fileId) clients.push(data);
@@ -91,30 +91,28 @@ function getAllClients() {
 
 // ── AUTO-FILL HELPERS ─────────────────────────────────────────────
 function buildClientDataFromSession() {
-  const fileId   = sessionStorage.getItem('vantage_fileId')   || '';
-  const name     = sessionStorage.getItem('vantage_name')     || '';
-  const email    = sessionStorage.getItem('vantage_email')    || '';
-  const appType  = sessionStorage.getItem('vantage_appType')  || '';
-  const dob      = sessionStorage.getItem('vantage_dob')      || '';
-  const phone    = sessionStorage.getItem('vantage_phone')    || '';
-  const passport = sessionStorage.getItem('vantage_passport') || '';
-  const country  = sessionStorage.getItem('vantage_country')  || '';
-  const addr     = sessionStorage.getItem('vantage_addr')     || '';
+  const fileId   = sessionStorage.getItem('graceful_fileId')   || '';
+  const name     = sessionStorage.getItem('graceful_name')     || '';
+  const email    = sessionStorage.getItem('graceful_email')    || '';
+  const appType  = sessionStorage.getItem('graceful_appType')  || '';
+  const dob      = sessionStorage.getItem('graceful_dob')      || '';
+  const phone    = sessionStorage.getItem('graceful_phone')    || '';
+  const passport = sessionStorage.getItem('graceful_passport') || '';
+  const country  = sessionStorage.getItem('graceful_country')  || '';
+  const addr     = sessionStorage.getItem('graceful_addr')     || '';
   const parts    = name.trim().split(' ');
   const first    = parts[0] || '';
   const last     = parts.slice(1).join(' ') || '';
   const appTypeLabel = APP_TYPE_LABELS[appType] || appType;
-  const fee = APP_FEES[appType] || 0;
-
   return {
     fileId, fullName: name, first, last, email, dob, phone,
     passport, country, appType, appTypeLabel,
     address: addr,
     purpose: appTypeLabel ? `Initial assessment and application for ${appTypeLabel}` : 'Canadian immigration assessment',
-    consultFee: '$150 CAD',
-    totalFee: fee ? `$${fee.toLocaleString()} CAD` : '',
-    stage1Fee: fee ? `$${Math.round(fee * 0.25).toLocaleString()} CAD — Due on signing` : '',
-    stage2Fee: fee ? `$${Math.round(fee * 0.75).toLocaleString()} CAD — Due at IRCC submission` : '',
+    consultFee: '',
+    totalFee: '',
+    stage1Fee: '',
+    stage2Fee: '',
     date: new Date().toLocaleDateString('en-CA'),
     ...COMPANY_DEFAULTS
   };
@@ -133,12 +131,6 @@ const APP_TYPE_LABELS = {
   pr_card_renewal:'PR Card Renewal'
 };
 
-const APP_FEES = {
-  spousal_spouses:2350, spousal_commonlaw:2350, express_entry:2800,
-  work_permit_overseas:1800, work_permit_extension:1200,
-  study_permit_overseas:1500, study_permit_extension:900,
-  trv_supervisa:1000, visitor_extension:800, pr_card_renewal:700
-};
 
 // ── CHECKLIST DATA PER APPLICATION TYPE ───────────────────────────
 const CLIENT_CHECKLISTS = {

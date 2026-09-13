@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audit Dashboard — Vantage Immigration Admin</title>
+  <title>Audit Dashboard — Graceful Immigration Consultant Admin</title>
   <link rel="stylesheet" href="../css/styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%237d3c98' rx='6'/><text y='24' x='5' font-size='20' fill='%23fff' font-family='Georgia'>A</text></svg>">
+  <link rel="icon" href="../logo.png">
   <style>
     /* Audit-specific styles */
-    .audit-topbar{background:#2c0e37;padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .audit-topbar{background:var(--navy-d);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
     .audit-title{color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px}
-    .audit-badge{display:inline-block;background:#7d3c98;color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;letter-spacing:.04em}
+    .audit-badge{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;letter-spacing:.04em}
     .audit-nav{display:flex;align-items:center;gap:6px}
     .audit-nav a{color:rgba(255,255,255,.7);font-size:13px;text-decoration:none;padding:6px 14px;border-radius:var(--radius);transition:.15s}
     .audit-nav a:hover{background:rgba(255,255,255,.12);color:#fff}
@@ -419,6 +419,18 @@ function exportAuditCSV() {
   a.download = `audit-${c.id}.csv`;
   a.click();
 }
+</script>
+<script>
+(function() {
+  if (sessionStorage.getItem('graceful_admin_auth') !== '1') {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1B3A5C;flex-direction:column;gap:16px">'
+      + '<img src="../logo.png" alt="Graceful Immigration Consultant" style="width:120px;height:120px;object-fit:contain;background:#fff;border-radius:14px;padding:8px">'
+      + '<div style="color:#fff;font-size:18px;font-weight:700">Admin access required</div>'
+      + '<div style="color:rgba(255,255,255,.6);font-size:13px">Please log in through the Admin Panel</div>'
+      + '<a href="index.html" style="margin-top:8px;background:#C9A84C;color:#fff;padding:11px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none">Go to Admin Login →</a>'
+      + '</div>';
+  }
+})();
 </script>
 </body>
 </html>

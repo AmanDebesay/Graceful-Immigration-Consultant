@@ -2,7 +2,7 @@
 const NOTES_STATE = {
   notes: [
     { id:1, type:'case', fileId:'VIS-2026-AB-WB-001', author:'Assistant', content:'Reviewed passport scan from Tesfaye — expires March 2027, valid. Planning to request marriage certificate translation next. Will follow up by email today.', date:'2026-04-06 09:15', tags:['passport','valid'] },
-    { id:2, type:'planning', fileId:'', author:'RCIC', content:'Planning to launch Instagram campaign next week targeting Fort McMurray Filipino community. Will post about spousal sponsorship timelines and how to start the process. Expecting 3-5 new leads.', date:'2026-04-05 16:30', tags:['marketing'] },
+    { id:2, type:'planning', fileId:'', author:'RCIC', content:'Planning to launch Instagram campaign next week targeting Filipino communities across Canada. Will post about spousal sponsorship timelines and how to start the process. Expecting 3-5 new leads.', date:'2026-04-05 16:30', tags:['marketing'] },
     { id:3, type:'action', fileId:'VIS-2026-AB-PH-002', author:'RCIC', content:'Maria\'s employer confirmed LMIA positive result. Action: download LMIA copy, start IMM 1295 prep. Need to verify position title matches exactly. Target submission: April 20.', date:'2026-04-04 11:00', tags:['lmia','urgent'] },
     { id:4, type:'reminder', fileId:'', author:'Assistant', content:'Commissioner of Oaths appointment booked for April 20 at 1:00 PM. Bring: Certificate of Barrister & Solicitor form (filled), ID, code of conduct booklet. Law firm: [Insert name]. Cost: ~$100.', date:'2026-04-03 14:00', tags:['commissioner','appointment'] }
   ],

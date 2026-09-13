@@ -3,13 +3,13 @@
    ================================================================ */
 const DATA = {
   company: {
-    name: "Vantage Immigration Services",
+    name: "Graceful Immigration Consultant Inc.",
     rcic: "[YOUR FULL NAME]",
     cicc: "[YOUR CICC LICENSE #]",
-    location: "Fort McMurray, Alberta",
-    address: "Fort McMurray, AB, Canada",
-    website: "vantageimmigration.ca",
-    email: "info@vantageimmigration.ca",
+    location: "Canada",
+    address: "Canada",
+    website: "gracefulimmigration.ca",
+    email: "info@gracefulimmigration.ca",
     phone: "+1 (780) 000-0000"
   },
 

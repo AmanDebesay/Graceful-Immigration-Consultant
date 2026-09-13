@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Start Your Application — Vantage Immigration</title>
+  <title>Start Your Application — Graceful Immigration Consultant</title>
+  <link rel="icon" href="../logo.png">
   <style>
     :root{--navy:#1B3A5C;--navy-d:#152e4a;--navy-l:#EAF2FB;--gold:#C9A84C;--gold-d:#b8953d;--white:#fff;--gray-50:#f8f9fa;--gray-100:#f2f2f2;--gray-200:#e5e5e5;--gray-400:#999;--gray-600:#666;--gray-800:#333;--green:#1E8449;--green-bg:#EAF3DE;--red:#C0392B;--red-bg:#FCEBEB;--orange:#E67E22;--orange-bg:#FAEEDA;--border:#e0e0e0;--radius:8px;--shadow:0 1px 4px rgba(0,0,0,.09);--font:'Segoe UI',system-ui,Arial,sans-serif}
     *{box-sizing:border-box;margin:0;padding:0}
@@ -12,7 +13,8 @@
 
     nav{background:var(--navy);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
     .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-    .nav-mark{width:34px;height:34px;background:var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;font-family:Georgia,serif;color:var(--white)}
+    .nav-mark{width:48px;height:48px;background:var(--white);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .nav-mark img{width:100%;height:100%;object-fit:contain;padding:2px}
     .nav-name{color:var(--white);font-size:14px;font-weight:700}
     .nav-back{color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
     .nav-back:hover{color:var(--white)}
@@ -137,8 +139,8 @@
 
 <nav>
   <a href="index.html" class="nav-logo">
-    <div class="nav-mark">V</div>
-    <div class="nav-name">Vantage Immigration</div>
+    <div class="nav-mark"><img src="../logo.png" alt="Graceful Immigration Consultant"></div>
+    <div class="nav-name">Graceful Immigration Consultant</div>
   </a>
   <a href="index.html" class="nav-back">← Back to website</a>
 </nav>
@@ -231,7 +233,7 @@
       <!-- Consultation option -->
       <div style="margin-top:16px;background:var(--navy-l);border-radius:var(--radius);border-left:3px solid var(--navy);padding:12px 16px">
         <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:4px">💡 Not sure about your situation?</div>
-        <div style="font-size:12px;color:var(--gray-800)">You can book a <strong>30-minute consultation</strong> first ($150 CAD) to discuss your options before committing to a full application. Select your type above and continue — you can mention this in your notes.</div>
+        <div style="font-size:12px;color:var(--gray-800)">You can book a <strong>30-minute consultation</strong> first to discuss your options before committing to a full application. Select your type above and continue — you can mention this in your notes.</div>
       </div>
 
       <div class="btn-group">
@@ -299,7 +301,7 @@
       <div class="row-3">
         <div class="form-group">
           <label>City / Town <span class="req">*</span></label>
-          <input type="text" id="s2_city" placeholder="Fort McMurray" oninput="onStreetInput();autoSave()">
+          <input type="text" id="s2_city" placeholder="City" oninput="onStreetInput();autoSave()">
         </div>
         <div class="form-group">
           <label>Postal Code <span class="req">*</span>
@@ -365,7 +367,7 @@
       <div class="section-head">Additional Notes</div>
       <div class="form-group">
         <label>Brief description of your situation (optional)
-          <span class="tip"><button class="tip-btn">?</button><span class="tip-text">For example: "My spouse is in Eritrea, I am a Canadian PR in Fort McMurray. We married in 2023."</span></span>
+          <span class="tip"><button class="tip-btn">?</button><span class="tip-text">For example: "My spouse is in Eritrea, I am a Canadian PR living in Canada. We married in 2023."</span></span>
         </label>
         <textarea id="s2_notes" placeholder="Describe your situation in a few sentences..." style="min-height:80px;resize:vertical" oninput="autoSave()"></textarea>
       </div>
@@ -381,7 +383,7 @@
   <div id="step3" style="display:none">
     <div class="form-card">
       <div class="form-title">Step 3 — Background Questions</div>
-      <div class="form-sub">Please answer all questions honestly. These help your consultant assess your eligibility accurately. All information is kept strictly confidential (PIPEDA / PIPA Alberta).</div>
+      <div class="form-sub">Please answer all questions honestly. These help your consultant assess your eligibility accurately. All information is kept strictly confidential (PIPEDA).</div>
 
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:var(--navy-l);border-radius:var(--radius);flex-wrap:wrap">
         <span style="font-size:12px;font-weight:600;color:var(--navy)">Question language / ቋንቋ / اللغة / ቋንቋ:</span>
@@ -410,8 +412,8 @@
   <!-- ═══ STEP 4: ACCOUNT CREATION ═══ -->
   <div id="step4" style="display:none">
     <div class="form-card">
-      <div class="form-title">Step 4 — Create Your Client Account</div>
-      <div class="form-sub">Your file ID has been generated. Create a password to access your client portal anytime.</div>
+      <div class="form-title">Step 4 — Review &amp; Submit</div>
+      <div class="form-sub">Review your file ID and confirm your information before submitting. Staff will review your application and send you login credentials.</div>
 
       <div class="file-id-box">
         <div class="file-id-label">Your File ID</div>
@@ -423,24 +425,10 @@
       <div class="section-head">Application Summary</div>
       <div id="summaryBlock" style="margin-bottom:16px"></div>
 
-      <div class="section-head">Account Details</div>
+      <div class="section-head">Contact Information</div>
       <div class="form-group">
-        <label>Email (your login) <span class="req">*</span></label>
+        <label>Email (used for login after approval)</label>
         <input type="email" id="s4_email" placeholder="your@email.com" readonly style="background:var(--gray-50)">
-      </div>
-      <div class="row-2">
-        <div class="form-group">
-          <label>Create Password <span class="req">*</span>
-            <span class="tip"><button class="tip-btn">?</button><span class="tip-text">Minimum 8 characters. Use a mix of letters and numbers for security.</span></span>
-          </label>
-          <input type="password" id="s4_pass" placeholder="Minimum 8 characters" oninput="checkPassStrength()">
-          <div id="passStrength" class="field-hint"></div>
-        </div>
-        <div class="form-group">
-          <label>Confirm Password <span class="req">*</span></label>
-          <input type="password" id="s4_pass2" placeholder="Re-enter password" oninput="checkPassMatch()">
-          <div id="passMatch" class="field-hint"></div>
-        </div>
       </div>
       <div class="form-group">
         <label>Preferred language for communication</label>
@@ -453,12 +441,12 @@
       </div>
 
       <div style="margin-top:14px;padding:12px 14px;background:var(--orange-bg);border-radius:var(--radius);border-left:3px solid var(--orange);font-size:12px;color:var(--gray-800)">
-        <strong style="color:var(--orange)">⚠ Before proceeding:</strong> A <strong>Consultation Agreement</strong> must be signed before any work begins. It will be waiting for you in your portal. The consultation fee ($150 CAD) is due at or before your consultation.
+        <strong style="color:var(--orange)">⚠ Before proceeding:</strong> A <strong>Consultation Agreement</strong> must be signed before any work begins. It will be waiting for you in your portal. The consultation fee is due at or before your consultation.
       </div>
 
       <div style="margin-top:14px;display:flex;align-items:flex-start;gap:8px">
         <input type="checkbox" id="s4_consent" style="margin-top:2px;flex-shrink:0">
-        <label for="s4_consent" style="margin:0;font-size:12px;cursor:pointer;color:var(--gray-800)">I consent to the collection and storage of my personal information in accordance with PIPEDA and Alberta PIPA for the purpose of immigration consulting services.</label>
+        <label for="s4_consent" style="margin:0;font-size:12px;cursor:pointer;color:var(--gray-800)">I consent to the collection and storage of my personal information in accordance with PIPEDA and PIPEDA for the purpose of immigration consulting services.</label>
       </div>
       <div style="margin-top:8px;display:flex;align-items:flex-start;gap:8px">
         <input type="checkbox" id="s4_accurate" style="margin-top:2px;flex-shrink:0">
@@ -467,7 +455,7 @@
 
       <div class="btn-group">
         <button class="btn" onclick="goStep(3)">← Back</button>
-        <button class="btn btn-gold" onclick="submitIntake()" style="flex:1;justify-content:center;font-size:15px">Create My Account &amp; Enter Portal →</button>
+        <button class="btn btn-gold" onclick="submitIntake()" style="flex:1;justify-content:center;font-size:15px">Submit Application →</button>
       </div>
     </div>
   </div>
@@ -475,22 +463,31 @@
   <!-- ═══ SUCCESS ═══ -->
   <div id="stepSuccess">
     <div class="form-card" style="text-align:center;padding:48px 28px">
-      <div class="success-icon">✅</div>
-      <div style="font-size:24px;font-weight:800;color:var(--green);margin-bottom:12px">Application Submitted!</div>
-      <div style="font-size:14px;color:var(--gray-600);max-width:480px;margin:0 auto 24px;line-height:1.7">
-        Your file has been created. Your consultant will review your intake and contact you within <strong>24 hours</strong> to schedule your consultation.
+      <div style="font-size:52px;margin-bottom:12px">📋</div>
+      <div style="font-size:24px;font-weight:800;color:var(--navy);margin-bottom:12px">Application Received!</div>
+      <div style="font-size:14px;color:var(--gray-600);max-width:500px;margin:0 auto 24px;line-height:1.7">
+        Your intake form has been submitted successfully. A staff member will <strong>review your application</strong> and send you <strong>login credentials by email</strong> within 1–2 business days. You will then be able to log in to your client portal.
       </div>
-      <div class="file-id-box" style="max-width:320px;margin:0 auto 24px">
-        <div class="file-id-label">Your File ID</div>
+      <div class="file-id-box" style="max-width:340px;margin:0 auto 24px">
+        <div class="file-id-label">Your File ID (keep this safe)</div>
         <div class="file-id-val" id="successFileId">VIS-2026-AB-XX-000</div>
-        <div class="file-id-note">Save this — needed to log in</div>
+        <div class="file-id-note">📌 Write this down — reference it when contacting us</div>
+      </div>
+      <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:16px 20px;max-width:420px;margin:0 auto 20px;text-align:left">
+        <div style="font-size:13px;font-weight:700;color:#1a7a4a;margin-bottom:8px">What happens next?</div>
+        <div style="font-size:12px;color:#2e7d32;line-height:1.8">
+          1. Staff reviews your intake form<br>
+          2. You receive an email with your username &amp; temporary password<br>
+          3. Log in at <strong>portal/dashboard.html</strong> with those credentials<br>
+          4. Sign agreements &amp; upload your documents
+        </div>
       </div>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <a href="portal/dashboard.html" style="display:inline-block;background:var(--navy);color:white;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">Go to My Portal →</a>
+        <a href="portal/dashboard.html" style="display:inline-block;background:var(--navy);color:white;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none">Go to Portal Login →</a>
         <a href="index.html" style="display:inline-block;background:var(--white);color:var(--navy);padding:12px 28px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;border:1px solid var(--border)">Back to Website</a>
       </div>
-      <div style="margin-top:20px;font-size:12px;color:var(--gray-400)">
-        📧 Can't access the portal? Email us at <strong>info@vantageimmigration.ca</strong> with your File ID and we'll help you log in.
+      <div style="margin-top:16px;font-size:12px;color:var(--gray-400)">
+        📧 Questions? Email <strong>info@gracefulimmigration.ca</strong> with your File ID
       </div>
     </div>
   </div>
@@ -502,7 +499,7 @@
 
 <script>
 // ── CONSTANTS ────────────────────────────────────────────────────
-const DRAFT_KEY = 'vantage_intake_draft_v2';
+const DRAFT_KEY = 'graceful_intake_draft_v2';
 
 const APP_TYPE_HINTS = {
   spousal_spouses: 'You or your spouse is a Canadian citizen or PR sponsoring the other.',
@@ -962,25 +959,6 @@ function buildSummary(fileId) {
     </div>`).join('');
 }
 
-// ── PASSWORD STRENGTH ─────────────────────────────────────────────
-function checkPassStrength() {
-  const p = document.getElementById('s4_pass').value;
-  const el = document.getElementById('passStrength');
-  if (!p) { el.textContent=''; return; }
-  if (p.length < 6) { el.textContent='Too short'; el.className='field-error'; return; }
-  if (p.length < 8) { el.textContent='Weak — add more characters'; el.className='field-error'; return; }
-  if (/[A-Z]/.test(p) && /\d/.test(p)) { el.textContent='✓ Strong password'; el.className='field-ok'; }
-  else { el.textContent='Fair — add numbers or uppercase for stronger security'; el.className='field-hint'; }
-}
-
-function checkPassMatch() {
-  const p1 = document.getElementById('s4_pass').value;
-  const p2 = document.getElementById('s4_pass2').value;
-  const el = document.getElementById('passMatch');
-  if (!p2) { el.textContent=''; return; }
-  if (p1 === p2) { el.textContent='✓ Passwords match'; el.className='field-ok'; }
-  else { el.textContent='✗ Passwords do not match'; el.className='field-error'; }
-}
 
 // ── FILE ID ───────────────────────────────────────────────────────
 function generateFileId(first, last) {
@@ -992,10 +970,6 @@ function generateFileId(first, last) {
 
 // ── SUBMIT ────────────────────────────────────────────────────────
 function submitIntake() {
-  const pass  = document.getElementById('s4_pass').value;
-  const pass2 = document.getElementById('s4_pass2').value;
-  if (!pass || pass.length < 8) { alert('Password must be at least 8 characters.'); return; }
-  if (pass !== pass2) { alert('Passwords do not match.'); return; }
   if (!document.getElementById('s4_consent').checked)  { alert('Please check the consent box to continue.'); return; }
   if (!document.getElementById('s4_accurate').checked) { alert('Please confirm the accuracy of your information.'); return; }
 
@@ -1013,13 +987,6 @@ function submitIntake() {
   const prov   = document.getElementById('s2_province').value;
   const country2 = document.getElementById('s2_country2').value.trim();
   const fullAddress = [street, city, prov, postal, country2].filter(Boolean).join(', ');
-
-  // Store session
-  sessionStorage.setItem('vantage_loggedIn', '1');
-  sessionStorage.setItem('vantage_fileId', fileId);
-  sessionStorage.setItem('vantage_name', first + ' ' + last);
-  sessionStorage.setItem('vantage_email', email);
-  sessionStorage.setItem('vantage_appType', appType);
 
   // Save to staff-client bridge (localStorage)
   const APP_LABELS2 = {
@@ -1049,6 +1016,7 @@ function submitIntake() {
     bgAnswers: { ...bgAnswers },
     leadScore: score,
     leadFlags: flags,
+    intakeStatus: 'pending',
     caseStatus: 'New',
     consultReady: false, serviceReady: false,
     consultSigned: false, serviceSigned: false,
@@ -1058,7 +1026,7 @@ function submitIntake() {
       { action: 'Intake submitted via online form', by: first+' '+last, at: new Date().toISOString() }
     ]
   };
-  try { localStorage.setItem('vantage_client_' + fileId, JSON.stringify(clientData)); } catch(e) {}
+  try { localStorage.setItem('graceful_client_' + fileId, JSON.stringify(clientData)); } catch(e) {}
 
   // Clear draft
   try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}

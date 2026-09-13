@@ -109,7 +109,7 @@ async function askAI() {
   CHAT_STATE.messages[CHAT_STATE.channel].push({ id: Date.now(), author:'You', avatar:'RC', text, time: now, self:true });
 
   // Add typing indicator
-  CHAT_STATE.messages[CHAT_STATE.channel].push({ id: 'typing', author:'Vantage AI', avatar:'AI', text:'Thinking...', time: now, ai:true, self:false });
+  CHAT_STATE.messages[CHAT_STATE.channel].push({ id: 'typing', author:'Graceful AI', avatar:'AI', text:'Thinking...', time: now, ai:true, self:false });
   renderMessages();
 
   try {
@@ -119,11 +119,11 @@ async function askAI() {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
-        system: `You are the Vantage Immigration Services AI assistant for the team chat. 
+        system: `You are the Graceful Immigration Consultant Inc. AI assistant for the team chat. 
 You help the RCIC team with Canadian immigration questions, IRCC processes, form requirements, processing times, and practice management.
 You are concise and practical — give direct answers with action items.
 You know about the IRCC spousal sponsorship process and all major Canadian immigration pathways.
-You are based in Fort McMurray, Alberta and serve a diverse immigrant community.
+You serve clients across Canada from a team of RCICs in multiple provinces.
 Keep responses under 150 words. Use bullet points when listing multiple items.`,
         messages: [{ role: 'user', content: text }]
       })
@@ -131,10 +131,10 @@ Keep responses under 150 words. Use bullet points when listing multiple items.`,
     const data = await res.json();
     const reply = data.content?.[0]?.text || 'Sorry, I had trouble with that. Please check the IRCC website.';
     CHAT_STATE.messages[CHAT_STATE.channel] = CHAT_STATE.messages[CHAT_STATE.channel].filter(m => m.id !== 'typing');
-    CHAT_STATE.messages[CHAT_STATE.channel].push({ id: Date.now(), author:'Vantage AI', avatar:'AI', text: reply, time: now, ai:true, self:false });
+    CHAT_STATE.messages[CHAT_STATE.channel].push({ id: Date.now(), author:'Graceful AI', avatar:'AI', text: reply, time: now, ai:true, self:false });
   } catch(err) {
     CHAT_STATE.messages[CHAT_STATE.channel] = CHAT_STATE.messages[CHAT_STATE.channel].filter(m => m.id !== 'typing');
-    CHAT_STATE.messages[CHAT_STATE.channel].push({ id: Date.now(), author:'Vantage AI', avatar:'AI', text:'Connection error. Please try again.', time: now, ai:true, self:false });
+    CHAT_STATE.messages[CHAT_STATE.channel].push({ id: Date.now(), author:'Graceful AI', avatar:'AI', text:'Connection error. Please try again.', time: now, ai:true, self:false });
   }
   renderMessages();
 }

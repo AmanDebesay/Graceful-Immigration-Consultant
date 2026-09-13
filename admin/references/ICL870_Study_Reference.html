@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICL 870 – Enforcement Study Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --ink: #0f1419;
+  --deep: #1a2332;
+  --navy: #2c3e5a;
+  --red: #a12a1e;
+  --red-light: #fbecea;
+  --orange: #c65400;
+  --orange-light: #fff4e8;
+  --blue: #155da1;
+  --blue-light: #e9f3fb;
+  --teal: #0a6b6a;
+  --teal-light: #e4f5f5;
+  --green: #1a6635;
+  --green-light: #eaf6ed;
+  --purple: #6a2d8a;
+  --purple-light: #f4ebf9;
+  --gold: #ad7700;
+  --gold-light: #fef8e6;
+  --border: #d4dce6;
+  --muted: #5d6d7e;
+  --bg: #f7f9fb;
+  --white: #fff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.7}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#0f1419 0%,#1a2332 40%,#2c3e5a 100%);padding:45px 24px 35px;position:relative;overflow:hidden}
+.hdr::after{content:'870';position:absolute;right:-20px;bottom:-40px;font-family:'Crimson Pro',serif;font-size:16rem;color:rgba(255,255,255,0.035);font-weight:700;line-height:1;pointer-events:none}
+.hdr-in{max-width:1200px;margin:0 auto;position:relative}
+.hdr h1{font-family:'Crimson Pro',serif;font-size:2.7rem;color:#fff;line-height:1.15;font-weight:700}
+.hdr h1 span{color:#f38181;font-weight:400}
+.hdr p{color:#9fb4ca;font-size:.92rem;margin-top:8px;font-weight:400}
+.hdr-tags{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+.htag{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#cbd9e8;font-size:.73rem;font-weight:700;padding:5px 13px;border-radius:22px;letter-spacing:.05em}
+
+/* NAV */
+.nav{background:#0f1419;border-top:1px solid rgba(255,255,255,.06);display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:200;padding:0 22px}
+.nav::-webkit-scrollbar{display:none}
+.nb{flex-shrink:0;background:none;border:none;border-bottom:3px solid transparent;color:#7a8fa5;font-family:'Inter',sans-serif;font-size:.79rem;font-weight:700;padding:13px 15px;cursor:pointer;white-space:nowrap;transition:color .2s;letter-spacing:.02em}
+.nb:hover{color:#fff}
+.nb.on{color:#f38181;border-bottom-color:#f38181}
+
+/* PAGE */
+.page{max-width:1200px;margin:0 auto;padding:28px 20px 80px}
+.sec{display:none}.sec.on{display:block}
+
+/* MODULE HEADER */
+.mh{border-radius:15px;padding:28px 30px;margin-bottom:22px;color:#fff;position:relative;overflow:hidden}
+.mh::after{content:attr(data-n);position:absolute;right:18px;bottom:-25px;font-family:'Crimson Pro',serif;font-size:10rem;color:rgba(255,255,255,.05);line-height:1;pointer-events:none;font-weight:700}
+.mtag{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.13em;color:rgba(255,255,255,.55);display:inline-block;margin-bottom:7px}
+.mh h2{font-family:'Crimson Pro',serif;font-size:1.85rem;line-height:1.25;font-weight:700}
+.mh .sub{color:rgba(255,255,255,.6);font-size:.89rem;margin-top:6px;font-weight:400}
+
+/* CARDS */
+.grid{display:grid;gap:14px}
+.card{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 3px rgba(15,20,25,.04)}
+.ch{display:flex;align-items:center;gap:11px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s;border-bottom:1px solid transparent}
+.ch:hover{background:#f9fbfd}
+.ch.on{background:var(--blue-light);border-bottom-color:var(--border)}
+.ci{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0}
+.ch h4{flex:1;font-size:.95rem;font-weight:700;color:var(--deep)}
+.cv{color:var(--muted);font-size:.74rem;transition:transform .2s}
+.ch.on .cv{transform:rotate(180deg)}
+.cb{display:none;padding:20px}
+.cb.on{display:block}
+
+/* TYPOGRAPHY */
+.cb p,.cb li{font-size:.87rem;color:var(--ink);line-height:1.65}
+.cb ul,.cb ol{padding-left:20px;margin:8px 0}
+.cb li{margin-bottom:5px}
+strong{color:var(--deep);font-weight:700}
+.lbl{font-size:.69rem;font-weight:800;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);margin:14px 0 7px;display:block}
+
+/* BOXES */
+.box{border-radius:9px;padding:12px 16px;margin:10px 0;font-size:.85rem;line-height:1.6}
+.bi{background:var(--blue-light);border-left:4px solid var(--blue)}
+.bw{background:var(--orange-light);border-left:4px solid var(--orange)}
+.bd{background:var(--red-light);border-left:4px solid var(--red)}
+.bg{background:var(--green-light);border-left:4px solid var(--green)}
+.bt{background:var(--teal-light);border-left:4px solid var(--teal)}
+.bp{background:var(--purple-light);border-left:4px solid var(--purple)}
+.bgo{background:var(--gold-light);border-left:4px solid var(--gold)}
+
+/* GRIDS */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin:10px 0}
+@media(max-width:640px){.two,.three{grid-template-columns:1fr}}
+.mini{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:13px 15px}
+.mini h5{font-size:.83rem;font-weight:700;color:var(--deep);margin-bottom:7px}
+.mini ul{list-style:none;padding:0}
+.mini ul li{font-size:.81rem;padding:3px 0 3px 15px;position:relative}
+.mini ul li::before{content:'›';position:absolute;left:0;color:var(--blue);font-weight:700;font-size:1.1rem}
+
+/* FLOW */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:10px 0}
+.fs{background:var(--blue-light);border:1px solid #b3d4f1;border-radius:8px;padding:7px 14px;font-size:.8rem;font-weight:700;color:#0d4374;white-space:nowrap}
+.fa{color:var(--orange);font-size:1.15rem;font-weight:700}
+
+/* PILLS */
+.pills{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+.pill{border-radius:22px;padding:5px 12px;font-size:.78rem;font-weight:700;border:1px solid}
+.pb{background:var(--blue-light);border-color:#9ac8e8;color:#0d4475}
+.pg{background:var(--green-light);border-color:#7ecfa0;color:#0e4023}
+.pr{background:var(--red-light);border-color:#e8a09a;color:#6e1a11}
+.pt{background:var(--teal-light);border-color:#7ed4d3;color:#084b4a}
+.pp{background:var(--purple-light);border-color:#b89cd8;color:#3b1557}
+.pgo{background:var(--gold-light);border-color:#e8c06a;color:#6b4400}
+.po{background:var(--orange-light);border-color:#f4c084;color:#6b3500}
+
+/* TABLE */
+.tw{overflow-x:auto;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead th{background:var(--deep);color:#fff;padding:10px 12px;text-align:left;font-weight:700;font-size:.78rem;letter-spacing:.03em}
+tbody tr:nth-child(even){background:#f9fbfd}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+
+/* CHECKLIST */
+.chk{list-style:none;padding:0}
+.chk li{font-size:.87rem;padding:7px 0 7px 28px;position:relative;border-bottom:1px dashed var(--border)}
+.chk li:last-child{border:none}
+.chk li::before{content:'□';position:absolute;left:0;color:var(--blue);font-size:1rem}
+
+/* QUOTE / CASE */
+.qt{border-left:3px solid var(--gold);background:var(--gold-light);border-radius:0 8px 8px 0;padding:11px 15px;font-size:.85rem;font-style:italic;color:#4a3200;margin:10px 0}
+.qt cite{font-style:normal;font-size:.75rem;color:var(--muted);display:block;margin-top:4px}
+.casebox{background:var(--purple-light);border:1px solid #c8a8e8;border-radius:9px;padding:12px 15px;margin:9px 0;font-size:.85rem}
+.casebox .cn{font-weight:700;color:var(--purple);font-size:.86rem;margin-bottom:5px}
+
+/* OV GRID */
+.og{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:24px}
+.oc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:transform .2s,box-shadow .2s;border-left:6px solid}
+.oc:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(15,20,25,.08)}
+.oc .mn{font-size:.71rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.oc h3{font-family:'Crimson Pro',serif;font-size:1.08rem;color:var(--deep);margin:5px 0 8px;font-weight:700}
+.oc p{font-size:.82rem;color:var(--muted);line-height:1.55}
+
+/* BACK */
+.back{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:.81rem;font-family:'Inter',sans-serif;color:var(--muted);cursor:pointer;margin-bottom:18px;transition:all .2s;font-weight:600}
+.back:hover{background:var(--blue-light);color:var(--deep);border-color:var(--blue)}
+
+/* SEARCH */
+.srch{margin-bottom:20px}
+.srch input{width:100%;padding:11px 18px;border:1px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.91rem;background:var(--white);color:var(--ink);outline:none}
+.srch input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
+
+.yes{display:inline-block;background:var(--green-light);color:var(--green);border:1px solid #7ecfa0;border-radius:5px;padding:2px 8px;font-size:.77rem;font-weight:700}
+.no{display:inline-block;background:var(--red-light);color:var(--red);border:1px solid #e8a09a;border-radius:5px;padding:2px 8px;font-size:.77rem;font-weight:700}
+
+/* SECTION DIVIDER */
+.sdiv{height:2px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin:20px 0}
+
+/* IRPA/IRPR REFERENCE */
+.ref{display:inline-block;background:var(--teal-light);color:var(--teal);border:1px solid #7ed4d3;border-radius:6px;padding:2px 9px;font-size:.76rem;font-weight:700;font-family:'Inter',monospace}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <h1>ICL 870 — <span>Enforcement</span></h1>
+    <p>Complete Study Reference · Inadmissibility, Detention & Removal · Queen's University GDipICL</p>
+    <div class="hdr-tags">
+      <span class="htag">⚖️ IRPA Grounds</span>
+      <span class="htag">🔒 Detention Reviews</span>
+      <span class="htag">🏛️ ID & IAD Rules</span>
+      <span class="htag">📋 s.58 Grounds</span>
+      <span class="htag">🎯 s.248 Factors</span>
+      <span class="htag">✈️ Removal / PRRA</span>
+      <span class="htag">🛡️ Criminal Rehab</span>
+      <span class="htag">📜 Ribic Factors</span>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb on" onclick="show('ov')">🏠 Overview</button>
+  <button class="nb" onclick="show('m1')">M1 Framework</button>
+  <button class="nb" onclick="show('m2')">M2 ID Rules</button>
+  <button class="nb" onclick="show('m3')">M3 IAD</button>
+  <button class="nb" onclick="show('m4')">M4 Remedies</button>
+  <button class="nb" onclick="show('m5')">M5 Detention</button>
+  <button class="nb" onclick="show('m6')">M6 DR Prep</button>
+  <button class="nb" onclick="show('m7')">M7 Conducting DR</button>
+  <button class="nb" onclick="show('m8')">M8 Removal</button>
+  <button class="nb" onclick="show('qr')">📊 Quick Ref</button>
+</div>
+
+<div class="page">
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<div class="sec on" id="ov">
+  <div class="srch"><input type="text" placeholder="🔍  Search any ground, case, rule, or factor…" oninput="srch(this.value)"></div>
+  <p style="font-size:.88rem;color:var(--muted);margin-bottom:18px">Click any module card to explore detailed content. Use the Quick Ref tab for comprehensive comparison tables.</p>
+  <div class="og">
+    <div class="oc" onclick="show('m1')" style="border-left-color:#a12a1e">
+      <div class="mn">Module 1 — Part 1: Inadmissibility</div>
+      <h3>Overview & Legal Framework</h3>
+      <p>IRPA grounds: medical, financial, misrepresentation, cessation, non-compliance, inadmissible family member.</p>
+    </div>
+    <div class="oc" onclick="show('m2')" style="border-left-color:#c65400">
+      <div class="mn">Module 2 — Part 1: Inadmissibility</div>
+      <h3>Immigration Division Rules & Procedure</h3>
+      <p>ID jurisdiction, admissibility hearings, procedural rules, responding to PFLs.</p>
+    </div>
+    <div class="oc" onclick="show('m3')" style="border-left-color:#6a2d8a">
+      <div class="mn">Module 3 — Part 1: Inadmissibility</div>
+      <h3>Immigration Appeal Division</h3>
+      <p>IAD jurisdiction, right of appeal, Ribic factors, evidence rules, written/oral advocacy, IAD orders.</p>
+    </div>
+    <div class="oc" onclick="show('m4')" style="border-left-color:#1a6635">
+      <div class="mn">Module 4 — Part 1: Inadmissibility</div>
+      <h3>Overcoming Inadmissibility</h3>
+      <p>Criminal rehabilitation, H&C applications, Temporary Resident Permits, Ministerial Relief, ARC.</p>
+    </div>
+    <div class="oc" onclick="show('m5')" style="border-left-color:#155da1">
+      <div class="mn">Module 5 — Part 2: Detention</div>
+      <h3>Legal Framework for Detention</h3>
+      <p>IRPA s.58 grounds (danger, flight risk, ministerial inquiry, identity), IRPR s.248 factors, detention as last resort.</p>
+    </div>
+    <div class="oc" onclick="show('m6')" style="border-left-color:#0a6b6a">
+      <div class="mn">Module 6 — Part 2: Detention</div>
+      <h3>Preparing for Detention Review</h3>
+      <p>Client interviews, bondsperson preparation, alternatives to detention, disclosure obligations, release plans.</p>
+    </div>
+    <div class="oc" onclick="show('m7')" style="border-left-color:#ad7700">
+      <div class="mn">Module 7 — Part 2: Detention</div>
+      <h3>Conducting a Detention Review</h3>
+      <p>Witness preparation, best practices for submissions, during the hearing, post-hearing applications (EDR, change in conditions).</p>
+    </div>
+    <div class="oc" onclick="show('m8')" style="border-left-color:#2c3e5a">
+      <div class="mn">Module 8 — Part 2: Detention</div>
+      <h3>Removal</h3>
+      <p>PRRA, H&C for removal, deferrals, ineffective assistance of counsel, Magonza case.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--red-light);color:var(--red)">⚖️</div>
+      <h4>Course Structure — ICL 870 Overview</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <div class="two">
+        <div class="mini">
+          <h5>Part 1: Inadmissibility (Modules 1–4)</h5>
+          <ul>
+            <li><strong>Module 1:</strong> IRPA grounds of inadmissibility</li>
+            <li><strong>Module 2:</strong> Immigration Division (ID) rules & procedure</li>
+            <li><strong>Module 3:</strong> Immigration Appeal Division (IAD) rules & Ribic</li>
+            <li><strong>Module 4:</strong> Remedies (rehab, H&C, TRP, ARC)</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Part 2: Detention (Modules 5–8)</h5>
+          <ul>
+            <li><strong>Module 5:</strong> Legal framework (s.58 grounds, s.248 factors)</li>
+            <li><strong>Module 6:</strong> Detention Review (DR) preparation</li>
+            <li><strong>Module 7:</strong> Conducting DR & post-hearing remedies</li>
+            <li><strong>Module 8:</strong> Removal (PRRA, H&C, deferrals)</li>
+          </ul>
+        </div>
+      </div>
+      <span class="lbl">Assessments (100%)</span>
+      <div class="pills">
+        <span class="pill pb">Assignment 1: Advice on Inadmissibility (15%)</span>
+        <span class="pill pp">Assignment 2: IAD Submissions + Peer Review (20%)</span>
+        <span class="pill pt">Assignment 3: Oral Submissions on DR (20%)</span>
+        <span class="pill pgo">Final Quiz: Modules 1–8 (40%)</span>
+        <span class="pill pg">Engagement + Skills Reflection (5%)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch on" onclick="tog(this)">
+      <div class="ci" style="background:var(--blue-light);color:var(--blue)">📚</div>
+      <h4>Master Reference — Key IRPA Sections</h4><span class="cv">▼</span>
+    </div>
+    <div class="cb on">
+      <div class="three">
+        <div class="mini">
+          <h5>Inadmissibility (s.33–s.43)</h5>
+          <ul>
+            <li><span class="ref">s.38</span> Medical inadmissibility</li>
+            <li><span class="ref">s.39</span> Financial reasons</li>
+            <li><span class="ref">s.40</span> Misrepresentation</li>
+            <li><span class="ref">s.40.1</span> Cessation of refugee protection</li>
+            <li><span class="ref">s.41</span> Non-compliance</li>
+            <li><span class="ref">s.42</span> Inadmissible family member</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Detention (s.54–s.61)</h5>
+          <ul>
+            <li><span class="ref">s.54–s.56</span> Arrest & detention authority</li>
+            <li><span class="ref">s.57</span> Detention review timelines</li>
+            <li><span class="ref">s.58</span> Four grounds for detention</li>
+            <li><span class="ref">IRPR s.246</span> Danger factors</li>
+            <li><span class="ref">IRPR s.248</span> Detention/release factors</li>
+          </ul>
+        </div>
+        <div class="mini">
+          <h5>Appeals & Reviews</h5>
+          <ul>
+            <li><span class="ref">s.62–s.69</span> IAD jurisdiction & appeals</li>
+            <li><span class="ref">s.63</span> Right of appeal (PR/FN)</li>
+            <li><span class="ref">s.112–s.114</span> PRRA</li>
+            <li><span class="ref">s.25</span> H&C applications</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════ MODULE 1 ═══════════════════════════ -->
+<div class="sec" id="m1">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="1" style="background:linear-gradient(130deg,#5a0e0a 0%,#a12a1e 100%)">
+    <div class="mtag">Module 1 — Part 1: Inadmissibility</div>
+    <h2>Overview & Legal Framework of Inadmissibility</h2>
+    <div class="sub">IRPA grounds: medical, financial, misrepresentation, cessation, non-compliance, inadmissible family</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">🏥</div>
+        <h4>Medical Inadmissibility — IRPA s.38</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd"><strong>IRPA 38(1)</strong> — A foreign national is inadmissible on health grounds if their health condition:</div>
+        <div class="pills">
+          <span class="pill pr">(a) Likely danger to public health</span>
+          <span class="pill pr">(b) Likely danger to public safety</span>
+          <span class="pill pr">(c) Might cause excessive demand on health/social services</span>
+        </div>
+        <div class="two">
+          <div class="mini">
+            <h5>Standard of Proof</h5>
+            <ul><li>Balance of probabilities</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Likely Outcome</h5>
+            <ul><li>Exclusion order — 1 year (though inadmissible for duration of medical condition)</li></ul>
+          </div>
+        </div>
+        <span class="lbl">Exceptions to s.38(1)(c) Excessive Demand</span>
+        <div class="pills">
+          <span class="pill pg">Refugee/protected person OR their immediate family member</span>
+          <span class="pill pg">Being sponsored as member of family class (spouse or child)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">💰</div>
+        <h4>Financial Inadmissibility — IRPA s.39</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bw"><strong>IRPA 39</strong> — A foreign national is inadmissible for financial reasons if they are or will be <strong>unable or unwilling to support themselves</strong> or any dependent person, and have NOT satisfied an officer that adequate arrangements (other than social assistance) have been made.</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Standard of Proof</h5>
+            <ul><li>Balance of probabilities</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Likely Outcome</h5>
+            <ul><li>Exclusion order — 1 year</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚠️</div>
+        <h4>Misrepresentation — IRPA s.40 (Most Common)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd"><strong>IRPA 40(1)(a)</strong> — A permanent resident or foreign national is inadmissible for misrepresentation for <strong>directly or indirectly misrepresenting or withholding material facts</strong> relating to a relevant matter that induces or <strong>could induce an error</strong> in the administration of this Act.</div>
+        <span class="lbl">Also Inadmissible If:</span>
+        <ul class="chk">
+          <li>Sponsored by a person who is inadmissible for misrepresentation</li>
+          <li>Had refugee decision vacated</li>
+          <li>Had citizenship revoked for false representation, fraud, or knowingly concealing material circumstances</li>
+        </ul>
+        <div class="two">
+          <div class="mini">
+            <h5>Standard of Proof</h5>
+            <ul><li>Balance of probabilities</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Likely Outcome</h5>
+            <ul><li>5-year exclusion order</li></ul>
+          </div>
+        </div>
+        <span class="lbl">Innocent Mistake Defence — Extremely Narrow!</span>
+        <div class="box bg"><strong>Quintessential Example:</strong> A person raising a child they believed was theirs, but DNA test during processing reveals the child is not actually theirs — this would likely qualify for innocent mistake defence.</div>
+        <div class="box bd">⚠️ <strong>Does NOT Qualify for Innocent Mistake:</strong>
+          <ul style="margin-top:7px;padding-left:18px">
+            <li>Unaware of fraudulent actions by your representative</li>
+            <li>Failed to include employment because you didn't think it counted</li>
+            <li>Didn't disclose previous refusal assuming IRCC already has the info</li>
+            <li>Accidentally checked wrong box on form</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🛑</div>
+        <h4>Cessation of Refugee Protection — IRPA s.40.1</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bi"><strong>s.40.1(1)</strong> — Foreign national inadmissible on final determination under s.108(2) that refugee protection has ceased.<br><strong>s.40.1(2)</strong> — Permanent resident inadmissible on final determination that refugee protection ceased for reasons in s.108(1)(a)–(d).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">📋</div>
+        <h4>Non-Compliance with the Act — IRPA s.41</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bw"><strong>IRPA 41</strong> — A person is inadmissible for failing to comply with this Act:</div>
+        <div class="two">
+          <div class="mini">
+            <h5>(a) Foreign National</h5>
+            <ul><li>Through act or omission which contravenes (directly or indirectly) a provision of this Act</li></ul>
+          </div>
+          <div class="mini">
+            <h5>(b) Permanent Resident</h5>
+            <ul><li>Failing to comply with s.27(2) conditions of PR OR s.28 residency obligation</li></ul>
+          </div>
+        </div>
+        <div class="two">
+          <div class="mini">
+            <h5>Likely Outcome</h5>
+            <ul><li>FN: Exclusion order</li><li>PR: Departure order</li></ul>
+          </div>
+          <div class="mini">
+            <h5>Standard of Proof</h5>
+            <ul><li>Balance of probabilities</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">👨‍👩‍👧</div>
+        <h4>Inadmissible Family Member — IRPA s.42</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bp"><strong>IRPA 42(1)</strong> — A foreign national (other than protected person) is inadmissible on grounds of an inadmissible family member if:</div>
+        <div class="pills">
+          <span class="pill pp">(a) Accompanying family member OR (in prescribed circumstances) non-accompanying family member is inadmissible</span>
+          <span class="pill pp">(b) They are an accompanying family member of an inadmissible person</span>
+        </div>
+        <div class="box bi">💡 Does NOT apply to temporary resident applications unless family member is inadmissible pursuant to IRPA ss.34, 35, 35.1, or 37 (security/human rights violations/organized crime).</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 2 ═══════════════════════════ -->
+<div class="sec" id="m2">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="2" style="background:linear-gradient(130deg,#3d1f00 0%,#c65400 100%)">
+    <div class="mtag">Module 2 — Part 1: Inadmissibility</div>
+    <h2>Immigration Division Rules & Procedure</h2>
+    <div class="sub">ID jurisdiction, admissibility hearings, procedural rules, responding to PFLs</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">🏛️</div>
+        <h4>Overview of the Immigration Division (ID)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bw">The Immigration Division is responsible for conducting <strong>admissibility hearings</strong> to determine if a foreign national or permanent resident is inadmissible to Canada under IRPA.</div>
+        <span class="lbl">Key Functions</span>
+        <ul class="chk">
+          <li>Conduct admissibility hearings for inadmissibility allegations</li>
+          <li>Conduct detention reviews to determine if continued detention is warranted</li>
+          <li>Issue removal orders if person found inadmissible</li>
+          <li>Make decisions on release conditions and alternatives to detention</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">📜</div>
+        <h4>Admissibility Hearings</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">Admissibility hearings are held when CBSA alleges that a person is inadmissible to Canada. The burden is on the <strong>Minister (CBSA)</strong> to prove inadmissibility on a balance of probabilities.</div>
+        <span class="lbl">Process</span>
+        <div class="flow">
+          <span class="fs">1. Report of Inadmissibility<br><small>(CBSA issues s.44 report)</small></span>
+          <span class="fa">→</span>
+          <span class="fs">2. Referral to ID<br><small>(Minister's delegate refers)</small></span>
+          <span class="fa">→</span>
+          <span class="fs">3. Admissibility Hearing<br><small>(ID Member presides)</small></span>
+          <span class="fa">→</span>
+          <span class="fs">4. Decision<br><small>(Inadmissible or not)</small></span>
+          <span class="fa">→</span>
+          <span class="fs">5. Removal Order<br><small>(If inadmissible)</small></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">⚖️</div>
+        <h4>Rules and Procedures of the ID</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bw">The ID operates under the <strong>Immigration Division Rules (SOR/2002-229)</strong>. Key procedural requirements:</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Notice & Disclosure</h5>
+            <ul>
+              <li>Minister must provide notice of hearing</li>
+              <li>Minister must disclose evidence in advance</li>
+              <li>Person concerned has right to disclosure</li>
+              <li>Documents must be filed according to timelines</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Hearing Conduct</h5>
+            <ul>
+              <li>Right to counsel</li>
+              <li>Right to interpreter</li>
+              <li>Right to call witnesses</li>
+              <li>Right to make submissions</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">📬</div>
+        <h4>Critically Assessing Responses to PFLs</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">Procedural Fairness Letters (PFLs) give the person an opportunity to respond to concerns BEFORE a negative decision is made. Effective responses are critical.</div>
+        <span class="lbl">Steps to Respond to a PFL</span>
+        <ul class="chk">
+          <li>Carefully read and identify ALL concerns raised</li>
+          <li>Research the law and policy applicable to each concern</li>
+          <li>Gather responsive documents and evidence</li>
+          <li>Draft a detailed response addressing each concern with legal references</li>
+          <li>Submit before the deadline (request extension if needed)</li>
+          <li>Follow up to confirm receipt</li>
+        </ul>
+        <div class="box bw">💡 A PFL response should be substantive, well-organized, and legally grounded. Generic or incomplete responses may lead to refusal.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 3 ═══════════════════════════ -->
+<div class="sec" id="m3">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="3" style="background:linear-gradient(130deg,#2d0e3d 0%,#6a2d8a 100%)">
+    <div class="mtag">Module 3 — Part 1: Inadmissibility</div>
+    <h2>Immigration Appeal Division (IAD)</h2>
+    <div class="sub">Jurisdiction, right of appeal, Ribic factors, evidence, orders, effective advocacy</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>IAD Jurisdiction — IRPA s.62</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp"><strong>IRPA 62</strong> — The Immigration Appeal Division is the competent Division of the Board with respect to appeals under this Division.</div>
+        <span class="lbl">IAD Hears Appeals From:</span>
+        <div class="pills">
+          <span class="pill pp">Permanent Residents — removal orders (with exceptions)</span>
+          <span class="pill pp">Foreign Nationals — sponsorship refusals</span>
+          <span class="pill pp">Sponsors — sponsorship application refusals</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📋</div>
+        <h4>Right of Appeal — IRPA s.63</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp"><strong>Who has a right of appeal to the IAD?</strong></div>
+        <div class="two">
+          <div class="mini">
+            <h5>Permanent Residents</h5>
+            <ul>
+              <li>May appeal removal order made at admissibility hearing</li>
+              <li><strong>EXCEPT:</strong> If inadmissible on grounds of serious criminality and sentenced to ≥6 months OR ≥2 years imprisonment</li>
+              <li><strong>EXCEPT:</strong> If inadmissible on security, human rights violations, or organized crime grounds</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Foreign Nationals (Sponsors)</h5>
+            <ul>
+              <li>Sponsor may appeal refusal of family class sponsorship application</li>
+              <li>Sponsored FN may appeal refusal (if sponsor is citizen or PR)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box bd">⚠️ <strong>IRPA s.64 "Serious Criminality" for Appeal Rights:</strong> No appeal if convicted in Canada of offence punishable by max of ≥10 years OR sentenced to ≥6 months. Note: This is DIFFERENT from s.36 serious criminality for inadmissibility purposes.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📊</div>
+        <h4>Ribic Factors — H&C Relief at IAD</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp">In determining whether to grant a <strong>stay of removal</strong>, the IAD considers humanitarian and compassionate (H&C) factors, as set out in the <em>Ribic</em> decision.</div>
+        <span class="lbl">The Ribic Factors</span>
+        <ul class="chk">
+          <li><strong>Seriousness of the offence(s)</strong> leading to the removal order</li>
+          <li><strong>Possibility of rehabilitation</strong> (or rehabilitation already achieved)</li>
+          <li><strong>Length of time spent in Canada</strong> and degree of establishment</li>
+          <li><strong>Family in Canada</strong> and dislocation to family that removal would cause</li>
+          <li><strong>Support available from family and community</strong></li>
+          <li><strong>Degree of hardship</strong> that would be caused by removal</li>
+          <li><strong>Any other relevant factors</strong> (best interests of children, country conditions, etc.)</li>
+        </ul>
+        <div class="box bg">✅ IAD has broad discretion to weigh these factors. Strong evidence on multiple factors increases likelihood of success.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📄</div>
+        <h4>Evidence at IAD</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi"><strong>Evidence</strong> = proof; means of establishing facts. IAD proceedings are <strong>less formal</strong> than court — broad rules of evidence apply.</div>
+        <span class="lbl">Types of Evidence</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Documentary Evidence</h5>
+            <ul>
+              <li>Letters of support</li>
+              <li>Employment records</li>
+              <li>Medical/psychological reports</li>
+              <li>Police records, rehabilitation certificates</li>
+              <li>Country condition reports</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Oral Testimony</h5>
+            <ul>
+              <li>Appellant's testimony</li>
+              <li>Family members</li>
+              <li>Community members</li>
+              <li>Expert witnesses (psychologists, etc.)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box bw">💡 Evidence must be <strong>reliable</strong> and <strong>probative</strong>. Generic letters or boilerplate documents carry little weight.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>IAD Orders / Decisions</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Possible IAD Outcomes</span>
+        <div class="tw"><table>
+          <thead><tr><th>Order</th><th>Description</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Allow Appeal</strong></td><td>IAD finds removal order was not valid or is not justified on H&C grounds</td><td>Removal order set aside; person remains in Canada</td></tr>
+            <tr><td><strong>Dismiss Appeal</strong></td><td>IAD upholds removal order; no H&C relief warranted</td><td>Removal order stands; person subject to removal</td></tr>
+            <tr><td><strong>Stay of Removal</strong></td><td>IAD grants conditional stay (typically 1–3 years) with terms</td><td>Removal order remains but enforcement is stayed; if conditions met, may appeal again later</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box bg">✅ A <strong>stay</strong> is the most common outcome when H&C factors are strong but the removal order was validly issued. Conditions may include: reporting, no criminal activity, community service, counseling, etc.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">🎤</div>
+        <h4>Effective Written & Oral Advocacy</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <span class="lbl">Written Submissions (Pre-Hearing)</span>
+        <ul class="chk">
+          <li>Clearly identify the issues and legal framework</li>
+          <li>Address each Ribic factor with specific evidence</li>
+          <li>Anticipate and respond to Minister's arguments</li>
+          <li>Cite relevant case law and policy</li>
+          <li>Be concise but comprehensive</li>
+        </ul>
+        <span class="lbl">Oral Submissions (At Hearing)</span>
+        <ul class="chk">
+          <li>Prepare an outline, not a script</li>
+          <li>Lead with strongest arguments</li>
+          <li>Be responsive to Member's questions</li>
+          <li>Use respectful, professional tone</li>
+          <li>Emphasize rehabilitation and family ties</li>
+          <li>Acknowledge weaknesses but contextualize them</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 4 ═══════════════════════════ -->
+<div class="sec" id="m4">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="4" style="background:linear-gradient(130deg,#0d2817 0%,#1a6635 100%)">
+    <div class="mtag">Module 4 — Part 1: Inadmissibility</div>
+    <h2>Overcoming Inadmissibility</h2>
+    <div class="sub">Criminal rehabilitation, H&C applications, TRPs, Ministerial Relief, ARC</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">🛡️</div>
+        <h4>Criminal Inadmissibility — IRPA s.36</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg"><strong>When is a person inadmissible on criminality for convictions?</strong><br>Committed offence equivalent to an offence punishable in Canada by a maximum of at least 10 years.</div>
+        <span class="lbl">Key Points</span>
+        <ul class="chk">
+          <li>Must be a <strong>conviction</strong></li>
+          <li>Must be under an <strong>Act of Parliament</strong> (federal statute)</li>
+          <li>Hybrid offence = treated as <strong>indictable</strong></li>
+          <li>Do NOT confuse <strong>s.36 serious criminality</strong> (inadmissibility) with <strong>s.64 serious criminality</strong> (appeal rights)</li>
+          <li>Look at the statute under which person was convicted to determine max punishment: ≥10 years triggers s.36(1)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">✅</div>
+        <h4>Criminal Rehabilitation</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg">Criminal rehabilitation removes the grounds of inadmissibility for past criminal conduct. It is a <strong>permanent solution</strong>.</div>
+        <span class="lbl">Eligibility</span>
+        <div class="tw"><table>
+          <thead><tr><th>Type</th><th>Waiting Period</th><th>Requirements</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Deemed Rehabilitation</strong></td><td>10 years since completion of sentence</td><td>Single non-serious offence (max &lt;10 yrs); no application needed, automatic</td></tr>
+            <tr><td><strong>Individual Rehabilitation</strong></td><td>5 years since completion of sentence</td><td>Serious criminality OR multiple offences; must apply with evidence of rehabilitation</td></tr>
+          </tbody>
+        </table></div>
+        <span class="lbl">Rehabilitation Criteria (Officer Assessment)</span>
+        <ul class="chk">
+          <li>Nature and severity of the offence(s)</li>
+          <li>Circumstances surrounding the offence</li>
+          <li>Period of time since the offence</li>
+          <li>Evidence of rehabilitation (employment, community ties, no reoffending)</li>
+          <li>Need to enter Canada</li>
+        </ul>
+        <div class="box bi">💡 Strong evidence package is essential: reference letters, employment records, police clearances, proof of stability.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">📄</div>
+        <h4>Humanitarian & Compassionate (H&C) Applications</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg"><strong>IRPA s.25(1)</strong> — Minister may grant PR status or exempt from IRPA requirements if justified by H&C considerations, taking into account best interests of any child directly affected.</div>
+        <span class="lbl">H&C Factors (Non-Exhaustive)</span>
+        <ul class="chk">
+          <li>Establishment in Canada (length of time, employment, community ties)</li>
+          <li>Best interests of any children affected</li>
+          <li>Hardship if required to apply from outside Canada</li>
+          <li>Family ties in Canada</li>
+          <li>Country conditions in country of origin</li>
+          <li>Health considerations</li>
+          <li>Any other relevant humanitarian factors</li>
+        </ul>
+        <div class="box bw">⚠️ H&C applications are discretionary and highly individualized. Officers have broad discretion. Strong documentary evidence is crucial.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🎫</div>
+        <h4>Temporary Resident Permits (TRPs)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt"><strong>IRPA s.24(1)</strong> — An officer may issue a TRP to a foreign national who is inadmissible or does not meet IRPA requirements, if the officer is of the opinion that it is justified in the circumstances.</div>
+        <span class="lbl">Key Features</span>
+        <div class="two">
+          <div class="mini">
+            <h5>Purpose</h5>
+            <ul>
+              <li>Temporary solution (not permanent)</li>
+              <li>Allows entry despite inadmissibility</li>
+              <li>Discretionary — must justify need to enter</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Duration & Conditions</h5>
+            <ul>
+              <li>Valid for specific period (officer decides)</li>
+              <li>May have conditions attached</li>
+              <li>Can be renewed if circumstances warrant</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box bi">💡 TRP is often used for urgent/compassionate travel (e.g., attending funeral, critical business meeting) when criminal rehabilitation is not yet available.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">🔄</div>
+        <h4>Authorization to Return to Canada (ARC)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb">
+        <div class="box bp">If a person has been removed from Canada, they need an <strong>Authorization to Return to Canada (ARC)</strong> before they can return.</div>
+        <span class="lbl">When Required</span>
+        <ul class="chk">
+          <li>Person was previously removed from Canada</li>
+          <li>Person has a removal order in effect</li>
+          <li>Person was deported</li>
+        </ul>
+        <span class="lbl">Application Process</span>
+        <ul class="chk">
+          <li>Must apply before attempting to return</li>
+          <li>Officer assesses reasons for previous removal and reasons to return</li>
+          <li>May be granted with conditions</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 5 ═══════════════════════════ -->
+<div class="sec" id="m5">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="5" style="background:linear-gradient(130deg,#081f2d 0%,#155da1 100%)">
+    <div class="mtag">Module 5 — Part 2: Detention</div>
+    <h2>Legal Framework for Immigration Detention</h2>
+    <div class="sub">IRPA s.58 grounds (danger, flight risk, ministerial inquiry, identity) · IRPR s.248 factors</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🔒</div>
+        <h4>Immigration Detention — Definition & Principles</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="qt">"Immigration detention is the practice of holding people who are subject to immigration control in custody, while they wait for permission to enter or before they are deported or removed from the country. It is an <strong>administrative process, not a criminal procedure.</strong>"</div>
+        <div class="box bd">⚠️ <strong>Detention as a Last Resort</strong> — Detention should only be used when there are no reasonable alternatives to detention available. Officers and ID members must consider alternatives first.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">⏱️</div>
+        <h4>Detention Review Timelines — IRPA s.57</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Review</th><th>Timing</th><th>Frequency</th></tr></thead>
+          <tbody>
+            <tr><td>First Review</td><td>Within 48 hours of detention</td><td>Once</td></tr>
+            <tr><td>Second Review</td><td>Within 7 days after first review</td><td>Once</td></tr>
+            <tr><td>Subsequent Reviews</td><td>At least once every 30 days</td><td>Ongoing until release or removal</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">📋</div>
+        <h4>Two-Part Analysis at Every Detention Review</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="flow">
+          <span class="fs"><strong>Step 1:</strong><br>Has a ground for detention been made out?<br><small>(IRPA s.58)</small></span>
+          <span class="fa">→</span>
+          <span class="fs"><strong>Step 2:</strong><br>Are the s.248 factors such that detention remains justified?<br><small>(IRPR s.248)</small></span>
+        </div>
+        <div class="box bi">💡 Even if a ground for detention exists, the ID Member must still assess all s.248 factors to determine if detention remains proportionate and justified. This is where alternatives to detention are considered.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚠️</div>
+        <h4>IRPA s.58(1) — Four Grounds for Detention</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">(a) Danger to the Public</span>
+        <div class="box bd">Person is a danger to the public.</div>
+        <div class="mini">
+          <h5>IRPR s.246 — Danger Factors</h5>
+          <ul>
+            <li>Association with criminal organization</li>
+            <li>Engagement in people smuggling or trafficking</li>
+            <li>Conviction in Canada for sexual offence, offence involving violence/weapons, or offence causing death/serious harm</li>
+            <li>Conviction outside Canada that, if committed in Canada, would constitute such offence</li>
+          </ul>
+        </div>
+        <div class="box bw">💡 <strong>Non-Listed Factors:</strong> Mental health issues, substance abuse, history of violence, compliance with conditions, support network, rehabilitation efforts.</div>
+        
+        <div class="sdiv"></div>
+        <span class="lbl">(b) Unlikely to Appear</span>
+        <div class="box bw">Person is unlikely to appear for examination, admissibility hearing, removal, or proceeding that could lead to removal order.</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Factors Suggesting Flight Risk</h5>
+            <ul>
+              <li>Previous failure to appear</li>
+              <li>No ties to Canada (family, employment, property)</li>
+              <li>History of non-compliance with immigration authorities</li>
+              <li>Use of false identity/documents</li>
+              <li>Weak travel documents or no documents</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Factors Suggesting LOW Flight Risk</h5>
+            <ul>
+              <li>Strong family ties in Canada</li>
+              <li>Employment/business in Canada</li>
+              <li>Property ownership</li>
+              <li>Compliance history</li>
+              <li>Valid travel documents</li>
+              <li>Bondsperson available</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="sdiv"></div>
+        <span class="lbl">(c) Ministerial Inquiry (Inadmissibility on Security/Human Rights Grounds)</span>
+        <div class="box bp">Minister is taking necessary steps to inquire into a reasonable suspicion that person is inadmissible on grounds of: security (s.34), violating human or international rights (s.35), or organized criminality (s.37).</div>
+        
+        <div class="sdiv"></div>
+        <span class="lbl">(d) Identity Not Established</span>
+        <div class="box bt">The Minister is satisfied that person's identity has not been established.</div>
+        <div class="two">
+          <div class="mini">
+            <h5>Identity Issues May Include</h5>
+            <ul>
+              <li>No identity documents provided</li>
+              <li>Documents appear fraudulent</li>
+              <li>Multiple identities used</li>
+              <li>Inconsistent biographical information</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h5>Ways to Establish Identity</h5>
+            <ul>
+              <li>Passport or national ID from country of origin</li>
+              <li>Birth certificate</li>
+              <li>Biometric verification</li>
+              <li>Corroborating documents (school records, etc.)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">⚖️</div>
+        <h4>IRPR s.248 — Factors for Detention/Release Assessment</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">Even if a ground for detention is made out, the ID Member must consider <strong>each</strong> of the s.248 factors to determine if detention remains proportionate and justified.</div>
+        <span class="lbl">The s.248 Factors</span>
+        <ul class="chk">
+          <li><strong>(a) Reason for detention</strong> and strength of the case</li>
+          <li><strong>(b) Length of time in detention</strong></li>
+          <li><strong>(c) Existence of alternatives to detention</strong></li>
+          <li><strong>(d) Immigration history</strong> and compliance with previous orders</li>
+          <li><strong>(e) Criminal record and nature of offences</strong></li>
+          <li><strong>(f) Pattern of criminal activity or convictions</strong></li>
+          <li><strong>(g) Danger to the public</strong></li>
+          <li><strong>(h) Health concerns,</strong> including mental health</li>
+          <li><strong>(i) Ties to the community,</strong> including family, employment, financial resources</li>
+          <li><strong>(j) Hardship</strong> that detention may cause to the person or their family</li>
+          <li><strong>(k) Reasons person came to Canada</strong></li>
+          <li><strong>(l) Cooperation with CBSA</strong></li>
+          <li><strong>(m) Any other relevant factor</strong></li>
+        </ul>
+        <div class="box bg">✅ <strong>Alternatives to detention</strong> under s.248(c) are critical. Propose specific, workable alternatives: reporting conditions, GPS monitoring, bondsperson, residence at specific address, surrender of travel documents, etc.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">📖</div>
+        <h4>Guidelines on Detention</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt">The Chairperson of the Immigration and Refugee Board has issued <strong>Guidelines</strong> on detention. While not legally binding, they are persuasive and should be referenced in submissions.</div>
+        <span class="lbl">Key Guideline Principles</span>
+        <ul class="chk">
+          <li>Detention should be a measure of last resort</li>
+          <li>Alternatives to detention must be considered</li>
+          <li>Vulnerable persons (children, pregnant women, elderly) require special consideration</li>
+          <li>Length of detention must be proportionate to the circumstances</li>
+          <li>Conditions in detention facilities must be humane</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 6 ═══════════════════════════ -->
+<div class="sec" id="m6">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="6" style="background:linear-gradient(130deg,#042d2d 0%,#0a6b6a 100%)">
+    <div class="mtag">Module 6 — Part 2: Detention</div>
+    <h2>Preparing for the Detention Review</h2>
+    <div class="sub">Client interviews, bondsperson selection, alternatives to detention, disclosure, release plans</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">📝</div>
+        <h4>Step 1: Investigate and Gather Information</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Establish Contact with the Client</span>
+        <ul class="chk">
+          <li>Arrange in-person or telephone interview as soon as possible</li>
+          <li>Explain your role and the detention review process</li>
+          <li>Build trust and rapport</li>
+          <li>Assess client's mental and physical state</li>
+        </ul>
+        <span class="lbl">Information You Need from Your Client</span>
+        <ul class="chk">
+          <li>Immigration history (how they came to Canada, previous applications, compliance)</li>
+          <li>Family ties in Canada (who, where, nature of relationship)</li>
+          <li>Employment history and current employment prospects</li>
+          <li>Community ties (religious community, organizations, friends)</li>
+          <li>Financial situation and assets</li>
+          <li>Criminal history (if any) and circumstances surrounding offences</li>
+          <li>Health concerns (physical and mental)</li>
+          <li>Understanding of the grounds for detention</li>
+          <li>Potential bondspersons</li>
+          <li>Plans if released (residence, employment, compliance)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">📂</div>
+        <h4>Step 2: Obtain Evidence About Previous DRs</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt">If retained after the 48-hour review, you need to understand what happened at previous detention reviews.</div>
+        <span class="lbl">Documents to Obtain</span>
+        <div class="pills">
+          <span class="pill pt">Previous hearing transcripts</span>
+          <span class="pill pt">Previous disclosure made by the Minister</span>
+          <span class="pill pt">Previous disclosure provided by your client</span>
+          <span class="pill pt">Previous ID Member's reasons for decision</span>
+        </div>
+        <div class="box bi">💡 Review these carefully to understand: What grounds were raised? What evidence was presented? What were the Member's concerns? What alternatives were proposed (if any)? Why was detention continued?</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🎯</div>
+        <h4>Step 3: Develop Theory of Your Case & Gather Evidence</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt">Based on the ground(s) for detention, develop a strategy to address each ground and the s.248 factors.</div>
+        <span class="lbl">Evidence to Rebut IRPA s.58 Grounds</span>
+        <div class="tw"><table>
+          <thead><tr><th>Ground</th><th>Rebuttal Evidence</th></tr></thead>
+          <tbody>
+            <tr><td>Danger to public</td><td>Rehabilitation evidence, psychological assessment, letters of support, clean record since offence, addiction treatment completion, employment, family ties</td></tr>
+            <tr><td>Flight risk</td><td>Strong ties to Canada (family, employment, property), compliance history, valid travel docs, bondsperson, proposed reporting conditions</td></tr>
+            <tr><td>Identity</td><td>Passport, birth certificate, ID from country of origin, corroborating documents, biometric verification</td></tr>
+          </tbody>
+        </table></div>
+        <span class="lbl">Evidence to Support s.248 Factors</span>
+        <ul class="chk">
+          <li>Letters of support from family, employer, community members</li>
+          <li>Employment letter or job offer</li>
+          <li>Proof of residence (lease, utility bills)</li>
+          <li>Evidence of financial resources</li>
+          <li>Medical reports (if health issues)</li>
+          <li>Rehabilitation certificates or program completion</li>
+          <li>Bondsperson's affidavit and financial documents</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">📬</div>
+        <h4>Step 4: Obtain Disclosure from the Minister</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bw"><strong>Guideline 2</strong> sets out the Minister's disclosure obligations in detention reviews.</div>
+        <span class="lbl">What Must the Minister Disclose?</span>
+        <ul class="chk">
+          <li>All evidence the Minister intends to rely on</li>
+          <li>CBSA case notes and reports</li>
+          <li>Criminal records and warrants</li>
+          <li>Immigration history and previous enforcement actions</li>
+          <li>Any evidence regarding the grounds for detention</li>
+        </ul>
+        <div class="box bd">⚠️ If disclosure is incomplete or late, raise a procedural fairness issue with the ID Member and request an adjournment if necessary.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">👥</div>
+        <h4>Selecting and Preparing a Bondsperson</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg">A good bondsperson is critical for release. They must be credible, financially stable, and willing to supervise the client.</div>
+        <span class="lbl">Characteristics of a Good Bondsperson</span>
+        <ul class="chk">
+          <li>Canadian citizen or permanent resident</li>
+          <li>Stable employment and income</li>
+          <li>Owns property or has significant savings</li>
+          <li>Has a genuine relationship with the client (family, close friend)</li>
+          <li>Understands their responsibilities</li>
+          <li>Willing and able to post a bond (cash deposit)</li>
+          <li>Lives in Canada (preferably nearby)</li>
+          <li>No criminal record</li>
+        </ul>
+        <span class="lbl">Preparing the Bondsperson for the Hearing</span>
+        <ul class="chk">
+          <li>Explain the purpose of their testimony</li>
+          <li>Review their affidavit with them</li>
+          <li>Explain their obligations (report breaches, ensure compliance)</li>
+          <li>Prepare them for cross-examination by Minister's counsel</li>
+          <li>Ensure they bring proof of income and assets</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">📋</div>
+        <h4>Developing a Comprehensive Release Plan</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bi">A detailed, realistic release plan addresses the grounds for detention and demonstrates how risks will be managed.</div>
+        <span class="lbl">Components of a Strong Release Plan</span>
+        <ul class="chk">
+          <li><strong>Residence:</strong> Specific address where client will reside (with bondsperson or family)</li>
+          <li><strong>Reporting:</strong> Willingness to report to CBSA at specified intervals</li>
+          <li><strong>Bondsperson:</strong> Identified person with financial capacity and relationship to client</li>
+          <li><strong>Bond amount:</strong> Proposed cash deposit (consider bondsperson's financial means)</li>
+          <li><strong>Surrender of documents:</strong> Passport and travel documents to be held by CBSA</li>
+          <li><strong>No criminal activity:</strong> Commitment to obey all laws</li>
+          <li><strong>Employment/education:</strong> Plans for employment or enrollment in programs</li>
+          <li><strong>Support services:</strong> Counseling, addiction treatment, mental health support (if applicable)</li>
+          <li><strong>GPS monitoring:</strong> If appropriate and available</li>
+          <li><strong>No contact orders:</strong> If relevant to danger concerns</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 7 ═══════════════════════════ -->
+<div class="sec" id="m7">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="7" style="background:linear-gradient(130deg,#3d2900 0%,#ad7700 100%)">
+    <div class="mtag">Module 7 — Part 2: Detention</div>
+    <h2>Conducting a Detention Review</h2>
+    <div class="sub">Witness prep, submissions best practices, hearing conduct, post-hearing remedies</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light);color:var(--gold)">👥</div>
+        <h4>Preparing Witnesses/Bondspersons for DR</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Key Steps in Witness Preparation</span>
+        <ul class="chk">
+          <li>Review their written statement or affidavit with them</li>
+          <li>Explain the format of the hearing and their role</li>
+          <li>Practice direct examination questions</li>
+          <li>Prepare them for possible cross-examination by Minister's counsel</li>
+          <li>Remind them to answer only the question asked</li>
+          <li>Advise them to be honest — if they don't know something, say so</li>
+          <li>Explain the importance of maintaining composure and professionalism</li>
+          <li>Ensure they bring all necessary documents (ID, financial documents)</li>
+        </ul>
+        <div class="box bw">💡 A well-prepared bondsperson who is clear, credible, and understands their responsibilities can make the difference between release and continued detention.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light);color:var(--gold)">📝</div>
+        <h4>Preparing Yourself for a DR</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <span class="lbl">Counsel's Pre-Hearing Checklist</span>
+        <ul class="chk">
+          <li>Review all disclosure from the Minister</li>
+          <li>Review all previous DR transcripts and decisions</li>
+          <li>Organize your evidence and create an index</li>
+          <li>Prepare an outline of your submissions</li>
+          <li>Anticipate Minister's arguments and prepare responses</li>
+          <li>Know the law: relevant IRPA/IRPR sections, case law, Guidelines</li>
+          <li>Prepare questions for your client and bondsperson</li>
+          <li>Prepare cross-examination questions for Minister's witnesses (if any)</li>
+          <li>Have copies of all documents for Member and Minister's counsel</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--gold-light);color:var(--gold)">🎤</div>
+        <h4>Preparing Submissions</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bgo">Effective submissions are clear, organized, and directly address the grounds for detention and all s.248 factors.</div>
+        <span class="lbl">Structure of Submissions</span>
+        <div class="flow">
+          <span class="fs">1. Introduction<br><small>Overview of your position</small></span>
+          <span class="fa">→</span>
+          <span class="fs">2. Address s.58 Ground<br><small>Why ground not made out OR mitigated</small></span>
+          <span class="fa">→</span>
+          <span class="fs">3. Address s.248 Factors<br><small>Go through each factor</small></span>
+          <span class="fa">→</span>
+          <span class="fs">4. Alternative to Detention<br><small>Present detailed release plan</small></span>
+          <span class="fa">→</span>
+          <span class="fs">5. Conclusion<br><small>Request for release + conditions</small></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">✅</div>
+        <h4>Best Practices for Submissions</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <ul class="chk">
+          <li><strong>Be concise:</strong> Respect the Member's time; focus on strongest points</li>
+          <li><strong>Be responsive:</strong> Address the specific concerns raised by the Member or Minister</li>
+          <li><strong>Use evidence:</strong> Reference specific documents in your record</li>
+          <li><strong>Cite law:</strong> Reference IRPA/IRPR sections, case law, Guidelines</li>
+          <li><strong>Acknowledge weaknesses:</strong> Don't ignore problems — address them head-on and contextualize</li>
+          <li><strong>Emphasize alternatives:</strong> Show that detention is not necessary — alternatives exist</li>
+          <li><strong>Be professional:</strong> Maintain respectful tone, even if you disagree with Minister's position</li>
+          <li><strong>Listen actively:</strong> Pay attention to Member's questions and concerns</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">⚖️</div>
+        <h4>During the Hearing — Advocacy Tips</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <ul class="chk">
+          <li>Arrive early and ensure client and witnesses are ready</li>
+          <li>Introduce yourself and your client for the record</li>
+          <li>Make preliminary applications if needed (adjournment, disclosure issues)</li>
+          <li>Present your evidence methodically (client testimony, bondsperson, documents)</li>
+          <li>Object to improper questions during cross-examination (if necessary)</li>
+          <li>Deliver clear, organized submissions</li>
+          <li>Respond to Member's questions directly and honestly</li>
+          <li>Request specific terms and conditions for release</li>
+          <li>Thank the Member at the conclusion</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📋</div>
+        <h4>Post-Hearing Applications</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bp">If detention is continued, there are post-hearing remedies available.</div>
+        <span class="lbl">1. Application for Early Detention Review (EDR)</span>
+        <div class="box bt">File if:
+          <ul style="margin-top:6px;padding-left:18px">
+            <li>You didn't have an adequate release plan but now you do</li>
+            <li>You are newly retained and can address the grounds for detention</li>
+            <li>You have new evidence to rebut CBSA's allegations or ID's previous findings</li>
+          </ul>
+        </div>
+        <span class="lbl">2. Request a Change in Conditions</span>
+        <div class="box bg">File if:
+          <ul style="margin-top:6px;padding-left:18px">
+            <li>Client has been released on terms and conditions</li>
+            <li>A bondsperson is no longer willing or able to continue</li>
+            <li>Material change in client's circumstances (e.g., probation conditions changed)</li>
+            <li>Time has passed and risk has reduced → previous conditions no longer proportionate</li>
+          </ul>
+        </div>
+        <span class="lbl">How to Make an Application (ID Rules 37–40)</span>
+        <ul class="chk">
+          <li>State explicitly what you are requesting</li>
+          <li>Set out why the request should be granted</li>
+          <li>Provide supporting evidence (e.g., new alternative to detention, evidence of compliance)</li>
+          <li>File with ID and serve on Minister's counsel</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MODULE 8 ═══════════════════════════ -->
+<div class="sec" id="m8">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="8" style="background:linear-gradient(130deg,#121821 0%,#2c3e5a 100%)">
+    <div class="mtag">Module 8 — Part 2: Detention</div>
+    <h2>Removal</h2>
+    <div class="sub">PRRA, H&C for removal, deferrals, ineffective assistance of counsel, Magonza case</div>
+  </div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">✈️</div>
+        <h4>Remedies for a Client Facing Removal</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Remedy</th><th>Purpose</th><th>Timeline</th></tr></thead>
+          <tbody>
+            <tr><td><strong>PRRA</strong><br>(Pre-Removal Risk Assessment)</td><td>Assess risk of persecution, torture, cruel treatment if returned</td><td>Can apply after removal order becomes enforceable; decision needed before removal</td></tr>
+            <tr><td><strong>H&C Application</strong></td><td>Request exemption from IRPA requirements on humanitarian grounds</td><td>No statutory timeline but must be before removal</td></tr>
+            <tr><td><strong>Deferral of Removal</strong></td><td>Temporary postponement of removal for compassionate reasons</td><td>Request to CBSA; discretionary</td></tr>
+            <tr><td><strong>TRP</strong><br>(Temporary Resident Permit)</td><td>Temporary entry despite inadmissibility</td><td>Discretionary; can apply anytime</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">🛡️</div>
+        <h4>Pre-Removal Risk Assessment (PRRA) — IRPA s.112–114</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bt"><strong>IRPA s.112</strong> — A person in Canada (other than protected person) may apply for protection if subject to removal order that is in force.</div>
+        <span class="lbl">Main Characteristics of PRRA</span>
+        <ul class="chk">
+          <li>Assesses risk of persecution (s.96), risk to life/cruel treatment (s.97)</li>
+          <li>Focus is on <strong>forward-looking risk</strong> — what will happen if returned now</li>
+          <li>Generally based on written submissions and documents (no oral hearing unless credibility concerns)</li>
+          <li>Officer must consider personalized risk to the individual</li>
+          <li>Can include <strong>new evidence</strong> that arose after refugee claim or was not reasonably available at the time</li>
+          <li>If PRRA is positive → protected person status granted</li>
+          <li>If PRRA is negative → removal proceeds (can seek judicial review at FC)</li>
+        </ul>
+        <div class="box bw">💡 <strong>New Evidence:</strong> Must show evidence could not have been presented earlier with reasonable diligence OR is new evidence that arose after previous decision.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">💚</div>
+        <h4>H&C Application for Removal Cases</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bg">H&C applications can be made from within Canada to avoid having to leave to apply for PR from abroad. Same factors as Module 4, but emphasis on:</div>
+        <ul class="chk">
+          <li>Establishment in Canada</li>
+          <li>Best interests of children affected by removal</li>
+          <li>Hardship of having to apply from outside Canada</li>
+          <li>Country conditions in country of removal</li>
+        </ul>
+        <div class="box bd">⚠️ H&C processing can take many months or years. Does NOT automatically stay removal unless a deferral is granted or stay is obtained from Federal Court.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">⏸️</div>
+        <h4>Deferrals of Removal</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bw">A deferral is a temporary postponement of removal. It is <strong>discretionary</strong> and granted by CBSA.</div>
+        <span class="lbl">Grounds for Deferral</span>
+        <ul class="chk">
+          <li>Pending PRRA or H&C application that has a reasonable chance of success</li>
+          <li>Medical emergency (person too ill to travel)</li>
+          <li>Humanitarian reasons (e.g., family emergency, wedding, funeral)</li>
+          <li>Awaiting judicial review decision (though JR does not automatically stay removal)</li>
+        </ul>
+        <div class="box bi">💡 Deferrals are temporary and must be requested from CBSA in writing with supporting evidence. CBSA has discretion to grant or deny.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚠️</div>
+        <h4>Ineffective Assistance of Counsel</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="box bd">Allegations of ineffective assistance of counsel can form the basis for new evidence in a PRRA or for a motion to reopen proceedings.</div>
+        <span class="lbl">Requirements to Establish Ineffective Assistance</span>
+        <ul class="chk">
+          <li>Counsel's acts or omissions were <strong>outside the range of reasonable competence</strong></li>
+          <li>There is a <strong>reasonable probability</strong> that the outcome would have been different but for counsel's errors</li>
+          <li>Applicant must provide <strong>affidavit evidence</strong> detailing specific failures</li>
+          <li>Former counsel must be given <strong>notice and opportunity to respond</strong></li>
+        </ul>
+        <div class="box bw">⚠️ These claims are taken seriously and require substantial evidence. Not every mistake or disagreement with counsel's strategy qualifies.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>Magonza v. Canada — Balancing IRPA Goals</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="casebox">
+          <div class="cn">Magonza v. Canada (Citizenship and Immigration), 2019 FC 14</div>
+          This case illustrates the tension between two IRPA goals: (1) efficient processing and removal of inadmissible persons, and (2) procedural fairness and protection of refugee claimants.
+        </div>
+        <span class="lbl">Key Findings in Magonza</span>
+        <div class="box bp">The court examined:
+          <ul style="margin-top:7px;padding-left:18px">
+            <li>Whether the officer properly considered new evidence</li>
+            <li>Whether procedural fairness was afforded</li>
+            <li>The balance between finality of decisions and access to justice</li>
+          </ul>
+        </div>
+        <div class="box bi">💡 <strong>Takeaway:</strong> PRRA officers must genuinely consider new evidence and personalized risk. Boilerplate reasoning or failure to engage with evidence can be grounds for judicial review.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════ QUICK REF ═══════════════════════════ -->
+<div class="sec" id="qr">
+  <button class="back" onclick="show('ov')">← Overview</button>
+  <div class="mh" data-n="" style="background:linear-gradient(130deg,#0f1419 0%,#1a2332 100%)">
+    <div class="mtag">All Modules</div>
+    <h2>📊 Master Quick Reference</h2>
+    <div class="sub">All key comparisons, grounds, factors, and checklists at a glance</div>
+  </div>
+
+  <div style="display:grid;gap:15px">
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--red-light);color:var(--red)">⚖️</div>
+        <h4>All IRPA Grounds of Inadmissibility — Complete Table</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Ground</th><th>IRPA Section</th><th>Standard of Proof</th><th>Likely Outcome</th><th>Key Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Medical</td><td>s.38</td><td>Balance of probabilities</td><td>Exclusion order (1 yr)</td><td>Exceptions for refugees and family class sponsors</td></tr>
+            <tr><td>Financial</td><td>s.39</td><td>Balance of probabilities</td><td>Exclusion order (1 yr)</td><td>Unable/unwilling to support self or dependents</td></tr>
+            <tr><td>Misrepresentation</td><td>s.40</td><td>Balance of probabilities</td><td>5-year exclusion order</td><td>Innocent mistake defence very narrow</td></tr>
+            <tr><td>Cessation of refugee</td><td>s.40.1</td><td>Final determination under s.108</td><td>Varies</td><td>Applies to FN and PR differently</td></tr>
+            <tr><td>Non-compliance</td><td>s.41</td><td>Balance of probabilities</td><td>Exclusion (FN), Departure (PR)</td><td>Includes breach of conditions, RO failure</td></tr>
+            <tr><td>Inadmissible family</td><td>s.42</td><td>Balance of probabilities</td><td>Varies</td><td>Does not apply to TR unless security grounds</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">🔒</div>
+        <h4>IRPA s.58 — Four Grounds for Detention (Quick Ref)</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Ground</th><th>Description</th><th>Key Factors</th></tr></thead>
+          <tbody>
+            <tr><td><strong>(a) Danger to public</strong></td><td>Person is a danger to the public</td><td>IRPR s.246 factors: criminal org, people smuggling, convictions for violence/sexual/weapons offences</td></tr>
+            <tr><td><strong>(b) Flight risk</strong></td><td>Unlikely to appear for examination, hearing, or removal</td><td>Ties to Canada, compliance history, valid documents, previous failures to appear</td></tr>
+            <tr><td><strong>(c) Ministerial inquiry</strong></td><td>Minister taking steps to inquire into reasonable suspicion re: security/human rights/organized crime</td><td>Applies to s.34, s.35, s.37 inadmissibility</td></tr>
+            <tr><td><strong>(d) Identity not established</strong></td><td>Minister satisfied identity has not been established</td><td>No documents, fraudulent documents, multiple identities, inconsistent biographical info</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--blue-light);color:var(--blue)">⚖️</div>
+        <h4>IRPR s.248 Factors — Complete Checklist</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <ul class="chk">
+          <li>(a) Reason for detention and strength of case</li>
+          <li>(b) Length of time in detention</li>
+          <li>(c) <strong>Existence of alternatives to detention</strong> (critical!)</li>
+          <li>(d) Immigration history and compliance with previous orders</li>
+          <li>(e) Criminal record and nature of offences</li>
+          <li>(f) Pattern of criminal activity or convictions</li>
+          <li>(g) Danger to the public</li>
+          <li>(h) Health concerns (physical and mental)</li>
+          <li>(i) Ties to community (family, employment, financial resources)</li>
+          <li>(j) Hardship that detention may cause to person or family</li>
+          <li>(k) Reasons person came to Canada</li>
+          <li>(l) Cooperation with CBSA</li>
+          <li>(m) Any other relevant factor</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">📊</div>
+        <h4>Ribic Factors — IAD H&C Assessment</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <ul class="chk">
+          <li><strong>Seriousness of offence(s)</strong> leading to removal order</li>
+          <li><strong>Possibility of rehabilitation</strong> or rehabilitation achieved</li>
+          <li><strong>Length of time in Canada</strong> and degree of establishment</li>
+          <li><strong>Family in Canada</strong> and dislocation that removal would cause</li>
+          <li><strong>Support available</strong> from family and community</li>
+          <li><strong>Degree of hardship</strong> caused by removal</li>
+          <li><strong>Any other relevant factors</strong> (best interests of children, country conditions)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--teal-light);color:var(--teal)">⏱️</div>
+        <h4>Detention Review Timelines</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Review</th><th>Timing After Detention</th><th>Frequency</th></tr></thead>
+          <tbody>
+            <tr><td>48-hour review</td><td>Within 48 hours</td><td>Once</td></tr>
+            <tr><td>7-day review</td><td>Within 7 days after first review</td><td>Once</td></tr>
+            <tr><td>30-day reviews</td><td>At least once every 30 days thereafter</td><td>Ongoing until release or removal</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--green-light);color:var(--green)">🛡️</div>
+        <h4>Criminal Rehabilitation — Eligibility & Process</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Type</th><th>Waiting Period</th><th>Application?</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Deemed Rehabilitation</td><td>10 years since completion of sentence</td><td>No application needed</td><td>Single non-serious offence (max &lt;10 yrs); automatic</td></tr>
+            <tr><td>Individual Rehabilitation</td><td>5 years since completion of sentence</td><td>Yes — must apply</td><td>Serious criminality OR multiple offences; officer assesses</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--orange-light);color:var(--orange)">🗂️</div>
+        <h4>Remedies for Removal — Quick Comparison</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Remedy</th><th>Purpose</th><th>Key Features</th></tr></thead>
+          <tbody>
+            <tr><td>PRRA</td><td>Assess risk if returned</td><td>Forward-looking; new evidence must be shown; written submissions</td></tr>
+            <tr><td>H&C</td><td>Request exemption on H&C grounds</td><td>Establishment, best interests of children, hardship; discretionary</td></tr>
+            <tr><td>Deferral</td><td>Temporary postponement</td><td>Discretionary; short-term; request to CBSA</td></tr>
+            <tr><td>TRP</td><td>Temporary entry despite inadmissibility</td><td>Discretionary; specific duration; may have conditions</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch on" onclick="tog(this)">
+        <div class="ci" style="background:var(--purple-light);color:var(--purple)">⚖️</div>
+        <h4>IAD vs ID — Jurisdiction Comparison</h4><span class="cv">▼</span>
+      </div>
+      <div class="cb on">
+        <div class="tw"><table>
+          <thead><tr><th>Division</th><th>Jurisdiction</th><th>Key Powers</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ID</strong><br>(Immigration Division)</td><td>Admissibility hearings, detention reviews</td><td>Issue removal orders; order detention/release; set conditions</td></tr>
+            <tr><td><strong>IAD</strong><br>(Immigration Appeal Division)</td><td>Appeals of removal orders, sponsorship refusals</td><td>Allow/dismiss appeals; grant stays with conditions; consider H&C factors (Ribic)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+function show(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const map={ov:0,m1:1,m2:2,m3:3,m4:4,m5:5,m6:6,m7:7,m8:8,qr:9};
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  const btns=document.querySelectorAll('.nb');
+  if(btns[map[id]])btns[map[id]].classList.add('on');
+  window.scrollTo({top:60,behavior:'smooth'});
+}
+function tog(h){
+  h.classList.toggle('on');
+  h.nextElementSibling.classList.toggle('on');
+}
+function srch(q){
+  if(q.length<2)return;
+  const lo=q.toLowerCase();
+  const all=document.querySelectorAll('.cb,.mini,.casebox,.box');
+  for(let el of all){
+    if(el.textContent.toLowerCase().includes(lo)){
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.style.outline='3px solid #c65400';
+      setTimeout(()=>el.style.outline='',3500);
+      break;
+    }
+  }
+}
+document.querySelectorAll('.ch.on').forEach(h=>{
+  h.nextElementSibling.classList.add('on');
+});
+</script>
+</body>
+</html>

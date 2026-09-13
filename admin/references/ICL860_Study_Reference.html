@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICL 860 – Refugee Protection Study Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&display=swap');
+
+  :root {
+    --navy: #0d1b2a;
+    --teal: #1b6ca8;
+    --gold: #c8963e;
+    --cream: #f7f3ed;
+    --light: #edf4fb;
+    --border: #d0e3f0;
+    --text: #1a2533;
+    --muted: #6b7c8f;
+    --red: #c0392b;
+    --green: #1e7d45;
+    --purple: #6c3483;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.65;
+  }
+
+  /* HEADER */
+  .site-header {
+    background: var(--navy);
+    padding: 40px 30px 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(200,150,62,0.05) 20px, rgba(200,150,62,0.05) 40px);
+  }
+  .site-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    color: #fff;
+    letter-spacing: 0.01em;
+    position: relative;
+  }
+  .site-header h1 span { color: var(--gold); }
+  .site-header p {
+    color: #a0b4c8;
+    font-size: 1rem;
+    margin-top: 6px;
+    position: relative;
+  }
+  .tag-bar {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+    margin-top: 18px;
+    position: relative;
+  }
+  .tag {
+    background: rgba(200,150,62,0.15);
+    color: var(--gold);
+    border: 1px solid rgba(200,150,62,0.3);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .tag:hover, .tag.active { background: var(--gold); color: var(--navy); }
+
+  /* NAV */
+  .module-nav {
+    background: var(--navy);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 0 20px;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 2px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .module-nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex-shrink: 0;
+    color: #8aa0b5;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+    white-space: nowrap;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+  }
+  .nav-btn:hover { color: #fff; }
+  .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px 60px; }
+
+  /* MODULE CARDS */
+  .module-section { display: none; }
+  .module-section.visible { display: block; }
+
+  /* OVERVIEW GRID */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+  .overview-card {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 20px;
+    cursor: pointer;
+    transition: all .25s;
+    border-left: 4px solid var(--teal);
+  }
+  .overview-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(27,108,168,0.12); }
+  .overview-card .mod-number {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .overview-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    margin: 4px 0 8px;
+    color: var(--navy);
+  }
+  .overview-card p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* MODULE DETAIL */
+  .module-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--teal) 100%);
+    border-radius: 12px;
+    padding: 30px;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-header::after {
+    content: attr(data-num);
+    position: absolute; right: -10px; top: -20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem;
+    color: rgba(255,255,255,0.06);
+    font-weight: 900;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .module-header .badge {
+    background: rgba(200,150,62,0.25);
+    color: var(--gold);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .module-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    margin-bottom: 6px;
+  }
+  .module-header .subtitle {
+    color: #a0c4e0;
+    font-size: 0.93rem;
+  }
+
+  /* CONTENT BLOCKS */
+  .content-grid { display: grid; gap: 16px; }
+  .content-block {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .block-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background .15s;
+  }
+  .block-header:hover { background: var(--light); }
+  .block-header.open { border-bottom-color: var(--border); background: var(--light); }
+  .block-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .block-header h4 {
+    flex: 1;
+    font-size: 0.97rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .block-header .chevron {
+    color: var(--muted);
+    font-size: 0.8rem;
+    transition: transform .2s;
+  }
+  .block-header.open .chevron { transform: rotate(180deg); }
+  .block-body {
+    display: none;
+    padding: 18px;
+  }
+  .block-body.open { display: block; }
+
+  /* PILLS & TAGS */
+  .pill-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .pill {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.82rem;
+    color: var(--text);
+  }
+  .pill.law { background: #e8f4f8; border-color: #b0d4e8; color: #1b5e7a; }
+  .pill.warn { background: #fef5e7; border-color: #f0c674; color: #7d5a00; }
+  .pill.danger { background: #fdedec; border-color: #f1948a; color: #922b21; }
+  .pill.good { background: #eafaf1; border-color: #82e0aa; color: #1e6640; }
+
+  /* FLOW */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0;
+  }
+  .flow-step {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--navy);
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--gold); font-weight: 700; font-size: 1rem; }
+
+  /* BOXES */
+  .info-box {
+    border-left: 4px solid var(--teal);
+    background: #f0f7fc;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-size: 0.88rem;
+  }
+  .warn-box {
+    border-left: 4px solid var(--gold);
+    background: #fef9f0;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-size: 0.88rem;
+  }
+  .danger-box {
+    border-left: 4px solid var(--red);
+    background: #fdf2f1;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-size: 0.88em;
+  }
+  .good-box {
+    border-left: 4px solid var(--green);
+    background: #f0faf5;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-size: 0.88em;
+  }
+
+  /* TWO-COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 10px 0; }
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  .mini-card {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .mini-card h5 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--navy);
+  }
+  .mini-card ul {
+    list-style: none;
+    font-size: 0.83rem;
+    color: var(--text);
+  }
+  .mini-card ul li::before { content: '• '; color: var(--teal); font-weight: 700; }
+  .mini-card ul li { margin-bottom: 4px; }
+
+  /* QUOTE */
+  .quote {
+    font-style: italic;
+    color: var(--muted);
+    border-left: 3px solid var(--gold);
+    padding: 8px 14px;
+    margin: 10px 0;
+    font-size: 0.87rem;
+    background: #fffbf4;
+    border-radius: 0 6px 6px 0;
+  }
+  .quote cite { display: block; font-style: normal; font-size: 0.78rem; color: #999; margin-top: 4px; }
+
+  /* TEST BOX */
+  .checklist {
+    list-style: none;
+    font-size: 0.88rem;
+  }
+  .checklist li {
+    padding: 6px 0;
+    padding-left: 26px;
+    position: relative;
+    border-bottom: 1px dashed var(--border);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: '□';
+    position: absolute; left: 0;
+    color: var(--teal);
+    font-size: 1.1rem;
+  }
+
+  /* CASE BOX */
+  .case-box {
+    background: #f8f5ff;
+    border: 1px solid #d5c8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 8px 0;
+    font-size: 0.85rem;
+  }
+  .case-box .case-name {
+    font-weight: 700;
+    color: var(--purple);
+    font-size: 0.88rem;
+    margin-bottom: 4px;
+  }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin: 14px 0 6px;
+  }
+
+  p, ul, ol { margin-bottom: 8px; }
+  ul, ol { padding-left: 20px; }
+  li { margin-bottom: 3px; font-size: 0.88rem; }
+  strong { color: var(--navy); }
+
+  /* BACK BUTTON */
+  .back-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: all .2s;
+  }
+  .back-btn:hover { background: var(--light); color: var(--navy); }
+
+  /* SEARCH */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: 'Source Sans 3', sans-serif;
+    background: white;
+    color: var(--text);
+    outline: none;
+  }
+  .search-bar input:focus { border-color: var(--teal); }
+
+  .highlight { background: #fff3b0; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <h1>ICL 860 — <span>Refugee Protection</span></h1>
+  <p>Trauma-Informed Client Service · Queen's University GDipICL · Modules 1–8 Study Reference</p>
+  <div class="tag-bar">
+    <span class="tag" onclick="filterTag('law')">⚖ Law</span>
+    <span class="tag" onclick="filterTag('process')">📋 Process</span>
+    <span class="tag" onclick="filterTag('practice')">💼 Practice</span>
+    <span class="tag" onclick="filterTag('trauma')">💛 Trauma</span>
+    <span class="tag" onclick="filterTag('key-cases')">📖 Key Cases</span>
+  </div>
+</div>
+
+<div class="module-nav" id="moduleNav">
+  <button class="nav-btn active" onclick="showModule('overview')">🏠 Overview</button>
+  <button class="nav-btn" onclick="showModule('m1')">M1 Intro</button>
+  <button class="nav-btn" onclick="showModule('m2')">M2 Process</button>
+  <button class="nav-btn" onclick="showModule('m3')">M3 Inclusion I</button>
+  <button class="nav-btn" onclick="showModule('m4')">M4 Inclusion II</button>
+  <button class="nav-btn" onclick="showModule('m5')">M5 Exclusion</button>
+  <button class="nav-btn" onclick="showModule('m6')">M6 Trauma & Credibility</button>
+  <button class="nav-btn" onclick="showModule('m7')">M7 Proceedings</button>
+  <button class="nav-btn" onclick="showModule('m8')">M8 Resettlement</button>
+</div>
+
+<div class="container">
+
+  <!-- OVERVIEW -->
+  <div class="module-section visible" id="overview">
+    <div class="search-bar">
+      <input type="text" placeholder="🔍  Search concepts, cases, or topics…" oninput="searchContent(this.value)">
+    </div>
+    <p style="font-size:0.9rem; color:var(--muted); margin-bottom:18px;">Click any module card to explore its content in detail.</p>
+    <div class="overview-grid">
+      <div class="overview-card" onclick="showModule('m1')" style="border-left-color:#1b6ca8">
+        <div class="mod-number">Module 1</div>
+        <h3>Introduction to Refugee Law</h3>
+        <p>Who is a refugee? Non-refoulement. The Refugee Convention. Core definitions and course framework.</p>
+      </div>
+      <div class="overview-card" onclick="showModule('m2')" style="border-left-color:#1a7a4a">
+        <div class="mod-number">Module 2</div>
+        <h3>Claiming Refugee Protection in Canada</h3>
+        <p>The full refugee determination process: RPD, RAD, Federal Court, PRRA. RPD and RAD Rules.</p>
+      </div>
+      <div class="overview-card" onclick="showModule('m3')" style="border-left-color:#8e44ad">
+        <div class="mod-number">Module 3</div>
+        <h3>Inclusion (Part 1)</h3>
+        <p>Section 96 definition: Convention refugee, subjective/objective fear, persecution, nexus grounds.</p>
+      </div>
+      <div class="overview-card" onclick="showModule('m4')" style="border-left-color:#c0392b">
+        <div class="mod-number">Module 4</div>
+        <h3>Inclusion (Part 2)</h3>
+        <p>State protection, Internal Flight Alternative (IFA), Section 97 complementary protection.</p>
+      </div>
+      <div class="overview-card" onclick="showModule('m5')" style="border-left-color:#d35400">
+        <div class="mod-number">Module 5</div>
+        <h3>Exclusion</h3>
+        <p>Article 1E (status elsewhere), 1F(a) war crimes/crimes against humanity, 1F(b) serious non-political crimes, 1F(c) UN principles.</p>
+      </div>
+      <div class="overview-card" onclick="showModule('m6')" style="border-left-color:#16a085">
+        <div class="mod-number">Module 6</div>
+        <h3>Trauma-Informed Service & Credibility</h3>
+        <p>Trauma principles, IRB Guideline 8, designated representatives, credibility assessment, gender & SOGIESC guidelines.</p>
+      </div>
+      <div class="overview-card" onclick="showModule('m7')" style="border-left-color:#2980b9">
+        <div class="mod-number">Module 7</div>
+        <h3>Proceedings Before the IRB</h3>
+        <p>RPD hearing structure, RAD appeals, timelines, CREASE framework, writing legal arguments (CREAC).</p>
+      </div>
+      <div class="overview-card" onclick="showModule('m8')" style="border-left-color:#c8963e">
+        <div class="mod-number">Module 8</div>
+        <h3>Resettlement & Rights of Refugees</h3>
+        <p>Cessation, vacation, refugee classes for resettlement, rights of protected persons, Bill C-2 changes.</p>
+      </div>
+    </div>
+
+    <!-- Quick Law Map -->
+    <div class="content-block" style="margin-top:10px">
+      <div class="block-header open" onclick="toggleBlock(this)">
+        <div class="block-icon" style="background:#e8f4f8">⚖️</div>
+        <h4>Quick Legal Map — Key Provisions at a Glance</h4>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="block-body open">
+        <div class="two-col">
+          <div class="mini-card">
+            <h5>🇨🇦 IRPA Sections</h5>
+            <ul>
+              <li><strong>s.96</strong> — Convention Refugee definition</li>
+              <li><strong>s.97</strong> — Person in Need of Protection</li>
+              <li><strong>s.115</strong> — Non-refoulement principle</li>
+              <li><strong>s.48–50</strong> — Enforcement of removal orders</li>
+              <li><strong>s.112</strong> — Pre-Removal Risk Assessment (PRRA)</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <h5>🌐 Refugee Convention Articles</h5>
+            <ul>
+              <li><strong>Art. 1A(2)</strong> — Definition of refugee</li>
+              <li><strong>Art. 1E</strong> — Exclusion: rights in another country</li>
+              <li><strong>Art. 1F(a)</strong> — War crimes / crimes against humanity</li>
+              <li><strong>Art. 1F(b)</strong> — Serious non-political crimes</li>
+              <li><strong>Art. 1F(c)</strong> — Acts against UN principles</li>
+              <li><strong>Art. 33</strong> — Non-refoulement</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <h5>📋 Key Procedural Bodies</h5>
+            <ul>
+              <li><strong>RPD</strong> — Refugee Protection Division (first hearing)</li>
+              <li><strong>RAD</strong> — Refugee Appeal Division (appeal)</li>
+              <li><strong>FC</strong> — Federal Court (judicial review)</li>
+              <li><strong>CBSA</strong> — Canada Border Services Agency</li>
+              <li><strong>IRCC</strong> — Immigration, Refugees, Citizenship Canada</li>
+            </ul>
+          </div>
+          <div class="mini-card">
+            <h5>🏛️ Key Cases</h5>
+            <ul>
+              <li><strong>Ward</strong> [1993] SCR — State protection standard</li>
+              <li><strong>Maldonado</strong> — Presumption of truthfulness</li>
+              <li><strong>Ezokola</strong> — Complicity in 1F(a)</li>
+              <li><strong>Zeng</strong> 2010 FCA — Article 1E framework</li>
+              <li><strong>Camayo</strong> 2022 FCA — Cessation & reavailment</li>
+              <li><strong>Magonza</strong> 2019 FC — Credibility principles</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 1 -->
+  <div class="module-section" id="m1">
+    <button class="back-btn" onclick="showModule('overview')">← Back to Overview</button>
+    <div class="module-header" data-num="1">
+      <div class="badge">Module 1</div>
+      <h2>Introduction to Refugee Law</h2>
+      <div class="subtitle">Who is a refugee? Core definitions & the framework of protection</div>
+    </div>
+    <div class="content-grid">
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#e8f4f8">📖</div>
+          <h4>Core Question: Who Is a Refugee?</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <p>A <strong>refugee</strong> is someone who cannot or will not return to their country because of a well-founded fear of persecution on specific grounds, or because they face serious harm.</p>
+          <div class="section-label">The Three Case Studies (Who qualifies?)</div>
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Iman (Syria)</h5>
+              <ul>
+                <li>Fled civil war / indiscriminate bombings</li>
+                <li>Assad regime now overthrown</li>
+                <li><strong>Issue:</strong> Indiscriminate harm ≠ persecution on grounds; changed country conditions</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Jose (Pacific Island)</h5>
+              <ul>
+                <li>Climate change = island uninhabitable</li>
+                <li>Disability makes temp shelter impossible</li>
+                <li><strong>Issue:</strong> Climate displacement not a Refugee Convention ground; govt provided shelter</li>
+              </ul>
+            </div>
+          </div>
+          <div class="mini-card" style="margin-top:10px">
+            <h5>Adeel (Convention Refugee with crimes)</h5>
+            <ul>
+              <li>Recognized as a Convention refugee</li>
+              <li>Subsequently joined a criminal gang; committed serious crimes</li>
+              <li><strong>Issue:</strong> Danger to the public in Canada → possible exception to non-refoulement under s.115(2)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fef5e7">⚖️</div>
+          <h4>Non-Refoulement — IRPA s.115</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="quote">
+            "A protected person shall not be removed from Canada to a country where they would be at risk of persecution for reasons of race, religion, nationality, membership in a particular social group or political opinion or at risk of torture or cruel and unusual treatment or punishment."
+            <cite>IRPA s.115(1)</cite>
+          </div>
+          <div class="section-label">Exceptions (s.115(2)) — Applies if person is:</div>
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Exception (a)</h5>
+              <ul>
+                <li>Inadmissible on grounds of <strong>serious criminality</strong></li>
+                <li>AND constitutes a danger to the public in Canada</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Exception (b)</h5>
+              <ul>
+                <li>Inadmissible on grounds of <strong>security, human rights violations, or organized criminality</strong></li>
+                <li>AND should not remain in Canada based on acts committed or danger to security</li>
+              </ul>
+            </div>
+          </div>
+          <div class="warn-box">⚠️ Even with exceptions, removal to torture is generally prohibited under international law (CAT).</div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#eafaf1">🎯</div>
+          <h4>Overarching Course Themes</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="pill-list">
+            <span class="pill law">Intersection of law and vulnerability</span>
+            <span class="pill good">Trauma-informed lawyering</span>
+            <span class="pill">Access to justice</span>
+            <span class="pill warn">Ethical obligations of counsel</span>
+            <span class="pill law">Human rights as foundation</span>
+          </div>
+          <p style="margin-top:10px; font-size:0.87rem; color:var(--muted)">This course trains you to apply refugee law while being sensitive to the lived trauma of clients, ensuring that legal processes do not re-traumatize those seeking protection.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODULE 2 -->
+  <div class="module-section" id="m2">
+    <button class="back-btn" onclick="showModule('overview')">← Back to Overview</button>
+    <div class="module-header" data-num="2" style="background: linear-gradient(135deg, #0d2b1a 0%, #1a7a4a 100%)">
+      <div class="badge">Module 2</div>
+      <h2>Claiming Refugee Protection in Canada</h2>
+      <div class="subtitle">The process from claim initiation to removal — and all steps in between</div>
+    </div>
+    <div class="content-grid">
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#eafaf1">🗺️</div>
+          <h4>The Refugee Journey — Step by Step</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="flow">
+            <span class="flow-step">Claim Initiated<br><small>POE or IRCC Portal</small></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">Eligibility<br><small>IRCC/CBSA</small></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">Referred to RPD<br><small>+ Conditional Departure Order</small></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">RPD Hearing<br><small>Decision</small></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">RAD Appeal<br><small>(if eligible)</small></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">Federal Court<br><small>Judicial Review</small></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">CBSA Enforcement<br><small>Removal Order</small></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">PRRA<br><small>s.112 (if still in Canada)</small></span>
+          </div>
+          <div class="info-box">Two entry points: <strong>Port of Entry (POE)</strong> — claim made at the border; <strong>Inland</strong> — claim made after entry into Canada via IRCC portal.</div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#e8f4f8">📜</div>
+          <h4>RPD Rules vs RAD Rules — Key Differences</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>RPD — First Instance Hearing</h5>
+              <ul>
+                <li>Basis of Claim (BOC) form required</li>
+                <li>Inquisitorial model (member leads)</li>
+                <li>Oral hearing standard</li>
+                <li>Claimant testifies; witnesses possible</li>
+                <li>Documents submitted in advance</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>RAD — Appeal of RPD Decision</h5>
+              <ul>
+                <li>Generally paper-based (no oral hearing by default)</li>
+                <li>Review RPD errors of law/fact</li>
+                <li>New evidence very restricted (s.110(4))</li>
+                <li>15 days to file Notice of Appeal</li>
+                <li>45 days to perfect (file full record)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="section-label">Common to Both</div>
+          <div class="pill-list">
+            <span class="pill">Interpreter available</span>
+            <span class="pill">Counsel permitted</span>
+            <span class="pill">Procedural fairness obligations</span>
+            <span class="pill">Applications for accommodation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#f4eeff">🎯</div>
+          <h4>Practical Scenarios — Applying the Rules</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Jasleen (Concussion)</h5>
+              <ul>
+                <li>Needs frequent breaks, max 2-hour sessions</li>
+                <li>→ Apply for <strong>procedural accommodation</strong> under Guideline 8</li>
+                <li>Attach doctor's letter</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Dave (BOC deadline)</h5>
+              <ul>
+                <li>Language barrier = missed deadline</li>
+                <li>→ Apply for <strong>extension of time</strong> with written explanation</li>
+                <li>Document language barriers</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Nadia (elderly witness)</h5>
+              <ul>
+                <li>Elderly, traumatized mother as witness</li>
+                <li>→ Request accommodations for witness; consider <strong>written affidavit</strong></li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Ivan (late documents)</h5>
+              <ul>
+                <li>Documents received 5 days before hearing</li>
+                <li>→ Application to <strong>accept late disclosure</strong>; relevance + identity argument</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Larry (missed RAD deadline)</h5>
+              <ul>
+                <li>Deadline to appeal passed</li>
+                <li>→ Application to <strong>extend time</strong> — must show exceptional reasons</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Janet (lost contact client)</h5>
+              <ul>
+                <li>No response for 3 months</li>
+                <li>→ Application to <strong>withdraw as counsel</strong> before RPD/RAD</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODULE 3 -->
+  <div class="module-section" id="m3">
+    <button class="back-btn" onclick="showModule('overview')">← Back to Overview</button>
+    <div class="module-header" data-num="3" style="background: linear-gradient(135deg, #2d1b5e 0%, #8e44ad 100%)">
+      <div class="badge">Module 3</div>
+      <h2>Inclusion — Part 1</h2>
+      <div class="subtitle">Section 96: The Convention Refugee definition — subjective fear, objective basis, persecution</div>
+    </div>
+    <div class="content-grid">
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#f4eeff">📝</div>
+          <h4>The s.96 Definition — Broken Down</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <ul class="checklist">
+            <li>Person is <strong>outside</strong> their country of nationality (or former habitual residence)</li>
+            <li>Has a <strong>well-founded fear of persecution</strong></li>
+            <li>Fear is linked to a <strong>Convention ground</strong> (nexus)</li>
+            <li>Is <strong>unable or unwilling</strong> to avail themselves of state protection</li>
+          </ul>
+          <div class="info-box" style="margin-top:10px">💡 The claimant only needs to satisfy <strong>s.96 OR s.97</strong> — not both. But the RPD/RAD must assess both.</div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#e8f4f8">🧠</div>
+          <h4>Well-Founded Fear — Subjective + Objective</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Subjective Fear</h5>
+              <ul>
+                <li>Claimant genuinely fears persecution</li>
+                <li><strong>Undermined by:</strong></li>
+                <li>Delay in leaving country</li>
+                <li>Delay in claiming in Canada</li>
+                <li>Failure to claim in a third country</li>
+                <li>Re-availment of country's protection</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Objective Basis</h5>
+              <ul>
+                <li>Fear must be <strong>objectively reasonable</strong></li>
+                <li>Standard: "reasonable chance" / "serious possibility" / "good grounds"</li>
+                <li>Assessed via country conditions evidence (NDP, reports)</li>
+                <li>Mixed evidence must be weighed</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fdedec">🔥</div>
+          <h4>What Counts as "Persecution"?</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="pill-list">
+            <span class="pill danger">Serious harm</span>
+            <span class="pill danger">Fundamental violation of human rights</span>
+            <span class="pill warn">State accountability required</span>
+          </div>
+          <p style="margin-top:8px; font-size:0.88rem">Persecution = more than mere discrimination. Can be:</p>
+          <ul style="font-size:0.88rem">
+            <li><strong>Repetitive and persistent</strong> acts (cumulative discrimination)</li>
+            <li><strong>One-off but severe</strong> (e.g., torture, rape)</li>
+            <li>NOT: ordinary criminal law enforcement, general poverty, or natural disaster</li>
+          </ul>
+          <div class="warn-box">⚠️ Discrimination alone ≠ persecution unless it rises to a fundamental human rights violation.</div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#eafaf1">📋</div>
+          <h4>Onus, Identity & Credibility</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Onus</h5>
+              <ul>
+                <li>Claimant bears the burden of proof</li>
+                <li>Standard: <strong>balance of probabilities</strong></li>
+                <li>Not "beyond reasonable doubt"</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Starting Point</h5>
+              <ul>
+                <li>Claimant's sworn testimony = presumed true</li>
+                <li><cite>Maldonado:</cite> Swearing to truth creates presumption of credibility</li>
+                <li>RPD must give reasons to doubt</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fef5e7">👤</div>
+          <h4>Case Study: Farah Aziz — Applying s.96</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <p style="font-size:0.87rem; color:var(--muted)">The Farah Aziz exercise applies the full s.96 framework to a concrete BOC narrative:</p>
+          <ul class="checklist">
+            <li>Is she outside her country of nationality?</li>
+            <li>Does she have a subjective fear? (behaviour analysis)</li>
+            <li>Is the fear objectively well-founded? (country conditions)</li>
+            <li>Is what she fears "persecution"?</li>
+            <li>Is there a nexus to a Convention ground?</li>
+            <li>Is state protection available?</li>
+            <li>Is there an IFA?</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODULE 4 -->
+  <div class="module-section" id="m4">
+    <button class="back-btn" onclick="showModule('overview')">← Back to Overview</button>
+    <div class="module-header" data-num="4" style="background: linear-gradient(135deg, #5c0011 0%, #c0392b 100%)">
+      <div class="badge">Module 4</div>
+      <h2>Inclusion — Part 2</h2>
+      <div class="subtitle">Nexus, State Protection, IFA, and Section 97 Complementary Protection</div>
+    </div>
+    <div class="content-grid">
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fdedec">🔗</div>
+          <h4>Nexus — Convention Grounds (s.96)</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <p>The persecution must be <strong>for reasons of</strong> one or more of these 5 grounds:</p>
+          <div class="pill-list">
+            <span class="pill law">Race</span>
+            <span class="pill law">Religion</span>
+            <span class="pill law">Nationality</span>
+            <span class="pill law">Political Opinion</span>
+            <span class="pill law">Membership in a Particular Social Group (PSG)</span>
+          </div>
+          <div class="warn-box">💡 "Particular Social Group" is the most litigated ground — requires an immutable characteristic and social recognition.</div>
+          <p style="font-size:0.87rem; margin-top:8px">In <strong>Biman Sikdar's</strong> case: targeted for involvement with the Bangladesh National Party (BNP) → nexus to <strong>political opinion</strong>.</p>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#e8f4f8">🛡️</div>
+          <h4>State Protection — The Framework</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="quote">
+            "Only in situations in which state protection might reasonably have been forthcoming will the claimant's failure to approach the state for protection defeat his claim."
+            <cite>Canada (Attorney General) v. Ward [1993] 2 SCR 689</cite>
+          </div>
+          <div class="section-label">The Framework</div>
+          <ul style="font-size:0.88rem">
+            <li>There is a <strong>presumption</strong> that states can protect their nationals</li>
+            <li>Claimant must <strong>rebut</strong> this presumption with clear and convincing evidence</li>
+            <li>More democratic the country → stronger the presumption</li>
+            <li>Claimant need NOT approach state if protection would not reasonably have been forthcoming</li>
+          </ul>
+          <div class="section-label">Evidentiary Burden</div>
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>To Rebut Presumption</h5>
+              <ul>
+                <li>National documentation package (NDP)</li>
+                <li>Personal evidence of failed attempts</li>
+                <li>Expert evidence on country conditions</li>
+                <li>Media / human rights reports</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Felippe Eli Exercise</h5>
+              <ul>
+                <li>Practice questioning a client about state protection</li>
+                <li>Did they approach authorities?</li>
+                <li>What happened when they did?</li>
+                <li>Would it be reasonable to expect protection?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#eafaf1">🗺️</div>
+          <h4>Internal Flight Alternative (IFA)</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <p>Even if there's persecution in one part of the country, the claim fails if there's a <strong>viable IFA</strong> elsewhere in the country.</p>
+          <div class="section-label">Two-Pronged Test</div>
+          <div class="two-col">
+            <div class="mini-card" style="border-left: 3px solid var(--teal)">
+              <h5>Prong 1 — No Serious Risk</h5>
+              <ul>
+                <li>Claimant would NOT face persecution in the IFA location</li>
+                <li>Agent of harm cannot reach the person there</li>
+              </ul>
+            </div>
+            <div class="mini-card" style="border-left: 3px solid var(--green)">
+              <h5>Prong 2 — Reasonably Viable</h5>
+              <ul>
+                <li>It is reasonable for the person to relocate there</li>
+                <li>Consider: gender, age, disability, language, economic access</li>
+                <li>Not unduly harsh</li>
+              </ul>
+            </div>
+          </div>
+          <div class="section-label">Colombia IFA Scenario (Key Arguments)</div>
+          <div class="info-box">
+            Client from Bogotá being asked to relocate to Tunja. AGC (paramilitary group) has national reach. Domestic violence widespread. Government laws improving but implementation criticized.
+            <br><br>
+            <strong>Arguments against IFA:</strong> AGC nationwide operations; domestic violence support inadequate in smaller cities; client has no contacts/support in Tunja.
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fef9f0">🆚</div>
+          <h4>Section 97 — Person in Need of Protection</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <p style="font-size:0.88rem; margin-bottom:10px">s.97 is complementary to s.96 — it protects people who don't fit the Convention refugee definition but still face serious harm.</p>
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>s.96 Convention Refugee</h5>
+              <ul>
+                <li>Outside country of nationality</li>
+                <li>Subjective + objective fear</li>
+                <li>Persecution</li>
+                <li>Nexus to Convention ground</li>
+                <li>State protection unavailable</li>
+                <li>No viable IFA</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>s.97 Person in Need of Protection</h5>
+              <ul>
+                <li>In Canada</li>
+                <li>Risk of: torture, risk to life, cruel/unusual treatment</li>
+                <li>Risk must be <strong>personal</strong> (not generalized)</li>
+                <li>Not inherent to lawful sanction</li>
+                <li>Not inability to provide medical care</li>
+                <li>State protection unavailable; no IFA</li>
+              </ul>
+            </div>
+          </div>
+          <div class="warn-box">⚠️ Key difference: s.97 does NOT require a nexus to a Convention ground, but the risk must be <strong>personal and individualized</strong>, not shared by all citizens generally.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODULE 5 -->
+  <div class="module-section" id="m5">
+    <button class="back-btn" onclick="showModule('overview')">← Back to Overview</button>
+    <div class="module-header" data-num="5" style="background: linear-gradient(135deg, #4a1a00 0%, #d35400 100%)">
+      <div class="badge">Module 5</div>
+      <h2>Exclusion</h2>
+      <div class="subtitle">Articles 1E and 1F — When protection is denied despite facing harm</div>
+    </div>
+    <div class="content-grid">
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fdf2f1">🚫</div>
+          <h4>Exclusion — General Principles</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <p>Exclusion means the person may face real risk, but is denied refugee status because of their own conduct or status. The exclusion clauses are in the <strong>Refugee Convention</strong> and incorporated into Canadian law.</p>
+          <div class="pill-list">
+            <span class="pill danger">Art. 1E — Rights equivalent to nationality elsewhere</span>
+            <span class="pill danger">Art. 1F(a) — War crimes / Crimes against humanity</span>
+            <span class="pill danger">Art. 1F(b) — Serious non-political crimes</span>
+            <span class="pill danger">Art. 1F(c) — Acts against UN principles</span>
+          </div>
+          <div class="danger-box">⚠️ Exclusion is assessed on "serious reasons for considering" — a lower standard than balance of probabilities.</div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#e8f4f8">🌍</div>
+          <h4>Article 1E — Status in Another Country</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="quote">
+            "This Convention shall not apply to a person who is recognized by the competent authorities of the country in which he has taken residence as having the rights and obligations which are attached to the possession of the nationality of that country."
+            <cite>Refugee Convention Art. 1E</cite>
+          </div>
+          <div class="section-label">Zeng Framework (FCA 2010) — Three Scenarios</div>
+          <div class="mini-card" style="margin-bottom:8px">
+            <h5>If the claimant had the rights when they left that country</h5>
+            <ul><li>→ Excluded (unless rights subsequently lost due to state action)</li></ul>
+          </div>
+          <div class="mini-card" style="margin-bottom:8px">
+            <h5>If the claimant does NOT currently have such rights</h5>
+            <ul><li>→ Not excluded (but RPD may consider why rights were lost)</li></ul>
+          </div>
+          <div class="mini-card">
+            <h5>Voluntarily given up rights</h5>
+            <ul><li>→ Generally excluded</li></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fdedec">⚔️</div>
+          <h4>Article 1F(a) — War Crimes & Crimes Against Humanity</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Crimes Against Peace</h5>
+              <ul><li>Planning, preparing, or waging a war of aggression</li></ul>
+            </div>
+            <div class="mini-card">
+              <h5>War Crimes</h5>
+              <ul><li>Serious violations of laws and customs of war</li></ul>
+            </div>
+            <div class="mini-card">
+              <h5>Crimes Against Humanity</h5>
+              <ul>
+                <li>Murder, enslavement, torture, etc.</li>
+                <li>In peace <strong>or</strong> war</li>
+                <li>Committed in widespread/systematic fashion</li>
+                <li>Defined in the Rome Statute</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Defence: Duress</h5>
+              <ul>
+                <li>Threat of imminent harm (will be carried out)</li>
+                <li>No safe avenue of escape</li>
+                <li>Close temporal connection</li>
+                <li>Harm inflicted proportionate to harm threatened</li>
+              </ul>
+            </div>
+          </div>
+          <div class="section-label">Complicity Standard — Ezokola Test</div>
+          <div class="case-box">
+            <div class="case-name">Ezokola v. Canada [2013] SCC 40</div>
+            "Serious reasons for considering that an individual has <strong>voluntarily made a significant and knowing contribution</strong> to a group's crime or criminal purpose."
+          </div>
+          <div class="section-label">Syrian Air Force Case Study</div>
+          <div class="info-box">Colonel who maintained weapon systems used by pilots bombing protesters. Key question: Did he make a <strong>significant and knowing</strong> contribution? Review of targeting videos after attacks → likely yes.</div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fef5e7">🔫</div>
+          <h4>Article 1F(b) — Serious Non-Political Crimes</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <ul style="font-size:0.88rem; margin-bottom:10px">
+            <li>Crime committed <strong>outside</strong> Canada before entering Canada</li>
+            <li>Must be a "serious" crime (consider: nature, sentence, circumstances, mitigating factors)</li>
+          </ul>
+          <div class="section-label">Is it "Non-Political"?</div>
+          <p style="font-size:0.88rem">A crime is political if there is:</p>
+          <ul style="font-size:0.88rem">
+            <li>A political disturbance (struggle to modify/abolish a government or policy)</li>
+            <li>A <strong>rational nexus</strong> between the crime and the political objective</li>
+          </ul>
+          <div class="section-label">Juan's Case Study</div>
+          <div class="info-box">
+            Convicted in the US for armed motor vehicle theft ($5,000 car) at age 22 while addicted to drugs. Served 7 years. Now facing refugee exclusion.
+            <br><br>
+            <strong>Factors weighing against exclusion:</strong> Drug addiction (mitigating), single offence, rehabilitation, no other criminal history, time elapsed.
+            <br>
+            <strong>Factors for exclusion:</strong> Knife used (violence), serious sentence, committed abroad.
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#f4eeff">🌐</div>
+          <h4>Article 1F(c) — Acts Against UN Principles</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <p style="font-size:0.88rem">Applies to acts contrary to the purposes and principles of the <strong>UN Charter</strong>. Very rarely invoked. Generally aimed at:</p>
+          <div class="pill-list">
+            <span class="pill danger">Terrorism</span>
+            <span class="pill danger">Financing of terrorism</span>
+            <span class="pill danger">Systematic human rights violations by state actors</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODULE 6 -->
+  <div class="module-section" id="m6">
+    <button class="back-btn" onclick="showModule('overview')">← Back to Overview</button>
+    <div class="module-header" data-num="6" style="background: linear-gradient(135deg, #0a3d2e 0%, #16a085 100%)">
+      <div class="badge">Module 6</div>
+      <h2>Trauma-Informed Service & Credibility</h2>
+      <div class="subtitle">Supporting vulnerable clients and understanding how credibility is assessed</div>
+    </div>
+    <div class="content-grid">
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#eafaf1">💛</div>
+          <h4>Principles of Trauma-Informed Legal Practice</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Core Characteristics</h5>
+              <ul>
+                <li>Safety — physical and emotional</li>
+                <li>Trustworthiness and transparency</li>
+                <li>Peer support and collaboration</li>
+                <li>Empowerment and choice</li>
+                <li>Cultural, historical, gender sensitivity</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>In Practice</h5>
+              <ul>
+                <li>Use grounding techniques when client dissociates</li>
+                <li>Explain every step of the process</li>
+                <li>Allow client to set pace</li>
+                <li>Avoid re-traumatizing through excessive detail</li>
+                <li>Separate emotion from legal analysis when writing</li>
+              </ul>
+            </div>
+          </div>
+          <div class="quote">
+            "Grounding techniques help the person step out of the movie theater into the daylight."
+            <cite>HHS — Trauma-Informed Care</cite>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#e8f4f8">📋</div>
+          <h4>IRB Guideline 8 — Vulnerable Persons</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <p style="font-size:0.88rem; margin-bottom:10px"><strong>Guideline 8</strong> provides procedural accommodations for vulnerable persons at the IRB.</p>
+          <div class="section-label">Who May Be Designated Vulnerable?</div>
+          <div class="pill-list">
+            <span class="pill">Minors (under 18)</span>
+            <span class="pill">Survivors of trauma or torture</span>
+            <span class="pill">People with mental health conditions</span>
+            <span class="pill">Survivors of sexual/gender-based violence</span>
+          </div>
+          <div class="section-label">Accommodations Available</div>
+          <div class="pill-list">
+            <span class="pill good">Designated Representative</span>
+            <span class="pill good">Testimony via videoconference</span>
+            <span class="pill good">Breaks during hearing</span>
+            <span class="pill good">Shortened sessions</span>
+            <span class="pill good">Support person present</span>
+            <span class="pill good">Private hearing room</span>
+          </div>
+          <div class="section-label">Designated Representative (s.20 RPD Rules)</div>
+          <div class="info-box">
+            A designated representative is required when:
+            <ul style="margin-top:6px">
+              <li>Claimant is <strong>under 18</strong></li>
+              <li>Claimant is <strong>unable to appreciate the nature of proceedings</strong></li>
+            </ul>
+            Counsel must notify the RPD without delay if they believe a DR should be appointed.
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fef5e7">⚖️</div>
+          <h4>Credibility — The Framework</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="case-box">
+            <div class="case-name">Maldonado — Starting Presumption</div>
+            "When an applicant swears to the truth of certain allegations, this creates a presumption that those allegations are true unless there be reason to doubt their truthfulness."
+          </div>
+          <div class="section-label">What Can Rebut the Presumption?</div>
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Common Negative Findings</h5>
+              <ul>
+                <li>BOC <strong>omissions</strong> (key facts not mentioned)</li>
+                <li><strong>Inconsistencies</strong> (internal or with documents)</li>
+                <li>Absence of corroborating evidence</li>
+                <li>Problems with documents submitted</li>
+                <li><strong>Implausibility</strong> findings</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Procedural Fairness Required</h5>
+              <ul>
+                <li>Claimant must be given opportunity to explain</li>
+                <li>RPD cannot make negative findings without putting concerns to claimant first</li>
+                <li>Rahal v. Canada — stern warning against prejudging</li>
+              </ul>
+            </div>
+          </div>
+          <div class="danger-box">
+            ❌ Unreasonable inferences the RPD should NOT make:
+            <ul style="margin-top:4px">
+              <li>Using travel on false documents to impugn overall credibility</li>
+              <li>Assuming all documents from certain countries are fake</li>
+              <li>Cultural stereotypes about how victims "should" behave</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#f4eeff">🏳️‍🌈</div>
+          <h4>Gender & SOGIESC Guidelines</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="section-label">Guideline 4 — Gender Considerations</div>
+          <p style="font-size:0.88rem; margin-bottom:8px">Recognizes that women and gender-diverse people may face persecution differently and that conventional credibility assumptions may not apply.</p>
+          <div class="section-label">SOGIESC — Myths the IRB Must AVOID</div>
+          <div class="danger-box">
+            ❌ Do NOT assume:
+            <ul>
+              <li>SOGIESC individuals have feminized/masculinized appearances</li>
+              <li>Would not voluntarily enter heterosexual marriage</li>
+              <li>Would actively participate in LGBTIQ2 culture in Canada</li>
+              <li>Are promiscuous or sexually active</li>
+            </ul>
+          </div>
+          <div class="good-box">
+            ✅ Best practices:
+            <ul>
+              <li>Allow claimant to tell their own story</li>
+              <li>Avoid intrusive questioning about sexual practices</li>
+              <li>Recognize that coming out is a process, not an event</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODULE 7 -->
+  <div class="module-section" id="m7">
+    <button class="back-btn" onclick="showModule('overview')">← Back to Overview</button>
+    <div class="module-header" data-num="7" style="background: linear-gradient(135deg, #0a1f3d 0%, #2980b9 100%)">
+      <div class="badge">Module 7</div>
+      <h2>Proceedings Before the IRB</h2>
+      <div class="subtitle">RPD hearings, RAD appeals, timelines, writing arguments, and the CREAC method</div>
+    </div>
+    <div class="content-grid">
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#e8f4f8">🏛️</div>
+          <h4>RPD Hearing — What to Expect</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="flow" style="flex-direction:column; align-items:flex-start">
+            <div class="flow-step" style="width:100%">1. Opening — Member introduces hearing, identifies counsel, confirms interpreter</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step" style="width:100%">2. Preliminary applications (e.g., accommodations, late documents)</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step" style="width:100%">3. Member questions claimant (inquisitorial model — member leads)</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step" style="width:100%">4. Minister's counsel cross-examines (if intervening)</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step" style="width:100%">5. Claimant's counsel may question (clarifying, not repeating)</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step" style="width:100%">6. Submissions by parties</div>
+            <div class="flow-arrow">↓</div>
+            <div class="flow-step" style="width:100%">7. Decision (oral or reserved)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#eafaf1">📅</div>
+          <h4>RAD Appeals — Timelines & Key Rules</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Key Deadlines</h5>
+              <ul>
+                <li><strong>15 days</strong> — Notice of Appeal after RPD written reasons</li>
+                <li><strong>45 days</strong> — Perfect the record (Appellant's Record) after written reasons</li>
+                <li>Regulations say 30 days; RAD practice notice allows 45</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>New Evidence (s.110(4) IRPA)</h5>
+              <ul>
+                <li>Very restricted on appeal</li>
+                <li>Must have arisen <strong>after</strong> RPD hearing, OR</li>
+                <li>Was not reasonably available, OR</li>
+                <li>Claimant could not reasonably have been expected to present it</li>
+              </ul>
+            </div>
+          </div>
+          <div class="section-label">Oral Hearing at RAD</div>
+          <div class="info-box">An oral hearing at the RAD is <strong>exceptional</strong> — only when new evidence raises a <strong>credibility issue</strong> that is central to the decision.</div>
+          <div class="section-label">Standard of Review</div>
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Correctness</h5>
+              <ul><li>Questions of law — RAD decides independently</li></ul>
+            </div>
+            <div class="mini-card">
+              <h5>Reasonableness</h5>
+              <ul><li>Questions of fact/mixed — defer somewhat to RPD but RAD can intervene</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fef5e7">📝</div>
+          <h4>RAD Record — What Goes In</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <ul class="checklist">
+            <li>Notice of decision and written reasons (optional per practice notice)</li>
+            <li>Transcript or CD timestamp reference</li>
+            <li>Any evidence RPD refused to accept</li>
+            <li>Written statement (re: new evidence, oral hearing request, interpreter needs)</li>
+            <li>New evidence (if admissible)</li>
+            <li>Case law (or list of cases)</li>
+            <li>Memorandum (legal argument)</li>
+          </ul>
+          <div class="section-label">Memorandum Must Contain (RAD Rule 3(g))</div>
+          <ul style="font-size:0.88rem">
+            <li>Errors alleged at the RPD</li>
+            <li>Where those errors appear (paragraph numbers, transcript)</li>
+            <li>How new evidence meets s.110(4)</li>
+            <li>The decision sought from the RAD</li>
+            <li>Why an oral hearing should be held (if requested)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#f4eeff">✍️</div>
+          <h4>CREAC — Legal Argument Framework</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="flow" style="flex-direction:column; gap:8px">
+            <div class="flow-step" style="background:#e8f4f8; border-color:var(--teal)"><strong>C</strong>ONCLUSION — State the issue revealing your conclusion upfront</div>
+            <div class="flow-step" style="background:#f4eeff; border-color:#8e44ad"><strong>R</strong>ULE — Set out the governing law or legal principles</div>
+            <div class="flow-step" style="background:#fef5e7; border-color:var(--gold)"><strong>E</strong>XPLANATION — Explain the rule / what the cases say</div>
+            <div class="flow-step" style="background:#eafaf1; border-color:var(--green)"><strong>A</strong>PPLICATION — Apply the law to your specific facts</div>
+            <div class="flow-step" style="background:#e8f4f8; border-color:var(--teal)"><strong>C</strong>ONCLUSION — State the outcome of applying law to facts</div>
+          </div>
+          <div class="section-label">Example: Francisco Ramírez López (State Protection Error)</div>
+          <div class="case-box">
+            <div class="case-name">C:</div> The RPD erred by finding the appellant failed to rebut the presumption of state protection without analyzing whether it would have been forthcoming.
+            <br><br>
+            <strong>R:</strong> Ward — failure to seek state protection defeats a claim only if it "might reasonably have been forthcoming."
+            <br><br>
+            <strong>E:</strong> RPD must analyze evidence before faulting claimant.
+            <br><br>
+            <strong>A:</strong> CJNG is Mexico's most powerful cartel; police underfunded and corrupt; no analysis conducted.
+            <br><br>
+            <strong>C:</strong> Reviewable error — decision must be quashed. (See: Perez Mendoza 2010 FC 119)
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fdedec">⚠️</div>
+          <h4>Common RPD Errors to Argue on Appeal</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Errors of Law</h5>
+              <ul>
+                <li>Wrong legal test applied</li>
+                <li>Ignoring relevant legal principle</li>
+                <li>Incorrect statutory interpretation</li>
+                <li>No analysis of whether state protection would be forthcoming before faulting claimant</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Errors of Fact</h5>
+              <ul>
+                <li>Ignoring or mischaracterizing evidence</li>
+                <li>Unreasonable credibility findings</li>
+                <li>Implausibility findings without basis</li>
+                <li>Failing to consider cumulative evidence</li>
+              </ul>
+            </div>
+          </div>
+          <div class="section-label">Practical Tips</div>
+          <ul class="checklist">
+            <li>Always cite paragraph numbers from RPD decision</li>
+            <li>Start with your strongest argument</li>
+            <li>Use point-first (CREAC) writing throughout</li>
+            <li>Number your paragraphs</li>
+            <li>Cite CanLII references with pinpoint cites</li>
+            <li>Double-check all deadlines</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODULE 8 -->
+  <div class="module-section" id="m8">
+    <button class="back-btn" onclick="showModule('overview')">← Back to Overview</button>
+    <div class="module-header" data-num="8" style="background: linear-gradient(135deg, #3d2800 0%, #c8963e 100%)">
+      <div class="badge">Module 8</div>
+      <h2>Resettlement & Rights of Refugees</h2>
+      <div class="subtitle">What happens after protection: cessation, vacation, rights, and Bill C-2 changes</div>
+    </div>
+    <div class="content-grid">
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fef9f0">🏠</div>
+          <h4>Classes of Refugees for Resettlement</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>Government-Assisted Refugees (GAR)</h5>
+              <ul><li>Sponsored by the Canadian government</li><li>UNHCR usually identifies candidates</li></ul>
+            </div>
+            <div class="mini-card">
+              <h5>Privately Sponsored Refugees (PSR)</h5>
+              <ul><li>Sponsored by private groups or designated organizations</li><li>5-year sponsorship commitment</li></ul>
+            </div>
+            <div class="mini-card">
+              <h5>Blended Visa Office Referred (BVOR)</h5>
+              <ul><li>Combination: government + private sponsors share costs</li></ul>
+            </div>
+            <div class="mini-card">
+              <h5>General Eligibility Requirements</h5>
+              <ul>
+                <li>Outside Canada</li>
+                <li>Not a threat to Canadian security</li>
+                <li>Refugee need</li>
+                <li>Ability to establish in Canada</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header open" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fdedec">🔚</div>
+          <h4>Cessation — Losing Protected Person Status</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body open">
+          <p style="font-size:0.88rem; margin-bottom:10px">Cessation ends refugee protection when the basis for it no longer exists.</p>
+          <div class="section-label">Three Requirements for Cessation</div>
+          <div class="three-col" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px">
+            <div class="mini-card" style="border-left:3px solid var(--red)">
+              <h5>1. Voluntariness</h5>
+              <ul><li>The refugee's action must be voluntary</li></ul>
+            </div>
+            <div class="mini-card" style="border-left:3px solid var(--gold)">
+              <h5>2. Intention</h5>
+              <ul><li>Must intend to re-avail of country's protection</li></ul>
+            </div>
+            <div class="mini-card" style="border-left:3px solid var(--teal)">
+              <h5>3. Re-availment</h5>
+              <ul><li>Must actually obtain such protection</li></ul>
+            </div>
+          </div>
+          <div class="section-label">Camayo Factors — Rebutting Presumption of Reavailment</div>
+          <div class="case-box">
+            <div class="case-name">MCI v. Camayo, 2022 FCA 50</div>
+            Obtaining a passport from country of origin + travelling there creates a <strong>presumption</strong> of reavailment. To rebut it, consider:
+          </div>
+          <ul class="checklist">
+            <li>State of the claimant's knowledge about cessation</li>
+            <li>Personal attributes (age, education, sophistication)</li>
+            <li>Identity of the agent of persecution</li>
+            <li>Whether the passport was obtained voluntarily</li>
+            <li>Whether the passport was actually used for travel</li>
+            <li>Purpose of travel (compelling reason = serious illness/death of family member)</li>
+            <li>Frequency and duration of travel</li>
+            <li>Activities while in the country</li>
+            <li>Precautionary measures taken</li>
+            <li>Whether actions indicate loss of subjective fear</li>
+          </ul>
+          <div class="section-label">Wei's Case Study</div>
+          <div class="info-box">
+            Falun Gong practitioner; refugee since 2010. Renewed Chinese passport in 2011. Traveled to Hong Kong (2013) to see ill mother, and to China (2014) for her funeral. Attended a high school reunion in Hong Kong.
+            <br><br>
+            <strong>For cessation (Minister):</strong> Obtained passport; voluntarily traveled; attended social events; dealt with Chinese officials without incident.
+            <br>
+            <strong>Against cessation (Refugee):</strong> Compelling reason (dying/deceased parent); traveled to Hong Kong, not China proper for first trip; duty as only child; no loss of subjective fear otherwise shown.
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#fef5e7">📛</div>
+          <h4>Vacation — Protected Status Obtained Through Fraud</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <p style="font-size:0.88rem">Vacation removes refugee protection where it was obtained through:</p>
+          <div class="pill-list">
+            <span class="pill danger">Misrepresentation</span>
+            <span class="pill danger">Withholding of material facts</span>
+            <span class="pill danger">Fraud</span>
+          </div>
+          <div class="warn-box">⚠️ Vacation is different from cessation — it looks backward (how protection was obtained) rather than forward (changed circumstances).</div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#eafaf1">✅</div>
+          <h4>Rights of Refugee Claimants & Protected Persons</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="two-col">
+            <div class="mini-card">
+              <h5>While Claim is Pending</h5>
+              <ul>
+                <li>Right to counsel</li>
+                <li>Work permit eligible</li>
+                <li>Access to health care (IFHP)</li>
+                <li>Cannot be removed while claim is pending</li>
+              </ul>
+            </div>
+            <div class="mini-card">
+              <h5>Once Protected Person Status Granted</h5>
+              <ul>
+                <li>Apply for Permanent Residence</li>
+                <li>Can sponsor certain family members</li>
+                <li>Right to travel document (not passport)</li>
+                <li>Cannot obtain passport from persecutor country (risk of cessation)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <div class="block-header" onclick="toggleBlock(this)">
+          <div class="block-icon" style="background:#e8f4f8">🆕</div>
+          <h4>Bill C-2 — Proposed Legislative Changes</h4>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="block-body">
+          <div class="section-label">New Ineligibility Provisions</div>
+          <div class="danger-box">
+            <ul>
+              <li><strong>One-year bar:</strong> Refugee claim ineligible if more than 1 year has passed since claimant first arrived in Canada (after June 24, 2020)</li>
+              <li><strong>Irregular crossers from US:</strong> Claim ineligible if person crossed irregularly from the US and makes a claim more than 14 days after crossing</li>
+            </ul>
+          </div>
+          <div class="section-label">Changes to In-Canada Asylum System</div>
+          <div class="info-box">
+            <ul>
+              <li>No more procedural distinction between inland and POE claims</li>
+              <li>Claim sent to RPD for abandonment hearing if information not provided in time</li>
+              <li>Minister must designate a representative in certain circumstances</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showModule(id) {
+  document.querySelectorAll('.module-section').forEach(s => s.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const map = { overview: 0, m1: 1, m2: 2, m3: 3, m4: 4, m5: 5, m6: 6, m7: 7, m8: 8 };
+  const btns = document.querySelectorAll('.nav-btn');
+  if (btns[map[id]]) btns[map[id]].classList.add('active');
+  window.scrollTo({ top: 60, behavior: 'smooth' });
+}
+
+function toggleBlock(header) {
+  header.classList.toggle('open');
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+function filterTag(tag) {
+  document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  // For now, just toggle style as visual cue
+  setTimeout(() => event.target.classList.remove('active'), 2000);
+}
+
+function searchContent(query) {
+  if (query.length < 2) return;
+  // Simple scroll to first match
+  const lower = query.toLowerCase();
+  const allText = document.querySelectorAll('.mini-card, .info-box, .warn-box, .danger-box, .good-box, .case-box');
+  for (let el of allText) {
+    if (el.textContent.toLowerCase().includes(lower)) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.style.outline = '2px solid var(--gold)';
+      setTimeout(() => el.style.outline = '', 3000);
+      break;
+    }
+  }
+}
+
+// Open first block in each module by default
+document.querySelectorAll('.block-header.open').forEach(h => {
+  h.nextElementSibling.classList.add('open');
+});
+</script>
+</body>
+</html>
