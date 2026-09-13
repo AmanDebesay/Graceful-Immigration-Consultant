@@ -224,6 +224,8 @@
           <option value="trv_supervisa">Visitor Visa (TRV) / Super Visa</option>
           <option value="visitor_extension">Visitor Record Extension</option>
           <option value="pr_card_renewal">PR Card Renewal</option>
+          <option value="employer_lmia">Employer Immigration Representation (LMIA)</option>
+          <option value="job_seeker_career">Immigration + Career Search (PR)</option>
           <option value="refugee">Refugee Protection Claim</option>
           <option value="other">Other / Not sure</option>
         </select>
@@ -512,6 +514,8 @@ const APP_TYPE_HINTS = {
   trv_supervisa: 'Super Visa allows parents/grandparents of Canadian citizens/PRs to visit for up to 5 years.',
   visitor_extension: 'Your visitor status expires within 90 days.',
   pr_card_renewal: 'Your PR card is expiring or has expired.',
+  employer_lmia: 'You are an employer seeking LMIA support or immigration representation to hire foreign workers.',
+  job_seeker_career: 'Combine your Express Entry / PR pathway with career search support to line up a job in Canada.',
   refugee: 'You are in Canada and claiming refugee protection.',
   other: 'Your consultant will assess the correct pathway at your consultation.'
 };
@@ -932,6 +936,7 @@ function buildSummary(fileId) {
     work_permit_extension:'Work Permit Extension', study_permit_overseas:'Study Permit — Overseas',
     study_permit_extension:'Study Permit Extension', trv_supervisa:'TRV / Super Visa',
     visitor_extension:'Visitor Record Extension', pr_card_renewal:'PR Card Renewal',
+    employer_lmia:'Employer Immigration Representation (LMIA)', job_seeker_career:'Immigration + Career Search (PR)',
     refugee:'Refugee Protection', other:'Other / To be determined'
   };
   const first  = document.getElementById('s2_first').value.trim();
@@ -995,6 +1000,7 @@ function submitIntake() {
     work_permit_extension:'Work Permit Extension', study_permit_overseas:'Study Permit — Overseas',
     study_permit_extension:'Study Permit Extension', trv_supervisa:'TRV / Super Visa',
     visitor_extension:'Visitor Record Extension', pr_card_renewal:'PR Card Renewal',
+    employer_lmia:'Employer Immigration Representation (LMIA)', job_seeker_career:'Immigration + Career Search (PR)',
     refugee:'Refugee Protection', other:'Other'
   };
   const clientData = {

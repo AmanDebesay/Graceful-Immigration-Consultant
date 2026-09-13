@@ -23,7 +23,9 @@ const DATA = {
     { id: "study_permit_extension", label: "Study Permit Extension",                fee: 900  },
     { id: "trv_supervisa",          label: "TRV / Super Visa",                      fee: 1000 },
     { id: "visitor_extension",      label: "Visitor Record Extension",              fee: 800  },
-    { id: "pr_card_renewal",        label: "PR Card Renewal",                       fee: 700  }
+    { id: "pr_card_renewal",        label: "PR Card Renewal",                       fee: 700  },
+    { id: "employer_lmia",          label: "Employer Immigration Representation (LMIA)", fee: 3000 },
+    { id: "job_seeker_career",      label: "Immigration + Career Search (PR)",      fee: 2800 }
   ],
 
   // Official IRCC forms for spousal sponsorship (with direct PDF links from IRCC)
