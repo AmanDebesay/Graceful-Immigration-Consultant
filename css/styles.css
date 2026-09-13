@@ -3,11 +3,11 @@
    Edit :root to rebrand. Sidebar + topbar layout like CaseEasy.
    ================================================================ */
 :root {
-  --navy:      #1B3A5C;
-  --navy-d:    #152e4a;
+  --navy:      #0B2A5C;
+  --navy-d:    #09224B;
   --navy-l:    #EAF2FB;
-  --gold:      #C9A84C;
-  --gold-d:    #b8953d;
+  --gold:      #DEA702;
+  --gold-d:    #B68801;
   --white:     #ffffff;
   --gray-50:   #f8f9fa;
   --gray-100:  #f2f2f2;
@@ -17,7 +17,7 @@
   --gray-800:  #333;
   --green:     #1E8449;
   --green-bg:  #EAF3DE;
-  --red:       #C0392B;
+  --red:       #D20101;
   --red-bg:    #FCEBEB;
   --orange:    #E67E22;
   --orange-bg: #FAEEDA;

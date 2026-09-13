@@ -183,7 +183,7 @@ function buildCharts() {
       type: 'bar',
       data: {
         labels: Object.keys(types).map(t => t.replace(' — ',' ')),
-        datasets: [{ data: Object.values(types), backgroundColor: '#1B3A5C', borderRadius: 4 }]
+        datasets: [{ data: Object.values(types), backgroundColor: '#0B2A5C', borderRadius: 4 }]
       },
       options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, responsive: true }
     });
@@ -193,7 +193,7 @@ function buildCharts() {
   if (ctx2 && !ctx2._chartInstance) {
     const statuses = {};
     STATE.cases.forEach(c => { statuses[c.status] = (statuses[c.status]||0)+1; });
-    const colors = { Active:'#1E8449', 'In Progress':'#E67E22', Submitted:'#1B3A5C', Approved:'#27AE60', Refused:'#C0392B' };
+    const colors = { Active:'#1E8449', 'In Progress':'#E67E22', Submitted:'#0B2A5C', Approved:'#27AE60', Refused:'#D20101' };
     ctx2._chartInstance = new Chart(ctx2, {
       type: 'doughnut',
       data: {
@@ -849,7 +849,7 @@ function setupCanvasById(canvasId) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  ctx.strokeStyle = '#1B3A5C'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#0B2A5C'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   let drawing = false, lx = 0, ly = 0;
   function pos(e) { const r = canvas.getBoundingClientRect(); const t = e.touches ? e.touches[0] : e; return { x:(t.clientX-r.left)*(canvas.width/r.width), y:(t.clientY-r.top)*(canvas.height/r.height) }; }
   canvas.addEventListener('mousedown', e => { drawing=true; const p=pos(e); lx=p.x; ly=p.y; });

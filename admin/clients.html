@@ -812,8 +812,8 @@ function exportPrintReport() {
       <td>${c.fullName||''}</td>
       <td>${c.email||''}</td>
       <td>${c.appTypeLabel||c.appType||''}</td>
-      <td style="text-align:center;color:${c.consultSigned?'#1a7a4a':'#c0392b'}">${c.consultSigned?'✓ Yes':'✗ No'}</td>
-      <td style="text-align:center;color:${c.serviceSigned?'#1a7a4a':'#c0392b'}">${c.serviceSigned?'✓ Yes':'✗ No'}</td>
+      <td style="text-align:center;color:${c.consultSigned?'#1a7a4a':'#D20101'}">${c.consultSigned?'✓ Yes':'✗ No'}</td>
+      <td style="text-align:center;color:${c.serviceSigned?'#1a7a4a':'#D20101'}">${c.serviceSigned?'✓ Yes':'✗ No'}</td>
       <td style="text-align:center;color:${c.docsSubmitted?'#1a7a4a':'#999'}">${c.docsSubmitted?'✓ Yes':'—'}</td>
       <td>${c.date||''}</td>
     </tr>`).join('');
@@ -822,11 +822,11 @@ function exportPrintReport() {
 <html><head><meta charset="UTF-8">
 <title>Graceful Immigration Consultant — Client Report</title>
 <style>
-  body{font-family:Arial,sans-serif;margin:30px;color:#1B3A5C}
+  body{font-family:Arial,sans-serif;margin:30px;color:#0B2A5C}
   h1{font-size:20px;margin-bottom:2px}
   .sub{font-size:12px;color:#888;margin-bottom:18px}
   table{width:100%;border-collapse:collapse;font-size:12px}
-  th{background:#1B3A5C;color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  th{background:#0B2A5C;color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
   td{padding:7px 10px;border-bottom:1px solid #e0e0e0}
   tr:nth-child(even) td{background:#f8f9fb}
   .footer{margin-top:18px;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:8px}
@@ -842,7 +842,7 @@ function exportPrintReport() {
   <tbody>${rows}</tbody>
 </table>
 <div class="footer">Confidential — Graceful Immigration Consultant Inc. · CICC-Regulated RCICs · Canada · PIPEDA compliant</div>
-<br><button onclick="window.print()" style="padding:8px 20px;background:#1B3A5C;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px">🖨 Print / Save as PDF</button>
+<br><button onclick="window.print()" style="padding:8px 20px;background:#0B2A5C;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px">🖨 Print / Save as PDF</button>
 </body></html>`;
 
   const win = window.open('', '_blank');
@@ -854,11 +854,11 @@ function exportPrintReport() {
 // ── ADMIN AUTH GUARD ──────────────────────────────────────────────
 (function() {
   if (sessionStorage.getItem('graceful_admin_auth') !== '1') {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#1B3A5C;flex-direction:column;gap:16px">'
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0B2A5C;flex-direction:column;gap:16px">'
       + '<img src="../logo.png" alt="Graceful Immigration Consultant" style="width:120px;height:120px;object-fit:contain;background:#fff;border-radius:14px;padding:8px">'
       + '<div style="color:#fff;font-size:18px;font-weight:700">Admin access required</div>'
       + '<div style="color:rgba(255,255,255,.6);font-size:13px">Please log in through the Admin Panel</div>'
-      + '<a href="index.html" style="margin-top:8px;background:#C9A84C;color:#fff;padding:11px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none">Go to Admin Login →</a>'
+      + '<a href="index.html" style="margin-top:8px;background:#DEA702;color:#fff;padding:11px 28px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none">Go to Admin Login →</a>'
       + '</div>';
   }
 })();

@@ -623,8 +623,8 @@ const DATA = {
 
   // ── TEAM MEMBERS ──────────────────────────────────────────────────────────
   team_members: [
-    { id: "tm1", name: "[YOUR FULL NAME]", role: "RCIC / Owner", pin: "1234", avatar: "RC", color: "#1B3A5C" },
-    { id: "tm2", name: "Assistant",        role: "Case Assistant",  pin: "0000", avatar: "AS", color: "#C9A84C" }
+    { id: "tm1", name: "[YOUR FULL NAME]", role: "RCIC / Owner", pin: "1234", avatar: "RC", color: "#0B2A5C" },
+    { id: "tm2", name: "Assistant",        role: "Case Assistant",  pin: "0000", avatar: "AS", color: "#DEA702" }
   ],
 
   // ── ACTIVITY LOG — tracks login & task actions ────────────────────────────
