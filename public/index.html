@@ -35,9 +35,16 @@
     .btn-hero-primary:hover{background:var(--gold-d);transform:translateY(-1px)}
     .btn-hero-outline{background:transparent;color:var(--white);padding:14px 36px;border-radius:var(--radius);font-size:16px;font-weight:600;border:2px solid rgba(255,255,255,.4);cursor:pointer;transition:.15s;display:inline-block}
     .btn-hero-outline:hover{border-color:var(--white);background:rgba(255,255,255,.05)}
-    .hero-trust{display:flex;gap:32px;justify-content:center;margin-top:48px;flex-wrap:wrap}
-    .hero-trust-item{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.7);font-size:13px}
-    .hero-trust-item span:first-child{font-size:18px}
+    .hero-trust{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;background:var(--gray-50);padding:20px 20px 32px}
+    .hero-trust-item{display:flex;align-items:center;gap:8px;color:var(--gray-600);font-size:13px}
+    .hero-trust-item span:first-child{font-size:16px;color:var(--green)}
+
+    /* HERO COVER IMAGE + HOTSPOTS */
+    .hero-image-wrap{position:relative;width:100%;line-height:0;overflow:hidden}
+    .hero-cover-img{width:100%;height:auto;display:block}
+    .hero-hotspot{position:absolute;display:block;border-radius:8px;transition:.15s;cursor:pointer}
+    .hero-hotspot-dark:hover{background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 2px rgba(255,255,255,.7)}
+    .hero-hotspot-light:hover{background:rgba(27,58,92,.08);box-shadow:inset 0 0 0 2px rgba(27,58,92,.35)}
 
     /* SECTIONS */
     section{padding:72px 40px;max-width:1100px;margin:0 auto}
@@ -147,20 +154,21 @@
 </nav>
 
 <!-- HERO -->
-<div class="hero">
-  <div class="hero-badge">CICC-Regulated RCICs · Serving All of Canada</div>
-  <h1>Your Canadian Immigration<br>Journey Starts <span>Here</span></h1>
-  <p>Expert guidance for work permits, spousal sponsorship, Express Entry, study permits, and permanent residency — with full multilingual support in English, Tigrinya, Arabic, and Amharic.</p>
-  <div class="hero-ctas">
-    <a href="intake.html" class="btn-hero-primary">Start Your Free Assessment →</a>
-    <a href="#services" class="btn-hero-outline">View Services</a>
-  </div>
-  <div class="hero-trust">
-    <div class="hero-trust-item"><span>✓</span> CICC-Regulated RCIC</div>
-    <div class="hero-trust-item"><span>✓</span> Multilingual: EN · TI · AR · AM</div>
-    <div class="hero-trust-item"><span>✓</span> Serving All of Canada</div>
-    <div class="hero-trust-item"><span>✓</span> PIPEDA / PIPA Compliant</div>
-  </div>
+<div class="hero-image-wrap">
+  <img src="../cover-page.png" alt="Graceful Immigration Consultant — Guide, Support, Belong. A Brighter Future Together." class="hero-cover-img">
+  <a href="intake.html" class="hero-hotspot hero-hotspot-dark" style="left:3%;top:67%;width:22%;height:8%" aria-label="Start Your Free Assessment"></a>
+  <a href="#services" class="hero-hotspot hero-hotspot-dark" style="left:25.5%;top:67%;width:15%;height:8%" aria-label="View Our Services"></a>
+  <a href="intake.html?type=work_permit_overseas" class="hero-hotspot hero-hotspot-light" style="left:0%;top:83%;width:17%;height:17%" aria-label="Work Permits"></a>
+  <a href="intake.html?type=spousal_spouses" class="hero-hotspot hero-hotspot-light" style="left:17%;top:83%;width:16.5%;height:17%" aria-label="Spousal Sponsorship"></a>
+  <a href="intake.html?type=study_permit_overseas" class="hero-hotspot hero-hotspot-light" style="left:33.5%;top:83%;width:16.5%;height:17%" aria-label="Study Permits"></a>
+  <a href="#services" class="hero-hotspot hero-hotspot-light" style="left:50%;top:83%;width:16.5%;height:17%" aria-label="Permanent Residence"></a>
+  <a href="intake.html?type=express_entry" class="hero-hotspot hero-hotspot-light" style="left:66.5%;top:83%;width:16.5%;height:17%" aria-label="Express Entry"></a>
+</div>
+<div class="hero-trust">
+  <div class="hero-trust-item"><span>✓</span> CICC-Regulated RCIC</div>
+  <div class="hero-trust-item"><span>✓</span> Multilingual: EN · TI · AR · AM</div>
+  <div class="hero-trust-item"><span>✓</span> Serving All of Canada</div>
+  <div class="hero-trust-item"><span>✓</span> PIPEDA / PIPA Compliant</div>
 </div>
 
 <!-- SERVICES -->
