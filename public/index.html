@@ -54,15 +54,6 @@
 
     /* SERVICES */
     .services-section{background:var(--gray-50);padding:72px 0}
-    .services-inner{max-width:1100px;margin:0 auto;padding:0 40px}
-    .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
-    .service-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:24px;transition:.2s;cursor:pointer}
-    .service-card:hover{border-color:var(--navy);box-shadow:0 4px 20px rgba(27,58,92,.12);transform:translateY(-2px)}
-    .service-icon{font-size:32px;margin-bottom:14px}
-    .service-name{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px}
-    .service-desc{font-size:13px;color:var(--gray-600);line-height:1.6;margin-bottom:16px}
-    .service-link{display:inline-flex;align-items:center;gap:4px;color:var(--navy);font-size:13px;font-weight:600;margin-top:12px;border-bottom:2px solid transparent;transition:.15s}
-    .service-link:hover{border-color:var(--gold);color:var(--gold)}
 
     /* HOW IT WORKS */
     .steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px}
@@ -113,7 +104,6 @@
     .footer-links a:hover{color:var(--white)}
 
     @media(max-width:900px){
-      .services-grid{grid-template-columns:1fr 1fr}
       .steps-grid{grid-template-columns:1fr 1fr}
       .trust-grid{grid-template-columns:1fr 1fr}
       .contact-grid{grid-template-columns:1fr}
@@ -126,8 +116,8 @@
       .hero h1{font-size:28px}
       section{padding:48px 20px}
       .services-section,.trust-section,.cta-banner{padding:48px 0}
-      .services-inner,.trust-inner{padding:0 20px}
-      .services-grid,.steps-grid,.trust-grid{grid-template-columns:1fr}
+      .trust-inner{padding:0 20px}
+      .steps-grid,.trust-grid{grid-template-columns:1fr}
       .cta-banner{padding:48px 20px}
       footer{padding:24px 20px}
     }
@@ -173,48 +163,14 @@
 
 <!-- SERVICES -->
 <div class="services-section" id="services">
-  <div class="services-inner">
-    <div class="section-label">What We Do</div>
-    <div class="section-title">Immigration Services</div>
-    <div class="section-sub">From initial assessment to final approval — we handle every step of your immigration journey.</div>
-    <div class="services-grid">
-      <div class="service-card" onclick="location.href='intake.html?type=spousal_spouses'">
-        <div class="service-icon">💑</div>
-        <div class="service-name">Spousal Sponsorship</div>
-        <div class="service-desc">Bring your spouse or common-law partner to Canada. We guide both the sponsor and the applicant through every form and requirement.</div>
-        <div class="service-link">Start application →</div>
-      </div>
-      <div class="service-card" onclick="location.href='intake.html?type=express_entry'">
-        <div class="service-icon">⭐</div>
-        <div class="service-name">Express Entry PR</div>
-        <div class="service-desc">Maximize your CRS score and get your Express Entry profile submission right. Federal Skilled Worker, CEC, and FSTP streams.</div>
-        <div class="service-link">Start application →</div>
-      </div>
-      <div class="service-card" onclick="location.href='intake.html?type=work_permit_overseas'">
-        <div class="service-icon">💼</div>
-        <div class="service-name">Work Permits</div>
-        <div class="service-desc">LMIA-based and LMIA-exempt work permits for overseas applicants and in-Canada extensions. Oil sands and trades experience.</div>
-        <div class="service-link">Start application →</div>
-      </div>
-      <div class="service-card" onclick="location.href='intake.html?type=study_permit_overseas'">
-        <div class="service-icon">🎓</div>
-        <div class="service-name">Study Permits</div>
-        <div class="service-desc">Study permit applications for overseas applicants and in-Canada extensions. Post-graduation work permit guidance included.</div>
-        <div class="service-link">Start application →</div>
-      </div>
-      <div class="service-card" onclick="location.href='intake.html?type=trv_supervisa'">
-        <div class="service-icon">✈️</div>
-        <div class="service-name">Visitor Visa / Super Visa</div>
-        <div class="service-desc">Tourist visas, Super Visas for parents and grandparents, and visitor record extensions for those already in Canada.</div>
-        <div class="service-link">Start application →</div>
-      </div>
-      <div class="service-card" onclick="location.href='intake.html?type=pr_card_renewal'">
-        <div class="service-icon">🍁</div>
-        <div class="service-name">PR Card Renewal</div>
-        <div class="service-desc">PR card renewal, travel document applications, and residency obligation assessments for permanent residents.</div>
-        <div class="service-link">Start application →</div>
-      </div>
-    </div>
+  <div class="hero-image-wrap">
+    <img src="../section-2-image.png" alt="Immigration Services — Spousal Sponsorship, Express Entry PR, Work Permits, Study Permits, Visitor Visa / Super Visa, PR Card Renewal" class="hero-cover-img">
+    <a href="intake.html?type=spousal_spouses" class="hero-hotspot hero-hotspot-light" style="left:3%;top:24%;width:31%;height:26%" aria-label="Spousal Sponsorship — Start application"></a>
+    <a href="intake.html?type=express_entry" class="hero-hotspot hero-hotspot-light" style="left:35%;top:24%;width:30%;height:26%" aria-label="Express Entry PR — Start application"></a>
+    <a href="intake.html?type=work_permit_overseas" class="hero-hotspot hero-hotspot-light" style="left:66%;top:24%;width:31%;height:26%" aria-label="Work Permits — Start application"></a>
+    <a href="intake.html?type=study_permit_overseas" class="hero-hotspot hero-hotspot-light" style="left:3%;top:55%;width:31%;height:27%" aria-label="Study Permits — Start application"></a>
+    <a href="intake.html?type=trv_supervisa" class="hero-hotspot hero-hotspot-light" style="left:35%;top:55%;width:30%;height:27%" aria-label="Visitor Visa / Super Visa — Start application"></a>
+    <a href="intake.html?type=pr_card_renewal" class="hero-hotspot hero-hotspot-light" style="left:66%;top:55%;width:31%;height:27%" aria-label="PR Card Renewal — Start application"></a>
   </div>
 </div>
 
