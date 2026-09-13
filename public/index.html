@@ -23,6 +23,7 @@
     .nav-links a:hover{color:var(--white)}
     .nav-cta{background:var(--gold);color:var(--white)!important;padding:8px 20px;border-radius:var(--radius);font-weight:600!important;font-size:13px!important}
     .nav-cta:hover{background:var(--gold-d)!important}
+    .nav-toggle{display:none;background:none;border:none;color:var(--white);font-size:26px;cursor:pointer;padding:4px 8px;line-height:1}
 
     /* HERO */
     .hero{background:linear-gradient(135deg,var(--navy) 0%,#243f6a 60%,#1a5276 100%);padding:80px 40px;text-align:center;color:var(--white)}
@@ -40,11 +41,14 @@
     .hero-trust-item span:first-child{font-size:16px;color:var(--green)}
 
     /* HERO COVER IMAGE + HOTSPOTS */
-    .hero-image-wrap{position:relative;width:100%;line-height:0;overflow:hidden}
+    .hero-image-wrap{position:relative;width:100%;margin:0 auto;line-height:0;overflow:hidden;border-top:6px solid var(--gold);border-bottom:6px solid var(--gold)}
     .hero-cover-img{width:100%;height:auto;display:block}
     .hero-hotspot{position:absolute;display:block;border-radius:8px;transition:.15s;cursor:pointer}
     .hero-hotspot-dark:hover{background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 2px rgba(255,255,255,.7)}
     .hero-hotspot-light:hover{background:rgba(27,58,92,.08);box-shadow:inset 0 0 0 2px rgba(27,58,92,.35)}
+    @media(max-width:640px){
+      .hero-image-wrap{border-top-width:4px;border-bottom-width:4px}
+    }
 
     /* SECTIONS */
     section{padding:72px 40px;max-width:1100px;margin:0 auto}
@@ -110,8 +114,15 @@
       .hero h1{font-size:36px}
     }
     @media(max-width:640px){
-      nav{padding:0 20px}
-      .nav-links{display:none}
+      nav{padding:0 16px}
+      .nav-name{font-size:14px}
+      .nav-mark{width:44px;height:44px}
+      .nav-toggle{display:block}
+      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--navy);flex-direction:column;align-items:stretch;gap:0;padding:8px 0;box-shadow:0 8px 16px rgba(0,0,0,.2)}
+      .nav-links.open{display:flex}
+      .nav-links a{padding:14px 20px;border-top:1px solid rgba(255,255,255,.1)}
+      .nav-links a:first-child{border-top:none}
+      .nav-links .nav-cta{margin:10px 20px;text-align:center}
       .hero{padding:60px 20px}
       .hero h1{font-size:28px}
       section{padding:48px 20px}
@@ -134,6 +145,7 @@
       <div class="nav-sub">Canada</div>
     </div>
   </div>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">☰</button>
   <div class="nav-links">
     <a href="#services">Services</a>
     <a href="#how-it-works">How It Works</a>
@@ -144,10 +156,10 @@
 </nav>
 
 <!-- HERO -->
-<div class="hero-image-wrap">
+<div class="hero-image-wrap" style="max-width:1754px">
   <img src="../cover-page.png" alt="Graceful Immigration Consultant — Guide, Support, Belong. A Brighter Future Together." class="hero-cover-img">
-  <a href="intake.html" class="hero-hotspot hero-hotspot-dark" style="left:3%;top:67%;width:22%;height:8%" aria-label="Start Your Free Assessment"></a>
-  <a href="#services" class="hero-hotspot hero-hotspot-dark" style="left:25.5%;top:67%;width:15%;height:8%" aria-label="View Our Services"></a>
+  <a href="intake.html" class="hero-hotspot hero-hotspot-dark" style="left:3%;top:64%;width:22%;height:15%" aria-label="Start Your Free Assessment"></a>
+  <a href="#services" class="hero-hotspot hero-hotspot-dark" style="left:25.5%;top:64%;width:15%;height:15%" aria-label="View Our Services"></a>
   <a href="intake.html?type=work_permit_overseas" class="hero-hotspot hero-hotspot-light" style="left:0%;top:83%;width:17%;height:17%" aria-label="Work Permits"></a>
   <a href="intake.html?type=spousal_spouses" class="hero-hotspot hero-hotspot-light" style="left:17%;top:83%;width:16.5%;height:17%" aria-label="Spousal Sponsorship"></a>
   <a href="intake.html?type=study_permit_overseas" class="hero-hotspot hero-hotspot-light" style="left:33.5%;top:83%;width:16.5%;height:17%" aria-label="Study Permits"></a>
@@ -163,7 +175,7 @@
 
 <!-- SERVICES -->
 <div class="services-section" id="services">
-  <div class="hero-image-wrap">
+  <div class="hero-image-wrap" style="max-width:1536px">
     <img src="../section-2-image.png" alt="Immigration Services — Spousal Sponsorship, Express Entry PR, Work Permits, Study Permits, Visitor Visa / Super Visa, PR Card Renewal" class="hero-cover-img">
     <a href="intake.html?type=spousal_spouses" class="hero-hotspot hero-hotspot-light" style="left:3%;top:24%;width:31%;height:26%" aria-label="Spousal Sponsorship — Start application"></a>
     <a href="intake.html?type=express_entry" class="hero-hotspot hero-hotspot-light" style="left:35%;top:24%;width:30%;height:26%" aria-label="Express Entry PR — Start application"></a>
