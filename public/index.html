@@ -105,20 +105,6 @@
     .step-desc{font-size:13px;color:var(--gray-600);line-height:1.6}
     .step-arrow{display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gold);padding-top:24px}
 
-    /* TRUST SIGNALS */
-    .trust-section{background:var(--navy);padding:64px 0}
-    .trust-inner{max-width:1100px;margin:0 auto;padding:0 40px}
-    .trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:40px}
-    .trust-item{text-align:center;padding:24px}
-    .trust-icon{font-size:40px;margin-bottom:12px}
-    .trust-title{font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px}
-    .trust-desc{font-size:13px;color:rgba(255,255,255,.65);line-height:1.6}
-
-    /* CTA BANNER */
-    .cta-banner{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-d) 100%);padding:64px 40px;text-align:center}
-    .cta-banner h2{font-size:36px;font-weight:800;color:var(--white);margin-bottom:16px}
-    .cta-banner p{font-size:17px;color:rgba(255,255,255,.85);max-width:560px;margin:0 auto 32px;line-height:1.7}
-
     /* CONTACT */
     .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:40px}
     .contact-info h3{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:20px}
@@ -147,7 +133,6 @@
 
     @media(max-width:900px){
       .steps-grid{grid-template-columns:1fr 1fr}
-      .trust-grid{grid-template-columns:1fr 1fr}
       .contact-grid{grid-template-columns:1fr}
       .hero h1{font-size:36px}
       .audience-grid{grid-template-columns:1fr}
@@ -167,10 +152,7 @@
       .hero{padding:60px 20px}
       .hero h1{font-size:28px}
       section{padding:48px 20px}
-      .services-section,.trust-section,.cta-banner{padding:48px 0}
-      .trust-inner{padding:0 20px}
-      .steps-grid,.trust-grid{grid-template-columns:1fr}
-      .cta-banner{padding:48px 20px}
+      .steps-grid{grid-template-columns:1fr}
       footer{padding:24px 20px}
       .blog-grid{grid-template-columns:1fr}
       .assess-popup{left:16px;right:16px;max-width:none;bottom:16px}
@@ -297,45 +279,6 @@
     <a href="intake.html" class="btn-hero-primary" style="display:inline-block;background:var(--navy);padding:14px 36px;border-radius:8px;color:white;font-size:16px;font-weight:700">Begin Your Assessment →</a>
   </div>
 </section>
-
-<!-- TRUST SIGNALS -->
-<div class="trust-section">
-  <div class="trust-inner">
-    <div style="text-align:center;color:var(--white)">
-      <div class="section-label" style="color:var(--gold)">Why Choose Us</div>
-      <div class="section-title" style="color:var(--white);margin:0 auto">Built for Canada's Immigrant Community</div>
-    </div>
-    <div class="trust-grid">
-      <div class="trust-item">
-        <div class="trust-icon">🏛️</div>
-        <div class="trust-title">CICC-Regulated</div>
-        <div class="trust-desc">Licensed RCIC in good standing with the College of Immigration and Citizenship Consultants.</div>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">🗣️</div>
-        <div class="trust-title">Bilingual Support</div>
-        <div class="trust-desc">Full service in English, Tigrinya (ትግርኛ), Arabic (العربية), and Amharic (አማርኛ). All intake questions and communications available in your preferred language.</div>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">🔒</div>
-        <div class="trust-title">Your Data is Safe</div>
-        <div class="trust-desc">PIPEDA compliant. Your information is never shared without your written consent.</div>
-      </div>
-      <div class="trust-item">
-        <div class="trust-icon">📱</div>
-        <div class="trust-title">Transparent Portal</div>
-        <div class="trust-desc">Your personal client portal shows your case status, documents, and messages — 24/7 access.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CTA BANNER -->
-<div class="cta-banner">
-  <h2>Ready to Start Your Application?</h2>
-  <p>Complete our free online intake form. Takes 5 minutes. We'll review your case and contact you within 24 hours.</p>
-  <a href="intake.html" class="btn-hero-primary" style="display:inline-block;background:var(--navy);color:white;padding:14px 36px;border-radius:8px;font-size:16px;font-weight:700">Start Free Assessment →</a>
-</div>
 
 <!-- BLOG -->
 <section id="blog">
