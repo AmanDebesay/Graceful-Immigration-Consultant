@@ -36,7 +36,7 @@
     .btn-hero-primary:hover{background:var(--gold-d);transform:translateY(-1px)}
     .btn-hero-outline{background:transparent;color:var(--white);padding:14px 36px;border-radius:var(--radius);font-size:16px;font-weight:600;border:2px solid rgba(255,255,255,.4);cursor:pointer;transition:.15s;display:inline-block}
     .btn-hero-outline:hover{border-color:var(--white);background:rgba(255,255,255,.05)}
-    .hero-trust{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;background:var(--gray-50);padding:20px 20px 32px}
+    .hero-trust{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;padding:20px 20px 32px}
     .hero-trust-item{display:flex;align-items:center;gap:8px;color:var(--gray-600);font-size:13px}
     .hero-trust-item span:first-child{font-size:16px;color:var(--green)}
 
@@ -59,9 +59,6 @@
     .section-title{font-size:36px;font-weight:800;color:var(--navy);margin-bottom:16px;line-height:1.2}
     .section-sub{font-size:16px;color:var(--gray-600);max-width:560px;line-height:1.7}
 
-    /* SERVICES */
-    .services-section{background:var(--gray-50);padding:72px 0}
-
     /* WHO WE HELP */
     .audience-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
     .audience-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:28px 24px;text-align:center;transition:.2s}
@@ -80,7 +77,6 @@
     .svc-desc{font-size:13px;color:var(--gray-600);line-height:1.6;margin-bottom:12px}
     .svc-link{display:inline-flex;align-items:center;gap:4px;color:var(--navy);font-size:13px;font-weight:600;border-bottom:2px solid transparent;transition:.15s}
     .svc-link:hover{border-color:var(--gold);color:var(--gold)}
-    .section-alt{background:var(--gray-50)}
 
     /* BLOG */
     .blog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:40px}
@@ -194,8 +190,7 @@
   </div>
   <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Toggle menu">☰</button>
   <div class="nav-links">
-    <a href="#services">Immigration</a>
-    <a href="#employers">Employers</a>
+    <a href="#who-we-help">Who We Help</a>
     <a href="#job-seekers">Job Seekers</a>
     <a href="#contact">Contact</a>
     <a href="portal/dashboard.html">Client Login</a>
@@ -207,11 +202,11 @@
 <div class="hero-image-wrap">
   <img src="../cover-page.png" alt="Graceful Immigration Consultant — Guide, Support, Belong. A Brighter Future Together." class="hero-cover-img">
   <a href="intake.html" class="hero-hotspot hero-hotspot-dark" style="left:2%;top:64%;width:22%;height:15.5%" aria-label="Start Your Free Assessment"></a>
-  <a href="#services" class="hero-hotspot hero-hotspot-dark" style="left:25.5%;top:64%;width:14.5%;height:15.5%" aria-label="View Our Services"></a>
+  <a href="#who-we-help" class="hero-hotspot hero-hotspot-dark" style="left:25.5%;top:64%;width:14.5%;height:15.5%" aria-label="View Our Services"></a>
   <a href="intake.html?type=work_permit_overseas" class="hero-hotspot hero-hotspot-light" style="left:0%;top:83%;width:17%;height:17%" aria-label="Work Permits"></a>
   <a href="intake.html?type=spousal_spouses" class="hero-hotspot hero-hotspot-light" style="left:17%;top:83%;width:16.5%;height:17%" aria-label="Spousal Sponsorship"></a>
   <a href="intake.html?type=study_permit_overseas" class="hero-hotspot hero-hotspot-light" style="left:33.5%;top:83%;width:16.5%;height:17%" aria-label="Study Permits"></a>
-  <a href="#services" class="hero-hotspot hero-hotspot-light" style="left:50%;top:83%;width:16.5%;height:17%" aria-label="Permanent Residence"></a>
+  <a href="intake.html?type=express_entry" class="hero-hotspot hero-hotspot-light" style="left:50%;top:83%;width:16.5%;height:17%" aria-label="Permanent Residence"></a>
   <a href="intake.html?type=express_entry" class="hero-hotspot hero-hotspot-light" style="left:66.5%;top:83%;width:16.5%;height:17%" aria-label="Express Entry"></a>
 </div>
 <div class="hero-trust">
@@ -231,13 +226,13 @@
       <div class="audience-icon">🍁</div>
       <div class="audience-title">Immigration</div>
       <div class="audience-desc">Individual and family immigration representation — spousal sponsorship, Express Entry, work and study permits, visitor visas, and PR renewals.</div>
-      <a href="#services" class="audience-link">See immigration services →</a>
+      <a href="intake.html" class="audience-link">Start your application →</a>
     </div>
     <div class="audience-card">
       <div class="audience-icon">🏢</div>
       <div class="audience-title">Employers</div>
       <div class="audience-desc">Domestic and international recruitment, LMIA support, and employer immigration representation to help you build your workforce.</div>
-      <a href="#employers" class="audience-link">See employer services →</a>
+      <a href="#contact" class="audience-link">Get in touch →</a>
     </div>
     <div class="audience-card">
       <div class="audience-icon">💼</div>
@@ -248,54 +243,8 @@
   </div>
 </section>
 
-<!-- SERVICES -->
-<div class="services-section" id="services">
-  <div class="hero-image-wrap">
-    <img src="../section-2-image.png" alt="Immigration Services — Spousal Sponsorship, Express Entry PR, Work Permits, Study Permits, Visitor Visa / Super Visa, PR Card Renewal" class="hero-cover-img">
-    <a href="intake.html?type=spousal_spouses" class="hero-hotspot hero-hotspot-card" style="left:3%;top:24%;width:31%;height:26%" aria-label="Spousal Sponsorship — Start application"></a>
-    <a href="intake.html?type=express_entry" class="hero-hotspot hero-hotspot-card" style="left:35%;top:24%;width:30%;height:26%" aria-label="Express Entry PR — Start application"></a>
-    <a href="intake.html?type=work_permit_overseas" class="hero-hotspot hero-hotspot-card" style="left:66%;top:24%;width:31%;height:26%" aria-label="Work Permits — Start application"></a>
-    <a href="intake.html?type=study_permit_overseas" class="hero-hotspot hero-hotspot-card" style="left:3%;top:53%;width:31%;height:26%" aria-label="Study Permits — Start application"></a>
-    <a href="intake.html?type=trv_supervisa" class="hero-hotspot hero-hotspot-card" style="left:35%;top:53%;width:30%;height:26%" aria-label="Visitor Visa / Super Visa — Start application"></a>
-    <a href="intake.html?type=pr_card_renewal" class="hero-hotspot hero-hotspot-card" style="left:66%;top:53%;width:31%;height:26%" aria-label="PR Card Renewal — Start application"></a>
-  </div>
-</div>
-
-<!-- FOR EMPLOYERS -->
-<section id="employers">
-  <div class="section-label">For Employers</div>
-  <div class="section-title">Build Your Workforce With Confidence</div>
-  <div class="section-sub">From sourcing candidates to sponsoring their immigration status, we handle the recruitment and compliance work so you can focus on running your business.</div>
-  <div class="svc-grid">
-    <div class="svc-card" onclick="location.href='#contact'">
-      <div class="svc-icon">🌎</div>
-      <div class="svc-name">International Recruitment</div>
-      <div class="svc-desc">Source and screen candidates from abroad to fill skilled and semi-skilled positions your local market can't cover.</div>
-      <div class="svc-link">Get in touch →</div>
-    </div>
-    <div class="svc-card" onclick="location.href='#contact'">
-      <div class="svc-icon">🇨🇦</div>
-      <div class="svc-name">Domestic Recruitment</div>
-      <div class="svc-desc">Find and place qualified candidates already in Canada, matched to your role and industry.</div>
-      <div class="svc-link">Get in touch →</div>
-    </div>
-    <div class="svc-card" onclick="location.href='intake.html?type=employer_lmia'">
-      <div class="svc-icon">📋</div>
-      <div class="svc-name">Employer Immigration Representation</div>
-      <div class="svc-desc">LMIA applications, work permit sponsorship, and compliance support so your hires can legally start work in Canada.</div>
-      <div class="svc-link">Start application →</div>
-    </div>
-    <div class="svc-card" onclick="location.href='#contact'">
-      <div class="svc-icon">🏥</div>
-      <div class="svc-name">Healthcare Recruitment</div>
-      <div class="svc-desc">Specialized recruitment support for healthcare employers sourcing nurses, personal support workers, and allied health staff.</div>
-      <div class="svc-link">Get in touch →</div>
-    </div>
-  </div>
-</section>
-
 <!-- FOR JOB SEEKERS -->
-<div class="section-alt" id="job-seekers">
+<div id="job-seekers">
   <section>
     <div class="section-label">For Job Seekers</div>
     <div class="section-title">Find Your Path to Working in Canada</div>
@@ -527,8 +476,7 @@
       </div>
     </div>
     <div class="footer-links">
-      <a href="#services">Immigration</a>
-      <a href="#employers">Employers</a>
+      <a href="#who-we-help">Who We Help</a>
       <a href="#job-seekers">Job Seekers</a>
       <a href="blog.html">Blog</a>
       <a href="intake.html">Start Application</a>
