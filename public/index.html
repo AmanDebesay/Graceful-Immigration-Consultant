@@ -125,17 +125,6 @@
     .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--navy)}
     .form-group textarea{min-height:100px;resize:vertical}
 
-    /* FOOTER */
-    footer{background:var(--navy-d,#09224B);padding:40px;color:rgba(255,255,255,.6);font-size:12px}
-    .footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
-    .footer-logo{display:flex;align-items:center;gap:10px}
-    .footer-mark{width:44px;height:44px;background:var(--white);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .footer-mark img{width:100%;height:100%;object-fit:contain;padding:1px}
-    .footer-name{color:var(--white);font-size:13px;font-weight:700}
-    .footer-links{display:flex;gap:20px;flex-wrap:wrap}
-    .footer-links a{color:rgba(255,255,255,.5);font-size:12px;transition:.15s}
-    .footer-links a:hover{color:var(--white)}
-
     @media(max-width:900px){
       .steps-grid{grid-template-columns:1fr 1fr}
       .contact-grid{grid-template-columns:1fr}
@@ -158,7 +147,6 @@
       .hero h1{font-size:28px}
       section{padding:48px 20px}
       .steps-grid{grid-template-columns:1fr}
-      footer{padding:24px 20px}
       .blog-grid{grid-template-columns:1fr}
       .assess-popup{left:16px;right:16px;max-width:none;bottom:16px}
     }
@@ -416,31 +404,6 @@
   </div>
 </section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-logo">
-      <div class="footer-mark"><img src="../logo.png" alt="Graceful Immigration Consultant"></div>
-      <div>
-        <div class="footer-name">Graceful Immigration Consultant Inc.</div>
-        <div>Canada · CICC-Regulated RCICs</div>
-      </div>
-    </div>
-    <div class="footer-links">
-      <a href="#who-we-help">Who We Help</a>
-      <a href="#job-seekers">Job Seekers</a>
-      <a href="blog.html">Blog</a>
-      <a href="intake.html">Start Application</a>
-      <a href="portal/dashboard.html">Client Portal</a>
-      <a href="#contact">Contact</a>
-    </div>
-    <div>© 2026 Graceful Immigration Consultant Inc.. All rights reserved.<br>Regulated by the College of Immigration and Citizenship Consultants (CICC).</div>
-  </div>
-  <div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.08)">
-    <a href="../admin/index.html" style="color:rgba(255,255,255,.2);font-size:11px;text-decoration:none;letter-spacing:.04em" onmouseover="this.style.color='rgba(255,255,255,.5)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Staff Access</a>
-  </div>
-</footer>
-
 <!-- FREE ASSESSMENT POPUP -->
 <div class="assess-popup" id="assessPopup">
   <button class="assess-popup-close" onclick="dismissAssessPopup()" aria-label="Close">✕</button>
@@ -485,13 +448,30 @@ body{background-image:url(../background.png)!important;background-repeat:repeat!
 
 <!-- COPYRIGHT BAR -->
 <style>
-.gic-copyright-bar{background:#000;border-top:3px solid #D20101;padding:20px;text-align:center;color:#fff;font-family:Arial,Helvetica,sans-serif}
+.gic-copyright-bar{background:#000;border-top:3px solid #D20101;padding:32px 20px 20px;text-align:center;color:#fff;font-family:Arial,Helvetica,sans-serif}
 .gic-copyright-bar p{margin:4px 0;font-size:13px}
 .gic-copyright-bar p.gic-address{color:#bbb;font-size:12px}
+.gic-copyright-links{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-bottom:24px}
+.gic-copyright-links a{color:rgba(255,255,255,.75);font-size:13px;text-decoration:none;transition:.15s}
+.gic-copyright-links a:hover{color:#fff}
+.gic-copyright-staff{margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
+.gic-copyright-staff a{color:rgba(255,255,255,.3);font-size:11px;text-decoration:none;letter-spacing:.04em;transition:.15s}
+.gic-copyright-staff a:hover{color:rgba(255,255,255,.6)}
 </style>
 <div class="gic-copyright-bar">
+  <div class="gic-copyright-links">
+    <a href="#who-we-help">Who We Help</a>
+    <a href="#job-seekers">Job Seekers</a>
+    <a href="blog.html">Blog</a>
+    <a href="intake.html">Start Application</a>
+    <a href="portal/dashboard.html">Client Portal</a>
+    <a href="#contact">Contact</a>
+  </div>
   <p>Copyright © 2026 · All Rights Reserved · Graceful Immigration Consultant Inc.</p>
   <p class="gic-address">Serving Clients Across Canada</p>
+  <div class="gic-copyright-staff">
+    <a href="../admin/index.html">Staff Access</a>
+  </div>
 </div>
 </body>
 </html>
