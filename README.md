@@ -8,7 +8,8 @@
 ```
 RCIC-IRB WEBSITE MASTER/
 │
-├── index.html                  ← Admin panel (root entry point — open this)
+├── index.html                  ← Redirects to public/ (site homepage)
+├── CNAME                       ← Custom domain for GitHub Pages
 │
 ├── public/
 │   ├── index.html              ← Public marketing website
@@ -46,7 +47,7 @@ RCIC-IRB WEBSITE MASTER/
 ### Admin Panel (your main tool)
 1. Open VS Code → File → Open Folder → `RCIC-IRB WEBSITE MASTER`
 2. Install **Live Server** extension (Ritwick Dey)
-3. Right-click `index.html` → **Open with Live Server**
+3. Right-click `admin/index.html` → **Open with Live Server**
 4. Opens at `http://127.0.0.1:5500`
 
 ### Public Website
