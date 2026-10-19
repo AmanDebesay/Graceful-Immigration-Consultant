@@ -6,8 +6,9 @@
 .svg-stroke{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* Brand wordmark */
-.brand{display:inline-flex;flex-direction:column;align-items:flex-start;position:relative;padding-top:10px;line-height:1}
-.brand-leaf{position:absolute;top:-2px;left:86px;width:22px;height:22px;color:var(--c-gold)}
+.brand{display:inline-flex;align-items:center;gap:12px;line-height:1}
+.brand-logo{height:60px;width:auto;flex:none}
+.brand-text{display:flex;flex-direction:column;align-items:flex-start}
 .brand-word{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;color:var(--c-navy);letter-spacing:-.01em;line-height:1}
 .brand-line{font-family:'Playfair Display',Georgia,serif;font-size:14.5px;color:var(--c-navy);margin-top:3px}
 .brand-tag{font-size:8.5px;font-weight:600;letter-spacing:.24em;color:var(--c-muted);margin-top:5px}
@@ -52,7 +53,7 @@
 .site-footer .brand-word,.site-footer .brand-line{color:#fff}
 .site-footer .brand-word{font-size:30px}
 .site-footer .brand-line{font-size:13px}
-.site-footer .brand-leaf{left:76px;width:20px;height:20px}
+.site-footer .brand-logo{height:52px}
 .footer-links{display:flex;flex-wrap:wrap;gap:6px 0}
 .footer-links a{padding:0 11px;border-left:1px solid rgba(255,255,255,.2)}
 .footer-links a:first-child{border-left:0}
@@ -89,7 +90,8 @@
   .site-header .wrap{height:80px}
   .site-nav{top:80px}
   .brand-word{font-size:28px}
-  .brand-leaf{left:70px;width:19px;height:19px}
+  .brand-logo{height:48px}
+  .brand{gap:9px}
   .brand-line{font-size:12.5px}
   .brand-tag{font-size:7.5px}
   .cta-strip .wrap{padding-top:36px;padding-bottom:36px}
@@ -98,3 +100,8 @@
   .footer-main{flex-direction:column;align-items:flex-start}
   .footer-links a:first-child{padding-left:0}
 }
+
+/* Pages whose <body> is a flex row (portal, admin): keep the footer on its own full-width row */
+body.has-app-footer{flex-wrap:wrap}
+body.has-app-footer > .site-header,body.has-app-footer > .site-footer{flex:0 0 100%;width:100%}
+body.app-block{display:block}
