@@ -104,8 +104,22 @@
       <h2>Pick a time &amp; tell us about you</h2>
       <p>Choose a time, then share your name, date of birth and what you'd like help with.</p>
     </div>
-    <div class="calendar-box" id="calendar">
-      <div class="calendar-empty">Select a consultation above to see available times.</div>
+    <div class="book-layout" id="bookLayout">
+      <aside class="book-profile">
+        <img src="img/consultant.jpg" alt="Aman Debesay, Regulated Canadian Immigration Consultant" width="360" height="360">
+        <h3>Aman Debesay</h3>
+        <p class="book-role">Regulated Canadian Immigration Consultant (RCIC-IRB)</p>
+        <div class="book-selected" id="bookSelected">30-Minute Consultation · $30</div>
+        <ul class="book-details">
+          <li><svg><use href="#i-clock"/></svg><span><span id="bookLength">30 min</span> · Phone or video</span></li>
+          <li><svg><use href="#i-pin"/></svg><span>Lethbridge, AB · Serving all of Canada</span></li>
+          <li><svg><use href="#i-phone"/></svg><span>Pay by phone:<br><a href="tel:+14039154230">(403) 915-4230</a></span></li>
+        </ul>
+        <p class="book-langs">English · Tigrinya · Arabic · Amharic</p>
+      </aside>
+      <div class="calendar-box" id="calendar">
+        <div class="calendar-empty">Select a consultation above to see available times.</div>
+      </div>
     </div>
 
     <p style="text-align:center;color:var(--muted);font-size:14px;margin-top:28px">Received a complimentary consultation link by email? Please use that personal link to book — it works once and needs no payment.<br>Questions? Email <a href="mailto:info@gracefulimmigration.ca" style="color:var(--navy);font-weight:600">info@gracefulimmigration.ca</a></p>
@@ -191,8 +205,13 @@
     return widgetLoaded;
   }
 
-  function showPlan(plan) {
+  const PLAN_LABEL = { '30': ['30-Minute Consultation · $30', '30 min'], '60': ['1-Hour Consultation · $60', '1 hour'] };
+
+  function showPlan(plan, scroll) {
     document.querySelectorAll('.price-card').forEach(b => b.classList.toggle('active', b.dataset.plan === plan));
+    document.getElementById('bookSelected').textContent = PLAN_LABEL[plan][0];
+    document.getElementById('bookLength').textContent = PLAN_LABEL[plan][1];
+    if (scroll) document.getElementById('bookLayout').scrollIntoView({ behavior: 'smooth', block: 'start' });
     const url = CALENDLY[plan];
     if (!url) {
       calendar.innerHTML = '<div class="calendar-empty">Online booking is coming soon. To book now, call <a href="tel:+14039154230">(403) 915-4230</a> or email <a href="mailto:info@gracefulimmigration.ca">info@gracefulimmigration.ca</a>.</div>';
@@ -200,21 +219,19 @@
     }
     calendar.innerHTML = '<div class="calendar-empty">Loading available times…</div>';
     loadWidget().then(() => {
-      calendar.innerHTML = '';
+      calendar.innerHTML = '<div class="calendly-inline-widget"></div>';
       Calendly.initInlineWidget({
-        url: url + (url.includes('?') ? '&' : '?') + 'hide_gdpr_banner=1&primary_color=0b2a5c',
-        parentElement: calendar
+        url: url + (url.includes('?') ? '&' : '?') + 'hide_gdpr_banner=1&background_color=ffffff&primary_color=0b2a5c',
+        parentElement: calendar.firstElementChild
       });
-      calendar.firstElementChild.style.height = '700px';
     }).catch(() => {
       calendar.innerHTML = '<div class="calendar-empty">The calendar could not load. <a href="' + url + '" target="_blank" rel="noopener">Open the booking page</a> or call <a href="tel:+14039154230">(403) 915-4230</a>.</div>';
     });
-    calendar.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  document.querySelectorAll('.price-card').forEach(b => b.addEventListener('click', () => showPlan(b.dataset.plan)));
+  document.querySelectorAll('.price-card').forEach(b => b.addEventListener('click', () => showPlan(b.dataset.plan, true)));
   const pre = new URLSearchParams(location.search).get('length');
-  if (pre === '30' || pre === '60') showPlan(pre);
+  showPlan(pre === '60' ? '60' : '30', pre === '30' || pre === '60');
 </script>
 </body>
 </html>
