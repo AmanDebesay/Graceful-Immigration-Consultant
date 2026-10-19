@@ -2,13 +2,13 @@
   "company": {
     "name": "Vantage Immigration Services",
     "tagline": "Credible guidance. Community trust.",
-    "location": "Fort McMurray, Alberta",
+    "location": "Lethbridge, Alberta",
     "website": "vantageimmigration.ca",
     "email": "info@vantageimmigration.ca",
     "phone": "+1 (780) 000-0000",
     "cicc": "[YOUR CICC LICENSE #]",
     "rcic_name": "[YOUR FULL NAME]",
-    "address": "Fort McMurray, AB, Canada"
+    "address": "Lethbridge, AB, Canada"
   },
 
   "application_types": [

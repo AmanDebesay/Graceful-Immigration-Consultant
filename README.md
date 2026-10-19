@@ -1,5 +1,5 @@
 # Graceful Immigration Consultant Portal v2
-**Complete Practice Management System | Fort McMurray, AB**
+**Complete Practice Management System | Lethbridge, AB**
 
 ---
 
