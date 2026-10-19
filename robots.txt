@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /public/portal/
+
+Sitemap: https://gracefulimmigration.ca/sitemap.xml
