@@ -220,7 +220,7 @@ a.card:hover .card-link{color:var(--gold)}
 /* Booking calendar */
 .book-layout{display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:start;max-width:1060px;margin:36px auto 0;scroll-margin-top:96px}
 .book-profile{background:var(--navy);color:#fff;border-radius:20px;padding:32px 24px;text-align:center;position:sticky;top:100px}
-.book-profile img{width:120px;height:120px;border-radius:50%;object-fit:cover;object-position:top;border:3px solid var(--gold);margin:0 auto 16px}
+.book-profile img{width:120px;height:120px;border-radius:50%;object-fit:cover;object-position:center 20%;border:3px solid var(--gold);margin:0 auto 16px}
 .book-profile h3{color:#fff;font-family:var(--serif);font-weight:400;font-size:24px;margin-bottom:4px}
 .book-role{font-size:13px;color:rgba(255,255,255,.65);margin-bottom:18px}
 .book-selected{background:rgba(201,151,28,.18);border:1px solid rgba(201,151,28,.5);color:#F3D27A;font-size:14px;font-weight:600;border-radius:999px;padding:7px 14px;margin-bottom:20px}
