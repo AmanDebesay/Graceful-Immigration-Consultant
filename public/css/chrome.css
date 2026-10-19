@@ -1,0 +1,52 @@
+/* Shared header + footer only — for app-like pages (intake) that keep their own styles */
+.site-header,.site-footer{--c-navy:#0B2A5C;--c-navy-d:#071D40;--c-gold:#C9971C;--c-ink:#1C2333;--c-muted:#5B6476;--c-line:#E4E7EE;font-family:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;line-height:1.6}
+.site-header *,.site-footer *{box-sizing:border-box}
+.site-header a,.site-footer a{text-decoration:none;color:inherit}
+.site-header .wrap,.site-footer .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.site-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--c-line)}
+.site-header .wrap{display:flex;align-items:center;justify-content:space-between;height:76px;gap:24px}
+.site-header .brand,.site-footer .brand{display:flex;align-items:center;gap:12px;min-width:0}
+.site-header .brand img,.site-footer .brand img{width:52px;height:auto;display:block}
+.site-header .brand-name,.site-footer .brand-name{font-family:'DM Serif Display',Georgia,serif;font-size:22px;color:var(--c-navy);line-height:1.05}
+.site-header .brand-sub,.site-footer .brand-sub{display:block;font-family:'Inter',system-ui,sans-serif;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--c-muted);margin-top:3px}
+.site-nav{display:flex;align-items:center;gap:30px}
+.site-nav a{font-size:15px;font-weight:500;color:var(--c-ink);transition:color .15s}
+.site-nav a:hover,.site-nav a.active{color:var(--c-gold)}
+.site-nav .nav-login{color:var(--c-muted)}
+.site-nav .btn{display:inline-flex;align-items:center;font-size:15px;font-weight:600;padding:11px 20px;border-radius:999px;background:var(--c-navy);color:#fff;border:0;white-space:nowrap}
+.site-nav .btn:hover{background:var(--c-navy-d);color:#fff}
+.nav-toggle{display:none;background:none;border:0;width:44px;height:44px;border-radius:10px;cursor:pointer;color:var(--c-navy)}
+.nav-toggle svg{width:26px;height:26px}
+.svg-stroke{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.site-footer{background:var(--c-navy-d);color:rgba(255,255,255,.72);padding:72px 0 0;font-size:15px}
+.site-footer .footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:44px;padding-bottom:52px}
+.site-footer .footer-brand .brand-name{color:#fff}
+.site-footer .footer-brand .brand-sub{color:rgba(255,255,255,.55)}
+.site-footer .footer-brand .brand img{background:#fff;border-radius:10px;padding:4px}
+.site-footer .footer-brand p{margin:18px 0 22px;max-width:320px;font-size:14px}
+.site-footer .footer-badges{display:flex;gap:10px;flex-wrap:wrap}
+.site-footer .footer-badges img{height:40px;width:auto;border-radius:5px;background:#fff}
+.site-footer h4{color:#fff;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin:0 0 18px}
+.site-footer ul{list-style:none;display:grid;gap:10px;margin:0;padding:0}
+.site-footer a:hover{color:#fff}
+.site-footer .socials{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.site-footer .socials a{border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:6px 14px;font-size:13px;color:rgba(255,255,255,.85)}
+.site-footer .socials a:hover{background:var(--c-gold);border-color:var(--c-gold);color:#fff}
+.site-footer .footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding:22px 0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:rgba(255,255,255,.5)}
+.site-footer .footer-bottom a{color:rgba(255,255,255,.5)}
+
+@media (max-width:1020px){
+  .site-nav{position:fixed;top:76px;left:0;right:0;background:#fff;flex-direction:column;align-items:stretch;gap:0;padding:12px 24px 24px;border-bottom:1px solid var(--c-line);box-shadow:0 12px 24px rgba(16,24,40,.08);display:none}
+  .site-nav.open{display:flex}
+  .site-nav a{padding:14px 0;border-bottom:1px solid var(--c-line)}
+  .site-nav .btn{margin-top:16px;justify-content:center;border-bottom:0}
+  .nav-toggle{display:inline-flex;align-items:center;justify-content:center}
+  .site-footer .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:720px){
+  .site-header .wrap,.site-footer .wrap{padding:0 18px}
+  .site-header .brand-name{font-size:19px}
+  .site-header .brand img{width:44px}
+  .site-footer .footer-grid{grid-template-columns:1fr;gap:32px}
+}
