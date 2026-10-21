@@ -43,7 +43,9 @@ let counts = {};
 async function boot() {
   const app = document.getElementById('app');
   // Links from invite / reset emails arrive with tokens or errors in the URL fragment
+  // Read the link fragment once; later re-boots (after saving a password or signing in) must not see it again
   const authHash = window.__authHash || '';
+  window.__authHash = '';
   if (/error_description=/.test(authHash)) {
     const desc = decodeURIComponent((authHash.match(/error_description=([^&]+)/) || [])[1] || '').replace(/\+/g, ' ');
     history.replaceState(null, '', location.pathname);

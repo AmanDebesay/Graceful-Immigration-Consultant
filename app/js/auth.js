@@ -35,6 +35,7 @@ export function showLogin(message) {
     const { error } = await db.auth.signInWithPassword({ email: em.value.trim(), password: pw.value });
     btn.disabled = false;
     if (error) return err(error.message === 'Invalid login credentials' ? 'Email or password is incorrect.' : error.message);
+    sessionStorage.removeItem('gi_auth_kind');
     location.hash = '#/';
     window.dispatchEvent(new Event('auth-changed'));
   };
@@ -66,7 +67,11 @@ export function showSetPassword(kind) {
       <div class="field"><label for="p2">Confirm password</label><input class="input" id="p2" type="password" autocomplete="new-password" required></div>
       <p style="font-size:12.5px;color:var(--muted);margin:-4px 0 14px">At least 10 characters, with upper and lower case letters and a number.</p>
       <button class="btn btn-primary" type="submit">Save password</button>
-    </form>`);
+    </form>
+    <div class="auth-links"><a href="#" id="toLogin">Already set your password? Sign in</a></div>`);
+  document.getElementById('toLogin').onclick = async (e) => {
+    e.preventDefault(); sessionStorage.removeItem('gi_auth_kind'); await db.auth.signOut(); showLogin();
+  };
   document.getElementById('spForm').onsubmit = async (e) => {
     e.preventDefault();
     if (p1.value !== p2.value) return err('The passwords do not match.');
@@ -76,7 +81,7 @@ export function showSetPassword(kind) {
     const btn = e.target.querySelector('button'); btn.disabled = true;
     const { error } = await db.auth.updateUser({ password: p1.value });
     btn.disabled = false;
-    if (error) return err(error.message);
+    if (error && !/different from the old/i.test(error.message)) return err(error.message);
     sessionStorage.removeItem('gi_auth_kind');
     location.hash = '#/';
     window.dispatchEvent(new Event('auth-changed'));
