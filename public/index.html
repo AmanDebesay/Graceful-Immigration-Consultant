@@ -78,22 +78,23 @@
       <div class="nav-drop">
         <button class="nav-drop-btn" type="button">Our Services <svg><use href="#i-chev"/></svg></button>
         <div class="nav-menu">
-          <a href="intake.html?type=work_permit_overseas">Work Permits</a>
-          <a href="intake.html?type=study_permit_overseas">Study Permits</a>
-          <a href="intake.html?type=spousal_spouses">Family Sponsorship</a>
-          <a href="intake.html?type=express_entry">Express Entry &amp; PR</a>
-          <a href="intake.html?type=trv_supervisa">Visitor Visas &amp; Super Visa</a>
-          <a href="intake.html?type=pr_card_renewal">PR Card Renewal</a>
+          <a href="assessment.html">Work Permits</a>
+          <a href="assessment.html">Study Permits</a>
+          <a href="assessment.html">Family Sponsorship</a>
+          <a href="assessment.html">Express Entry &amp; PR</a>
+          <a href="assessment.html">Visitor Visas &amp; Super Visa</a>
+          <a href="assessment.html">PR Card Renewal</a>
           <a href="index.html#services">All services</a>
+          <a href="assessment.html"><b>Start an assessment →</b></a>
         </div>
       </div>
       <div class="nav-drop">
         <button class="nav-drop-btn" type="button">Who We Serve <svg><use href="#i-chev"/></svg></button>
         <div class="nav-menu">
-          <a href="intake.html">Individuals &amp; Families</a>
-          <a href="intake.html?type=employer_lmia">Employers</a>
-          <a href="intake.html?type=study_permit_overseas">Students</a>
-          <a href="intake.html?type=job_seeker_career">Job Seekers</a>
+          <a href="assessment.html">Individuals &amp; Families</a>
+          <a href="assessment.html">Employers</a>
+          <a href="assessment.html">Students</a>
+          <a href="assessment.html">Job Seekers</a>
         </div>
       </div>
       <div class="nav-drop">
@@ -148,31 +149,31 @@
       <p>Expert advice tailored to your unique situation, every step of the way.</p>
     </div>
     <div class="services-grid">
-      <a href="intake.html" class="svc">
+      <a href="assessment.html" class="svc">
         <span class="svc-icon"><svg><use href="#i-users"/></svg></span>
         <h3>Individuals<br>&amp; Families</h3>
         <ul><li>Visitor Visa</li><li>Study Permit</li><li>Work Permit</li><li>Permanent Residence</li><li>Family Sponsorship</li></ul>
         <span class="svc-arrow"><svg><use href="#i-arrow"/></svg></span>
       </a>
-      <a href="intake.html?type=employer_lmia" class="svc">
+      <a href="assessment.html" class="svc">
         <span class="svc-icon"><svg><use href="#i-briefcase"/></svg></span>
         <h3>Employers</h3>
         <ul><li>LMIA Support</li><li>Employer Compliance</li><li>Hiring Foreign Talent</li><li>Work Permits</li></ul>
         <span class="svc-arrow"><svg><use href="#i-arrow"/></svg></span>
       </a>
-      <a href="intake.html?type=study_permit_overseas" class="svc">
+      <a href="assessment.html" class="svc">
         <span class="svc-icon"><svg><use href="#i-cap"/></svg></span>
         <h3>Students</h3>
         <ul><li>Study Permit</li><li>Program Guidance</li><li>Study Permit Extensions</li><li>Pathways to PR</li></ul>
         <span class="svc-arrow"><svg><use href="#i-arrow"/></svg></span>
       </a>
-      <a href="intake.html?type=express_entry" class="svc">
+      <a href="assessment.html" class="svc">
         <span class="svc-icon"><svg><use href="#i-file"/></svg></span>
         <h3>Permanent<br>Residence</h3>
         <ul><li>Express Entry</li><li>Provincial Nominee Program</li><li>Family Sponsorship</li><li>Canadian Experience Class</li></ul>
         <span class="svc-arrow"><svg><use href="#i-arrow"/></svg></span>
       </a>
-      <a href="intake.html?type=other" class="svc">
+      <a href="assessment.html" class="svc">
         <span class="svc-icon"><svg><use href="#i-globe"/></svg></span>
         <h3>Citizenship<br>&amp; Other Services</h3>
         <ul><li>Canadian Citizenship</li><li>PR Card Renewals</li><li>Status Restoration</li><li>Humanitarian Applications</li><li>and more…</li></ul>
@@ -349,6 +350,35 @@
 
 <footer class="site-footer">
   <div class="wrap">
+    <form class="footer-news" id="newsForm" novalidate>
+      <div class="fn-copy"><strong>Immigration news &amp; updates</strong><span>Program changes and tips, a few times a month. Unsubscribe anytime.</span></div>
+      <div class="fn-fields">
+        <input type="email" id="newsEmail" placeholder="Your email address" aria-label="Email address" required>
+        <button type="submit" class="btn-gold-grad">Subscribe</button>
+        <label class="fn-consent"><input type="checkbox" id="newsConsent"> I agree to receive immigration news and updates by email from Graceful Immigration Consultant Inc.</label>
+        <input type="text" id="newsTrap" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
+        <p class="fn-msg" id="newsMsg" role="status"></p>
+      </div>
+      <script>
+      (function () {
+        var f = document.getElementById('newsForm'); if (!f || f.dataset.ready) return; f.dataset.ready = '1';
+        f.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var msg = document.getElementById('newsMsg'), email = document.getElementById('newsEmail').value.trim();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.textContent = 'Enter a valid email address.'; return; }
+          if (!document.getElementById('newsConsent').checked) { msg.textContent = 'Please tick the consent box.'; return; }
+          var k = 'sb_publishable_ZcaXkELPK820lTD41ffw2Q_iMTta3uT';
+          msg.textContent = 'Subscribing…';
+          fetch('https://bmzhcprthrocbqluxpwa.supabase.co/functions/v1/subscribe', { method: 'POST',
+            headers: { 'Content-Type': 'application/json', apikey: k, Authorization: 'Bearer ' + k },
+            body: JSON.stringify({ email: email, consent: true, website: document.getElementById('newsTrap').value, source: 'footer' }) })
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error); }); })
+            .then(function () { f.reset(); msg.textContent = 'Thank you! You are subscribed.'; })
+            .catch(function (er) { msg.textContent = er.message || 'Could not subscribe. Please try again.'; });
+        });
+      })();
+      </script>
+    </form>
     <div class="footer-main">
       <a href="index.html" class="brand" aria-label="Graceful Immigration Consultants — Home">
         <img class="brand-logo" src="img/logo-emblem.png" alt="" width="220" height="161">
@@ -377,12 +407,12 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Graceful Immigration Consultant Inc. All rights reserved.</span>
+      <span>© 2026 Graceful Immigration Consultant Inc. · Aman Debesay, RCIC-IRB, College ID R1056136 · <a href="privacy.html">Privacy</a></span>
       <div class="footer-badges">
         <img src="img/badge-rcic.png" alt="RCIC-IRB — Regulated Canadian Immigration Consultant" width="406" height="120">
         <img src="img/badge-cicc.png" alt="College of Immigration and Citizenship Consultants" width="416" height="120">
       </div>
-      <span>Guide · Support · Belong · <a href="../admin/index.html">Staff access</a></span>
+      <span>Guide · Support · Belong · <a href="../app/">Staff login</a></span>
     </div>
   </div>
 </footer>

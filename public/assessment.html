@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Request a Consultation — Graceful Immigration Consultant</title>
+  <meta name="description" content="Answer a few questions so a licensed immigration consultant can prepare before your consultation. Takes about five minutes.">
+  <link rel="canonical" href="https://gracefulimmigration.ca/public/assessment.html">
+  <link rel="icon" href="img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/chrome.css">
+  <script>if (/[?&]embed=1/.test(location.search)) document.documentElement.classList.add('embed');</script>
+<style>
+html.embed .site-header,html.embed .site-footer{display:none}
+#gi-intake{
+  --ink:#1C2333; --teal:#0B2A5C; --teal-d:#071B3A; --mist:#FBF8F2; --paper:#FFFFFF;
+  --line:#E3DCCD; --gold:#D6A23A; --alert:#A63A2B; --muted:#5B6476; --focus:#0B2A5C; --tint:#EEF2F8;
+  font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--ink); background:var(--mist); line-height:1.5; font-size:17px;
+  padding:clamp(10px,3vw,40px); box-sizing:border-box; min-height:70vh;
+}
+#gi-intake *,#gi-intake *::before,#gi-intake *::after{box-sizing:inherit}
+#gi-intake [hidden]{display:none !important}
+#gi-intake .gi-sheet{max-width:720px;margin:0 auto;background:var(--paper);border-radius:16px;
+  box-shadow:0 1px 0 rgba(11,42,92,.06),0 14px 34px -16px rgba(11,42,92,.35);overflow:hidden}
+#gi-intake .gi-head{background:linear-gradient(120deg,#071B3A,#123571);color:#fff;padding:28px clamp(18px,4vw,36px) 26px}
+#gi-intake .gi-firm{margin:0 0 6px;font-size:.8rem;opacity:.85;letter-spacing:.16em;text-transform:uppercase;color:#F3D27A;font-weight:600}
+#gi-intake .gi-head h1{margin:0;font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:clamp(1.7rem,4.6vw,2.3rem);line-height:1.15;color:#fff}
+#gi-intake .gi-lede{margin:10px 0 0;max-width:52ch;opacity:.9;font-size:1rem}
+#gi-intake .gi-urgent{background:#FBEFD6;border-left:5px solid var(--gold);padding:14px clamp(18px,4vw,36px);font-size:.98rem}
+#gi-intake .gi-urgent a{color:var(--teal-d);font-weight:700}
+#gi-intake .gi-body{padding:clamp(18px,4vw,36px)}
+#gi-intake .gi-progress{display:flex;gap:6px;list-style:none;margin:0 0 6px;padding:0}
+#gi-intake .gi-progress li{flex:1;min-width:0}
+#gi-intake .gi-progress li::before{content:"";display:block;height:5px;border-radius:3px;background:var(--line);margin-bottom:7px}
+#gi-intake .gi-progress li.is-done::before{background:var(--teal)}
+#gi-intake .gi-progress li.is-current::before{background:var(--gold)}
+#gi-intake .gi-progress span{font-size:.85rem;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#gi-intake .gi-progress li.is-current span{color:var(--ink);font-weight:600}
+#gi-intake .gi-stepcount{margin:0 0 22px;font-size:.9rem;color:var(--muted)}
+@media (max-width:560px){#gi-intake .gi-progress span{display:none}}
+#gi-intake h2{font-family:'Playfair Display',Georgia,serif;font-weight:700;color:var(--teal);font-size:clamp(1.4rem,3.6vw,1.75rem);line-height:1.2;margin:0 0 8px;outline:none}
+#gi-intake .gi-intro{margin:0 0 22px;color:var(--muted);max-width:60ch}
+#gi-intake .gi-field{margin:0 0 22px;border:0;padding:0;min-width:0}
+#gi-intake label,#gi-intake legend{display:block;font-weight:600;padding:0;margin:0 0 6px}
+#gi-intake .gi-hint{margin:-2px 0 8px;font-size:.93rem;color:var(--muted);max-width:60ch}
+#gi-intake input[type=text],#gi-intake input[type=email],#gi-intake input[type=tel],#gi-intake input[type=date],
+#gi-intake select,#gi-intake textarea{width:100%;min-height:50px;padding:10px 12px;font:inherit;color:var(--ink);background:#fff;border:1.5px solid #B9C2D3;border-radius:10px}
+#gi-intake textarea{resize:vertical;min-height:110px}
+#gi-intake input:focus-visible,#gi-intake select:focus-visible,#gi-intake textarea:focus-visible,
+#gi-intake button:focus-visible,#gi-intake a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+#gi-intake .gi-field.has-err input,#gi-intake .gi-field.has-err select{border-color:var(--alert)}
+#gi-intake .gi-err{margin:6px 0 0;color:var(--alert);font-size:.95rem;font-weight:600}
+#gi-intake .gi-err:empty{display:none}
+#gi-intake .gi-count{margin:4px 0 0;font-size:.85rem;color:var(--muted);text-align:right}
+#gi-intake .gi-choice{display:flex;gap:12px;align-items:flex-start;min-height:50px;padding:12px 14px;margin:0 0 8px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-weight:400;background:#fff}
+#gi-intake .gi-choice input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--teal)}
+#gi-intake .gi-choice:has(input:checked){border-color:var(--teal);background:var(--tint)}
+#gi-intake .gi-choice:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+#gi-intake .gi-field.has-err .gi-choice{border-color:var(--alert)}
+#gi-intake .gi-actions{display:flex;justify-content:space-between;gap:12px;margin-top:30px;flex-wrap:wrap}
+#gi-intake .gi-btn{min-height:52px;padding:0 26px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:2px solid var(--teal);background:var(--teal);color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:.4em}
+#gi-intake .gi-btn:hover{background:var(--teal-d);border-color:var(--teal-d)}
+#gi-intake .gi-btn.is-gold{background:linear-gradient(180deg,#EDBE55,#D19A2E);border-color:#D19A2E;color:#1B1405}
+#gi-intake .gi-btn.is-quiet{background:transparent;color:var(--teal)}
+#gi-intake .gi-btn.is-quiet:hover{background:var(--tint)}
+#gi-intake .gi-btn[disabled]{opacity:.6;cursor:progress}
+@media (max-width:520px){#gi-intake .gi-actions{flex-direction:column-reverse}#gi-intake .gi-btn{width:100%}}
+#gi-intake .gi-summary{margin:0 0 22px;display:grid;grid-template-columns:1fr;gap:0;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+#gi-intake .gi-summary div{padding:10px 14px;border-bottom:1px solid var(--line)}
+#gi-intake .gi-summary div:last-child{border-bottom:0}
+#gi-intake .gi-summary dt{font-size:.88rem;color:var(--muted);margin:0}
+#gi-intake .gi-summary dd{margin:0;overflow-wrap:anywhere}
+#gi-intake .gi-privacy{background:var(--mist);border-radius:10px;padding:4px 16px;margin:0 0 22px;font-size:.95rem}
+#gi-intake .gi-privacy a{color:var(--teal-d);font-weight:600}
+#gi-intake .gi-fail{background:#FBE9E5;border-left:5px solid var(--alert);padding:12px 14px;margin:18px 0 0;border-radius:6px}
+#gi-intake .gi-done h2{font-size:clamp(1.6rem,4.4vw,2.1rem)}
+#gi-intake .gi-done ol{padding-left:1.2rem;margin:0 0 24px}
+#gi-intake .gi-done li{margin:0 0 8px;max-width:58ch}
+#gi-intake .gi-done .gi-urgent{margin:0 0 24px;border-radius:6px}
+#gi-intake .gi-cta{display:flex;gap:12px;flex-wrap:wrap}
+#gi-intake .gi-staff{background:#EEF2F8;border-left:5px solid #0B2A5C;padding:12px clamp(18px,4vw,36px);font-size:.95rem}
+#gi-intake .gi-foot{margin:0;padding:16px clamp(18px,4vw,36px) 22px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line)}
+#gi-intake .gi-trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-maple" viewBox="0 0 100 100"><path fill="currentColor" d="M50 2l8 16 8-4-3 20 13-12 4 8 14-2-6 16 8 4-22 16 4 8-24-4v30h-8V68l-24 4 4-8L4 48l8-4-6-16 14 2 4-8 13 12-3-20 8 4z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path class="svg-stroke" d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path class="svg-stroke" d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-arrow-long" viewBox="0 0 40 24"><path class="svg-stroke" d="M2 12h34M28 5l8 7-8 7"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path class="svg-stroke" d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path class="svg-stroke" d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path class="svg-stroke" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle class="svg-stroke" cx="9" cy="7" r="4"/><path class="svg-stroke" d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><rect class="svg-stroke" x="2" y="7" width="20" height="14" rx="2"/><path class="svg-stroke" d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20"/></symbol>
+    <symbol id="i-cap" viewBox="0 0 24 24"><path class="svg-stroke" d="M22 10 12 5 2 10l10 5 10-5Z"/><path class="svg-stroke" d="M6 12v5c3 2.5 9 2.5 12 0v-5M22 10v6"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path class="svg-stroke" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path class="svg-stroke" d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle class="svg-stroke" cx="12" cy="12" r="10"/><path class="svg-stroke" d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path class="svg-stroke" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path class="svg-stroke" d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path class="svg-stroke" d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/><path class="svg-stroke" d="M8 11.5h.01M12 11.5h.01M16 11.5h.01"/></symbol>
+    <symbol id="i-filesearch" viewBox="0 0 24 24"><path class="svg-stroke" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5M14 2v6h6M20 8v3"/><circle class="svg-stroke" cx="16.5" cy="16.5" r="3"/><path class="svg-stroke" d="m21 21-2.4-2.4"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect class="svg-stroke" x="8" y="2" width="8" height="4" rx="1"/><path class="svg-stroke" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path class="svg-stroke" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect class="svg-stroke" x="2" y="4" width="20" height="16" rx="2"/><path class="svg-stroke" d="m22 7-10 6L2 7"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path class="svg-stroke" d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle class="svg-stroke" cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle class="svg-stroke" cx="12" cy="12" r="10"/><path class="svg-stroke" d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-whatsapp" viewBox="0 0 24 24"><path class="svg-stroke" d="M3 21l1.7-5A9 9 0 1 1 8 19.4Z"/><path class="svg-stroke" d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.4-2-1-1 .8a4 4 0 0 1-2-2l.8-1-1-2Z"/></symbol>
+    <symbol id="i-tiktok" viewBox="0 0 24 24"><path class="svg-stroke" d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5M14 3c.5 2.6 2.4 4.4 5 4.6"/></symbol>
+  </defs>
+</svg>
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand" aria-label="Graceful Immigration Consultants — Home">
+      <img class="brand-logo" src="img/logo-emblem.png" alt="" width="220" height="161">
+      <span class="brand-text">
+        <span class="brand-word">Graceful</span>
+        <span class="brand-line">Immigration Consultants</span>
+        <span class="brand-tag">GUIDE <b>·</b> SUPPORT <b>·</b> BELONG</span>
+      </span>
+    </a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav"><svg><use href="#i-menu"/></svg></button>
+    <nav class="site-nav" id="siteNav">
+      <a href="index.html">Home</a>
+      <a href="index.html#why">About</a>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button">Our Services <svg><use href="#i-chev"/></svg></button>
+        <div class="nav-menu">
+          <a href="assessment.html">Work Permits</a>
+          <a href="assessment.html">Study Permits</a>
+          <a href="assessment.html">Family Sponsorship</a>
+          <a href="assessment.html">Express Entry &amp; PR</a>
+          <a href="assessment.html">Visitor Visas &amp; Super Visa</a>
+          <a href="assessment.html">PR Card Renewal</a>
+          <a href="index.html#services">All services</a>
+          <a href="assessment.html"><b>Start an assessment →</b></a>
+        </div>
+      </div>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button">Who We Serve <svg><use href="#i-chev"/></svg></button>
+        <div class="nav-menu">
+          <a href="assessment.html">Individuals &amp; Families</a>
+          <a href="assessment.html">Employers</a>
+          <a href="assessment.html">Students</a>
+          <a href="assessment.html">Job Seekers</a>
+        </div>
+      </div>
+      <div class="nav-drop">
+        <button class="nav-drop-btn" type="button">Resources <svg><use href="#i-chev"/></svg></button>
+        <div class="nav-menu">
+          <a href="blog.html">Immigration Tips &amp; Updates</a>
+          <a href="blog.html#mistakes">Guides &amp; Checklists</a>
+          <a href="blog.html#faq">Frequently Asked Questions</a>
+          <a href="portal/dashboard.html">Client Login</a>
+        </div>
+      </div>
+      <a href="index.html#contact">Contact</a>
+      <a href="book.html" class="btn-gold-grad">Book a Consultation <svg><use href="#i-arrow"/></svg></a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div id="gi-intake">
+  <div class="gi-sheet">
+    <header class="gi-head">
+      <p class="gi-firm" data-cfg="firmName"></p>
+      <h1>Request a consultation</h1>
+      <p class="gi-lede">Answer a few questions so we can prepare before we speak. It takes about five minutes.</p>
+    </header>
+    <div class="gi-staff" id="gi-staff" hidden><strong>Staff mode.</strong> You are entering this assessment on the client's behalf. Read the consent statements to the client before ticking them.</div>
+    <div class="gi-urgent">
+      <strong>Facing removal, detained, or have a deadline in the next 7 days?</strong>
+      Call <a data-cfg-href="phoneHref" href="#"><span data-cfg="phone"></span></a> now. Do not wait for a reply to this form.
+    </div>
+
+    <div class="gi-body">
+      <div id="gi-flow">
+        <ol class="gi-progress" id="gi-progress" aria-label="Form progress">
+          <li><span>About you</span></li><li><span>Situation</span></li><li><span>Dates</span></li><li><span>Background</span></li><li><span>Review</span></li>
+        </ol>
+        <p class="gi-stepcount" id="gi-stepcount" aria-live="polite"></p>
+
+        <form id="gi-form" novalidate autocomplete="on">
+          <div class="gi-trap" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <section class="gi-step" data-step="1"><h2 tabindex="-1">How can we reach you?</h2><p class="gi-intro">We use this only to contact you about your consultation.</p><div class="gi-field" id="f-fullName" data-required="1" data-msg="Enter your full name."><label for="fullName">Full name</label><input id="fullName" name="fullName" type="text" autocomplete="name" aria-describedby="e-fullName" ><p class="gi-err" id="e-fullName" role="alert"></p></div><div class="gi-field" id="f-email" data-required="1" data-msg="Enter a valid email address, like name@example.com."><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" aria-describedby="e-email" ><p class="gi-err" id="e-email" role="alert"></p></div><div class="gi-field" id="f-phone" data-required="1" data-msg="Enter a phone number we can call."><label for="phone">Phone number</label><p class="gi-hint" id="h-phone">Include the country code if you are outside Canada.</p><input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="h-phone e-phone" ><p class="gi-err" id="e-phone" role="alert"></p></div><fieldset class="gi-field" id="f-contactPref" data-required="1" data-msg="Choose how you would like us to contact you."><legend>Best way to reach you</legend><p class="gi-hint" id="h-contactPref">WhatsApp is for scheduling only. Please do not send documents by WhatsApp or regular email. We will give you a secure way to share them.</p><div class="gi-choices"><label class="gi-choice"><input type="radio" name="contactPref" value="call"><span class="t">Phone call</span></label><label class="gi-choice"><input type="radio" name="contactPref" value="whatsapp"><span class="t">WhatsApp message</span></label><label class="gi-choice"><input type="radio" name="contactPref" value="email"><span class="t">Email</span></label></div><p class="gi-err" id="e-contactPref" role="alert"></p></fieldset><div class="gi-field" id="f-language" data-required="1" data-msg="Choose the language you want to use."><label for="language">Language for your consultation</label><select id="language" name="language" aria-describedby="e-language"><option value="">Choose one</option><option value="english">English</option><option value="tigrinya">Tigrinya</option><option value="amharic">Amharic</option><option value="arabic">Arabic</option><option value="oromo">Oromo</option><option value="other">Another language</option></select><p class="gi-err" id="e-language" role="alert"></p></div><div class="gi-cond" id="c-langother" hidden><div class="gi-field" id="f-languageOther" data-required="1" data-msg="Enter the language you want to use."><label for="languageOther">Which language?</label><input id="languageOther" name="languageOther" type="text" aria-describedby="e-languageOther" ><p class="gi-err" id="e-languageOther" role="alert"></p></div></div></section>
+          <section class="gi-step" data-step="2" hidden><h2 tabindex="-1">Where are you, and what do you need?</h2><fieldset class="gi-field" id="f-location" data-required="1" data-msg="Choose where you are right now."><legend>Where are you right now?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="location" value="in"><span class="t">In Canada</span></label><label class="gi-choice"><input type="radio" name="location" value="out"><span class="t">Outside Canada</span></label></div><p class="gi-err" id="e-location" role="alert"></p></fieldset><div class="gi-cond" id="c-status" hidden><div class="gi-field" id="f-status" data-required="1" data-msg="Choose your current status."><label for="status">What is your current status in Canada?</label><select id="status" name="status" aria-describedby="e-status"><option value="">Choose one</option><option value="visitor">Visitor</option><option value="student">Student (study permit)</option><option value="worker">Worker (work permit)</option><option value="claimant">Refugee claimant (I made a claim in Canada)</option><option value="protected">Protected person or Convention refugee</option><option value="pr">Permanent resident</option><option value="citizen">Canadian citizen</option><option value="nostatus">No valid status (my permit expired or I never had one)</option><option value="other">Other or not sure</option></select><p class="gi-err" id="e-status" role="alert"></p></div></div><div class="gi-field" id="f-citizenship" data-required="1" data-msg="Enter your country of citizenship."><label for="citizenship">Country of citizenship</label><p class="gi-hint" id="h-citizenship">If you have more than one, list them all.</p><input id="citizenship" name="citizenship" type="text" aria-describedby="h-citizenship e-citizenship" ><p class="gi-err" id="e-citizenship" role="alert"></p></div><fieldset class="gi-field" id="f-services" data-required="1" data-msg="Choose at least one option."><legend>What do you need help with?</legend><p class="gi-hint" id="h-services">Choose all that apply.</p><div class="gi-choices"><label class="gi-choice"><input type="checkbox" name="services" value="refugee"><span class="t">A refugee claim or an IRB hearing</span></label><label class="gi-choice"><input type="checkbox" name="services" value="protectedPR"><span class="t">Permanent residence as a protected person</span></label><label class="gi-choice"><input type="checkbox" name="services" value="resettle"><span class="t">Refugee resettlement or sponsorship from outside Canada</span></label><label class="gi-choice"><input type="checkbox" name="services" value="family"><span class="t">Sponsoring a spouse, child or parent</span></label><label class="gi-choice"><input type="checkbox" name="services" value="visitor"><span class="t">Visitor visa or Super Visa</span></label><label class="gi-choice"><input type="checkbox" name="services" value="study"><span class="t">Study permit</span></label><label class="gi-choice"><input type="checkbox" name="services" value="work"><span class="t">Work permit</span></label><label class="gi-choice"><input type="checkbox" name="services" value="economic"><span class="t">Permanent residence through work (Express Entry or a provincial program)</span></label><label class="gi-choice"><input type="checkbox" name="services" value="citizenship"><span class="t">Citizenship</span></label><label class="gi-choice"><input type="checkbox" name="services" value="review"><span class="t">Reviewing a refusal or decision</span></label><label class="gi-choice"><input type="checkbox" name="services" value="notsure"><span class="t">I am not sure</span></label></div><p class="gi-err" id="e-services" role="alert"></p></fieldset></section>
+          <section class="gi-step" data-step="3" hidden><h2 tabindex="-1">Dates and deadlines</h2><p class="gi-intro">Dates decide what is possible, so give your best answer. If you do not remember an exact date, enter the closest one. You can bring documents to the consultation.</p><div class="gi-cond" id="c-incanada" hidden><div class="gi-field" id="f-firstEntryDate" data-required="1" data-msg="Enter the date you first arrived, or your best guess."><label for="firstEntryDate">When did you first arrive in Canada?</label><p class="gi-hint" id="h-firstEntryDate">Your very first arrival, even if you have left and returned since.</p><input id="firstEntryDate" name="firstEntryDate" type="date" aria-describedby="h-firstEntryDate e-firstEntryDate" ><p class="gi-err" id="e-firstEntryDate" role="alert"></p></div><div class="gi-field" id="f-entryMethod" data-required="1" data-msg="Choose how you arrived."><label for="entryMethod">How did you arrive?</label><select id="entryMethod" name="entryMethod" aria-describedby="e-entryMethod"><option value="">Choose one</option><option value="airport">At an airport</option><option value="land">At a land border crossing, with a border officer</option><option value="between">I crossed the border away from an official crossing</option><option value="unsure">Other or not sure</option></select><p class="gi-err" id="e-entryMethod" role="alert"></p></div><div class="gi-cond" id="c-usentry" hidden><fieldset class="gi-field" id="f-cameFromUS" data-required="1" data-msg="Choose one option."><legend>Did you travel to Canada from the United States?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="cameFromUS" value="yes"><span class="t">Yes</span></label><label class="gi-choice"><input type="radio" name="cameFromUS" value="no"><span class="t">No</span></label><label class="gi-choice"><input type="radio" name="cameFromUS" value="unsure"><span class="t">Not sure</span></label></div><p class="gi-err" id="e-cameFromUS" role="alert"></p></fieldset></div></div><div class="gi-cond" id="c-refugee" hidden><fieldset class="gi-field" id="f-claimMade" data-required="1" data-msg="Choose Yes or No."><legend>Have you already made a refugee claim in Canada?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="claimMade" value="yes"><span class="t">Yes</span></label><label class="gi-choice"><input type="radio" name="claimMade" value="no"><span class="t">No</span></label></div><p class="gi-err" id="e-claimMade" role="alert"></p></fieldset><div class="gi-cond" id="c-claim" hidden><div class="gi-field" id="f-claimDate" data-required="1" data-msg="Enter the date you made your claim, or your best guess."><label for="claimDate">Date you made the claim</label><input id="claimDate" name="claimDate" type="date" aria-describedby="e-claimDate" ><p class="gi-err" id="e-claimDate" role="alert"></p></div><fieldset class="gi-field" id="f-bocSubmitted" data-required="1" data-msg="Choose one option."><legend>Has your Basis of Claim (BOC) form been submitted?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="bocSubmitted" value="yes"><span class="t">Yes</span></label><label class="gi-choice"><input type="radio" name="bocSubmitted" value="no"><span class="t">No</span></label><label class="gi-choice"><input type="radio" name="bocSubmitted" value="unsure"><span class="t">Not sure</span></label></div><p class="gi-err" id="e-bocSubmitted" role="alert"></p></fieldset><div class="gi-field" id="f-hearingDate"><label for="hearingDate">Hearing date (optional)</label><p class="gi-hint" id="h-hearingDate">Enter it if you have been given one.</p><input id="hearingDate" name="hearingDate" type="date" aria-describedby="h-hearingDate e-hearingDate" ><p class="gi-err" id="e-hearingDate" role="alert"></p></div></div></div><fieldset class="gi-field" id="f-decisionReceived" data-required="1" data-msg="Choose Yes or No."><legend>Have you received a refusal or other decision letter from IRCC, CBSA or the IRB?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="decisionReceived" value="yes"><span class="t">Yes</span></label><label class="gi-choice"><input type="radio" name="decisionReceived" value="no"><span class="t">No</span></label></div><p class="gi-err" id="e-decisionReceived" role="alert"></p></fieldset><div class="gi-cond" id="c-decision" hidden><div class="gi-field" id="f-decisionDate"><label for="decisionDate">Date on the letter</label><p class="gi-hint" id="h-decisionDate">If you cannot find the date, leave this blank and bring the letter.</p><input id="decisionDate" name="decisionDate" type="date" aria-describedby="h-decisionDate e-decisionDate" ><p class="gi-err" id="e-decisionDate" role="alert"></p></div><div class="gi-field" id="f-decisionFrom"><label for="decisionFrom">Who sent the letter?</label><select id="decisionFrom" name="decisionFrom" aria-describedby="e-decisionFrom"><option value="">Choose one</option><option value="ircc">IRCC</option><option value="rpd">IRB: Refugee Protection Division</option><option value="rad">IRB: Refugee Appeal Division</option><option value="iad">IRB: Immigration Appeal Division</option><option value="cbsa">CBSA</option><option value="other">Other or not sure</option></select><p class="gi-err" id="e-decisionFrom" role="alert"></p></div><div class="gi-field" id="f-decisionDeadline"><label for="decisionDeadline">Deadline in the letter (optional)</label><p class="gi-hint" id="h-decisionDeadline">If the letter says you must respond, appeal or leave by a certain date, enter it.</p><input id="decisionDeadline" name="decisionDeadline" type="date" aria-describedby="h-decisionDeadline e-decisionDeadline" ><p class="gi-err" id="e-decisionDeadline" role="alert"></p></div></div><fieldset class="gi-field" id="f-removalOrder" data-required="1" data-msg="Choose one option."><legend>Have you received a removal order or a notice to leave Canada, or been detained by immigration?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="removalOrder" value="yes"><span class="t">Yes</span></label><label class="gi-choice"><input type="radio" name="removalOrder" value="no"><span class="t">No</span></label><label class="gi-choice"><input type="radio" name="removalOrder" value="unsure"><span class="t">Not sure</span></label></div><p class="gi-err" id="e-removalOrder" role="alert"></p></fieldset><div class="gi-cond" id="c-permit" hidden><div class="gi-field" id="f-permitExpiry"><label for="permitExpiry">When does your permit expire?</label><p class="gi-hint" id="h-permitExpiry">Visitor, study or work permit. Leave blank if you do not know.</p><input id="permitExpiry" name="permitExpiry" type="date" aria-describedby="h-permitExpiry e-permitExpiry" ><p class="gi-err" id="e-permitExpiry" role="alert"></p></div></div></section>
+          <section class="gi-step" data-step="4" hidden><h2 tabindex="-1">Background</h2><p class="gi-intro">You do not need to give details here. We will talk through anything sensitive privately at the consultation.</p><fieldset class="gi-field" id="f-priorRefusals" data-required="1" data-msg="Choose Yes or No."><legend>Have you ever been refused a visa, permit or status by Canada?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="priorRefusals" value="yes"><span class="t">Yes</span></label><label class="gi-choice"><input type="radio" name="priorRefusals" value="no"><span class="t">No</span></label></div><p class="gi-err" id="e-priorRefusals" role="alert"></p></fieldset><fieldset class="gi-field" id="f-criminal" data-required="1" data-msg="Choose one option."><legend>Have you ever been charged with or convicted of an offence, in any country?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="criminal" value="no"><span class="t">No</span></label><label class="gi-choice"><input type="radio" name="criminal" value="yes"><span class="t">Yes</span></label><label class="gi-choice"><input type="radio" name="criminal" value="discuss"><span class="t">I would rather discuss this at the consultation</span></label></div><p class="gi-err" id="e-criminal" role="alert"></p></fieldset><fieldset class="gi-field" id="f-misrep" data-required="1" data-msg="Choose one option."><legend>Has any government told you that you gave false or incomplete information?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="misrep" value="no"><span class="t">No</span></label><label class="gi-choice"><input type="radio" name="misrep" value="yes"><span class="t">Yes</span></label><label class="gi-choice"><input type="radio" name="misrep" value="unsure"><span class="t">Not sure</span></label></div><p class="gi-err" id="e-misrep" role="alert"></p></fieldset><fieldset class="gi-field" id="f-otherRep" data-required="1" data-msg="Choose one option."><legend>Is another consultant, lawyer or agent handling an immigration matter for you?</legend><div class="gi-choices"><label class="gi-choice"><input type="radio" name="otherRep" value="no"><span class="t">No</span></label><label class="gi-choice"><input type="radio" name="otherRep" value="current"><span class="t">Yes, currently</span></label><label class="gi-choice"><input type="radio" name="otherRep" value="former"><span class="t">Yes, but not any more</span></label></div><p class="gi-err" id="e-otherRep" role="alert"></p></fieldset><fieldset class="gi-field" id="f-familyOnApp"><legend>Who else might be part of your application?</legend><p class="gi-hint" id="h-familyOnApp">Choose all that apply.</p><div class="gi-choices"><label class="gi-choice"><input type="checkbox" name="familyOnApp" value="spouse"><span class="t">Spouse or partner</span></label><label class="gi-choice"><input type="checkbox" name="familyOnApp" value="children"><span class="t">Children</span></label><label class="gi-choice"><input type="checkbox" name="familyOnApp" value="parents"><span class="t">Parents</span></label><label class="gi-choice"><input type="checkbox" name="familyOnApp" value="other"><span class="t">Other family</span></label><label class="gi-choice"><input type="checkbox" name="familyOnApp" value="none"><span class="t">Nobody, just me</span></label></div><p class="gi-err" id="e-familyOnApp" role="alert"></p></fieldset><div class="gi-field" id="f-notes"><label for="notes">Anything else we should know before the consultation?</label><p class="gi-hint" id="h-notes">Please do not describe your refugee story here, and do not enter passport, UCI or other ID numbers. We will go through your story with you privately.</p><textarea id="notes" name="notes" rows="4" maxlength="600" aria-describedby="h-notes"></textarea><p class="gi-count" id="notes-count">0 of 600 characters</p></div></section>
+          <section class="gi-step" data-step="5" hidden><h2 tabindex="-1">Review and send</h2><p class="gi-intro">Check your answers. Use Back to change anything.</p><dl class="gi-summary" id="gi-summary"></dl><div class="gi-privacy"><p><strong>How we use your answers.</strong> We use them to prepare for your consultation and to contact you. They are stored securely in Canada and shared only with people at <span data-cfg="firmName"></span> who need them for that work. <a data-cfg-href="privacyUrl" href="#" target="_blank" rel="noopener">Read our privacy policy</a></p></div><fieldset class="gi-field" id="f-consents" data-required="1" data-msg="Tick all three boxes to send your request."><legend>Before you send</legend><div class="gi-choices"><label class="gi-choice"><input type="checkbox" name="consents" value="privacy"><span class="t">I have read how my answers are used and I agree.</span></label><label class="gi-choice"><input type="checkbox" name="consents" value="notClient"><span class="t">I understand that sending this form does not make Graceful Immigration my representative. Representation starts only when I sign an agreement.</span></label><label class="gi-choice"><input type="checkbox" name="consents" value="secure"><span class="t">You may contact me the way I chose. I will share documents only through the secure method I am given, not by WhatsApp or regular email.</span></label></div><p class="gi-err" id="e-consents" role="alert"></p></fieldset><label class="gi-choice" id="gi-news-wrap"><input type="checkbox" id="gi-news"><span class="t">Optional: send me immigration news and updates by email. I can unsubscribe at any time.</span></label><p class="gi-fail" id="gi-fail" role="alert" hidden></p></section>
+          <div class="gi-actions">
+            <button type="button" class="gi-btn is-quiet" id="gi-back" hidden>Back</button>
+            <button type="button" class="gi-btn" id="gi-next">Continue</button>
+            <button type="submit" class="gi-btn" id="gi-send" hidden>Send request</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="gi-done" id="gi-done" hidden tabindex="-1">
+        <h2 id="gi-done-title">Request received</h2>
+        <p id="gi-done-lead"></p>
+        <div class="gi-urgent" id="gi-done-urgent" hidden>
+          Your answers suggest your matter may be time-sensitive. Please call <a data-cfg-href="phoneHref" href="#"><span data-cfg="phone"></span></a> today and have any letters or notices with you. Do not wait for us to reply.
+        </div>
+        <p><strong>What happens next</strong></p>
+        <ol id="gi-next-steps"></ol>
+        <div class="gi-cta">
+          <a class="gi-btn is-gold" id="gi-book" href="book.html">Book a consultation time</a>
+          <a class="gi-btn is-quiet" data-cfg-href="phoneHref" href="#">Call <span data-cfg="phone"></span></a>
+        </div>
+      </div>
+    </div>
+    <p class="gi-foot" data-cfg="licenceLine"></p>
+  </div>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <form class="footer-news" id="newsForm" novalidate>
+      <div class="fn-copy"><strong>Immigration news &amp; updates</strong><span>Program changes and tips, a few times a month. Unsubscribe anytime.</span></div>
+      <div class="fn-fields">
+        <input type="email" id="newsEmail" placeholder="Your email address" aria-label="Email address" required>
+        <button type="submit" class="btn-gold-grad">Subscribe</button>
+        <label class="fn-consent"><input type="checkbox" id="newsConsent"> I agree to receive immigration news and updates by email from Graceful Immigration Consultant Inc.</label>
+        <input type="text" id="newsTrap" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
+        <p class="fn-msg" id="newsMsg" role="status"></p>
+      </div>
+      <script>
+      (function () {
+        var f = document.getElementById('newsForm'); if (!f || f.dataset.ready) return; f.dataset.ready = '1';
+        f.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var msg = document.getElementById('newsMsg'), email = document.getElementById('newsEmail').value.trim();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.textContent = 'Enter a valid email address.'; return; }
+          if (!document.getElementById('newsConsent').checked) { msg.textContent = 'Please tick the consent box.'; return; }
+          var k = 'sb_publishable_ZcaXkELPK820lTD41ffw2Q_iMTta3uT';
+          msg.textContent = 'Subscribing…';
+          fetch('https://bmzhcprthrocbqluxpwa.supabase.co/functions/v1/subscribe', { method: 'POST',
+            headers: { 'Content-Type': 'application/json', apikey: k, Authorization: 'Bearer ' + k },
+            body: JSON.stringify({ email: email, consent: true, website: document.getElementById('newsTrap').value, source: 'footer' }) })
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error); }); })
+            .then(function () { f.reset(); msg.textContent = 'Thank you! You are subscribed.'; })
+            .catch(function (er) { msg.textContent = er.message || 'Could not subscribe. Please try again.'; });
+        });
+      })();
+      </script>
+    </form>
+    <div class="footer-main">
+      <a href="index.html" class="brand" aria-label="Graceful Immigration Consultants — Home">
+        <img class="brand-logo" src="img/logo-emblem.png" alt="" width="220" height="161">
+        <span class="brand-text">
+          <span class="brand-word">Graceful</span>
+          <span class="brand-line">Immigration Consultants</span>
+        </span>
+      </a>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="index.html#why">About</a>
+        <a href="index.html#services">Our Services</a>
+        <a href="book.html">Book</a>
+        <a href="blog.html">Resources</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="footer-contact">
+        <a href="tel:+14039154230"><svg><use href="#i-phone"/></svg>(403) 915-4230</a>
+        <a href="mailto:info@gracefulimmigration.ca"><svg><use href="#i-mail"/></svg>info@gracefulimmigration.ca</a>
+      </div>
+      <div class="footer-social">
+        <a href="https://www.linkedin.com/company/graceful-immigration-consultants/" target="_blank" rel="noopener" aria-label="LinkedIn">in</a>
+        <a href="https://www.facebook.com/profile.php?id=61595522484419" target="_blank" rel="noopener" aria-label="Facebook">f</a>
+        <a href="https://www.tiktok.com/@graceful.immigrati" target="_blank" rel="noopener" aria-label="TikTok"><svg><use href="#i-tiktok"/></svg></a>
+        <a href="https://wa.me/14039154230" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-whatsapp"/></svg></a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Graceful Immigration Consultant Inc. · Aman Debesay, RCIC-IRB, College ID R1056136 · <a href="privacy.html">Privacy</a></span>
+      <div class="footer-badges">
+        <img src="img/badge-rcic.png" alt="RCIC-IRB — Regulated Canadian Immigration Consultant" width="406" height="120">
+        <img src="img/badge-cicc.png" alt="College of Immigration and Citizenship Consultants" width="416" height="120">
+      </div>
+      <span>Guide · Support · Belong · <a href="../app/">Staff login</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var CONFIG = {
+    firmName: "Graceful Immigration Consultant Inc.",
+    licenceLine: "Graceful Immigration Consultant Inc. · Aman Debesay, Regulated Canadian Immigration Consultant (RCIC-IRB), College ID R1056136.",
+    phone: "(403) 915-4230",
+    phoneHref: "tel:+14039154230",
+    email: "info@gracefulimmigration.ca",
+    endpoint: "https://bmzhcprthrocbqluxpwa.supabase.co/functions/v1/submit-intake",
+    subscribeEndpoint: "https://bmzhcprthrocbqluxpwa.supabase.co/functions/v1/subscribe",
+    apiKey: "sb_publishable_ZcaXkELPK820lTD41ffw2Q_iMTta3uT",
+    privacyUrl: "privacy.html",
+    version: "intake-v1",
+    nextSteps: [
+      "Book a consultation time using the button below, or we will contact you the way you chose to arrange one.",
+      "We will send you a written consultation agreement before the session.",
+      "At the consultation we go through your situation privately. Afterward you receive a written assessment of your options."
+    ]
+  };
+
+  var root = document.getElementById("gi-intake");
+  var form = document.getElementById("gi-form");
+  var steps = Array.prototype.slice.call(root.querySelectorAll(".gi-step"));
+  var progress = Array.prototype.slice.call(root.querySelectorAll("#gi-progress li"));
+  var btnBack = document.getElementById("gi-back");
+  var btnNext = document.getElementById("gi-next");
+  var btnSend = document.getElementById("gi-send");
+  var current = 0;
+  var sending = false;
+  var params = new URLSearchParams(location.search);
+  var staffMode = params.get("staff") === "1";
+  var embedded = params.get("embed") === "1";
+
+  // Staff entering an assessment from the dashboard: reuse their signed-in session (same site)
+  function staffToken() {
+    try {
+      var raw = localStorage.getItem("sb-bmzhcprthrocbqluxpwa-auth-token");
+      var s = raw && JSON.parse(raw);
+      return s && s.access_token ? s.access_token : null;
+    } catch (e) { return null; }
+  }
+  if (staffMode) {
+    document.getElementById("gi-staff").hidden = false;
+    document.getElementById("gi-news-wrap").hidden = true;
+  }
+
+  Array.prototype.forEach.call(root.querySelectorAll("[data-cfg]"), function (el) { el.textContent = CONFIG[el.getAttribute("data-cfg")] || ""; });
+  Array.prototype.forEach.call(root.querySelectorAll("[data-cfg-href]"), function (el) {
+    var v = CONFIG[el.getAttribute("data-cfg-href")];
+    if (v) el.setAttribute("href", v);
+  });
+
+  var todayISO = (function () { var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); })();
+  ["firstEntryDate", "claimDate", "decisionDate"].forEach(function (n) { var el = form.elements[n]; if (el) el.max = todayISO; });
+
+  function visible(el) { return !el.closest(".gi-cond[hidden]"); }
+  function radio(name) { var el = form.querySelector('input[name="' + name + '"]:checked'); return el && visible(el) ? el.value : ""; }
+  function text(name) { var el = form.elements[name]; return el && visible(el) ? String(el.value).trim() : ""; }
+  function multi(name) {
+    return Array.prototype.slice.call(form.querySelectorAll('input[name="' + name + '"]:checked')).filter(visible).map(function (e) { return e.value; });
+  }
+  function collect() {
+    return {
+      fullName: text("fullName"), email: text("email"), phone: text("phone"), contactPref: radio("contactPref"),
+      language: text("language"), languageOther: text("languageOther"),
+      location: radio("location"), status: text("status"), citizenship: text("citizenship"), services: multi("services"),
+      firstEntryDate: text("firstEntryDate"), entryMethod: text("entryMethod"), cameFromUS: radio("cameFromUS"),
+      claimMade: radio("claimMade"), claimDate: text("claimDate"), bocSubmitted: radio("bocSubmitted"), hearingDate: text("hearingDate"),
+      decisionReceived: radio("decisionReceived"), decisionDate: text("decisionDate"), decisionFrom: text("decisionFrom"), decisionDeadline: text("decisionDeadline"),
+      removalOrder: radio("removalOrder"), permitExpiry: text("permitExpiry"),
+      priorRefusals: radio("priorRefusals"), criminal: radio("criminal"), misrep: radio("misrep"), otherRep: radio("otherRep"),
+      familyOnApp: multi("familyOnApp"), notes: text("notes")
+    };
+  }
+
+  function setHidden(id, hide) { var el = document.getElementById(id); if (el) el.hidden = hide; }
+  function refresh() {
+    var loc = radio("location");
+    var st = form.elements.status ? form.elements.status.value : "";
+    var inCan = loc === "in";
+    var svc = multi("services");
+    setHidden("c-langother", form.elements.language.value !== "other");
+    setHidden("c-status", !inCan);
+    setHidden("c-incanada", !(inCan && st !== "pr" && st !== "citizen"));
+    var em = form.elements.entryMethod ? form.elements.entryMethod.value : "";
+    setHidden("c-usentry", !(em === "land" || em === "between" || em === "unsure"));
+    var refugeeRelevant = inCan && (svc.indexOf("refugee") > -1 || svc.indexOf("protectedPR") > -1 || st === "claimant" || st === "protected");
+    setHidden("c-refugee", !refugeeRelevant);
+    setHidden("c-claim", !(refugeeRelevant && radio("claimMade") === "yes"));
+    setHidden("c-decision", radio("decisionReceived") !== "yes");
+    var permitStatus = inCan && (st === "visitor" || st === "student" || st === "worker" || st === "nostatus");
+    setHidden("c-permit", !permitStatus);
+    var pl = document.querySelector("#f-permitExpiry label");
+    var ph = document.getElementById("h-permitExpiry");
+    if (pl && ph) {
+      if (st === "nostatus") { pl.textContent = "When did your status or permit expire?"; ph.textContent = "If you never had a permit, leave this blank."; }
+      else { pl.textContent = "When does your permit expire?"; ph.textContent = "Visitor, study or work permit. Leave blank if you do not know."; }
+    }
+  }
+
+  function fieldValue(f) {
+    var checks = f.querySelectorAll('input[type=radio],input[type=checkbox]');
+    if (checks.length) return Array.prototype.some.call(checks, function (c) { return c.checked; }) ? "x" : "";
+    var inp = f.querySelector("input,select,textarea");
+    return inp ? String(inp.value).trim() : "";
+  }
+  function validStep(i) {
+    var ok = true, first = null;
+    Array.prototype.forEach.call(steps[i].querySelectorAll("[data-required]"), function (f) {
+      if (f.closest(".gi-cond[hidden]")) return;
+      var v = fieldValue(f), msg = "";
+      if (!v) { msg = f.getAttribute("data-msg") || "This field is required."; }
+      else if (f.querySelector("input[type=email]") && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { msg = f.getAttribute("data-msg"); }
+      else if (f.querySelector("input[type=tel]") && v.replace(/\D/g, "").length < 7) { msg = f.getAttribute("data-msg"); }
+      else if (f.id === "f-consents") {
+        if (f.querySelectorAll("input:checked").length < 3) msg = f.getAttribute("data-msg");
+      }
+      var e = f.querySelector(".gi-err");
+      if (msg) { ok = false; f.classList.add("has-err"); if (e) e.textContent = msg; if (!first) first = f; }
+      else { f.classList.remove("has-err"); if (e) e.textContent = ""; }
+    });
+    if (first) { var focusEl = first.querySelector("input,select,textarea"); if (focusEl) focusEl.focus(); }
+    return ok;
+  }
+
+  function label(name, value) {
+    if (!value) return "";
+    var el = form.querySelector('[name="' + name + '"][value="' + value + '"]');
+    if (el && el.closest("label")) { var s = el.closest("label").querySelector(".t"); return s ? s.textContent.trim() : value; }
+    var sel = form.elements[name];
+    if (sel && sel.options) { for (var i = 0; i < sel.options.length; i++) { if (sel.options[i].value === value) return sel.options[i].text; } }
+    return value;
+  }
+  function fmt(s) {
+    if (!s) return "";
+    var p = s.split("-"); var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    return d.toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
+  }
+  function rowsFor(d) {
+    var rows = [];
+    function add(l, v) { if (v && String(v).length) rows.push([l, String(v)]); }
+    add("Name", d.fullName); add("Email", d.email); add("Phone", d.phone);
+    add("Best way to reach you", label("contactPref", d.contactPref));
+    add("Language", d.language === "other" && d.languageOther ? d.languageOther : label("language", d.language));
+    add("Where you are now", label("location", d.location));
+    add("Current status in Canada", label("status", d.status));
+    add("Country of citizenship", d.citizenship);
+    add("Help needed", d.services.map(function (s) { return label("services", s); }).join("; "));
+    add("First arrival in Canada", fmt(d.firstEntryDate));
+    add("How you arrived", label("entryMethod", d.entryMethod));
+    add("Travelled from the United States", label("cameFromUS", d.cameFromUS));
+    add("Refugee claim made in Canada", label("claimMade", d.claimMade));
+    add("Date of claim", fmt(d.claimDate));
+    add("BOC form submitted", label("bocSubmitted", d.bocSubmitted));
+    add("Hearing date", fmt(d.hearingDate));
+    add("Received a decision letter", label("decisionReceived", d.decisionReceived));
+    add("Date on the letter", fmt(d.decisionDate));
+    add("Letter sent by", label("decisionFrom", d.decisionFrom));
+    add("Deadline in the letter", fmt(d.decisionDeadline));
+    add("Removal order, notice to leave or detention", label("removalOrder", d.removalOrder));
+    add(d.status === "nostatus" ? "Date status or permit expired" : "Permit expiry date", fmt(d.permitExpiry));
+    add("Refused by Canada before", label("priorRefusals", d.priorRefusals));
+    add("Charged with or convicted of an offence", label("criminal", d.criminal));
+    add("Told they gave false or incomplete information", label("misrep", d.misrep));
+    add("Another representative", label("otherRep", d.otherRep));
+    add("Family who may be on the application", d.familyOnApp.map(function (s) { return label("familyOnApp", s); }).join("; "));
+    add("Notes", d.notes);
+    return rows;
+  }
+
+  function buildReview() {
+    var box = document.getElementById("gi-summary");
+    box.innerHTML = "";
+    rowsFor(collect()).forEach(function (r) {
+      var wrap = document.createElement("div"), dt = document.createElement("dt"), dd = document.createElement("dd");
+      dt.textContent = r[0]; dd.textContent = r[1]; wrap.appendChild(dt); wrap.appendChild(dd); box.appendChild(wrap);
+    });
+  }
+
+  function show(i) {
+    current = i;
+    steps.forEach(function (s, k) { s.hidden = k !== i; });
+    progress.forEach(function (li, k) {
+      li.className = k < i ? "is-done" : (k === i ? "is-current" : "");
+      if (k === i) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+    });
+    document.getElementById("gi-stepcount").textContent = "Step " + (i + 1) + " of " + steps.length + ": " + progress[i].textContent.trim();
+    btnBack.hidden = i === 0;
+    btnNext.hidden = i === steps.length - 1;
+    btnSend.hidden = i !== steps.length - 1;
+    if (i === steps.length - 1) buildReview();
+    var h = steps[i].querySelector("h2");
+    if (h) h.focus({ preventScroll: true });
+    if (i > 0 || window.__giStarted) root.scrollIntoView({ behavior: "auto", block: "start" });
+    window.__giStarted = true;
+  }
+  function next() { refresh(); if (validStep(current)) show(current + 1); }
+  btnNext.addEventListener("click", next);
+  btnBack.addEventListener("click", function () { if (current > 0) show(current - 1); });
+  form.addEventListener("input", refresh);
+  form.addEventListener("change", refresh);
+  form.addEventListener("submit", function (e) { e.preventDefault(); if (current < steps.length - 1) next(); else submit(); });
+
+  var notes = document.getElementById("notes");
+  notes.addEventListener("input", function () { document.getElementById("notes-count").textContent = notes.value.length + " of 600 characters"; });
+
+  function showDone(d, urgent) {
+    document.getElementById("gi-flow").hidden = true;
+    var done = document.getElementById("gi-done");
+    done.hidden = false;
+    var first = d.fullName.split(/\s+/)[0] || "";
+    document.getElementById("gi-done-lead").textContent = "Thank you" + (first ? ", " + first : "") + ". We have your request.";
+    document.getElementById("gi-done-urgent").hidden = !urgent;
+    var ol = document.getElementById("gi-next-steps"); ol.innerHTML = "";
+    CONFIG.nextSteps.forEach(function (s) { var li = document.createElement("li"); li.textContent = s; ol.appendChild(li); });
+    done.focus();
+    root.scrollIntoView({ behavior: "auto", block: "start" });
+  }
+
+  function submit() {
+    if (sending) return;
+    refresh();
+    if (!validStep(steps.length - 1)) return;
+    var fail = document.getElementById("gi-fail"); fail.hidden = true;
+    if (form.elements.website && form.elements.website.value) { document.getElementById("gi-flow").hidden = true; document.getElementById("gi-done").hidden = false; return; }
+
+    var d = collect();
+    var payload = {
+      form_version: CONFIG.version, answers: d, rows: rowsFor(d),
+      consents: multi("consents"), website: form.elements.website.value
+    };
+    var token = staffMode ? staffToken() : null;
+    var headers = { "Content-Type": "application/json", "apikey": CONFIG.apiKey, "Authorization": "Bearer " + (token || CONFIG.apiKey) };
+
+    sending = true; btnSend.disabled = true; btnSend.textContent = "Sending…";
+    fetch(CONFIG.endpoint, { method: "POST", headers: headers, body: JSON.stringify(payload) })
+      .then(function (res) { return res.json().then(function (j) { if (!res.ok) throw new Error(j.error || ("HTTP " + res.status)); return j; }); })
+      .then(function (j) {
+        if (!staffMode && document.getElementById("gi-news").checked) {
+          fetch(CONFIG.subscribeEndpoint, { method: "POST", headers: { "Content-Type": "application/json", "apikey": CONFIG.apiKey, "Authorization": "Bearer " + CONFIG.apiKey },
+            body: JSON.stringify({ email: d.email, full_name: d.fullName, language: d.language, consent: true, source: "assessment" }) }).catch(function () {});
+        }
+        if (staffMode && embedded && window.parent !== window) {
+          window.parent.postMessage({ type: "gi-assessment-saved", id: j.id }, location.origin);
+          return;
+        }
+        showDone(d, j.urgent);
+      })
+      .catch(function (err) {
+        fail.textContent = (err && err.message && !/HTTP|fetch/i.test(err.message) ? err.message + " " : "We could not send your request. Your answers are still here. ") +
+          "Try again, or call " + CONFIG.phone + " or email " + CONFIG.email + ".";
+        fail.hidden = false;
+      })
+      .then(function () { sending = false; btnSend.disabled = false; btnSend.textContent = "Send request"; });
+  }
+
+  refresh();
+  show(0);
+})();
+</script>
+<script>
+  (function () {
+    var nav = document.getElementById('siteNav');
+    var toggle = document.querySelector('.nav-toggle');
+    toggle.addEventListener('click', function () {
+      nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', nav.classList.contains('open'));
+    });
+    document.querySelectorAll('.nav-drop-btn').forEach(function (b) {
+      b.addEventListener('click', function () { b.parentElement.classList.toggle('open'); });
+    });
+    nav.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function () { nav.classList.remove('open'); });
+    });
+  })();
+</script>
+</body>
+</html>

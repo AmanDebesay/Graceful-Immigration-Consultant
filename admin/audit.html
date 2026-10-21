@@ -464,6 +464,35 @@ function exportAuditCSV() {
 </svg>
 <footer class="site-footer">
   <div class="wrap">
+    <form class="footer-news" id="newsForm" novalidate>
+      <div class="fn-copy"><strong>Immigration news &amp; updates</strong><span>Program changes and tips, a few times a month. Unsubscribe anytime.</span></div>
+      <div class="fn-fields">
+        <input type="email" id="newsEmail" placeholder="Your email address" aria-label="Email address" required>
+        <button type="submit" class="btn-gold-grad">Subscribe</button>
+        <label class="fn-consent"><input type="checkbox" id="newsConsent"> I agree to receive immigration news and updates by email from Graceful Immigration Consultant Inc.</label>
+        <input type="text" id="newsTrap" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">
+        <p class="fn-msg" id="newsMsg" role="status"></p>
+      </div>
+      <script>
+      (function () {
+        var f = document.getElementById('newsForm'); if (!f || f.dataset.ready) return; f.dataset.ready = '1';
+        f.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var msg = document.getElementById('newsMsg'), email = document.getElementById('newsEmail').value.trim();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.textContent = 'Enter a valid email address.'; return; }
+          if (!document.getElementById('newsConsent').checked) { msg.textContent = 'Please tick the consent box.'; return; }
+          var k = 'sb_publishable_ZcaXkELPK820lTD41ffw2Q_iMTta3uT';
+          msg.textContent = 'Subscribing…';
+          fetch('https://bmzhcprthrocbqluxpwa.supabase.co/functions/v1/subscribe', { method: 'POST',
+            headers: { 'Content-Type': 'application/json', apikey: k, Authorization: 'Bearer ' + k },
+            body: JSON.stringify({ email: email, consent: true, website: document.getElementById('newsTrap').value, source: 'footer' }) })
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error); }); })
+            .then(function () { f.reset(); msg.textContent = 'Thank you! You are subscribed.'; })
+            .catch(function (er) { msg.textContent = er.message || 'Could not subscribe. Please try again.'; });
+        });
+      })();
+      </script>
+    </form>
     <div class="footer-main">
       <a href="../public/index.html" class="brand" aria-label="Graceful Immigration Consultants — Home">
         <img class="brand-logo" src="../public/img/logo-emblem.png" alt="" width="220" height="161">
@@ -492,12 +521,12 @@ function exportAuditCSV() {
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Graceful Immigration Consultant Inc. All rights reserved.</span>
+      <span>© 2026 Graceful Immigration Consultant Inc. · Aman Debesay, RCIC-IRB, College ID R1056136 · <a href="../public/privacy.html">Privacy</a></span>
       <div class="footer-badges">
         <img src="../public/img/badge-rcic.png" alt="RCIC-IRB — Regulated Canadian Immigration Consultant" width="406" height="120">
         <img src="../public/img/badge-cicc.png" alt="College of Immigration and Citizenship Consultants" width="416" height="120">
       </div>
-      <span>Guide · Support · Belong · <a href="../public/../admin/index.html">Staff access</a></span>
+      <span>Guide · Support · Belong · <a href="../public/../app/">Staff login</a></span>
     </div>
   </div>
 </footer>
