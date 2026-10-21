@@ -5,15 +5,29 @@ import { showLogin, showSetPassword, showLinkError, showMfaChallenge } from './a
 const NAV = [
   { group: 'Overview' },
   { path: '/', label: 'Dashboard', icon: 'home', show: () => isStaff() },
-  { group: 'Clients' },
-  { path: '/assessments', label: 'Assessments', icon: 'clipboard', show: () => can('intake.view'), count: 'new_assessments' },
-  { path: '/pipeline', label: 'Pipeline', icon: 'kanban', show: () => can('crm.view') },
+  { group: 'CRM' },
   { path: '/contacts', label: 'Contacts', icon: 'users', show: () => can('crm.view') },
+  { path: '/companies', label: 'Companies', icon: 'briefcase', show: () => can('crm.view') },
+  { path: '/deals', label: 'Deals', icon: 'trend', show: () => can('crm.view') },
+  { path: '/pipeline', label: 'Lead Pipeline', icon: 'kanban', show: () => can('crm.view') },
+  { path: '/activities', label: 'Activities', icon: 'phone', show: () => can('crm.view') },
+  { path: '/cases', label: 'Cases', icon: 'file', show: () => can('crm.view') },
+  { path: '/assessments', label: 'Assessments', icon: 'clipboard', show: () => can('intake.view'), count: 'new_assessments' },
   { path: '/tasks', label: 'Tasks', icon: 'checksq', show: () => isStaff(), count: 'tasks_overdue', red: true },
+  { path: '/crm-reports', label: 'CRM Reports', icon: 'trend', show: () => can('crm.view') },
+  { group: 'Accounting' },
+  { path: '/accounting', label: 'Overview', icon: 'dollar', show: () => can('finance.view') },
+  { path: '/invoices', label: 'Sales & Invoices', icon: 'file', show: () => can('finance.view') },
+  { path: '/expenses', label: 'Expenses & Bills', icon: 'briefcase', show: () => can('finance.view') },
+  { path: '/banking', label: 'Banking', icon: 'home', show: () => can('finance.view') },
+  { path: '/trust', label: 'Trust (Client Funds)', icon: 'lock', show: () => can('finance.view') },
+  { path: '/reports', label: 'Reports', icon: 'trend', show: () => can('finance.view') },
+  { path: '/coa', label: 'Chart of Accounts', icon: 'note', show: () => can('finance.view') },
+  { path: '/journal', label: 'Journal', icon: 'history', show: () => can('finance.view') },
+  { path: '/items', label: 'Products & Services', icon: 'clipboard', show: () => can('finance.view') || can('crm.edit') },
   { group: 'Business' },
   { path: '/newsletter', label: 'Newsletter', icon: 'mail', show: () => can('newsletter.view') },
   { path: '/agreements', label: 'Agreements', icon: 'file', show: () => can('agreements.manage'), soon: true },
-  { path: '/finance', label: 'Finance', icon: 'dollar', show: () => can('finance.view'), soon: true },
   { group: 'Administration' },
   { path: '/team', label: 'Team & Access', icon: 'shield', show: () => can('staff.manage') },
   { path: '/settings', label: 'Business Settings', icon: 'settings', show: () => can('settings.manage') },
@@ -25,16 +39,33 @@ const ROUTES = [
   [/^\/assessments$/, 'assessments', 'Assessments'],
   [/^\/assessments\/new$/, 'assessment-new', 'New assessment'],
   [/^\/assessments\/([\w-]+)$/, 'assessment', 'Assessment'],
-  [/^\/pipeline$/, 'pipeline', 'Pipeline'],
+  [/^\/pipeline$/, 'pipeline', 'Lead Pipeline'],
   [/^\/contacts$/, 'contacts', 'Contacts'],
   [/^\/contacts\/([\w-]+)$/, 'contact', 'Contact'],
+  [/^\/companies$/, 'companies', 'Companies'],
+  [/^\/companies\/([\w-]+)$/, 'company', 'Company'],
+  [/^\/deals$/, 'deals', 'Deals'],
+  [/^\/activities$/, 'activities', 'Activities'],
+  [/^\/cases$/, 'cases', 'Cases'],
+  [/^\/cases\/([\w-]+)$/, 'case', 'Case'],
+  [/^\/crm-reports$/, 'crm-reports', 'CRM Reports'],
   [/^\/tasks$/, 'tasks', 'Tasks'],
+  [/^\/accounting$/, 'accounting', 'Accounting'],
+  [/^\/invoices$/, 'invoices', 'Sales & Invoices'],
+  [/^\/invoices\/([\w-]+)$/, 'invoice', 'Invoice'],
+  [/^\/expenses$/, 'expenses', 'Expenses & Bills'],
+  [/^\/banking$/, 'banking', 'Banking'],
+  [/^\/trust$/, 'trust', 'Trust (Client Funds)'],
+  [/^\/reports$/, 'reports', 'Reports'],
+  [/^\/coa$/, 'coa', 'Chart of Accounts'],
+  [/^\/journal$/, 'journal', 'Journal'],
+  [/^\/items$/, 'items', 'Products & Services'],
   [/^\/newsletter$/, 'newsletter', 'Newsletter'],
   [/^\/team$/, 'team', 'Team & Access'],
   [/^\/settings$/, 'settings', 'Business Settings'],
   [/^\/audit$/, 'audit', 'Audit Log'],
   [/^\/account$/, 'account', 'My Account'],
-  [/^\/(agreements|finance)$/, 'soon', 'Coming soon'],
+  [/^\/agreements$/, 'soon', 'Coming soon'],
 ];
 
 let shellBuilt = false;
@@ -106,6 +137,7 @@ function buildShell() {
         <button class="menu-btn btn btn-ghost btn-sm" id="menuBtn" aria-label="Menu">${icon('menu')}</button>
         <h1 id="pageTitle">Dashboard</h1>
         <div class="search">${icon('search')}<input id="gSearch" placeholder="Search contacts…" autocomplete="off"><div class="search-results" id="gResults" hidden></div></div>
+        <div style="position:relative"><button class="btn btn-gold" id="plusNew">${icon('plus')} New</button></div>
         <button class="user-chip" id="userChip">
           <span class="avatar">${esc(initials(p.full_name || p.email))}</span>
           <span class="meta"><b>${esc(p.full_name || p.email)}</b><span>${esc(ROLE_LABEL[p.role])}</span></span>
@@ -127,7 +159,31 @@ function buildShell() {
     setTimeout(() => document.addEventListener('click', () => d.remove(), { once: true }));
   };
   setupSearch();
+  setupNewMenu();
   refreshCounts();
+}
+
+async function setupNewMenu() {
+  const btn = document.getElementById('plusNew');
+  const fin = await import('./fin.js'), crm = await import('./crm.js');
+  const groups = [
+    ['Clients', [[can('crm.edit'), 'Contact', () => (location.hash = '#/contacts?new=1')], [can('crm.edit'), 'Deal', () => crm.editDeal()],
+      [can('crm.edit'), 'Case', () => crm.editCase()], [can('crm.edit'), 'Log activity', () => crm.logActivity()], [can('intake.view'), 'Assessment', () => (location.hash = '#/assessments/new')]]],
+    ['Money in', [[can('finance.manage'), 'Invoice', () => fin.newInvoice()], [can('finance.manage'), 'Receive payment', () => fin.receivePayment()],
+      [can('finance.manage'), 'Retainer into trust', () => fin.trustTxn('deposit')]]],
+    ['Money out', [[can('finance.manage'), 'Expense', () => fin.newExpense()], [can('finance.manage'), 'Bill', () => fin.newBill()]]],
+    ['Other', [[can('finance.manage'), 'Bank transfer', () => fin.newTransfer()], [can('finance.manage'), 'Journal entry', () => fin.newJournal()]]],
+  ].map(([g, items]) => [g, items.filter((x) => x[0])]).filter(([, items]) => items.length);
+  if (!groups.length) { btn.remove(); return; }
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    const old = document.querySelector('.newmenu'); if (old) return old.remove();
+    const d = document.createElement('div'); d.className = 'dropdown newmenu';
+    d.innerHTML = groups.map(([g, items]) => `<div class="nm-group"><small>${g}</small>${items.map(([, l], i) => `<button data-g="${g}" data-i="${i}">${l}</button>`).join('')}</div>`).join('');
+    btn.parentElement.appendChild(d);
+    d.onclick = (ev) => { const t = ev.target.closest('[data-g]'); if (!t) return; d.remove(); groups.find(([g]) => g === t.dataset.g)[1][+t.dataset.i][2](); };
+    setTimeout(() => document.addEventListener('click', () => d.remove(), { once: true }));
+  };
 }
 
 function renderNav() {
