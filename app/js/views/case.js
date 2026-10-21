@@ -18,6 +18,7 @@ export async function render(el, [id], { setTitle }) {
   const label = Object.fromEntries(CASE_STATUS);
 
   el.innerHTML = `<div class="toolbar"><a class="btn btn-sm" href="#/cases">← Cases</a><div class="grow"></div>
+      ${can('agreements.manage') ? `<button class="btn" id="agr">${icon('file')} Retainer agreement</button>` : ''}
       ${can('finance.manage') ? `<button class="btn" id="inv">${icon('dollar')} Invoice this case</button>` : ''}
       ${can('crm.edit') ? `<button class="btn btn-primary" id="ed">Update case</button>` : ''}</div>
     <div class="card" style="margin-bottom:18px"><div class="card-b">
@@ -40,6 +41,7 @@ export async function render(el, [id], { setTitle }) {
         ${(log || []).length ? `<div class="card"><div class="card-h"><h3>History</h3></div><div class="card-b" style="font-size:13px">${log.map((l) => `<div class="check"><span style="flex:1">${l.action === 'created' ? 'Case opened' : `Status: ${esc(label[l.details.from] || l.details.from)} → <b>${esc(label[l.details.to] || l.details.to)}</b>`}</span><small>${fmtDateTime(l.created_at)}</small></div>`).join('')}</div></div>` : ''}
       </div></div>`;
   el.querySelector('#ed')?.addEventListener('click', () => editCase(c));
+  el.querySelector('#agr')?.addEventListener('click', async () => (await import('./agreements.js')).newAgreement({ contactId: c.contact_id, caseId: id, type: 'retainer' }));
   el.querySelector('#inv')?.addEventListener('click', async () => {
     const { data, error: e } = await db.from('invoices').insert({ contact_id: c.contact_id, case_id: id }).select('id').single();
     if (!e) location.hash = `#/invoices/${data.id}`; else newInvoice(c.contact_id);

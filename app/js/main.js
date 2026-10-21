@@ -27,7 +27,7 @@ const NAV = [
   { path: '/items', label: 'Products & Services', icon: 'clipboard', show: () => can('finance.view') || can('crm.edit') },
   { group: 'Business' },
   { path: '/newsletter', label: 'Newsletter', icon: 'mail', show: () => can('newsletter.view') },
-  { path: '/agreements', label: 'Agreements', icon: 'file', show: () => can('agreements.manage'), soon: true },
+  { path: '/agreements', label: 'Agreements', icon: 'file', show: () => can('agreements.manage') || can('crm.view') },
   { group: 'Administration' },
   { path: '/team', label: 'Team & Access', icon: 'shield', show: () => can('staff.manage') },
   { path: '/settings', label: 'Business Settings', icon: 'settings', show: () => can('settings.manage') },
@@ -65,7 +65,8 @@ const ROUTES = [
   [/^\/settings$/, 'settings', 'Business Settings'],
   [/^\/audit$/, 'audit', 'Audit Log'],
   [/^\/account$/, 'account', 'My Account'],
-  [/^\/agreements$/, 'soon', 'Coming soon'],
+  [/^\/agreements$/, 'agreements', 'Agreements'],
+  [/^\/agreements\/([\w-]+)$/, 'agreement', 'Agreement'],
 ];
 
 let shellBuilt = false;
@@ -168,7 +169,7 @@ async function setupNewMenu() {
   const fin = await import('./fin.js'), crm = await import('./crm.js');
   const groups = [
     ['Clients', [[can('crm.edit'), 'Contact', () => (location.hash = '#/contacts?new=1')], [can('crm.edit'), 'Deal', () => crm.editDeal()],
-      [can('crm.edit'), 'Case', () => crm.editCase()], [can('crm.edit'), 'Log activity', () => crm.logActivity()], [can('intake.view'), 'Assessment', () => (location.hash = '#/assessments/new')]]],
+      [can('crm.edit'), 'Case', () => crm.editCase()], [can('agreements.manage'), 'Agreement', async () => (await import('./views/agreements.js')).newAgreement()], [can('crm.edit'), 'Log activity', () => crm.logActivity()], [can('intake.view'), 'Assessment', () => (location.hash = '#/assessments/new')]]],
     ['Money in', [[can('finance.manage'), 'Invoice', () => fin.newInvoice()], [can('finance.manage'), 'Receive payment', () => fin.receivePayment()],
       [can('finance.manage'), 'Retainer into trust', () => fin.trustTxn('deposit')]]],
     ['Money out', [[can('finance.manage'), 'Expense', () => fin.newExpense()], [can('finance.manage'), 'Bill', () => fin.newBill()]]],

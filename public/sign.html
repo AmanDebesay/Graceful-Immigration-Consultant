@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review & Sign — Graceful Immigration Consultant</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,Arial,sans-serif;background:#F5F6FA;color:#1C2333;font-size:15px;line-height:1.55}
+    header{background:#fff;border-bottom:1px solid #E7E9F0;padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+    header img{width:48px}header b{font-family:'Playfair Display',Georgia,serif;font-size:20px;color:#0B2A5C;display:block;line-height:1}header span{font-size:12px;color:#667085}
+    main{max-width:880px;margin:0 auto;padding:22px 16px 60px}
+    .card{background:#fff;border:1px solid #E7E9F0;border-radius:14px;box-shadow:0 4px 14px rgba(16,24,40,.05);padding:26px 24px;margin-bottom:18px}
+    .doc{max-height:none}
+    .banner{border-radius:12px;padding:14px 16px;margin-bottom:16px}
+    .banner.info{background:#EFF8FF;color:#1849A9}.banner.ok{background:#ECFDF3;color:#067647}.banner.err{background:#FEF3F2;color:#B42318}
+    h2{font-family:'Playfair Display',Georgia,serif;color:#0B2A5C;font-size:22px;margin-bottom:8px}
+    label{display:block;font-weight:600;font-size:13px;margin:12px 0 6px}
+    input[type=text]{width:100%;padding:12px 14px;border:1px solid #C9D0DC;border-radius:10px;font:inherit}
+    .seg{display:inline-flex;background:#F5F6FA;border:1px solid #E7E9F0;border-radius:10px;padding:3px;margin-bottom:8px}
+    .seg button{border:0;background:none;padding:6px 14px;border-radius:7px;font-weight:600;color:#667085;cursor:pointer;font:inherit}.seg button.on{background:#0B2A5C;color:#fff}
+    canvas{width:100%;height:160px;border:1px dashed #B9C2D3;border-radius:10px;background:#fff;touch-action:none;display:block}
+    .typed{font-family:'Brush Script MT',cursive;font-size:30px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:10px;border:1px solid #E7E9F0;background:#fff;font:inherit;font-weight:600;cursor:pointer}
+    .btn-gold{background:linear-gradient(180deg,#EDBE55,#D19A2E);border-color:#D19A2E;color:#1B1405;font-size:16px;width:100%;margin-top:16px}
+    .btn-sm{padding:6px 12px;font-size:13px}
+    .check{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14px}.check input{width:20px;height:20px;margin-top:2px;accent-color:#0B2A5C;flex:none}
+    .loading{text-align:center;padding:60px;color:#667085}
+    @media print{header,.no-print{display:none!important}body{background:#fff}.card{border:0;box-shadow:none;padding:0}main{padding:0}}
+  </style>
+</head>
+<body>
+<header><img src="img/logo-emblem.png" alt=""><div><b>Graceful</b><span>Immigration Consultant Inc. · Secure document signing</span></div></header>
+<main id="main"><div class="loading">Loading your document…</div></main>
+<script type="module">
+  import { withSignatures, certificate } from '../app/js/agreement-templates.js';
+  const FN = 'https://bmzhcprthrocbqluxpwa.supabase.co/functions/v1/agreement-sign';
+  const KEY = 'sb_publishable_ZcaXkELPK820lTD41ffw2Q_iMTta3uT';
+  const token = new URLSearchParams(location.search).get('t') || '';
+  const main = document.getElementById('main');
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const call = async (body) => {
+    const r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify({ token, ...body }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || 'Something went wrong. Please try again.');
+    return j;
+  };
+
+  async function load(justSigned = false) {
+    let a;
+    try { a = await call({ action: 'view' }); }
+    catch (e) { main.innerHTML = `<div class="card"><h2>Link not available</h2><p>${esc(e.message)}</p><p style="margin-top:10px">Questions? Call <a href="tel:+14039154230">(403) 915-4230</a> or email <a href="mailto:info@gracefulimmigration.ca">info@gracefulimmigration.ca</a>.</p></div>`; return; }
+    const doc = withSignatures(a.body_html, { ...a, client_name: a.client_signed_name });
+    if (a.status === 'signed') {
+      main.innerHTML = `<div class="banner ok no-print">${justSigned ? '<b>Thank you — your agreement is signed.</b> ' : '<b>This agreement has been signed.</b> '}Print it or save it as a PDF for your records. A copy is kept securely by your consultant.</div>
+        <div class="no-print" style="margin-bottom:14px"><button class="btn" onclick="window.print()">Print / Save as PDF</button></div>
+        <div class="card doc">${doc}${certificate({ ...a, client_name: a.client_signed_name })}</div>`;
+      return;
+    }
+    main.innerHTML = `<div class="banner info"><b>${esc(a.client_name)}</b>, please read your ${esc(a.title)} (${esc(a.number)}) carefully. It has already been signed by your consultant, ${esc(a.rcic_name)}. Questions before signing? Call <a href="tel:+14039154230">(403) 915-4230</a>.</div>
+      <div class="card doc">${doc}</div>
+      <div class="card no-print" id="signCard"><h2>Sign this agreement</h2>
+        <p style="color:#667085">Your initials will be placed on each section marked “Client initials”, and your signature at the end.</p>
+        <label for="nm">Full legal name</label><input type="text" id="nm" value="${esc(a.client_name)}" autocomplete="name">
+        <label for="ini">Initials</label><input type="text" id="ini" maxlength="6" style="max-width:140px;text-transform:uppercase">
+        <label>Signature</label><div class="seg"><button type="button" data-m="draw" class="on">Draw</button><button type="button" data-m="type">Type</button></div>
+        <div data-p="draw"><canvas width="760" height="200"></canvas><button type="button" class="btn btn-sm" id="clr" style="margin-top:6px">Clear</button></div>
+        <div data-p="type" hidden><input type="text" id="typed" class="typed" placeholder="Type your name"></div>
+        <label class="check"><input type="checkbox" id="c1"> I have read and understood this agreement, had the opportunity to ask questions and seek independent advice, and agree to its terms.</label>
+        <label class="check"><input type="checkbox" id="c2"> I agree to sign electronically. My electronic signature is legally binding, the same as a handwritten signature.</label>
+        <div class="banner err" id="err" hidden style="margin-top:14px"></div>
+        <button class="btn btn-gold" id="sign">Sign agreement</button></div>`;
+    const cv = main.querySelector('canvas'), ctx = cv.getContext('2d');
+    ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.strokeStyle = '#0B2A5C';
+    let down = false, drawn = false, mode = 'draw';
+    const pos = (e) => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * (cv.width / r.width), (e.clientY - r.top) * (cv.height / r.height)]; };
+    cv.onpointerdown = (e) => { down = true; drawn = true; cv.setPointerCapture(e.pointerId); ctx.beginPath(); ctx.moveTo(...pos(e)); };
+    cv.onpointermove = (e) => { if (down) { ctx.lineTo(...pos(e)); ctx.stroke(); } };
+    cv.onpointerup = () => { down = false; };
+    main.querySelector('#clr').onclick = () => { ctx.clearRect(0, 0, cv.width, cv.height); drawn = false; };
+    main.querySelectorAll('[data-m]').forEach((b) => (b.onclick = () => {
+      mode = b.dataset.m; main.querySelectorAll('[data-m]').forEach((x) => x.classList.toggle('on', x === b));
+      main.querySelector('[data-p="draw"]').hidden = mode !== 'draw'; main.querySelector('[data-p="type"]').hidden = mode !== 'type';
+    }));
+    main.querySelector('#sign').onclick = async () => {
+      const err = main.querySelector('#err'); err.hidden = true;
+      const fail = (m) => { err.textContent = m; err.hidden = false; };
+      const name = main.querySelector('#nm').value.trim(), ini = main.querySelector('#ini').value.trim();
+      const sig = mode === 'draw' ? (drawn ? cv.toDataURL('image/png') : '') : main.querySelector('#typed').value.trim();
+      if (name.length < 2) return fail('Type your full legal name.');
+      if (!ini) return fail('Type your initials.');
+      if (!sig) return fail('Add your signature.');
+      if (!main.querySelector('#c1').checked || !main.querySelector('#c2').checked) return fail('Please tick both boxes to confirm.');
+      const btn = main.querySelector('#sign'); btn.disabled = true; btn.textContent = 'Signing…';
+      try { await call({ action: 'sign', name, initials: ini, signature: sig, consent: true }); window.scrollTo(0, 0); load(true); }
+      catch (e) { fail(e.message); btn.disabled = false; btn.textContent = 'Sign agreement'; }
+    };
+  }
+  token ? load() : (main.innerHTML = '<div class="card"><h2>Missing link</h2><p>Please use the full link your consultant sent you.</p></div>');
+</script>
+</body>
+</html>

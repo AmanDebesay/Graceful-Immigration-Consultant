@@ -287,3 +287,16 @@ table.t{width:100%;border-collapse:collapse}
   .inv-sheet,.report{max-width:none;padding:0}
   a{color:inherit}
 }
+
+/* ── Agreements ── */
+.agr-layout{display:grid;grid-template-columns:minmax(340px,440px) 1fr;gap:18px;align-items:start}
+.agr-form{padding:6px 0;max-height:calc(100vh - 170px);overflow:auto;position:sticky;top:84px}
+.agr-sec{border-bottom:1px solid var(--line)}
+.agr-sec summary{cursor:pointer;padding:14px 18px;font-weight:600;color:var(--navy);list-style:none}
+.agr-sec summary::-webkit-details-marker{display:none}
+.agr-sec summary::after{content:'+';float:right;color:var(--muted)}
+.agr-sec[open] summary::after{content:'–'}
+.agr-sec-b{padding:0 18px 14px}
+.ms-row{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+.agr-preview .card-b{padding:26px 28px}
+@media (max-width:1180px){.agr-layout{grid-template-columns:1fr}.agr-form{position:static;max-height:none}}

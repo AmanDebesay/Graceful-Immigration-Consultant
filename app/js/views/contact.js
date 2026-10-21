@@ -57,7 +57,7 @@ export async function render(el, [id], { setTitle }) {
         </div></div>
       </div>
       <div class="card">
-        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['deals', 'Deals'], ['cases', 'Cases'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ['assessments', 'Assessments']]
+        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['deals', 'Deals'], ['cases', 'Cases'], ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ['assessments', 'Assessments']]
           .map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
         <div class="card-b" id="tabBody"></div>
       </div>
@@ -69,13 +69,13 @@ export async function render(el, [id], { setTitle }) {
     e.stopPropagation();
     const old = document.querySelector('.dropdown'); if (old) return old.remove();
     const d = document.createElement('div'); d.className = 'dropdown'; d.style.left = '0'; d.style.right = 'auto';
-    const items = [[can('crm.edit'), 'deal', 'trend', 'Deal'], [can('crm.edit'), 'case', 'briefcase', 'Case'], [can('finance.manage'), 'inv', 'file', 'Invoice'],
+    const items = [[can('crm.edit'), 'deal', 'trend', 'Deal'], [can('crm.edit'), 'case', 'briefcase', 'Case'], [can('agreements.manage'), 'agr', 'file', 'Agreement'], [can('finance.manage'), 'inv', 'file', 'Invoice'],
       [can('finance.manage'), 'pay', 'check', 'Payment received'], [can('finance.manage'), 'trust', 'lock', 'Retainer into trust'], [true, 'task', 'checksq', 'Task']].filter((x) => x[0]);
     d.innerHTML = items.map(([, k, ic, l]) => `<button data-n="${k}">${icon(ic)} ${l}</button>`).join('');
     e.currentTarget.parentElement.appendChild(d);
     d.onclick = (ev) => {
       const k = ev.target.closest('[data-n]')?.dataset.n; d.remove();
-      ({ deal: () => editDeal({}, { contactId: id }), case: () => editCase({}, { contactId: id }), inv: () => newInvoice(id), pay: () => receivePayment(id),
+      ({ agr: async () => (await import('./agreements.js')).newAgreement({ contactId: id }), deal: () => editDeal({}, { contactId: id }), case: () => editCase({}, { contactId: id }), inv: () => newInvoice(id), pay: () => receivePayment(id),
         trust: () => trustTxn('deposit', id), task: () => addTask() })[k]?.();
     };
     setTimeout(() => document.addEventListener('click', () => d.remove(), { once: true }));
@@ -132,7 +132,7 @@ export async function render(el, [id], { setTitle }) {
   async function showTab() {
     tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === tab));
     body.innerHTML = '<div class="loading" style="min-height:120px"><div class="spin"></div></div>';
-    ({ activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab })[tab]();
+    ({ agreements: agreementsTab, activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab })[tab]();
   }
 
   async function activityTab() {
@@ -157,6 +157,15 @@ export async function render(el, [id], { setTitle }) {
       if (er) return fail(er);
       toast('Note saved'); showTab();
     });
+  }
+  async function agreementsTab() {
+    const { agrBadge, AGR_TYPE, newAgreement } = await import('./agreements.js');
+    const { data } = await db.from('agreements').select('id, number, type, status, created_at, client_signed_at').eq('contact_id', id).order('created_at', { ascending: false });
+    body.innerHTML = `${can('agreements.manage') ? `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn btn-primary btn-sm" id="na">${icon('plus')} New agreement</button></div>` : ''}
+      ${(data || []).length ? `<table class="t"><tbody>${data.map((g) => `<tr class="click" onclick="location.hash='#/agreements/${g.id}'"><td><b>${esc(g.number)}</b><br><small style="color:var(--muted)">${esc(AGR_TYPE[g.type])}</small></td>
+        <td>${agrBadge(g.status)}</td><td>${g.client_signed_at ? 'Signed ' + fmtDate(g.client_signed_at) : fmtDate(g.created_at)}</td></tr>`).join('')}</tbody></table>`
+      : '<div class="empty">No agreements yet. An Initial Consultation Agreement is required before paid advice, and a Retainer Agreement for representation.</div>'}`;
+    body.querySelector('#na')?.addEventListener('click', () => newAgreement({ contactId: id }));
   }
   async function dealsTab() {
     const { data } = await db.from('deals').select('*, items(name)').eq('contact_id', id).order('created_at', { ascending: false });
