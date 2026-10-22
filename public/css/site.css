@@ -65,7 +65,7 @@ h3{font-size:18px;font-weight:600}
 .ring svg{width:22px;height:22px}
 
 /* Services */
-.services-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .svc{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px 18px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s,border-color .15s}
 .svc:hover{transform:translateY(-3px);border-color:#E5D3A8;box-shadow:0 16px 34px rgba(11,42,92,.1)}
 .svc-icon{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F7D88E,#E2AE45);color:var(--navy-d);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
@@ -147,6 +147,7 @@ h3{font-size:18px;font-weight:600}
 .field textarea{min-height:120px;resize:vertical}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-50)}
 .form-foot{font-size:13px;color:var(--muted);margin-top:14px;text-align:center}
+.form-steps{margin:18px 0 22px;padding-left:1.3em;line-height:1.9;font-weight:500}
 
 /* Inner page hero */
 .page-hero{background:var(--cream);padding:72px 0 60px;text-align:center;border-bottom:1px solid var(--line)}
@@ -164,6 +165,7 @@ h3{font-size:18px;font-weight:600}
 .article h2{font-size:30px;margin-bottom:18px}
 .article h3{margin:22px 0 6px}
 .article p{margin-bottom:16px;font-size:17px}
+.article p.article-date{margin:-10px 0 18px;font-size:14px;color:var(--muted)}
 .article ul,.article ol{margin:0 0 16px 22px;font-size:17px}
 .article li{margin-bottom:8px}
 .article strong{color:var(--navy)}
