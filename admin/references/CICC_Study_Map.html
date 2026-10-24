@@ -1247,11 +1247,11 @@
       </script>
     </form>
     <div class="footer-main">
-      <a href="../../public/index.html" class="brand" aria-label="Graceful Immigration Consultants — Home">
+      <a href="../../public/index.html" class="brand" aria-label="Graceful Immigration Consultant Inc. — Home">
         <img class="brand-logo" src="../../public/img/logo-emblem.png" alt="" width="220" height="161">
         <span class="brand-text">
           <span class="brand-word">Graceful</span>
-          <span class="brand-line">Immigration Consultants</span>
+          <span class="brand-line">Immigration Consultant Inc.</span>
         </span>
       </a>
       <nav class="footer-links" aria-label="Footer">
@@ -1273,13 +1273,27 @@
         <a href="https://wa.me/14039154230" target="_blank" rel="noopener" aria-label="WhatsApp"><svg><use href="#i-whatsapp"/></svg></a>
       </div>
     </div>
+    <a class="float-wa" href="https://wa.me/14039154230" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><svg><use href="#i-whatsapp"/></svg><span>Chat with us</span></a>
+    <button class="float-top" type="button" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg><use href="#i-up"/></svg></button>
+    <script>
+    (function () {
+      if (window.__giFx) return; window.__giFx = 1;
+      var top = document.querySelector('.float-top');
+      window.addEventListener('scroll', function () { top && top.classList.toggle('show', window.scrollY > 700); }, { passive: true });
+      var els = document.querySelectorAll('.reveal, main .section-head, main .svc, main .res, main .price-card, main .why-col, main .card, main .article');
+      if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      els.forEach(function (el) { el.classList.add('reveal'); });
+      var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+      els.forEach(function (el) { io.observe(el); });
+    })();
+    </script>
     <div class="footer-bottom">
-      <span>© 2026 Graceful Immigration Consultant Inc. · Aman Debesay, RCIC-IRB, College ID R1056136 · <a href="../../public/privacy.html">Privacy</a></span>
+      <span>© 2026 Graceful Immigration Consultant Inc. · Aman Debesay, RCIC-IRB, College ID R1056136 (<a href="https://register.college-ic.ca/Public-Register-EN/RCIC_Search.aspx" target="_blank" rel="noopener">verify my licence</a>) · <a href="../../public/privacy.html">Privacy</a></span>
       <div class="footer-badges">
         <img src="../../public/img/badge-rcic.png" alt="RCIC-IRB — Regulated Canadian Immigration Consultant" width="406" height="120">
         <img src="../../public/img/badge-cicc.png" alt="College of Immigration and Citizenship Consultants" width="416" height="120">
       </div>
-      <span>Guide · Support · Belong · <a href="../../public/../app/">Staff login</a></span>
+      <span>Guide · Support · Belong</span>
     </div>
   </div>
 </footer>

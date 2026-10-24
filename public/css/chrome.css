@@ -6,9 +6,9 @@
 .svg-stroke{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* Brand wordmark */
-.brand{display:inline-flex;align-items:center;gap:12px;line-height:1}
+.brand{display:inline-flex;align-items:center;gap:12px;line-height:1;flex:none}
 .brand-logo{height:60px;width:auto;flex:none}
-.brand-text{display:flex;flex-direction:column;align-items:flex-start}
+.brand-text{display:flex;flex-direction:column;align-items:flex-start;white-space:nowrap}
 .brand-word{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:34px;color:var(--c-navy);letter-spacing:-.01em;line-height:1}
 .brand-line{font-family:'Playfair Display',Georgia,serif;font-size:14.5px;color:var(--c-navy);margin-top:3px}
 .brand-tag{font-size:8.5px;font-weight:600;letter-spacing:.24em;color:var(--c-muted);margin-top:5px}
@@ -17,8 +17,8 @@
 /* Header */
 .site-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);box-shadow:0 1px 0 var(--c-line)}
 .site-header .wrap{display:flex;align-items:center;justify-content:space-between;height:92px;gap:24px}
-.site-nav{display:flex;align-items:center;gap:28px}
-.site-nav > a,.nav-drop-btn{font-family:inherit;font-size:15px;font-weight:500;color:var(--c-ink);background:none;border:0;cursor:pointer;padding:8px 0;position:relative;display:inline-flex;align-items:center;gap:5px}
+.site-nav{display:flex;align-items:center;gap:22px}
+.site-nav > a,.nav-drop-btn{white-space:nowrap;font-family:inherit;font-size:14.5px;font-weight:500;color:var(--c-ink);background:none;border:0;cursor:pointer;padding:8px 0;position:relative;display:inline-flex;align-items:center;gap:5px}
 .site-nav > a::after,.nav-drop-btn::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--c-gold);transform:scaleX(0);transition:transform .2s}
 .site-nav > a:hover::after,.site-nav > a.active::after,.nav-drop:hover .nav-drop-btn::after{transform:scaleX(1)}
 .nav-drop-btn svg{width:15px;height:15px;transition:transform .2s}
@@ -72,7 +72,7 @@
 .footer-bottom a{color:rgba(255,255,255,.55)}
 .footer-bottom a:hover{color:#fff}
 
-@media (max-width:1100px){
+@media (max-width:1240px){
   .site-nav{position:fixed;top:92px;left:0;right:0;bottom:0;overflow-y:auto;background:#fff;flex-direction:column;align-items:stretch;gap:0;padding:8px 28px 32px;display:none}
   .site-nav.open{display:flex}
   .site-nav > a,.nav-drop-btn{width:100%;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--c-line);font-size:16px}
@@ -117,3 +117,25 @@ body.app-block{display:block}
 .fn-consent{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:rgba(255,255,255,.7);width:100%}
 .fn-consent input{margin-top:2px;accent-color:#D6A23A}
 .fn-msg{font-size:13px;color:#F3D27A;width:100%;margin:0;min-height:1em}
+
+/* Login dropdown */
+.nav-login-drop .nav-menu{left:auto;right:-10px;min-width:270px}
+.nav-login-drop .nav-menu small{color:var(--c-muted);font-weight:400;font-size:12px}
+.nav-login-drop .nav-drop-btn{color:var(--c-navy);font-weight:600}
+
+/* Floating WhatsApp + back to top */
+.float-wa{position:fixed;right:22px;bottom:22px;z-index:90;display:flex;align-items:center;gap:10px;background:#25D366;color:#fff!important;border-radius:999px;padding:12px 18px 12px 14px;font-weight:600;font-size:14px;box-shadow:0 10px 26px rgba(37,211,102,.4);transition:transform .2s}
+.float-wa:hover{transform:translateY(-3px)}
+.float-wa svg{width:24px;height:24px}
+.float-wa::after{content:'';position:absolute;inset:-6px;border-radius:999px;border:2px solid #25D366;opacity:0;animation:waPulse 2.6s ease-out infinite}
+@keyframes waPulse{0%{opacity:.6;transform:scale(.9)}100%{opacity:0;transform:scale(1.25)}}
+.float-top{position:fixed;right:28px;bottom:86px;z-index:90;width:44px;height:44px;border-radius:50%;border:0;background:var(--c-navy);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(11,42,92,.3);opacity:0;pointer-events:none;transform:translateY(10px);transition:.25s}
+.float-top.show{opacity:1;pointer-events:auto;transform:none}
+.float-top svg{width:22px;height:22px}
+@media (max-width:640px){.float-wa span{display:none}.float-wa{padding:14px}.float-top{right:24px;bottom:84px}}
+html.embed .float-wa,html.embed .float-top{display:none}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease;transition-delay:var(--d,0s)}
+.reveal.in{opacity:1;transform:none}
+@media print{.float-wa,.float-top{display:none}.reveal{opacity:1;transform:none}}
