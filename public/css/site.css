@@ -283,3 +283,17 @@ h3{font-size:18px;font-weight:600}
 
 @media (max-width:1100px){.journey{grid-template-columns:repeat(3,1fr);row-gap:36px}.journey::before{display:none}.consultant,.faq-wrap{grid-template-columns:1fr;gap:40px}}
 @media (max-width:640px){.journey{grid-template-columns:1fr 1fr}.jphoto{width:140px;height:140px}.c-badge{right:6px}}
+
+/* Service cards with photos */
+.svc.svc-photo{padding:0 0 22px;overflow:hidden;background:#FEFCF7;text-align:left;align-items:stretch}
+.svc-img{position:relative;aspect-ratio:47/19;overflow:hidden}
+.svc-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
+.svc-photo:hover .svc-img img{transform:scale(1.06)}
+.svc-wave{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:34px}
+.svc-photo .svc-icon{width:66px;height:66px;margin:-46px auto 10px;position:relative;z-index:1;background:var(--navy-d,#0B2A5C);color:#F2C462;border:4px solid #E2AE45;box-shadow:0 6px 16px rgba(11,42,92,.25)}
+.svc-photo h3{font-family:var(--serif,"Playfair Display",Georgia,serif);font-size:21px;text-align:center;padding:0 18px;margin-bottom:12px}
+.svc-photo ul{padding:0 26px 0 30px;font-size:14px;color:var(--ink,#2b3446)}
+.svc-photo li{position:relative;padding-left:20px;margin:3px 0}
+.svc-photo li::before{content:"";position:absolute;left:0;top:.55em;width:8px;height:8px;border-radius:2px;background:#E2AE45;transform:rotate(45deg)}
+.svc-photo .svc-arrow{align-self:flex-end;margin:14px 22px 0 0;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F7D88E,#E2AE45);color:var(--navy-d,#0B2A5C);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(226,174,69,.4);transition:transform .2s}
+.svc-photo:hover .svc-arrow{transform:translateX(4px)}
