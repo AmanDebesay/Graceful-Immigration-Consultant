@@ -8,7 +8,6 @@ const lines = (t) => String(t || '').split(/\n+/).map((s) => s.trim()).filter(Bo
 const bullets = (t, fallback = '') => { const l = lines(t); return l.length ? `<ul>${l.map((x) => `<li>${e(x)}</li>`).join('')}</ul>` : fallback; };
 const para = (t) => lines(t).map((x) => `<p>${e(x)}</p>`).join('');
 const longDate = (d) => (d ? new Date(d + 'T00:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' }) : '________________');
-const initials = () => `<div class="ini">Client initials: <span class="gi-initials">______</span></div>`;
 
 export const CICC = {
   name: 'College of Immigration and Citizenship Consultants (CICC)',
@@ -57,160 +56,228 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
   return d;
 }
 
+const LOGO = 'https://gracefulimmigration.ca/public/img/logo-emblem.png';
+const BILLING = {
+  flat: 'Flat fee billing with payment by milestones',
+  flat_dates: 'Flat fee billing with payment on predetermined dates',
+  hourly: 'Billing by the hour',
+  daily: 'Billing by the day',
+};
+
 const STYLE = `<style>
-.gi-agr{font-family:Georgia,'Times New Roman',serif;color:#1C2333;font-size:14.5px;line-height:1.6;max-width:800px;margin:0 auto}
-.gi-agr h1{font-size:22px;text-align:center;color:#0B2A5C;margin:0 0 4px;letter-spacing:.04em}
-.gi-agr .sub{text-align:center;color:#5B6476;font-size:13px;margin-bottom:22px}
-.gi-agr h2{font-size:15.5px;color:#0B2A5C;margin:22px 0 6px;font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:.04em}
-.gi-agr p{margin:0 0 9px}.gi-agr ul{margin:0 0 9px 22px}.gi-agr li{margin-bottom:4px}
-.gi-agr .parties{display:grid;grid-template-columns:1fr 1fr;gap:18px;border:1px solid #E3DCCD;border-radius:8px;padding:14px 16px;margin:10px 0 14px;font-size:13.5px}
-.gi-agr .parties b{display:block;color:#0B2A5C;font-family:Arial,sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
-.gi-agr table{width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:13px;font-family:Arial,sans-serif}
-.gi-agr th,.gi-agr td{border:1px solid #D9D4C7;padding:7px 9px;text-align:left;vertical-align:top}.gi-agr th{background:#F6F2E9}
-.gi-agr .r{text-align:right}.gi-agr .ini{text-align:right;font-family:Arial,sans-serif;font-size:12px;color:#5B6476;margin:4px 0 8px}
-.gi-agr .gi-initials{font-weight:700;color:#0B2A5C;border-bottom:1px solid #999;padding:0 10px}
-.gi-agr .sigs{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}
-.gi-agr .sig{border-top:1px solid #333;padding-top:6px;font-size:13px;min-height:110px}
-.gi-agr .sig .gi-sig{height:70px;display:flex;align-items:flex-end;margin-top:-80px;margin-bottom:10px}
-.gi-agr .sig img{max-height:70px;max-width:260px}.gi-agr .typed{font-family:'Brush Script MT',cursive;font-size:30px;color:#0B2A5C}
-.gi-agr .note{font-size:12px;color:#5B6476;font-family:Arial,sans-serif}
-@media (max-width:640px){.gi-agr .parties,.gi-agr .sigs{grid-template-columns:1fr}}
+.gi-agr{font-family:Georgia,'Times New Roman',serif;color:#1C2333;font-size:14px;line-height:1.62;max-width:820px;margin:0 auto;position:relative}
+.gi-agr *{box-sizing:border-box}
+.gi-agr .lh{display:flex;align-items:center;gap:18px;padding-bottom:14px;border-bottom:3px double #C9A24A}
+.gi-agr .lh img{width:74px;height:auto;flex:none}
+.gi-agr .lh-name{flex:1}
+.gi-agr .lh-name b{display:block;font-size:24px;color:#0B2A5C;letter-spacing:.06em;line-height:1.1}
+.gi-agr .lh-name span{display:block;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#9A7420;margin-top:4px}
+.gi-agr .lh-name small{display:block;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;color:#5B6476;margin-top:5px}
+.gi-agr .lh-contact{text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;color:#3B4456;line-height:1.55}
+.gi-agr .title{text-align:center;margin:26px 0 6px}
+.gi-agr .title h1{font-size:25px;letter-spacing:.14em;color:#0B2A5C;margin:0;font-weight:700}
+.gi-agr .title .kind{font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#9A7420;margin-top:4px}
+.gi-agr .orn{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 4px;color:#C9A24A}
+.gi-agr .orn i{display:block;height:1px;width:90px;background:linear-gradient(90deg,transparent,#C9A24A)}.gi-agr .orn i:last-child{background:linear-gradient(90deg,#C9A24A,transparent)}
+.gi-agr .meta{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:10px 0 22px;font-family:Arial,Helvetica,sans-serif;font-size:11.5px}
+.gi-agr .meta span{border:1px solid #E3D3AA;background:#FFFBF2;border-radius:999px;padding:3px 12px;color:#3B4456}.gi-agr .meta b{color:#0B2A5C}
+.gi-agr .parties{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #E3DCCD;border-radius:10px;overflow:hidden;margin:0 0 16px;font-size:13.2px}
+.gi-agr .parties > div{padding:14px 16px}.gi-agr .parties > div + div{border-left:1px solid #E3DCCD;background:#FCFAF5}
+.gi-agr .parties .lbl{display:block;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#9A7420;margin-bottom:6px}
+.gi-agr .parties .nm{display:block;font-size:16px;color:#0B2A5C;font-weight:700;margin-bottom:2px}
+.gi-agr .glance{border:1px solid #D9C48E;background:linear-gradient(180deg,#FFFBF2,#FFF7E6);border-radius:10px;padding:12px 16px;margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:12.5px}
+.gi-agr .glance h3{font-family:Georgia,serif;font-size:14px;color:#0B2A5C;margin:0 0 8px;letter-spacing:.06em;text-transform:uppercase}
+.gi-agr .glance dl{display:grid;grid-template-columns:170px 1fr;gap:5px 12px;margin:0}.gi-agr .glance dt{color:#6B5A2E;font-weight:700}.gi-agr .glance dd{margin:0;color:#1C2333}
+.gi-agr .intro{font-size:13.6px;color:#2A3142;text-align:justify}
+.gi-agr h2{display:flex;align-items:center;gap:10px;font-family:Arial,Helvetica,sans-serif;font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;color:#0B2A5C;margin:24px 0 8px;padding-bottom:6px;border-bottom:1px solid #EFE6D2;page-break-after:avoid;break-after:avoid}
+.gi-agr h2 .n{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:50%;background:#0B2A5C;color:#F2C462;font-size:12px;letter-spacing:0}
+.gi-agr p{margin:0 0 9px;text-align:justify}.gi-agr ul{margin:0 0 9px 22px;padding:0}.gi-agr li{margin-bottom:4px}
+.gi-agr table{width:100%;border-collapse:collapse;margin:8px 0 12px;font-size:12.5px;font-family:Arial,Helvetica,sans-serif;page-break-inside:avoid}
+.gi-agr th,.gi-agr td{border:1px solid #DED6C4;padding:7px 9px;text-align:left;vertical-align:top}
+.gi-agr thead th{background:#0B2A5C;color:#fff;font-weight:600;border-color:#0B2A5C}
+.gi-agr tfoot th{background:#FBF4E3;color:#0B2A5C}
+.gi-agr .r{text-align:right;white-space:nowrap}
+.gi-agr .ini{display:flex;justify-content:flex-end;align-items:center;gap:8px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6B7385;margin:2px 0 10px;letter-spacing:.06em;text-transform:uppercase}
+.gi-agr .gi-initials{display:inline-block;min-width:64px;text-align:center;font-weight:700;font-size:13px;color:#0B2A5C;border:1px solid #C9A24A;border-radius:6px;padding:2px 8px;letter-spacing:.1em;background:#FFFDF8}
+.gi-agr .callout{border-left:3px solid #C9A24A;background:#FCFAF5;padding:8px 12px;margin:6px 0 10px;font-size:13.2px}
+.gi-agr .sigpage{margin-top:28px;border:1px solid #E3DCCD;border-radius:12px;padding:18px 20px 14px;background:#FFFEFB;page-break-inside:avoid;break-inside:avoid}
+.gi-agr .sigpage h2{margin-top:0}
+.gi-agr .sigs{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:18px}
+.gi-agr .sig{font-family:Arial,Helvetica,sans-serif;font-size:12.5px;color:#3B4456}
+.gi-agr .sig .gi-sig{height:74px;display:flex;align-items:flex-end;border-bottom:1.5px solid #1C2333;margin-bottom:6px}
+.gi-agr .sig img{max-height:70px;max-width:260px}.gi-agr .typed{font-family:'Brush Script MT','Segoe Script',cursive;font-size:30px;color:#0B2A5C}
+.gi-agr .sig b{color:#0B2A5C}
+.gi-agr .note{font-size:11.5px;color:#6B7385;font-family:Arial,Helvetica,sans-serif}
+.gi-agr .foot{margin-top:22px;padding-top:10px;border-top:3px double #C9A24A;display:flex;justify-content:space-between;gap:10px;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;color:#6B7385}
+.gi-agr .runfoot{display:none}
+@media (max-width:640px){.gi-agr .lh{flex-wrap:wrap}.gi-agr .lh-contact{text-align:left;width:100%}.gi-agr .parties,.gi-agr .sigs{grid-template-columns:1fr}.gi-agr .parties > div + div{border-left:0;border-top:1px solid #E3DCCD}.gi-agr .glance dl{grid-template-columns:1fr}}
+@media print{
+  @page{margin:16mm 15mm 20mm}
+  .gi-agr{font-size:11.5pt;max-width:none}
+  .gi-agr .runfoot{display:flex;position:fixed;bottom:-12mm;left:0;right:0;justify-content:space-between;font-family:Arial,Helvetica,sans-serif;font-size:8pt;color:#6B7385;border-top:1px solid #E3DCCD;padding-top:3mm}
+}
 </style>`;
 
-function header(title, d, extra = '') {
-  return `<h1>${e(title)}</h1><div class="sub">${e(d.business_name)} · Agreement date: ${longDate(d.agreement_date)}${extra}</div>
-  <div class="parties"><div><b>Regulated Canadian Immigration Consultant</b>${e(d.rcic_name)}<br>College ID: ${e(d.rcic_id)}<br>${e(d.business_name)}<br>${e(d.business_address)}<br>${e(d.business_phone)} · ${e(d.business_email)}</div>
-    <div><b>Client</b>${e(d.client_name)}${d.client_dob ? `<br>Date of birth: ${longDate(d.client_dob)}` : ''}<br>${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone)}${d.client_email ? ' · ' + e(d.client_email) : ''}</div></div>`;
+const H = (n, t) => `<h2><span class="n">${n}</span>${t}</h2>`;
+const glanceRow = (k, v) => (v ? `<dt>${k}</dt><dd>${v}</dd>` : '');
+
+function letterhead(d, title, kind, extra = '') {
+  return `<div class="lh"><img src="${LOGO}" alt="Graceful Immigration Consultant Inc.">
+    <div class="lh-name"><b>${e(d.business_name)}</b><span>Guide · Support · Belong</span><small>${e(d.rcic_name)}, Regulated Canadian Immigration Consultant (RCIC-IRB) · College ID ${e(d.rcic_id)}</small></div>
+    <div class="lh-contact">${e(d.business_address)}<br>${e(d.business_phone)}<br>${e(d.business_email)}<br>gracefulimmigration.ca</div></div>
+  <div class="title"><h1>${e(title)}</h1><div class="kind">${e(kind)}</div><div class="orn"><i></i>✦<i></i></div></div>
+  <div class="meta">${d.number ? `<span>Agreement no. <b>${e(d.number)}</b></span>` : ''}<span>Date <b>${longDate(d.agreement_date)}</b></span>${extra}<span>Written in <b>English</b></span></div>
+  <div class="parties"><div><span class="lbl">Licensee (RCIC)</span><span class="nm">${e(d.rcic_name)}</span>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>${e(d.business_name)}<br>${e(d.business_address)}<br>${e(d.business_phone)} · ${e(d.business_email)}</div>
+    <div><span class="lbl">Client</span><span class="nm">${e(d.client_name)}</span>${d.client_dob ? `Date of birth: ${longDate(d.client_dob)}<br>` : ''}${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone || 'Phone: ________________')}${d.client_email ? ' · ' + e(d.client_email) : ''}</div></div>`;
 }
-function signatures(d, title) {
-  return `<h2>Signatures</h2><p>IN WITNESS WHEREOF this ${e(title)} has been executed by the parties on the dates written below.</p>
-  <div class="sigs"><div class="sig"><div class="gi-sig" data-sig="client"></div>Client: <b>${e(d.client_name)}</b><br>Date: <span data-sig-date="client">________________</span></div>
-    <div class="sig"><div class="gi-sig" data-sig="rcic"></div>RCIC: <b>${e(d.rcic_name)}</b>, College ID ${e(d.rcic_id)}<br>Date: <span data-sig-date="rcic">________________</span></div></div>
-  <p class="note" style="margin-top:14px">Digital signatures are legally recognized under the federal Personal Information Protection and Electronic Documents Act (PIPEDA) and provincial legislation, and by CICC By-law 2021-2, s.1.1(aa).</p>`;
+function runningFooter(d, title) {
+  return `<div class="runfoot"><span>${e(d.business_name)} · ${e(title)}${d.number ? ' · ' + e(d.number) : ''}</span><span>Client initials: ________</span></div>`;
 }
-const regulator = `<p>The RCIC is licensed and regulated by the ${CICC.name}, the national regulator of immigration and citizenship consultants. ${CICC.address}. Telephone ${CICC.phone}. Email ${CICC.email}. Website ${CICC.web}.</p>`;
+function signatures(d, title, n) {
+  return `<div class="sigpage">${H(n, 'Signatures')}
+  <p>IN WITNESS WHEREOF, the Client and the RCIC have each read this ${e(title)} and signed it personally (not through a designate) on the dates written below. Where the parties are not physically together, signatures are given electronically, a method both parties agree to.</p>
+  <div class="sigs"><div class="sig"><div class="gi-sig" data-sig="client"></div><b>${e(d.client_name)}</b><br>Client<br>Date: <span data-sig-date="client">________________</span></div>
+    <div class="sig"><div class="gi-sig" data-sig="rcic"></div><b>${e(d.rcic_name)}</b><br>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>Date: <span data-sig-date="rcic">________________</span></div></div>
+  <p class="note" style="margin-top:14px">Electronic signatures are legally recognized under the Personal Information Protection and Electronic Documents Act (PIPEDA), Alberta's Electronic Transactions Act and CICC By-law 2021-2, s.1.1(aa). The signed document is fingerprinted (SHA-256) so any later change can be detected.</p></div>`;
+}
+function closing(d) {
+  return `<div class="foot"><span>${e(d.business_name)} · ${e(d.business_address)}</span><span>${e(d.rcic_name)} · CICC College ID ${e(d.rcic_id)}</span></div>`;
+}
+const regulator = `<p>The RCIC is a Licensee of the ${CICC.name}, the national regulator of immigration and citizenship consultants in Canada. ${CICC.address}. Telephone ${CICC.phone}. Email ${CICC.email}. Website ${CICC.web}.</p>`;
 
 function consultation(d) {
   const tax = Math.round(Number(d.fee || 0) * Number(d.gst_rate || 0)) / 100;
-  return `${STYLE}<div class="gi-agr">${header('INITIAL CONSULTATION AGREEMENT', d)}
-  <p>This Initial Consultation Agreement (the “Agreement”) is made between the Regulated Canadian Immigration Consultant (the “RCIC”) and the Client named above, as required by section 4.1 of the Retainer Agreement Regulation before advice is given for a fee.</p>
-  <h2>1. Purpose and scope of the consultation</h2>
+  const total = Number(d.fee || 0) + tax;
+  return `${STYLE}<div class="gi-agr">${letterhead(d, 'INITIAL CONSULTATION AGREEMENT', 'Retainer Agreement Regulation, section 4.1')}
+  <div class="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Consultation', `${longDate(d.consult_date)} · ${e(d.consult_length)} · ${e(d.consult_method)}`)}${glanceRow('Purpose', e(d.purpose))}
+    ${glanceRow('Fee', `${money(total)} CAD${d.gst_rate ? ` (incl. GST ${money(tax)})` : ' (GST not applicable)'}`)}${glanceRow('Language of service', e(d.language))}</dl></div>
+  <p class="intro">This Initial Consultation Agreement (the “Agreement”) is made between the Regulated Canadian Immigration Consultant named above (the “RCIC”) and the Client, as required by section 4.1 of the Retainer Agreement Regulation of the College of Immigration and Citizenship Consultants before advice is given for a fee. It records the purpose, the fee and the date of the consultation.</p>
+  ${H(1, 'Purpose and scope of the consultation')}
   <p>This Agreement is for a one-time initial consultation only, specifically for: <b>${e(d.purpose)}</b></p>
-  <p>Consultation: ${longDate(d.consult_date)} · ${e(d.consult_length)} · ${e(d.consult_method)}.</p>
-  <p>No immigration application preparation, submission or ongoing representation is included under this Agreement. Any further services will require a separate written Retainer (Service) Agreement.</p>
-  <h2>2. Limited-scope service</h2>
-  <ul><li>The consultation is limited to general information, assessment and guidance based on the information provided by the Client.</li>
+  <p>The consultation will take place on ${longDate(d.consult_date)}, for ${e(d.consult_length)}, by ${e(d.consult_method)}.</p>
+  <p>No immigration application preparation, submission or ongoing representation is included. Any further services require a separate written Retainer (Service) Agreement.</p>
+  ${H(2, 'Limited-scope service')}
+  <ul><li>The consultation is limited to general information, assessment and guidance based on the information the Client provides.</li>
     <li>The RCIC will not act as the Client's representative before Immigration, Refugees and Citizenship Canada (IRCC), the Immigration and Refugee Board (IRB) or any other authority under this Agreement.</li>
-    <li>No forms will be filed and no submissions will be made on the Client's behalf unless a separate Retainer Agreement is signed.</li></ul>
-  <h2>3. No guarantee of outcome</h2>
-  <p>Any opinion or information provided is based solely on the information the Client provides at the time of the consultation. The RCIC does not guarantee eligibility, approval, processing times or any particular outcome; all decisions are made by government authorities.</p>
-  <h2>4. Consultation fee</h2>
-  <table><tr><th>Description</th><th class="r">Amount (CAD)</th></tr><tr><td>Consultation fee</td><td class="r">${money(d.fee)}</td></tr>
-    <tr><td>GST ${d.gst_rate ? `(${d.gst_rate}%)` : ''}</td><td class="r">${d.gst_rate ? money(tax) : 'Not applicable'}</td></tr>
-    <tr><th>Total</th><th class="r">${money(Number(d.fee || 0) + tax)}</th></tr></table>
+    <li>No forms will be filed and no submissions made on the Client's behalf unless a separate Retainer Agreement is signed.</li></ul>
+  ${H(3, 'No guarantee of outcome')}
+  <p>Any opinion given is based solely on the information the Client provides at the time of the consultation. The RCIC does not guarantee eligibility, approval, processing times or any particular outcome; all decisions are made by government authorities.</p>
+  ${H(4, 'Consultation fee')}
+  <table><thead><tr><th>Description</th><th class="r">Amount (CAD)</th></tr></thead><tbody><tr><td>Consultation fee</td><td class="r">${money(d.fee)}</td></tr>
+    <tr><td>GST ${d.gst_rate ? `(${e(d.gst_rate)}%)` : ''}</td><td class="r">${d.gst_rate ? money(tax) : 'Not applicable'}</td></tr></tbody>
+    <tfoot><tr><th>Total payable in advance</th><th class="r">${money(total)}</th></tr></tfoot></table>
   <p>Payment method: ${e(d.payment_method)}. The fee is earned once the consultation has taken place and is non-refundable, unless otherwise required by law. If the RCIC cancels and the consultation is not rescheduled, the fee will be refunded in full.</p>
-  <h2>5. Confidentiality</h2>
-  <p>Under section 28 of the Code of Professional Conduct, the RCIC must keep confidential all information relating to the Client acquired in the course of the professional relationship, unless disclosure is authorized by the Client or required by law.</p>
-  <h2>6. Privacy and consent</h2>
-  <p>The Client consents to the collection, use and storage of personal information for the purpose of this consultation, in accordance with the Personal Information Protection and Electronic Documents Act (PIPEDA) and Alberta's Personal Information Protection Act. Records are stored securely in Canada. The Client understands that communication may occur by email or other electronic means and accepts the inherent risks of electronic communication.</p>
-  <h2>7. Language</h2><p>The consultation will be provided in ${e(d.language)}. The Client may arrange an interpreter.</p>
-  <h2>8. Regulator and complaints</h2>${regulator}<p>Information about the College's complaints process: ${CICC.complaints}</p>
-  <h2>9. Governing law</h2><p>This Agreement is governed by the laws of the Province of ${e(d.province)} and the federal laws of Canada applicable therein.</p>
-  <h2>10. Acknowledgement</h2><p>The Client acknowledges that they have read and understood this Agreement, had the opportunity to ask questions, and agree to be bound by its terms.</p>
-  ${initials()}${signatures(d, 'Initial Consultation Agreement')}</div>`;
+  ${H(5, 'Confidentiality and privacy')}
+  <p>The RCIC must keep confidential all information about the Client acquired in the professional relationship, as required by the Code of Professional Conduct, unless disclosure is authorized by the Client or required by law. The Client consents to the collection, use and secure storage in Canada of personal information for this consultation, in accordance with PIPEDA and Alberta's Personal Information Protection Act, and accepts the risks of communication by email or other electronic means.</p>
+  ${H(6, 'Language')}<p>This Agreement is written in English. The consultation will be provided in ${e(d.language)}. The Client may bring or arrange an interpreter.</p>
+  ${H(7, 'Regulator and complaints')}${regulator}<p>Information about the College's complaints process: ${CICC.complaints}</p>
+  ${H(8, 'Governing law')}<p>This Agreement is governed by the laws of the Province of ${e(d.province)} and the federal laws of Canada applicable therein.</p>
+  ${H(9, 'Acknowledgement')}<p>The Client acknowledges that they have read and understood this Agreement, had the opportunity to ask questions, and agree to be bound by its terms. The Client will receive a copy of the signed Agreement by email.</p>
+  <div class="ini">Client initials <span class="gi-initials">______</span></div>
+  ${signatures(d, 'Initial Consultation Agreement', 10)}${closing(d)}${runningFooter(d, 'Initial Consultation Agreement')}</div>`;
 }
 
 function retainer(d) {
   const rate = Number(d.gst_rate || 0);
+  const billing = BILLING[d.billing] ? d.billing : 'flat';
   const ms = (d.milestones || []).filter((m) => m.name);
   const msTotal = ms.reduce((s, m) => s + Number(m.fee || 0), 0);
+  const disbTotal = ms.reduce((s, m) => s + Number(m.disb || 0), 0);
   const tax = (v) => Math.round(Number(v || 0) * rate) / 100;
-  const fees = d.billing === 'hourly'
-    ? `<p>The Client will be billed by the <b>hourly</b> method. This method will not be changed for the services in this Agreement.</p>
-       <table><tr><th>Hourly rate</th><th>Anticipated hours</th><th class="r">Estimated professional fees</th></tr>
-       <tr><td>${money(d.hourly_rate)} per hour</td><td>${e(d.est_hours)}</td><td class="r">${money(Number(d.hourly_rate || 0) * Number(d.est_hours || 0))}</td></tr></table>
-       <p>Schedule of payments: ${e(d.hourly_schedule)}. Each invoice will itemize the services rendered, the dates and the time spent.</p>`
-    : `<p>The Client will be billed by the <b>flat fee</b> method with payment by milestones. This method will not be changed for the services in this Agreement; if the Agreement ends early, earned fees are determined by the milestones completed.</p>
-       <table><tr><th>Milestone (fee earned when completed)</th><th>What is included</th><th class="r">Fee</th><th class="r">GST</th><th class="r">Total</th></tr>
-       ${ms.map((m) => `<tr><td>${e(m.name)}</td><td>${e(m.included)}</td><td class="r">${money(m.fee)}</td><td class="r">${rate ? money(tax(m.fee)) : 'N/A'}</td><td class="r">${money(Number(m.fee || 0) + tax(m.fee))}</td></tr>`).join('')}
-       <tr><th colspan="2">Total professional fees</th><th class="r">${money(msTotal)}</th><th class="r">${rate ? money(tax(msTotal)) : 'N/A'}</th><th class="r">${money(msTotal + tax(msTotal))}</th></tr></table>
-       <p>An invoice is issued when each milestone is completed and is payable within ${e(d.payment_days)} days.</p>`;
-  return `${STYLE}<div class="gi-agr">${header('RETAINER (SERVICE) AGREEMENT', d, d.file_number ? ` · File no. ${e(d.file_number)}` : '')}
-  <p>This Service Agreement contains the terms and conditions the RCIC will follow in providing immigration and/or citizenship services to the Client. It is made in accordance with the College of Immigration and Citizenship Consultants Act, the Code of Professional Conduct and the Retainer Agreement Regulation. The RCIC is licensed and regulated by the College of Immigration and Citizenship Consultants (the “College”). Both parties agree to the terms below and accept the responsibilities and obligations they set out.</p>
+  const per = billing === 'daily' ? ['day', d.daily_rate, d.est_days] : ['hour', d.hourly_rate, d.est_hours];
+  const est = Number(per[1] || 0) * Number(per[2] || 0);
+  const totalFees = billing === 'hourly' || billing === 'daily' ? est : msTotal;
+  const fees = billing === 'hourly' || billing === 'daily'
+    ? `<p>Professional fees are determined by <b>${BILLING[billing].toLowerCase()}</b>. This method will not change for the services in this Agreement.</p>
+       <table><thead><tr><th>Rate</th><th>Anticipated ${per[0]}s</th><th class="r">Estimated professional fees</th><th class="r">GST</th><th class="r">Estimated total</th></tr></thead>
+       <tbody><tr><td>${money(per[1])} per ${per[0]}</td><td>${e(per[2])}</td><td class="r">${money(est)}</td><td class="r">${rate ? money(tax(est)) : 'Not applicable'}</td><td class="r">${money(est + tax(est))}</td></tr></tbody></table>
+       <p>Schedule of payments: ${e(d.hourly_schedule)}. Invoices will be provided ${e(d.invoice_frequency || 'monthly')} and will list the services rendered, the dates and the time spent.</p>`
+    : `<p>Professional fees are determined by <b>${BILLING[billing].toLowerCase()}</b>. This method will not change for the services in this Agreement; if the Agreement ends early, earned fees are those of the milestones completed. The milestones below are listed in chronological order.</p>
+       <table><thead><tr><th>#</th><th>Milestone${billing === 'flat_dates' ? ' and due date' : ' (fee earned when completed)'}</th><th>What is included</th><th class="r">Professional fee</th><th class="r">GST</th><th class="r">Est. disbursements</th></tr></thead>
+       <tbody>${ms.map((m, i) => `<tr><td>${i + 1}</td><td>${e(m.name)}${billing === 'flat_dates' && m.due ? `<br><small>Due ${longDate(m.due)}</small>` : ''}</td><td>${e(m.included)}</td><td class="r">${money(m.fee)}</td><td class="r">${rate ? money(tax(m.fee)) : 'N/A'}</td><td class="r">${Number(m.disb) ? money(m.disb) : '—'}</td></tr>`).join('')}</tbody>
+       <tfoot><tr><th colspan="3">Totals</th><th class="r">${money(msTotal)}</th><th class="r">${rate ? money(tax(msTotal)) : 'N/A'}</th><th class="r">${disbTotal ? money(disbTotal) : '—'}</th></tr>
+       <tr><th colspan="5">Total professional fees including GST</th><th class="r">${money(msTotal + tax(msTotal))}</th></tr></tfoot></table>
+       <p>${billing === 'flat_dates' ? 'Each payment is due on the date shown.' : 'An invoice is issued when each milestone is completed.'} Invoices are payable within ${e(d.payment_days)} days.</p>`;
+  return `${STYLE}<div class="gi-agr">${letterhead(d, 'RETAINER AGREEMENT', 'Service Agreement for Immigration and Citizenship Services', d.file_number ? `<span>File no. <b>${e(d.file_number)}</b></span>` : '')}
+  <div class="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Category and program', e(d.program || '________________'))}${glanceRow('Billing method', BILLING[billing])}
+    ${glanceRow(billing === 'hourly' || billing === 'daily' ? 'Estimated professional fees' : 'Total professional fees', `${money(totalFees)} + ${rate ? `GST ${money(tax(totalFees))}` : 'GST not applicable'} = <b>${money(totalFees + tax(totalFees))}</b> CAD`)}
+    ${glanceRow('Retainer held in trust', Number(d.retainer) > 0 ? money(d.retainer) : 'None')}${glanceRow('Language of service', e(d.language))}
+    ${glanceRow('Preferred correspondence', e(d.comm_methods))}</dl></div>
+  <p class="intro">This Retainer Agreement (the “Agreement”) sets out the exact duties of the Regulated Canadian Immigration Consultant named above (the “RCIC”) and of the Client, so that both parties have clear expectations about what will be provided, how it will be provided and at what cost. It is made in accordance with the College of Immigration and Citizenship Consultants Act, the Code of Professional Conduct and the Retainer Agreement Regulation. The RCIC is a Licensee of the College of Immigration and Citizenship Consultants (the “College”).</p>
 
-  <h2>1. Summary of preliminary advice</h2>
+  ${H(1, 'Summary of preliminary advice')}
   ${para(d.preliminary_advice) || '<p>________________</p>'}${d.consultation_ref ? `<p>Reference: Initial Consultation Agreement ${e(d.consultation_ref)}.</p>` : ''}
-  <p>The RCIC has also advised that any existing or potential criminal matter may affect the outcome and that additional documents may be required; the RCIC does not provide criminal law advice.</p>${initials()}
+  <p>The RCIC has also advised that any existing or potential criminal matter may affect the outcome and that additional documents may be required; the RCIC does not provide criminal law advice.</p>
+  <div class="ini">Client initials <span class="gi-initials">______</span></div>
 
-  <h2>2. General provisions</h2>
-  <p>The RCIC commits to providing the Client with quality immigration and/or citizenship services and to adequately supervising any person who assists with these services.</p>
-  <p>People likely to assist the RCIC with these services: ${e(d.assistants || 'None at this time. The Client will be informed in writing if this changes.')}</p>
-  <p>When necessary, the RCIC will obtain assistance from other professionals or services, including an interpreter or translator. The RCIC will keep the Client informed and will obtain the Client's written consent before any additional fees are incurred.</p>
-  <p>The RCIC will provide professional, ethical and competent services as required by the College's Code of Professional Conduct. A copy of the Code has been provided to the Client: ${CICC.code}</p>
-  <p>The RCIC will provide services in <b>${e(d.language)}</b>. The RCIC will return any original documents provided by the Client as soon as the purpose for which they were taken is completed.</p>
-  <p>The RCIC will provide timely updates on the status of the Client's case, including when new information, requests or decisions are made by the government and when key milestones are completed. Updates and government correspondence will be shared within ${e(d.update_time)} of receipt. The RCIC will respond to the Client's inquiries within ${e(d.response_time)}. Communication will be by: ${e(d.comm_methods)}.</p>
-  <p>The RCIC will provide the Client with a signed copy of this Service Agreement.</p>
+  ${H(2, 'General provisions')}
+  <p>The RCIC commits to providing quality immigration and/or citizenship services and to adequately supervising any person who assists with them. People likely to assist the RCIC: ${e(d.assistants || 'none at this time; the Client will be told in writing if this changes')}.</p>
+  <p>When necessary, the RCIC will obtain assistance from other professionals or services, including an interpreter or translator, and will obtain the Client's written consent before any additional fees are incurred. The RCIC will provide professional, ethical and competent services as required by the College's Code of Professional Conduct (${CICC.code}).</p>
+  <p>The RCIC will provide services in <b>${e(d.language)}</b>; this Agreement is written in English. Original documents provided by the Client will be returned as soon as their purpose is complete.</p>
+  <p>The RCIC will keep the Client informed of the status of the file, including new government requests or decisions and the completion of key milestones. Government correspondence will be shared within ${e(d.update_time)} of receipt, and the RCIC will respond to the Client's inquiries within ${e(d.response_time)}.</p>
 
-  <h2>3. Authorization to act</h2>
-  <p>The Client expressly authorizes the RCIC to act on the Client's behalf to the extent of the specific services described in this Agreement, including by completing a Use of a Representative form (IMM 5476) where required.</p>
+  ${H(3, 'Authorization to act')}
+  <p>The Client expressly authorizes the RCIC to act on the Client's behalf to the extent of the specific services described in this Agreement, including by completing a Use of a Representative form (IMM 5476) where required. Once this Agreement is signed, the Client may appoint a designate in writing to deal with the RCIC on their behalf.</p>
 
-  <h2>4. Services to be provided</h2>
-  <p>The RCIC will represent the Client and act on the Client's behalf in the following immigration and/or citizenship category and program: <b>${e(d.program || '________________')}</b></p>
-  <p>The scope of services and major steps will include:</p>${bullets(d.scope)}
+  ${H(4, 'Services to be provided')}
+  <p>The RCIC will represent the Client in the following immigration and/or citizenship category and program: <b>${e(d.program || '________________')}</b></p>
+  <p>The scope of services and major steps:</p>${bullets(d.scope)}
   <p>Estimated timeframes:</p>${bullets(d.timeframes)}
-  <p>Once an application is submitted, the RCIC is not in control of government processing times, which may change at any time.</p>
+  <p class="callout">Once an application is submitted, government processing times are outside the RCIC's control and may change at any time.</p>
 
-  <h2>5. Client instructions</h2>
+  ${H(5, 'Client instructions and designate')}
   ${para(d.instructions) || '<p>No additional instructions.</p>'}
-  <p>Persons the Client authorizes to receive file updates or communicate with the RCIC on the Client's behalf: ${e(d.designate || 'None. Any designate must be appointed by the Client in writing, stating the duties and duration of their authority.')}</p>
+  <p>Designate authorized to receive file updates or communicate with the RCIC: ${e(d.designate || 'none. A designate must be appointed by the Client in writing, stating the duties conferred and the duration of the authority; a designate may not be paid for acting as designate')}.</p>
 
-  <h2>6. Services not included</h2>${bullets(d.excluded, '<p>None listed.</p>')}
-  <p>If the Client wishes the RCIC to provide additional services, a separate Service Agreement or a signed addendum to this Agreement will be required before that work begins.</p>
+  ${H(6, 'Services not included')}${bullets(d.excluded, '<p>None listed.</p>')}
+  <p>This Agreement applies only to immigration and citizenship services. If the Client requests additional services, a separate Retainer Agreement or a signed addendum to this Agreement will be required before that work begins.</p>
 
-  <h2>7. Professional fees and billing method</h2>${fees}
-  <p>All amounts are in Canadian dollars. Professional fees are subject to GST ${rate ? `at ${rate}% (${e(d.province)})${d.gst_number ? `, registration no. ${e(d.gst_number)}` : ''}` : ': Not applicable'}. Contingency billing is not used.</p>
-  <p><b>Advance payment (retainer):</b> ${Number(d.retainer) > 0 ? `The Client will pay ${money(d.retainer)} in advance. These funds will be deposited and held in the RCIC's client (trust) account until earned. Only earned fees will be withdrawn, and only after an invoice has been issued to the Client. ${e(d.retainer_replenish)}` : 'No advance payment is required.'}</p>
+  ${H(7, 'Professional fees and billing method')}${fees}
+  <p>All amounts are in <b>Canadian dollars (CAD)</b>. Applicable taxes: ${rate ? `GST at ${e(rate)}% (${e(d.province)})${d.gst_number ? `, registration no. ${e(d.gst_number)}` : ''}` : '<b>Not applicable</b>'}. Contingency billing (payment only on a successful decision) is not used. All fees are fair and reasonable.</p>
+  <p><b>Retainer held in trust:</b> ${Number(d.retainer) > 0 ? `The Client will deposit ${money(d.retainer)} in advance. These funds will be held in the RCIC's client (trust) account until earned, withdrawn only after an invoice is issued, and maintained in accordance with the College's Client Account Regulation. ${e(d.retainer_replenish)}` : 'No funds will be held in trust; no advance payment is required.'}</p>
+  <p><b>Invoices:</b> each invoice will state the Client's name, the services rendered, the dates they were rendered and the total professional fees payable for them.</p>
 
-  <h2>8. Disbursements and government fees</h2>
-  <p>The following disbursements may be incurred and will be billed to the Client at cost, with invoices and receipts provided:</p>${bullets(d.disbursements, '<p>None expected.</p>')}
-  <p>If disbursements will exceed these estimates, the RCIC will inform the Client and obtain the Client's written agreement before incurring them.</p>
-  <p>The Client is responsible for all fees charged by the Government of Canada or a province (for example processing, biometrics and right of permanent residence fees). These are paid directly to the government when an application is submitted and may change without notice. Current fees: https://www.cic.gc.ca/english/information/fees/fees.asp</p>
+  ${H(8, 'Disbursements and government fees')}
+  <p>The following disbursements may be incurred. They are billed to the Client at cost on the next invoice, with receipts:</p>${bullets(d.disbursements, '<p>None expected.</p>')}
+  <p>If disbursements will exceed these estimates, the RCIC will obtain the Client's written agreement first. Government fees (for example processing, biometrics and right of permanent residence fees) are the Client's responsibility, are paid directly to the government and may change without notice: https://www.cic.gc.ca/english/information/fees/fees.asp</p>
 
-  <h2>9. Terms of payment</h2>
-  <p>Invoices are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. ${Number(d.interest) > 0 ? `Interest of ${e(d.interest)}% per month may be charged on overdue amounts.` : 'No interest is charged on overdue amounts.'} ${Number(d.admin_fee) > 0 ? `An administrative fee of ${money(d.admin_fee)} may be charged for processing a Client-initiated discharge of representation or early termination of this Agreement.` : 'No administrative fee is charged for a Client-initiated discharge or early termination.'}</p>
+  ${H(9, 'Terms of payment')}
+  <p>Invoices are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. ${Number(d.interest) > 0 ? `Interest of ${e(d.interest)}% per month may be charged on overdue amounts.` : 'No interest is charged on overdue amounts.'} ${Number(d.admin_fee) > 0 ? `An administrative fee of ${money(d.admin_fee)} applies to processing a Client-initiated discharge of representation or early termination of this Agreement.` : 'No administrative fee is charged for a Client-initiated discharge or early termination.'}</p>
 
-  <h2>10. Refund policy</h2>
+  ${H(10, 'Refund policy')}
   ${d.cooling_off ? '<p>The Client may cancel this Agreement in writing within forty-eight (48) hours of signing it for a full refund of all amounts paid.</p>' : ''}
-  <p>If this Agreement is terminated, the Client will receive an itemized statement of account showing the amounts received and the services provided, and an invoice for any outstanding amounts for services rendered or disbursements made. Any unearned fees will be refunded to the Client in accordance with the College's Client Account and Client File Management Regulations.</p>
-  <p>Fees are not refundable in the event of an application refusal, provided the RCIC performed the agreed services professionally. Should the RCIC make an error or omission that necessitates a refund, a refund will be provided, and the RCIC will notify their professional liability insurer.</p>
+  <p>If this Agreement ends, the Client will receive an itemized account of all funds received and services provided, and an invoice for any outstanding services or disbursements. Unused or unearned fees will be refunded in accordance with the College's Client File Management Regulation and Client Account Regulation.</p>
+  <p class="callout"><b>Fees are not refundable in the event of an application refusal</b>, provided the RCIC performed the agreed services professionally. If an error or omission by the RCIC requires a refund, it will be provided and the RCIC will notify their professional liability insurer.</p>
+  <div class="ini">Client initials <span class="gi-initials">______</span></div>
 
-  <h2>11. Client responsibilities</h2>
-  <p>The Client is responsible for: (a) providing all required documentation to process the file; (b) providing up-to-date and reliable contact information in a timely manner; (c) providing accurate, complete and honest information, understanding that inaccuracies may negatively affect the outcome of the application; and (d) informing the RCIC of any material change and of any direct contact from government authorities.</p>
-  <p><b>Misrepresentation:</b> The Client understands that providing false, misleading or incomplete information may lead to refusal, loss of status, inadmissibility and a finding of misrepresentation. If the Client knowingly provides inaccurate, misleading or false material information, the RCIC's obligations under this Agreement become null and void, and the Client's financial obligations remain.</p>${initials()}
+  ${H(11, 'Obligations of the Client')}
+  <p>The Client: (a) is responsible for providing the RCIC with all required documentation to process the file; (b) is responsible for providing up-to-date and reliable contact information in a timely manner; (c) is responsible for providing accurate information, and understands that any inaccuracies may negatively affect the outcome of the application; and (d) understands that the RCIC's obligations under this Agreement are null and void if the Client knowingly provides inaccurate, misleading or false material information, and that the Client's financial obligations remain.</p>
+  <p>The Client will also inform the RCIC promptly of any material change in their circumstances and of any direct contact from a government authority.</p>
+  <div class="ini">Client initials <span class="gi-initials">______</span></div>
 
-  <h2>12. Electronic communication</h2>
-  <p>The Client consents to communication by email and other electronic means, accepts the inherent risks, and will share documents only through the secure method provided by the RCIC.</p>${initials()}
+  ${H(12, 'Confidentiality and correspondence')}
+  <p>The Client's personal information and documents are collected and protected according to the Code of Professional Conduct, PIPEDA and Alberta's Personal Information Protection Act. They are stored in an encrypted, access-controlled system hosted in Canada, seen only by people working on the file, and kept confidential indefinitely, except where disclosure is authorized by the Client, required for the applications in this Agreement or required by law. Another person may access the file only with the Client's written authorization.</p>
+  <p>Preferred method of correspondence: <b>${e(d.comm_methods)}</b>. The Client accepts the risks of electronic communication and will share documents only through the secure method the RCIC provides.</p>
 
-  <h2>13. Confidentiality and privacy</h2>
-  <p>The RCIC owes the Client an obligation of confidentiality under the Code of Professional Conduct and will keep all information relating to the Client confidential indefinitely, except where disclosure is authorized by the Client, required for the applications described in this Agreement, or required by law. The Client's personal information and documents are collected and protected according to the Code of Professional Conduct, PIPEDA and Alberta's Personal Information Protection Act, and are stored securely in Canada. If the Client wishes another person or family member to access information on the file, the Client must give the RCIC a written authorization naming that person.</p>
+  ${H(13, 'Discharge or withdrawal of representation')}
+  <p><b>Discharge by the Client.</b> The Client may discharge the RCIC at any time by written notice, in accordance with the laws of ${e(d.province)}. The Client will then pay only for services rendered and disbursements incurred up to that date${Number(d.admin_fee) > 0 ? `, plus the administrative fee of ${money(d.admin_fee)}` : ''}; any unearned funds will be refunded.</p>
+  <p><b>Withdrawal by the RCIC.</b> The RCIC may withdraw if the Client fails to honour this Agreement, including non-payment after reasonable notice, unless serious prejudice to the Client would result. The RCIC must withdraw if discharged, if instructed to act illegally or contrary to the Code of Professional Conduct, if a conflict of interest arises, or if the RCIC is not competent to handle the matter, and may withdraw where there has been a serious loss of confidence (for example deception, inadequate instructions, or refusal to act on the RCIC's advice on a significant point). Withdrawal will never be done for an improper purpose or so as to prejudice the Client.</p>
+  <p><b>What happens next.</b> On discharge or withdrawal the RCIC will: deliver to the Client all documents, files and property belonging to the Client; give the Client all information required about the matter; provide an invoice for services rendered (or an account of time spent); provide an itemized account of all Client funds and refund unearned funds; promptly account for outstanding fees and disbursements; co-operate with any successor to minimize expense and avoid prejudice; and make best efforts to notify, in writing within ten (10) calendar days, any government agency where the RCIC is the Client's representative.</p>
 
-  <h2>14. Discharge or withdrawal of representation</h2>
-  <p>The Client may discharge the RCIC at any time by written notice. The RCIC may withdraw if the Client fails to honour this Agreement, including non-payment after reasonable notice, and must withdraw if instructed to act illegally or contrary to the Code, if a conflict of interest arises, or if the RCIC is not competent to handle the matter. The RCIC may also withdraw where there is a serious loss of confidence, such as deception or failure to give adequate instructions. Any withdrawal will be done without prejudice to the Client.</p>
-  <p>On discharge or withdrawal the RCIC will: return all documents and property belonging to the Client; give the Client all information required in connection with the matter; provide an invoice for services rendered and an itemized account of all Client funds; refund unearned funds; co-operate with any successor representative; and make best efforts to notify, in writing within ten (10) calendar days, any government agency where the RCIC appears as the Client's representative.</p>
+  ${H(14, 'If the RCIC cannot be reached')}
+  <p>If the Client is unable to contact the RCIC and has reason to believe the RCIC may be dead, incapacitated or otherwise unable to fulfil their duties, the Client should contact the College (details in section 15). ${e(d.successor || 'The RCIC maintains arrangements so that the Client\'s file can be returned or transferred without prejudice to the Client.')}</p>
 
-  <h2>15. Unexpected termination of service</h2>
-  <p>If the Client is unable to contact the RCIC and has reason to believe the RCIC may be dead, incapacitated or otherwise unable to fulfil their duties, the Client should contact the College (contact details below). ${e(d.successor || 'The RCIC maintains arrangements so that the Client\'s file can be returned or transferred without prejudice to the Client.')}</p>
-
-  <h2>16. Disputes and complaints</h2>
-  <p>If a dispute arises, the Client should first present the concern in writing to the RCIC. The RCIC will respond within ${e(d.dispute_days)} business days. If the matter is not resolved, or if the Client is concerned that the RCIC has not met their obligations under the Code of Professional Conduct, the Client may file a complaint with the College: ${CICC.complaints}</p>
+  ${H(15, 'Disputes, complaints and the regulator')}
   ${regulator}
+  <p>If a dispute arises, the Client should first present the concern in writing to the RCIC, who will respond within ${e(d.dispute_days)} business days. If the dispute remains unresolved, or the Client believes the RCIC has not met their obligations under the Code of Professional Conduct, the Client may file a complaint with the College. Information about the complaints process: ${CICC.complaints} (College website, section “Protecting the public — Complaints process”).</p>
 
-  <h2>17. Amendments and general terms</h2>
-  <p>This Agreement may only be changed in writing with the consent of both parties, signed or initialled and dated by the RCIC and the Client. This Agreement is governed by the laws of the Province of ${e(d.province)} and the federal laws of Canada applicable therein. It is the entire agreement between the parties, and if any provision is found invalid the remaining provisions continue in full force.</p>
+  ${H(16, 'Changes to this Agreement and general terms')}
+  <p>Any change to this Agreement after it is signed must be agreed in writing by the Client and the RCIC, and each change initialled by both. This Agreement is governed by the laws of the Province of ${e(d.province)} and the federal laws of Canada applicable therein. It is the entire agreement between the parties; if any provision is found invalid, the rest remains in force.</p>
 
-  <h2>18. Acknowledgement</h2>
-  <p>The Client acknowledges that they have read and understood this Agreement, had the opportunity to ask questions and to seek independent legal advice, received a copy of the Code of Professional Conduct, and agree to be bound by these terms. The Client will receive a copy of the signed Agreement.</p>
-  ${initials()}${signatures(d, 'Service Agreement')}</div>`;
+  ${H(17, 'Acknowledgement and copy')}
+  <p>The Client acknowledges having read and understood this Agreement, had the opportunity to ask questions and to seek independent legal advice, and received access to the Code of Professional Conduct, and agrees to be bound by these terms. The RCIC will send the Client a signed copy of this Agreement by email as confirmation and keep a copy, with that confirmation, in the Client's file.</p>
+  <div class="ini">Client initials <span class="gi-initials">______</span></div>
+  ${signatures(d, 'Retainer Agreement', 18)}${closing(d)}${runningFooter(d, 'Retainer Agreement')}</div>`;
 }
 
 export function render(type, d) { return type === 'consultation' ? consultation(d) : retainer(d); }
@@ -222,8 +289,11 @@ export function requiredMissing(type, d) {
   else need.push(['program', 'Category and program'], ['scope', 'Scope of services'], ['preliminary_advice', 'Summary of preliminary advice']);
   const miss = need.filter(([k]) => !String(d[k] ?? '').trim()).map(([, l]) => l);
   if (type === 'retainer') {
-    if (d.billing === 'flat' && !(d.milestones || []).some((m) => m.name && Number(m.fee) > 0)) miss.push('At least one milestone with a fee');
+    if (['flat', 'flat_dates'].includes(d.billing || 'flat') && !(d.milestones || []).some((m) => m.name && Number(m.fee) > 0)) miss.push('At least one milestone with a fee');
+    if (d.billing === 'flat_dates' && (d.milestones || []).some((m) => m.name && !m.due)) miss.push('A due date for every milestone');
     if (d.billing === 'hourly' && !(Number(d.hourly_rate) > 0)) miss.push('Hourly rate');
+    if (d.billing === 'daily' && !(Number(d.daily_rate) > 0)) miss.push('Daily rate');
+    if (!String(d.comm_methods || '').trim()) miss.push('Preferred method of correspondence');
   }
   return miss;
 }

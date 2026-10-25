@@ -49,9 +49,13 @@ export async function render(el, [id], { setTitle }) {
             ${v.details?.signed_by ? ` · ${esc(v.details.signed_by)}` : ''}${v.details?.name ? ` · ${esc(v.details.name)}` : ''}</div></div>`).join('')}</div></div>
         ${a.body_sha256 ? `<div class="card"><div class="card-b" style="font-size:12px;word-break:break-all"><b>Document fingerprint (SHA-256)</b><br>${esc(a.body_sha256)}</div></div>` : ''}
         ${a.status === 'signed' ? `<div class="alert ok">Signed ${fmtDateTime(a.client_signed_at)}. RA 5.5: send the client a copy of the signed agreement by email and keep the confirmation on file.</div>
-          ${a.contacts?.email ? `<a class="btn btn-primary" href="mailto:${esc(a.contacts.email)}?subject=${encodeURIComponent(`Your signed ${AGR_TYPE[a.type]} (${a.number})`)}&body=${encodeURIComponent(`Hello ${a.contacts.full_name.split(' ')[0]},\n\nThank you for signing. Your signed copy of ${a.number} is available at this secure link (valid until ${new Date(a.token_expires_at).toLocaleDateString('en-CA')}):\n\n${signLink(a.signing_token)}\n\nYou can print it or save it as a PDF from that page.\n\nKind regards,\n${a.rcic_name}`)}">${icon('mail')} Email signed copy to client</a>` : ''}` : ''}
+          ${a.contacts?.email ? `<button class="btn btn-primary" id="sendCopy">${icon('mail')} Email signed copy to client</button>` : ''}` : ''}
       </div></div>`;
   el.querySelector('#share')?.addEventListener('click', () => shareModal(a.signing_token, a));
+  // RA 5.5: email the signed copy as confirmation (sent from Outlook, kept in Sent Items and on the client file)
+  el.querySelector('#sendCopy')?.addEventListener('click', async () => (await import('../crm.js')).composeEmail({
+    contact: a.contacts, subject: `Your signed ${AGR_TYPE[a.type]} (${a.number})`,
+    body: `Hello ${a.contacts.full_name.split(' ')[0]},\n\nThank you for signing. As confirmation, your signed copy of ${AGR_TYPE[a.type]} ${a.number} is available at this secure link (valid until ${new Date(a.token_expires_at).toLocaleDateString('en-CA')}):\n\n${signLink(a.signing_token)}\n\nYou can print it or save it as a PDF from that page. Please keep it for your records.` }));
   el.querySelector('#void')?.addEventListener('click', () => modal({
     title: `Void ${a.number}`, body: `<p style="margin-bottom:10px">The signing link stops working and the agreement is kept for your records. To change terms, void it and create a new one.</p><div class="field"><label>Reason</label><input class="input" id="r"></div>`,
     actions: [{ label: 'Cancel' }, { label: 'Void agreement', cls: 'btn-danger', onClick: async (m) => { await rpc('void_agreement', { p_id: id, p_reason: m.querySelector('#r').value || null }); toast('Agreement voided'); render(el, [id], { setTitle }); } }],
@@ -67,12 +71,14 @@ function shareModal(token, a) {
     body: `<p style="margin-bottom:10px">Share this private link with <b>${esc(a.contacts?.full_name || '')}</b>. Anyone with the link can view and sign, so send it only to the client.</p>
       <div class="row" style="flex-wrap:nowrap"><input class="input" id="lk" value="${esc(link)}" readonly><button class="btn" id="cp">Copy</button></div>
       <div class="row" style="margin-top:14px">
-        ${a.contacts?.email ? `<a class="btn btn-primary" href="mailto:${esc(a.contacts.email)}?subject=${encodeURIComponent(`Please sign: ${AGR_TYPE[a.type]} ${a.number}`)}&body=${encodeURIComponent(msg)}">${icon('mail')} Email link</a>` : ''}
+        ${a.contacts?.email ? `<button class="btn btn-primary" id="em">${icon('mail')} Email link</button>` : ''}
         ${a.contacts?.phone ? `<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${String(a.contacts.phone).replace(/\D/g, '').replace(/^(?=\d{10}$)/, '1')}?text=${encodeURIComponent(msg)}">WhatsApp link</a>` : ''}
         <button class="btn" id="rn">Issue new link</button></div>
-      <p style="font-size:12.5px;color:var(--muted);margin-top:12px">Sending by email from the dashboard itself will be enabled once your email service is connected.</p>`,
+      <p style="font-size:12.5px;color:var(--muted);margin-top:12px">Email is sent from your Outlook mailbox, saved in Sent Items and logged on the client's file.</p>`,
     onOpen: (m) => {
       m.querySelector('#cp').onclick = async () => { await navigator.clipboard.writeText(link).catch(() => {}); toast('Link copied'); };
+      m.querySelector('#em')?.addEventListener('click', async () => { m.closest('.overlay').remove(); (await import('../crm.js')).composeEmail({ contact: a.contacts, subject: `Please sign: ${AGR_TYPE[a.type]} ${a.number}`,
+        body: `Hello ${first},\n\nPlease review and sign your ${AGR_TYPE[a.type]} (${a.number}) from Graceful Immigration Consultant Inc. using this private link:\n\n${link}\n\nThe link is private to you and valid for 30 days. If you have any questions before signing, reply to this email or call (403) 915-4230.` }); });
       m.querySelector('#rn').onclick = async () => { try { const r = await rpc('renew_agreement_link', { p_id: a.id }); toast('New link issued — the old link no longer works'); m.closest('.overlay').remove(); shareModal(r.token, a); } catch (e) { fail(e); } };
     },
   });
@@ -85,7 +91,9 @@ async function editor(el, a, setTitle) {
     ? `<textarea class="input" data-k="${k}" ${extra}>${esc(d[k] ?? '')}</textarea>` : `<input class="input" type="${type}" data-k="${k}" value="${esc(d[k] ?? '')}" ${extra}>`}</div>`;
   const sec = (title, inner, open = false) => `<details class="agr-sec" ${open ? 'open' : ''}><summary>${title}</summary><div class="agr-sec-b">${inner}</div></details>`;
   const msRows = () => (d.milestones || []).map((m, i) => `<div class="ms-row" data-i="${i}"><input class="input" data-m="name" placeholder="Milestone" value="${esc(m.name)}">
-    <input class="input" data-m="included" placeholder="What is included" value="${esc(m.included)}"><input class="input" data-m="fee" type="number" step="0.01" placeholder="Fee" value="${esc(m.fee)}" style="max-width:110px">
+    <input class="input" data-m="included" placeholder="What is included" value="${esc(m.included)}"><input class="input" data-m="fee" type="number" step="0.01" placeholder="Fee" value="${esc(m.fee)}" style="max-width:100px" title="Professional fee">
+    <input class="input" data-m="disb" type="number" step="0.01" placeholder="Disb." value="${esc(m.disb ?? '')}" style="max-width:90px" title="Estimated disbursements for this milestone">
+    <input class="input ms-due" data-m="due" type="date" value="${esc(m.due ?? '')}" style="max-width:150px" title="Due date (predetermined-date billing)" ${d.billing === 'flat_dates' ? '' : 'hidden'}>
     <button class="btn btn-ghost btn-sm" data-delm="${i}" aria-label="Remove">${icon('trash')}</button></div>`).join('');
 
   const parties = sec('Parties & date', `<div class="row-2">${f('agreement_date', 'Agreement date', 'date')}${f('language', 'Language of service (English or French)')}</div>
@@ -100,15 +108,17 @@ async function editor(el, a, setTitle) {
     : parties
       + sec('1–2. Preliminary advice & general provisions', `${f('file_number', 'File number')}${f('preliminary_advice', 'Summary of preliminary advice given to the client', 'textarea', 'rows="4"')}
         ${f('consultation_ref', 'Initial Consultation Agreement no. (if any)')}${f('assistants', 'People who will assist (names and their role)')}
-        <div class="row-2">${f('response_time', 'Respond to client inquiries within')}${f('update_time', 'Share government updates within')}</div>${f('comm_methods', 'How you will communicate')}`)
+        <div class="row-2">${f('response_time', 'Respond to client inquiries within')}${f('update_time', 'Share government updates within')}</div>${f('comm_methods', 'Preferred method of correspondence')}`)
       + sec('3–6. Services, instructions & exclusions', `${f('program', 'Immigration/citizenship category and program (be specific, e.g. “Permanent Residence — Family Class, spousal, outland”)')}
         ${f('scope', 'Scope of services & major steps (one per line)', 'textarea', 'rows="6"')}${f('timeframes', 'Estimated timeframes (one per line)', 'textarea', 'rows="3"')}
         ${f('instructions', 'Client instructions', 'textarea')}${f('designate', 'Designate who may receive updates (name and access)')}${f('excluded', 'Services NOT included (one per line)', 'textarea', 'rows="3"')}`)
       + sec('7. Fees & billing method', `<div class="field"><label>Billing method (choose one — cannot be switched later)</label><select class="input" data-k="billing">
-          <option value="flat" ${d.billing === 'flat' ? 'selected' : ''}>Flat fee with payment by milestones</option><option value="hourly" ${d.billing === 'hourly' ? 'selected' : ''}>Hourly</option></select></div>
-        <div id="flatBox" ${d.billing === 'hourly' ? 'hidden' : ''}><label style="font-size:12.5px;font-weight:600">Milestones (fee is earned when each is completed)</label><div id="ms">${msRows()}</div>
+          ${[['flat', 'Flat fee with payment by milestones'], ['flat_dates', 'Flat fee with payment on predetermined dates'], ['hourly', 'By the hour'], ['daily', 'By the day']].map(([k, l]) => `<option value="${k}" ${(d.billing || 'flat') === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+        <div id="flatBox" ${['hourly', 'daily'].includes(d.billing) ? 'hidden' : ''}><label style="font-size:12.5px;font-weight:600">Milestones in chronological order: fee, estimated disbursements${d.billing === 'flat_dates' ? ' and due date' : ''}</label><div id="ms">${msRows()}</div>
           <button class="btn btn-sm" id="addMs">${icon('plus')} Add milestone</button></div>
-        <div id="hourBox" ${d.billing === 'hourly' ? '' : 'hidden'}><div class="row-2">${f('hourly_rate', 'Hourly rate (CAD)', 'number', 'step="0.01"')}${f('est_hours', 'Anticipated hours', 'number', 'step="0.5"')}</div>${f('hourly_schedule', 'Schedule of payments')}</div>
+        <div id="hourBox" ${d.billing === 'hourly' ? '' : 'hidden'}><div class="row-2">${f('hourly_rate', 'Hourly rate (CAD)', 'number', 'step="0.01"')}${f('est_hours', 'Anticipated hours', 'number', 'step="0.5"')}</div></div>
+        <div id="dayBox" ${d.billing === 'daily' ? '' : 'hidden'}><div class="row-2">${f('daily_rate', 'Daily rate (CAD)', 'number', 'step="0.01"')}${f('est_days', 'Anticipated days', 'number', 'step="0.5"')}</div></div>
+        <div id="schedBox" ${['hourly', 'daily'].includes(d.billing) ? '' : 'hidden'}><div class="row-2">${f('hourly_schedule', 'Schedule of payments')}${f('invoice_frequency', 'How often invoices are provided (e.g. monthly)')}</div></div>
         <div class="row-2" style="margin-top:12px">${f('retainer', 'Advance payment held in trust (CAD, 0 = none)', 'number', 'step="0.01"')}${f('payment_days', 'Invoices payable within (days)', 'number')}</div>
         ${f('retainer_replenish', 'When the retainer is replenished')}`)
       + sec('8–10. Disbursements, payment terms & refunds', `${f('disbursements', 'Expected disbursements with estimates (one per line)', 'textarea', 'rows="3"')}${f('payment_methods', 'Payment methods')}
@@ -123,21 +133,26 @@ async function editor(el, a, setTitle) {
 
   const read = () => {
     el.querySelectorAll('[data-k]').forEach((i) => { d[i.dataset.k] = i.type === 'checkbox' ? i.checked : i.type === 'number' ? (i.value === '' ? '' : Number(i.value)) : i.value; });
-    d.milestones = [...el.querySelectorAll('.ms-row')].map((r) => ({ name: r.querySelector('[data-m="name"]').value, included: r.querySelector('[data-m="included"]').value, fee: Number(r.querySelector('[data-m="fee"]').value || 0) }));
+    d.milestones = [...el.querySelectorAll('.ms-row')].map((r) => ({ disb: Number(r.querySelector('[data-m="disb"]')?.value || 0), due: r.querySelector('[data-m="due"]')?.value || '', name: r.querySelector('[data-m="name"]').value, included: r.querySelector('[data-m="included"]').value, fee: Number(r.querySelector('[data-m="fee"]').value || 0) }));
   };
   const preview = () => {
     read();
-    el.querySelector('#pv').innerHTML = renderDoc(T, d);
+    el.querySelector('#pv').innerHTML = renderDoc(T, { ...d, number: a.number });
     const miss = requiredMissing(T, d);
     el.querySelector('#missing').innerHTML = miss.length ? `<div class="alert info">Still needed before sending: <b>${miss.map(esc).join(', ')}</b></div>` : '';
   };
   let t; el.querySelector('.agr-form').addEventListener('input', () => { clearTimeout(t); t = setTimeout(preview, 250); });
   el.querySelector('.agr-form').addEventListener('change', (e) => {
-    if (e.target.dataset.k === 'billing') { el.querySelector('#flatBox').hidden = e.target.value === 'hourly'; el.querySelector('#hourBox').hidden = e.target.value !== 'hourly'; }
+    if (e.target.dataset.k === 'billing') {
+      const b = e.target.value;
+      el.querySelector('#flatBox').hidden = ['hourly', 'daily'].includes(b); el.querySelector('#hourBox').hidden = b !== 'hourly';
+      el.querySelector('#dayBox').hidden = b !== 'daily'; el.querySelector('#schedBox').hidden = !['hourly', 'daily'].includes(b);
+      el.querySelectorAll('.ms-due').forEach((i) => (i.hidden = b !== 'flat_dates'));
+    }
     preview();
   });
   const wireMs = () => el.querySelectorAll('[data-delm]').forEach((b) => (b.onclick = () => { b.closest('.ms-row').remove(); preview(); }));
-  el.querySelector('#addMs')?.addEventListener('click', () => { read(); d.milestones.push({ name: '', included: '', fee: 0 }); el.querySelector('#ms').innerHTML = msRows(); wireMs(); });
+  el.querySelector('#addMs')?.addEventListener('click', () => { read(); d.milestones.push({ name: '', included: '', fee: 0, disb: 0, due: '' }); el.querySelector('#ms').innerHTML = msRows(); wireMs(); });
   wireMs(); preview();
 
   const save = async () => { read(); const { error } = await db.from('agreements').update({ data: d }).eq('id', a.id); if (error) throw error; };
@@ -158,7 +173,7 @@ async function editor(el, a, setTitle) {
       onOpen: async (m) => { getSig = await signaturePad(m.querySelector('#pad')); },
       actions: [{ label: 'Cancel' }, { label: 'Sign & create link', cls: 'btn-gold', onClick: async () => {
         const sig = getSig(); if (!sig) throw new Error('Add your signature.');
-        const r = await rpc('send_agreement', { p_id: a.id, p_body_html: renderDoc(T, d), p_rcic_signature: sig });
+        const r = await rpc('send_agreement', { p_id: a.id, p_body_html: renderDoc(T, { ...d, number: a.number }), p_rcic_signature: sig });
         toast('Agreement signed and ready to send');
         const { data: fresh } = await db.from('agreements').select('*, contacts(id, full_name, email, phone)').eq('id', a.id).single();
         await render(el, [a.id], { setTitle });
