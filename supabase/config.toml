@@ -438,3 +438,6 @@ verify_jwt = false
 
 [functions.comms]
 verify_jwt = false
+
+[functions.receipt-scan]
+verify_jwt = false

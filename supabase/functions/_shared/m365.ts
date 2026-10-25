@@ -67,6 +67,45 @@ export async function graphFindMail(mailbox: string, party: string, top = 20) {
   }));
 }
 
+const FOLDERS: Record<string, string> = { inbox: "inbox", sent: "sentitems", drafts: "drafts", archive: "archive", junk: "junkemail" };
+const pick = (m: any) => ({
+  id: m.id, subject: m.subject ?? "(no subject)", from: m.from?.emailAddress?.address ?? "", fromName: m.from?.emailAddress?.name ?? "",
+  to: (m.toRecipients ?? []).map((r: any) => r.emailAddress?.address).filter(Boolean),
+  date: m.receivedDateTime ?? m.sentDateTime, preview: m.bodyPreview ?? "", isRead: m.isRead ?? true, hasAttachments: !!m.hasAttachments, webLink: m.webLink ?? "",
+});
+
+/** A page of messages from a company mailbox folder (newest first), optionally filtered by a search. */
+export async function graphListMail(mailbox: string, folder: string, opts: { top?: number; skip?: number; search?: string } = {}) {
+  if (!isCompanyEmail(mailbox)) throw new Error("Only company mailboxes can be read.");
+  const f = FOLDERS[folder] ?? "inbox", top = Math.min(opts.top ?? 30, 50);
+  const sel = "$select=id,subject,from,toRecipients,receivedDateTime,sentDateTime,bodyPreview,isRead,hasAttachments,webLink";
+  const q = opts.search
+    ? `?$search=${encodeURIComponent(`"${opts.search.replace(/"/g, "")}"`)}&$top=${top}&${sel}`
+    : `?$orderby=receivedDateTime desc&$top=${top}&$skip=${opts.skip ?? 0}&${sel}`;
+  const data = await graph(`/users/${encodeURIComponent(mailbox)}/mailFolders/${f}/messages${q}`);
+  return ((data?.value ?? []) as any[]).map(pick);
+}
+
+/** One message with its body (HTML) and attachment names. */
+export async function graphGetMail(mailbox: string, id: string) {
+  if (!isCompanyEmail(mailbox)) throw new Error("Only company mailboxes can be read.");
+  const m = await graph(`/users/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(id)}?$select=id,subject,from,toRecipients,ccRecipients,receivedDateTime,sentDateTime,body,bodyPreview,isRead,hasAttachments,webLink`);
+  let attachments: { name: string; size: number }[] = [];
+  if (m.hasAttachments) {
+    const a = await graph(`/users/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(id)}/attachments?$select=name,size`);
+    attachments = ((a?.value ?? []) as any[]).map((x) => ({ name: x.name, size: x.size }));
+  }
+  return { ...pick(m), cc: (m.ccRecipients ?? []).map((r: any) => r.emailAddress?.address).filter(Boolean), bodyType: m.body?.contentType, body: m.body?.content ?? "", attachments };
+}
+
+/** Replies to a message from the same company mailbox (saved in Sent Items, threaded in Outlook). */
+export async function graphReply(mailbox: string, id: string, html: string, replyAll = false) {
+  if (!isCompanyEmail(mailbox)) throw new Error("Only company mailboxes can send.");
+  await graph(`/users/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(id)}/${replyAll ? "replyAll" : "reply"}`, {
+    method: "POST", body: JSON.stringify({ comment: html }),
+  });
+}
+
 /** Posts a card to the Microsoft Teams channel configured in Integrations. Never throws. */
 export async function notifyTeams(admin: SupabaseClient, title: string, text: string, link?: string, urgent = false): Promise<boolean> {
   try {
