@@ -392,3 +392,81 @@ h3{font-size:18px;font-weight:600}
 @media (max-width:640px){.res-grid{grid-template-columns:1fr}}
 .news-page{padding-top:48px}
 .res .res-body{flex:1;align-items:flex-start}.res .res-body > svg{align-self:flex-end;flex:none}
+
+
+/* ═══ Hero: "Turning your dreams into new beginnings" ═══
+   Wide screens: the artwork fills the hero at its own proportions and every size scales with the width,
+   so the layout matches the design. Narrower screens: artwork on top, text below. */
+.hero2{position:relative;overflow:hidden;background:#FCF6EC;color:var(--navy)}
+.h2-art{background:url(../img/hero-journey.jpg) right bottom/cover no-repeat}
+.h2-eyebrow{display:flex;align-items:center;gap:.7em;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:#B8861F}
+.h2-eyebrow i{font-style:normal}
+.h2-eyebrow::after{content:'';display:block;width:4.5em;height:1px;background:linear-gradient(90deg,#D6A23A,transparent)}
+.hero2 h1{font-family:var(--serif);font-weight:700;color:#0B2A5C;line-height:1.04;letter-spacing:-.01em;margin:0}
+.hero2 h1 .gold{color:#D19A2E;position:relative;white-space:nowrap}
+.h2-leaf{position:absolute;color:#D6A23A;width:.62em;height:.62em;margin-left:.18em;top:-.02em}
+.h2-lead{color:#3B4456;line-height:1.5}
+.h2-lic{display:flex;align-items:center;gap:.5em;color:#6B5A2E;font-weight:600}
+.h2-lic svg{width:1.2em;height:1.2em;color:#B8861F;flex:none}
+.h2-actions{display:flex;flex-wrap:wrap}
+.h2-btn{display:inline-flex;align-items:center;justify-content:center;gap:.6em;font-weight:600;border-radius:.5em;transition:transform .15s,box-shadow .15s}
+.h2-btn svg{width:1.1em;height:1.1em}
+.h2-btn.gold{background:linear-gradient(180deg,#EDC468,#CF9A30);color:#0B2A5C;box-shadow:0 .6em 1.4em rgba(207,154,48,.35)}
+.h2-btn.line{border:1.5px solid #0B2A5C;color:#0B2A5C;background:rgba(255,255,255,.7)}
+.h2-btn:hover{transform:translateY(-2px)}
+.h2-feats{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);padding:0;margin:0}
+.h2-feats li{display:flex;flex-direction:column;align-items:center;text-align:center;font-weight:600;color:#0B2A5C;line-height:1.25;border-left:1px solid #E7DCC6}
+.h2-feats li:first-child{border-left:0}
+.h2-feats span{border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFF3DC,#F6E3BD);display:flex;align-items:center;justify-content:center;color:#0B2A5C}
+.h2-leaf-o{color:#0B2A5C}
+.h2-quote{position:relative;margin:0;font-family:var(--serif);font-style:italic;color:#0B2A5C;line-height:1.25}
+.h2-quote b{position:absolute;font-style:normal;color:#D6A23A;font-family:Georgia,serif;font-weight:700;line-height:1}
+.h2-quote em{font-family:var(--script);font-style:normal;color:#C9922B;font-size:1.3em;line-height:.8}
+
+@media (min-width:1181px){
+  .hero2{aspect-ratio:1816/866;max-height:920px}
+  .h2-art{position:absolute;inset:0}
+  .h2-copy{position:absolute;left:5.2%;top:5.2%;width:37%;z-index:1;font-size:clamp(12px,.92vw,17px)}
+  .h2-eyebrow{font-size:.95em}
+  .hero2 h1{font-size:clamp(46px,3.95vw,74px);margin-top:.42em}
+  .h2-lead{font-size:clamp(15px,1.16vw,22px);margin-top:1.05em;max-width:31em}
+  .h2-lic{font-size:clamp(12px,.82vw,15px);margin-top:.9em}
+  .h2-actions{gap:1.2em;margin-top:1.5em}
+  .h2-btn{font-size:clamp(14px,.98vw,18px);padding:.95em 1.9em;min-width:11em}
+  .h2-btn.gold{min-width:16em}
+  .h2-feats{margin-top:2.1em;max-width:42em}
+  .h2-feats li{font-size:clamp(12px,.88vw,16px);gap:.7em}
+  .h2-feats span{width:3.9em;height:3.9em}.h2-feats span svg{width:1.9em;height:1.9em}
+  .h2-quote{font-size:clamp(20px,1.7vw,32px);margin:1.4em 0 0 3.6em}
+  .h2-quote b{font-size:2.2em;left:-1.05em;top:-.12em}
+}
+@media (max-width:1180px){
+  .h2-art{background-image:url(../img/hero-journey-m.jpg);background-position:center bottom;aspect-ratio:900/663;width:100%}
+  .h2-copy{padding:28px 22px 44px;max-width:720px;margin:0 auto}
+  .h2-eyebrow{font-size:12px}
+  .hero2 h1{font-size:clamp(36px,7.4vw,58px);margin-top:12px}
+  .h2-lead{font-size:17px;margin-top:14px}
+  .h2-lic{font-size:13px;margin-top:12px;align-items:flex-start}
+  .h2-actions{gap:12px;margin-top:22px}
+  .h2-btn{font-size:16px;padding:14px 26px;flex:1 1 200px}
+  .h2-feats{margin-top:26px;grid-template-columns:repeat(4,1fr)}
+  .h2-feats li{font-size:12.5px;gap:8px;padding:0 4px}
+  .h2-feats span{width:52px;height:52px}.h2-feats span svg{width:24px;height:24px}
+  .h2-quote{font-size:22px;margin:30px 0 0 40px}
+  .h2-quote b{font-size:52px;left:-40px;top:-6px}
+}
+@media (max-width:520px){.h2-feats{grid-template-columns:repeat(2,1fr);row-gap:18px}.h2-feats li:nth-child(3){border-left:0}}
+
+.hero2 h1 .h2-l{display:block;white-space:nowrap}
+.hero2 h1 .h2-l.gold{display:block;width:max-content}
+@media (min-width:1181px){
+  .h2-copy{top:4.6%}
+  .h2-lic{display:none}
+  .h2-lead{max-width:27em;margin-top:.9em}
+  .h2-actions{margin-top:1.35em}
+  .h2-feats{margin-top:1.7em}
+  .h2-quote{margin-top:1.05em}
+}
+@media (min-width:1181px){.hero2 h1{font-size:clamp(44px,3.68vw,70px)}}
+@media (max-width:1180px){.h2-eyebrow{letter-spacing:.14em;font-size:11px;white-space:nowrap}.h2-eyebrow::after{display:none}}
+@media (min-width:1181px){.hero2 h1{font-size:clamp(42px,3.4vw,64px)}}
