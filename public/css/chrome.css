@@ -252,3 +252,6 @@ html.has-gi-chat .float-top{bottom:156px}
 .site-footer .footer-bottom a{color:rgba(255,255,255,.85)}
 @media (max-width:900px){.fx-grid{grid-template-columns:1fr;gap:32px}.fx-brand b{font-size:32px}}
 @media (max-width:560px){.fx-btns{grid-template-columns:1fr 1fr}.fx-badges img{height:42px}}
+
+/* Small Canadian flag: one fixed size everywhere */
+.ca-flag{display:inline-block;width:20px !important;height:10px !important;flex:none;vertical-align:-1px;border-radius:1px;box-shadow:0 0 0 .5px rgba(0,0,0,.25)}
