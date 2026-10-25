@@ -108,6 +108,10 @@ async function boot() {
   const { data: profile, error } = await db.from('profiles').select('*').eq('id', session.user.id).single();
   if (error || !profile) { app.innerHTML = '<div class="loading">Your account is not set up yet. Contact the administrator.</div>'; return; }
   if (!profile.active) { await db.auth.signOut(); return showLogin('This account has been deactivated.'); }
+  if (profile.role !== 'client' && !/@gracefulimmigration\.ca$/i.test(session.user.email || '')) {
+    await db.auth.signOut();
+    return showLogin('Staff access requires a company email address (@gracefulimmigration.ca). Ask the administrator to invite you with your company email.');
+  }
   state.profile = profile;
   const { data: perms } = await db.rpc('my_permissions');
   state.perms = new Set(perms || []);

@@ -63,7 +63,7 @@ export async function render(el) {
     title: 'Invite team member',
     body: `<p style="color:var(--muted);margin-bottom:14px">They'll get an email with a link to set their password.</p>
       <div class="field"><label>Full name</label><input class="input" id="n"></div>
-      <div class="field"><label>Email</label><input class="input" id="e" type="email"></div>
+      <div class="field"><label>Email (staff must use a company address)</label><input class="input" id="e" type="email" placeholder="name@gracefulimmigration.ca"></div>
       <div class="row-2"><div class="field"><label>Role</label><select class="input" id="r">${[...STAFF_ROLES, 'client'].filter((r) => isOwner || r !== 'owner')
         .map((r) => `<option value="${r}" ${r === 'assistant' ? 'selected' : ''}>${ROLE_LABEL[r]}</option>`).join('')}</select></div>
       <div class="field"><label>Job title (optional)</label><input class="input" id="j"></div></div>`,

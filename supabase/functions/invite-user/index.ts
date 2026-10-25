@@ -1,5 +1,5 @@
 // Invites a staff member (or client) by email and assigns their role. Caller needs the staff.manage permission.
-import { adminClient, callerProfile, corsHeaders, hasPerm, json } from "../_shared/common.ts";
+import { adminClient, callerProfile, COMPANY_DOMAIN, corsHeaders, hasPerm, isCompanyEmail, json } from "../_shared/common.ts";
 
 const ROLES = ["owner", "rcic", "case_manager", "bookkeeper", "assistant", "client"];
 
@@ -20,6 +20,7 @@ Deno.serve(async (req) => {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return json(req, { error: "Enter a valid email address." }, 400);
   if (!fullName) return json(req, { error: "Enter the person's name." }, 400);
   if (!ROLES.includes(role)) return json(req, { error: "Choose a role." }, 400);
+  if (role !== "client" && !isCompanyEmail(email)) return json(req, { error: `Staff must use a company email address (@${COMPANY_DOMAIN}).` }, 400);
   if (role === "owner" && caller.role !== "owner") return json(req, { error: "Only an owner can invite another owner." }, 403);
 
   const origin = req.headers.get("origin") ?? "https://gracefulimmigration.ca";

@@ -31,6 +31,9 @@ export function adminClient(): SupabaseClient {
   });
 }
 
+export const COMPANY_DOMAIN = "gracefulimmigration.ca";
+export const isCompanyEmail = (e?: string | null) => !!e && e.toLowerCase().endsWith("@" + COMPANY_DOMAIN);
+
 /** Returns the signed-in staff user making the request, or null. */
 export async function callerProfile(req: Request, admin: SupabaseClient) {
   const auth = req.headers.get("authorization") ?? "";
@@ -40,6 +43,8 @@ export async function callerProfile(req: Request, admin: SupabaseClient) {
   if (error || !data.user) return null;
   const { data: profile } = await admin.from("profiles").select("id, email, full_name, role, active").eq("id", data.user.id).single();
   if (!profile || !profile.active) return null;
+  // Staff access only for company email addresses (checked against the auth email, not the profile copy).
+  if (profile.role !== "client" && !isCompanyEmail(data.user.email)) return null;
   return profile as { id: string; email: string; full_name: string; role: string; active: boolean };
 }
 
