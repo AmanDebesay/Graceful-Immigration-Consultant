@@ -15,7 +15,7 @@ export async function newAgreement({ contactId, caseId, type = 'retainer' } = {}
   modal({
     title: 'Generate agreement',
     body: `<div class="field"><label>Client</label><select class="input" id="c">${contactOptions(contacts, contactId)}</select>
-        <small style="color:var(--muted)">Not in the list? Add the client first under Contacts → New contact.</small></div>
+        <small style="color:var(--muted)">Not in the list? Add them first with Contacts → New client.</small></div>
       <div class="field"><label>Agreement type</label><select class="input" id="t">
         <option value="consultation" ${type === 'consultation' ? 'selected' : ''}>Initial Consultation Agreement — before paid advice (RA 4.1)</option>
         <option value="retainer" ${type === 'retainer' ? 'selected' : ''}>Retainer / Service Agreement — representation (RA 5.1)</option></select></div>

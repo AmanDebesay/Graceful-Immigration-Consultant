@@ -1,4 +1,4 @@
-import { db, state, esc, icon, toast, fail, modal, confirmBox, ROLE_LABEL } from '../core.js';
+import { db, state, esc, icon, toast, fail, modal, confirmBox, ROLE_LABEL, avatarHtml } from '../core.js';
 
 export async function render(el) {
   const p = state.profile;
@@ -7,11 +7,16 @@ export async function render(el) {
 
   el.innerHTML = `<div class="grid g-2" style="max-width:1000px">
     <div class="card"><div class="card-h"><h3>Profile</h3><span class="badge plain b-navy">${ROLE_LABEL[p.role]}</span></div>
-      <form class="card-b" id="pf">
+      <div class="card-b photo-row">
+        <span id="bigAv">${avatarHtml(p, 'avatar xl')}</span>
+        <div><b>Profile photo</b><p class="dk-muted" style="margin:2px 0 10px">Shown on your profile in the top right of the dashboard. A clear head-and-shoulders photo works best.</p>
+          <div class="row"><label class="btn btn-gold btn-sm">${icon('camera')} ${p.avatar_url ? 'Change photo' : 'Upload photo'}<input type="file" id="ph0" accept="image/jpeg,image/png,image/webp" hidden></label>
+          ${p.avatar_url ? '<button class="btn btn-sm" id="rmPh" type="button">Remove</button>' : ''}</div></div></div>
+      <form class="card-b" id="pf" style="border-top:1px solid var(--line)">
         <div class="field"><label>Full name</label><input class="input" id="n" value="${esc(p.full_name)}"></div>
         <div class="field"><label>Email</label><input class="input" value="${esc(p.email)}" disabled></div>
         <div class="row-2"><div class="field"><label>Phone</label><input class="input" id="ph" value="${esc(p.phone || '')}"></div>
-        <div class="field"><label>Job title</label><input class="input" id="jt" value="${esc(p.job_title || '')}"></div></div>
+        <div class="field"><label>Job title (shown under your name)</label><input class="input" id="jt" value="${esc(p.job_title || '')}" placeholder="e.g. RCIC – IRB"></div></div>
         <div class="row" style="justify-content:flex-end"><button class="btn btn-primary" type="submit">Save profile</button></div>
       </form></div>
     <div class="grid">
@@ -32,7 +37,39 @@ export async function render(el) {
     const { error } = await db.from('profiles').update(patch).eq('id', p.id);
     if (error) return fail(error);
     Object.assign(state.profile, patch); toast('Profile saved');
+    window.dispatchEvent(new Event('profile-changed'));
   };
+
+  const setAvatar = async (url) => {
+    const { error } = await db.from('profiles').update({ avatar_url: url }).eq('id', p.id);
+    if (error) throw error;
+    state.profile.avatar_url = url;
+    window.dispatchEvent(new Event('profile-changed'));
+    render(el);
+  };
+  el.querySelector('#ph0').onchange = async (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    try {
+      if (file.size > 15 * 1024 * 1024) throw new Error('That image is too large. Choose one under 15 MB.');
+      const blob = await squareJpeg(file, 400);
+      const path = `${p.id}/avatar-${Date.now()}.jpg`;
+      const { error } = await db.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+      if (error) throw error;
+      const old = p.avatar_url;
+      await setAvatar(db.storage.from('avatars').getPublicUrl(path).data.publicUrl);
+      const oldPath = old && old.split('/avatars/')[1];
+      if (oldPath && oldPath.startsWith(p.id + '/')) db.storage.from('avatars').remove([oldPath]);
+      toast('Photo updated');
+    } catch (err) { fail(err); }
+  };
+  el.querySelector('#rmPh')?.addEventListener('click', async () => {
+    try {
+      const oldPath = p.avatar_url.split('/avatars/')[1];
+      await setAvatar(null);
+      if (oldPath && oldPath.startsWith(p.id + '/')) db.storage.from('avatars').remove([oldPath]);
+      toast('Photo removed');
+    } catch (err) { fail(err); }
+  });
   el.querySelector('#pw').onsubmit = async (e) => {
     e.preventDefault();
     const a = el.querySelector('#p1').value, b = el.querySelector('#p2').value;
@@ -66,5 +103,21 @@ export async function render(el) {
           toast('Two-step verification is on'); render(el);
         } }],
     });
+  });
+}
+
+/** Centre-crops an image file to a square JPEG of the given size. */
+function squareJpeg(file, size) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const side = Math.min(img.width, img.height), c = document.createElement('canvas');
+      c.width = c.height = size;
+      c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      c.toBlob((b) => (b ? resolve(b) : reject(new Error('Could not process that image.'))), 'image/jpeg', 0.88);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('That file is not an image we can read.')); };
+    img.src = url;
   });
 }

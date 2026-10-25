@@ -9,7 +9,7 @@ export async function render(el) {
       <div class="grow"></div>
       <button class="btn" id="csv">${icon('file')} Export CSV</button>
       ${can('crm.edit') ? `<button class="btn" id="imp">${icon('plus')} Import CSV</button>` : ''}
-      ${can('crm.edit') ? `<button class="btn btn-primary" id="add">${icon('plus')} Add contact</button>` : ''}
+      ${can('crm.edit') ? `<button class="btn btn-primary" id="add">${icon('plus')} New client</button>` : ''}
     </div><div class="card"><div class="table-wrap" id="list"></div></div>`;
 
   let rows = [];
@@ -78,14 +78,14 @@ export async function render(el) {
 
   function openAdd() {
     modal({
-      title: 'Add contact',
+      title: 'New client',
       body: `<div class="field"><label>Full name *</label><input class="input" id="n"></div>
         <div class="row-2"><div class="field"><label>Email</label><input class="input" id="e" type="email"></div>
         <div class="field"><label>Phone</label><input class="input" id="p" type="tel"></div></div>
         <div class="row-2"><div class="field"><label>Stage</label><select class="input" id="s">${STAGES.map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
         <div class="field"><label>Assigned to</label><select class="input" id="a">${staffOptions(state.profile.id)}</select></div></div>
         <div class="field"><label>Source</label><select class="input" id="src"><option value="phone">Phone call</option><option value="walk-in">Walk-in</option><option value="referral">Referral</option><option value="whatsapp">WhatsApp</option><option value="social">Social media</option><option value="website">Website</option><option value="other">Other</option></select></div>`,
-      actions: [{ label: 'Cancel' }, { label: 'Add contact', cls: 'btn-primary', onClick: async (m) => {
+      actions: [{ label: 'Cancel' }, { label: 'Add client', cls: 'btn-primary', onClick: async (m) => {
         const full_name = m.querySelector('#n').value.trim();
         if (!full_name) throw new Error('Enter a name.');
         const email = m.querySelector('#e').value.trim().toLowerCase() || null;

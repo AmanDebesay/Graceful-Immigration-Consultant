@@ -1,5 +1,5 @@
 // App bootstrap: session → profile & permissions → shell → hash router.
-import { db, state, can, isStaff, esc, icon, initials, ROLE_LABEL, loadStaff, fail } from './core.js';
+import { db, state, can, isStaff, esc, icon, avatarHtml, fmtDate, ROLE_LABEL, loadStaff, fail } from './core.js';
 import { showLogin, showSetPassword, showLinkError, showMfaChallenge } from './auth.js';
 
 const NAV = [
@@ -28,6 +28,8 @@ const NAV = [
   { group: 'Business' },
   { path: '/newsletter', label: 'Newsletter', icon: 'mail', show: () => can('newsletter.view') },
   { path: '/agreements', label: 'Agreements', icon: 'file', show: () => can('agreements.manage') || can('crm.view') },
+  { group: 'Resources' },
+  { path: '/resources', label: 'Legal & Research', icon: 'book', show: () => isStaff() },
   { group: 'Administration' },
   { path: '/team', label: 'Team & Access', icon: 'shield', show: () => can('staff.manage') },
   { path: '/settings', label: 'Business Settings', icon: 'settings', show: () => can('settings.manage') },
@@ -36,6 +38,7 @@ const NAV = [
 
 const ROUTES = [
   [/^\/$/, 'dashboard', 'Dashboard'],
+  [/^\/resources$/, 'resources', 'Legal & Research Resources'],
   [/^\/assessments$/, 'assessments', 'Assessments'],
   [/^\/assessments\/new$/, 'assessment-new', 'New assessment'],
   [/^\/assessments\/([\w-]+)$/, 'assessment', 'Assessment'],
@@ -129,19 +132,22 @@ function buildShell() {
   const p = state.profile;
   app.innerHTML = `<div class="layout">
     <aside class="sidebar" id="sidebar">
-      <div class="sb-brand"><img src="../public/img/logo-emblem.png" alt=""><div><b>Graceful</b><span>Practice Hub</span></div></div>
+      <a class="sb-brand" href="#/"><img src="../public/img/logo-emblem.png" alt=""><b>GRACEFUL</b><span>Immigration Consultant Inc.</span></a>
       <nav class="sb-nav" id="sbNav"></nav>
-      <div class="sb-foot">Signed in as ${esc(ROLE_LABEL[p.role])}<br><a href="../public/index.html" style="color:rgba(255,255,255,.7)">View website ↗</a></div>
+      <div class="sb-foot"><a class="sb-help" href="#/resources">${icon('book')}<span><b>Need help?</b><small>Legal &amp; research resources</small></span>${icon('arrowr')}</a>
+        <a class="sb-site" href="../public/index.html" target="_blank" rel="noopener">View website ↗</a></div>
     </aside>
     <div class="main">
       <header class="topbar">
         <button class="menu-btn btn btn-ghost btn-sm" id="menuBtn" aria-label="Menu">${icon('menu')}</button>
         <h1 id="pageTitle">Dashboard</h1>
-        <div class="search">${icon('search')}<input id="gSearch" placeholder="Search contacts…" autocomplete="off"><div class="search-results" id="gResults" hidden></div></div>
+        <div class="search">${icon('search')}<input id="gSearch" placeholder="Search clients, cases, invoices, documents…" autocomplete="off"><div class="search-results" id="gResults" hidden></div></div>
         <div style="position:relative"><button class="btn btn-gold" id="plusNew">${icon('plus')} New</button></div>
+        <div style="position:relative"><button class="bell" id="bell" aria-label="Notifications">${icon('bell')}<span class="bell-n" id="bellN" hidden></span></button></div>
         <button class="user-chip" id="userChip">
-          <span class="avatar">${esc(initials(p.full_name || p.email))}</span>
-          <span class="meta"><b>${esc(p.full_name || p.email)}</b><span>${esc(ROLE_LABEL[p.role])}</span></span>
+          <span id="chipAv">${avatarHtml(p)}</span>
+          <span class="meta"><b>${esc(p.full_name || p.email)}</b><span>${esc(p.job_title || ROLE_LABEL[p.role])}</span></span>
+          ${icon('down')}
         </button>
       </header>
       <main class="content" id="view"></main>
@@ -154,21 +160,57 @@ function buildShell() {
     e.stopPropagation();
     const old = document.querySelector('.dropdown'); if (old) return old.remove();
     const d = document.createElement('div'); d.className = 'dropdown';
-    d.innerHTML = `<a href="#/account">${icon('user')} My account</a><button id="lo">${icon('logout')} Sign out</button>`;
+    d.innerHTML = `<a href="#/account">${icon('user')} My profile &amp; photo</a><a href="#/resources">${icon('book')} Resources</a><button id="lo">${icon('logout')} Sign out</button>`;
     e.currentTarget.appendChild(d);
     d.querySelector('#lo').onclick = async () => { await db.auth.signOut(); location.hash = ''; location.reload(); };
     setTimeout(() => document.addEventListener('click', () => d.remove(), { once: true }));
   };
   setupSearch();
   setupNewMenu();
+  setupBell();
   refreshCounts();
+}
+
+// Profile changes (e.g. a new photo) refresh the chip without a reload.
+window.addEventListener('profile-changed', () => {
+  const p = state.profile, av = document.getElementById('chipAv');
+  if (!av) return;
+  av.innerHTML = avatarHtml(p);
+  const meta = document.querySelector('#userChip .meta');
+  meta.innerHTML = `<b>${esc(p.full_name || p.email)}</b><span>${esc(p.job_title || ROLE_LABEL[p.role])}</span>`;
+});
+
+function setupBell() {
+  const btn = document.getElementById('bell');
+  btn.onclick = async (e) => {
+    e.stopPropagation();
+    const old = document.querySelector('.bellmenu'); if (old) return old.remove();
+    const d = document.createElement('div'); d.className = 'dropdown bellmenu';
+    d.innerHTML = '<div class="dk-muted" style="padding:10px">Loading…</div>';
+    btn.parentElement.appendChild(d);
+    setTimeout(() => document.addEventListener('click', (ev) => { if (!d.contains(ev.target)) d.remove(); }, { once: true }));
+    const in30 = new Date(Date.now() + 30 * 86400000).toLocaleDateString('en-CA');
+    const [a, t, k] = await Promise.all([
+      can('intake.view') ? db.from('intake_submissions').select('id, triage_level, created_at, contacts(full_name)').eq('status', 'new').order('created_at', { ascending: false }).limit(5) : { data: [] },
+      db.from('tasks').select('id, title, due_date').eq('done', false).eq('assigned_to', state.profile.id).lte('due_date', new Date().toLocaleDateString('en-CA')).order('due_date').limit(5),
+      can('crm.view') ? db.from('key_dates').select('id, doc_type, expires_on, contacts(full_name)').lte('expires_on', in30).order('expires_on').limit(5) : { data: [] },
+    ]);
+    const item = (href, ico, title, sub, cls = '') => `<a href="${href}" class="bm-i ${cls}">${icon(ico)}<span>${title}<small>${sub}</small></span></a>`;
+    const html = [
+      ...(a.data || []).map((x) => item(`#/assessments/${x.id}`, 'clipboard', `New assessment — ${esc(x.contacts?.full_name || 'Unknown')}`, `${x.triage_level === 'RED' ? 'URGENT · ' : ''}${fmtDate(x.created_at)}`, x.triage_level === 'RED' ? 'red' : '')),
+      ...(t.data || []).map((x) => item('#/tasks', 'checksq', esc(x.title), `Due ${fmtDate(x.due_date)}`)),
+      ...(k.data || []).map((x) => item('#/', 'file', `${esc(x.doc_type)} expiring — ${esc(x.contacts?.full_name || '')}`, fmtDate(x.expires_on))),
+    ];
+    d.innerHTML = `<div class="bm-h">Notifications</div>${html.join('') || '<div class="dk-muted" style="padding:12px">Nothing needs your attention right now.</div>'}`;
+    d.onclick = (ev) => { if (ev.target.closest('a')) d.remove(); };
+  };
 }
 
 async function setupNewMenu() {
   const btn = document.getElementById('plusNew');
   const fin = await import('./fin.js'), crm = await import('./crm.js');
   const groups = [
-    ['Clients', [[can('crm.edit'), 'Contact', () => (location.hash = '#/contacts?new=1')], [can('crm.edit'), 'Deal', () => crm.editDeal()],
+    ['Clients', [[can('crm.edit'), 'Client', () => (location.hash = '#/contacts?new=1')], [can('crm.edit'), 'Appointment', () => crm.editAppointment()], [can('crm.edit'), 'Document expiry date', () => crm.editKeyDate()], [can('crm.edit'), 'Deal', () => crm.editDeal()],
       [can('crm.edit'), 'Case', () => crm.editCase()], [can('agreements.manage'), 'Agreement', async () => (await import('./views/agreements.js')).newAgreement()], [can('crm.edit'), 'Log activity', () => crm.logActivity()], [can('intake.view'), 'Assessment', () => (location.hash = '#/assessments/new')]]],
     ['Money in', [[can('finance.manage'), 'Invoice', () => fin.newInvoice()], [can('finance.manage'), 'Receive payment', () => fin.receivePayment()],
       [can('finance.manage'), 'Retainer into trust', () => fin.trustTxn('deposit')]]],
@@ -204,29 +246,54 @@ function renderNav() {
 
 export async function refreshCounts() {
   try { counts = (await db.rpc('dashboard_stats')).data || {}; } catch { counts = {}; }
-  if (shellBuilt) renderNav();
+  if (shellBuilt) {
+    renderNav();
+    const n = (counts.new_assessments || 0) + (counts.tasks_overdue || 0), b = document.getElementById('bellN');
+    if (b) { b.textContent = n > 9 ? '9+' : n; b.hidden = !n; }
+  }
 }
 window.addEventListener('refresh-counts', refreshCounts);
 
 function setupSearch() {
   const input = document.getElementById('gSearch'), box = document.getElementById('gResults');
-  if (!can('crm.view')) { input.closest('.search').remove(); return; }
-  let t;
+  if (!isStaff()) { input.closest('.search').remove(); return; }
+  let t, seq = 0;
+  const q1 = (on, table, cols, filter, limit = 5) => (on ? db.from(table).select(cols).or(filter).limit(limit) : Promise.resolve({ data: [] }));
   input.oninput = () => {
     clearTimeout(t);
     const q = input.value.trim();
     if (q.length < 2) { box.hidden = true; return; }
     t = setTimeout(async () => {
-      const like = `%${q.replace(/[%_]/g, '')}%`;
-      const { data } = await db.from('contacts').select('id, full_name, email, phone, stage')
-        .or(`full_name.ilike.${like},email.ilike.${like},phone.ilike.${like}`).limit(8);
-      box.innerHTML = (data || []).length
-        ? data.map((c) => `<a href="#/contacts/${c.id}"><span>${esc(c.full_name)}</span><span style="color:var(--muted);font-size:12px">${esc(c.email || c.phone || '')}</span></a>`).join('')
-        : '<div style="padding:10px;color:var(--muted)">No matches</div>';
+      const my = ++seq, w = `%${q.replace(/[%_,()]/g, ' ').trim()}%`, crm = can('crm.view'), fin = can('finance.view');
+      const [con, cas, com, inv, agr, ass, tsk, apt] = await Promise.all([
+        q1(crm, 'contacts', 'id, full_name, email, phone, citizenship', `full_name.ilike.${w},email.ilike.${w},phone.ilike.${w},citizenship.ilike.${w}`, 6),
+        q1(crm, 'cases', 'id, case_number, title, application_type, ircc_file_number, uci, contacts(full_name)', `case_number.ilike.${w},title.ilike.${w},application_type.ilike.${w},ircc_file_number.ilike.${w},uci.ilike.${w}`),
+        q1(crm, 'companies', 'id, name', `name.ilike.${w}`),
+        q1(fin, 'invoices', 'id, number, total, status, contacts(full_name)', `number.ilike.${w}`),
+        q1(can('agreements.manage') || crm, 'agreements', 'id, number, title, status', `number.ilike.${w},title.ilike.${w}`),
+        can('intake.view') ? db.from('intake_submissions').select('id, created_at, triage_level, contacts!inner(full_name)').ilike('contacts.full_name', w).limit(4) : { data: [] },
+        q1(true, 'tasks', 'id, title, due_date', `title.ilike.${w}`, 4),
+        q1(crm, 'appointments', 'id, title, starts_at', `title.ilike.${w}`, 3),
+      ]);
+      if (my !== seq) return;
+      const group = (label, ico, rows, href, main, sub) => (rows || []).length ? `<div class="sr-g">${label}</div>` + rows.map((r) =>
+        `<a href="${href(r)}">${icon(ico)}<span>${esc(main(r))}</span><small>${esc(sub(r) || '')}</small></a>`).join('') : '';
+      const html = group('Clients', 'user', con.data, (r) => `#/contacts/${r.id}`, (r) => r.full_name, (r) => r.email || r.phone || r.citizenship)
+        + group('Cases', 'folder', cas.data, (r) => `#/cases/${r.id}`, (r) => `${r.case_number} · ${r.title}`, (r) => r.contacts?.full_name || r.ircc_file_number)
+        + group('Companies', 'briefcase', com.data, (r) => `#/companies/${r.id}`, (r) => r.name, () => '')
+        + group('Invoices', 'dollar', inv.data, (r) => `#/invoices/${r.id}`, (r) => r.number, (r) => `${r.contacts?.full_name || ''} · ${r.status}`)
+        + group('Agreements', 'file', agr.data, (r) => `#/agreements/${r.id}`, (r) => r.number, (r) => r.title)
+        + group('Assessments', 'clipboard', ass.data, (r) => `#/assessments/${r.id}`, (r) => r.contacts?.full_name || 'Assessment', (r) => fmtDate(r.created_at))
+        + group('Tasks', 'checksq', tsk.data, () => '#/tasks', (r) => r.title, (r) => (r.due_date ? 'Due ' + fmtDate(r.due_date) : ''))
+        + group('Appointments', 'calendar', apt.data, () => '#/', (r) => r.title, (r) => fmtDate(r.starts_at));
+      box.innerHTML = html || '<div style="padding:12px;color:var(--muted)">No matches</div>';
       box.hidden = false;
     }, 220);
   };
+  input.onkeydown = (e) => { if (e.key === 'Enter') { const a = box.querySelector('a'); if (a) { location.hash = a.getAttribute('href'); box.hidden = true; input.blur(); } } };
+  box.onclick = (e) => { if (e.target.closest('a')) { box.hidden = true; input.value = ''; } };
   input.onblur = () => setTimeout(() => (box.hidden = true), 200);
+  window.addEventListener('hashchange', () => { input.value = ''; box.hidden = true; });
 }
 
 async function route() {
@@ -238,6 +305,7 @@ async function route() {
   if (!match) { location.hash = '#/'; return; }
   const [m, mod, title] = match;
   document.getElementById('pageTitle').textContent = title;
+  document.querySelector('.topbar').classList.toggle('tb-home', path === '/');
   document.title = `${title} · Graceful Practice Hub`;
   renderNav();
   // Each visit renders into its own container, so a slow page that finishes after the user
@@ -248,7 +316,7 @@ async function route() {
   view.replaceChildren(host);
   try {
     const page = await import(`./views/${mod}.js`);
-    await page.render(host, m.slice(1), { setTitle: (t) => { if (seq === routeSeq) document.getElementById('pageTitle').textContent = t; } });
+    await page.render(host, m.slice(1), { setTitle: (t, html) => { if (seq === routeSeq) document.getElementById('pageTitle')[html ? 'innerHTML' : 'textContent'] = t; } });
   } catch (e) {
     host.innerHTML = `<div class="alert err">Something went wrong loading this page: ${esc(e.message)}</div>`;
     if (seq === routeSeq) fail(e);

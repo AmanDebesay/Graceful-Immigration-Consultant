@@ -116,3 +116,61 @@ export async function editCase(c = {}, { contactId } = {}) {
 }
 
 export { money };
+
+// ── Appointments & client document expiry dates (dashboard widgets) ──
+export const APPT_KINDS = [['consultation', 'Client consultation'], ['document_review', 'Document review'], ['follow_up', 'Follow-up meeting'], ['hearing', 'IRB hearing / interview'], ['other', 'Other']];
+export const APPT_LABEL = Object.fromEntries(APPT_KINDS);
+export const DOC_TYPES = ['Passport', 'Work permit', 'Study permit', 'Visitor record', 'Temporary resident visa', 'PR card', 'Medical exam', 'Police certificate', 'Biometrics', 'Language test', 'ECA report', 'Other'];
+const localInput = (d) => new Date(new Date(d).getTime() - new Date(d).getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+export async function editAppointment(a = {}, { contactId } = {}) {
+  const contacts = await contactsList();
+  const start = a.starts_at ? localInput(a.starts_at) : localInput(Math.ceil(Date.now() / 3600000) * 3600000 + 86400000);
+  const mins = a.starts_at && a.ends_at ? Math.round((new Date(a.ends_at) - new Date(a.starts_at)) / 60000) : 60;
+  modal({
+    title: a.id ? 'Edit appointment' : 'New appointment',
+    body: `<div class="field"><label>Client</label><select class="input" id="c">${contactOptions(contacts, a.contact_id || contactId, '— No client —')}</select></div>
+      <div class="row-2"><div class="field"><label>Type</label><select class="input" id="k">${APPT_KINDS.map(([k, l]) => `<option value="${k}" ${k === (a.kind || 'consultation') ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div class="field"><label>Topic</label><input class="input" id="t" value="${esc(a.title || '')}" placeholder="e.g. PR eligibility assessment"></div></div>
+      <div class="row-2"><div class="field"><label>Starts</label><input class="input" type="datetime-local" id="s" value="${start}"></div>
+      <div class="field"><label>Length</label><select class="input" id="m">${[15, 30, 45, 60, 90, 120].map((n) => `<option value="${n}" ${n === mins ? 'selected' : ''}>${n} minutes</option>`).join('')}</select></div></div>
+      <div class="row-2"><div class="field"><label>Where</label><select class="input" id="l">${['Zoom', 'Microsoft Teams', 'Phone', 'In person', 'IRB virtual hearing'].map((x) => `<option ${x === (a.location || 'Zoom') ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+      <div class="field"><label>Meeting link (optional)</label><input class="input" id="u" value="${esc(a.meeting_link || '')}" placeholder="https://"></div></div>
+      <div class="field"><label>Notes</label><textarea class="input" id="n">${esc(a.notes || '')}</textarea></div>`,
+    actions: [
+      ...(a.id ? [{ label: 'Delete', cls: 'btn-danger', onClick: async () => { if (!confirm('Delete this appointment?')) return false; const { error } = await db.from('appointments').delete().eq('id', a.id); if (error) throw error; toast('Appointment deleted'); changed(); } }] : []),
+      { label: 'Cancel' },
+      { label: 'Save', cls: 'btn-primary', onClick: async (m) => {
+        const v = (s) => m.querySelector(s).value;
+        const startsAt = new Date(v('#s'));
+        if (isNaN(startsAt)) throw new Error('Choose a start date and time.');
+        const kind = v('#k');
+        const row = { contact_id: v('#c') || null, kind, title: v('#t').trim() || APPT_LABEL[kind], starts_at: startsAt.toISOString(),
+          ends_at: new Date(startsAt.getTime() + Number(v('#m')) * 60000).toISOString(), location: v('#l'), meeting_link: v('#u').trim() || null, notes: v('#n').trim() || null };
+        if (row.meeting_link && !/^https:\/\//i.test(row.meeting_link)) throw new Error('The meeting link must start with https://');
+        const { error } = a.id ? await db.from('appointments').update(row).eq('id', a.id) : await db.from('appointments').insert({ ...row, assigned_to: state.profile.id });
+        if (error) throw error; toast('Appointment saved'); changed();
+      } }],
+  });
+}
+
+export async function editKeyDate(k = {}, { contactId } = {}) {
+  const contacts = await contactsList();
+  modal({
+    title: k.id ? 'Edit document date' : 'Track a document expiry',
+    body: `<div class="field"><label>Client</label><select class="input" id="c">${contactOptions(contacts, k.contact_id || contactId)}</select></div>
+      <div class="row-2"><div class="field"><label>Document</label><select class="input" id="d">${DOC_TYPES.map((x) => `<option ${x === k.doc_type ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+      <div class="field"><label>Expires on</label><input class="input" type="date" id="e" value="${esc(k.expires_on || '')}"></div></div>
+      <div class="field"><label>Notes</label><input class="input" id="n" value="${esc(k.notes || '')}" placeholder="e.g. apply for extension 90 days before"></div>`,
+    actions: [
+      ...(k.id ? [{ label: 'Delete', cls: 'btn-danger', onClick: async () => { const { error } = await db.from('key_dates').delete().eq('id', k.id); if (error) throw error; toast('Removed'); changed(); } }] : []),
+      { label: 'Cancel' },
+      { label: 'Save', cls: 'btn-primary', onClick: async (m) => {
+        const row = { contact_id: m.querySelector('#c').value, doc_type: m.querySelector('#d').value, expires_on: m.querySelector('#e').value, notes: m.querySelector('#n').value.trim() || null };
+        if (!row.contact_id) throw new Error('Choose a client.');
+        if (!row.expires_on) throw new Error('Enter the expiry date.');
+        const { error } = k.id ? await db.from('key_dates').update(row).eq('id', k.id) : await db.from('key_dates').insert(row);
+        if (error) throw error; toast('Document date saved'); changed();
+      } }],
+  });
+}
