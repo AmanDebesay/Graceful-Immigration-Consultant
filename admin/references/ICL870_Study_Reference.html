@@ -1771,10 +1771,10 @@ document.querySelectorAll('.ch.on').forEach(h=>{
       if (window.__giFx) return; window.__giFx = 1;
       var top = document.querySelector('.float-top');
       window.addEventListener('scroll', function () { top && top.classList.toggle('show', window.scrollY > 700); }, { passive: true });
-      var els = document.querySelectorAll('.reveal, main .section-head, main .svc, main .res, main .price-card, main .why-col, main .card, main .article');
+      var els = document.querySelectorAll('.reveal, main .section-head, main .svc, main .res, main .price-card, main .why-col, main .card');
       if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       els.forEach(function (el) { el.classList.add('reveal'); });
-      var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+      var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
       els.forEach(function (el) { io.observe(el); });
     })();
     </script>

@@ -97,15 +97,14 @@
       <div class="nav-drop">
         <button class="nav-drop-btn" type="button">Our Services <svg><use href="#i-chev"/></svg></button>
         <div class="nav-menu">
-          <a href="assessment.html">Refugee Claims &amp; IRB Hearings</a>
-          <a href="assessment.html">Family Reunification</a>
-          <a href="assessment.html">PR for Protected Persons</a>
-          <a href="assessment.html">Work Permits</a>
-          <a href="assessment.html">Study Permits</a>
-          <a href="assessment.html">Family Sponsorship</a>
-          <a href="assessment.html">Express Entry &amp; PR</a>
-          <a href="assessment.html">Visitor Visas &amp; Super Visa</a>
-          <a href="assessment.html">PR Card Renewal</a>
+          <a href="refugee-claims.html">Refugee Claims &amp; IRB Hearings</a>
+          <a href="spousal-family-sponsorship.html">Spousal &amp; Family Sponsorship</a>
+          <a href="express-entry.html">Express Entry &amp; PR</a>
+          <a href="alberta-pnp-aaip.html">Alberta PNP (AAIP)</a>
+          <a href="work-permits-lmia.html">Work Permits &amp; LMIA</a>
+          <a href="study-permits.html">Study Permits</a>
+          <a href="visitor-visa-super-visa.html">Visitor Visas &amp; Super Visa</a>
+          <a href="citizenship-pr-card.html">Citizenship &amp; PR Card</a>
           <a href="index.html#services">All services</a>
           <a href="assessment.html"><b>Start an assessment →</b></a>
         </div>
@@ -113,11 +112,14 @@
       <div class="nav-drop">
         <button class="nav-drop-btn" type="button">Who We Serve <svg><use href="#i-chev"/></svg></button>
         <div class="nav-menu">
-          <a href="assessment.html">Refugees &amp; Protected Persons</a>
-          <a href="assessment.html">Individuals &amp; Families</a>
-          <a href="assessment.html">Employers</a>
-          <a href="assessment.html">Students</a>
-          <a href="assessment.html">Workers: Immigration Pathways</a>
+          <a href="refugee-claims.html">Refugees &amp; Protected Persons</a>
+          <a href="spousal-family-sponsorship.html">Individuals &amp; Families</a>
+          <a href="work-permits-lmia.html">Employers</a>
+          <a href="study-permits.html">Students</a>
+          <a href="express-entry.html">Workers: Immigration Pathways</a>
+          <a href="tigrinya-immigration-consultant.html">ትግርኛ · Tigrinya speakers</a>
+          <a href="amharic-immigration-consultant.html">አማርኛ · Amharic speakers</a>
+          <a href="arabic-immigration-consultant.html">العربية · Arabic speakers</a>
         </div>
       </div>
       <div class="nav-drop">
@@ -326,10 +328,10 @@
       if (window.__giFx) return; window.__giFx = 1;
       var top = document.querySelector('.float-top');
       window.addEventListener('scroll', function () { top && top.classList.toggle('show', window.scrollY > 700); }, { passive: true });
-      var els = document.querySelectorAll('.reveal, main .section-head, main .svc, main .res, main .price-card, main .why-col, main .card, main .article');
+      var els = document.querySelectorAll('.reveal, main .section-head, main .svc, main .res, main .price-card, main .why-col, main .card');
       if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       els.forEach(function (el) { el.classList.add('reveal'); });
-      var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+      var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
       els.forEach(function (el) { io.observe(el); });
     })();
     </script>
