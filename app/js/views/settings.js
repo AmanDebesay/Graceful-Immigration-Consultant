@@ -9,14 +9,14 @@ const money = (n) => Number(n || 0).toLocaleString('en-CA', { style: 'currency',
 const total = (p) => (p.milestones || []).reduce((s, m) => s + Number(m.fee || 0), 0);
 
 export async function render(el) {
-  const tab = (location.hash.match(/tab=(fees|ai|integrations)/) || [])[1] || 'business';
-  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="ai">AI assistant</button><button data-t="integrations">Integrations</button></div></div><div id="pane"></div>`;
+  const tab = (location.hash.match(/tab=(fees|ai|integrations|reviews)/) || [])[1] || 'business';
+  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="ai">AI assistant</button><button data-t="integrations">Integrations</button><button data-t="reviews">Website reviews</button></div></div><div id="pane"></div>`;
   el.querySelectorAll('#tabs button').forEach((b) => {
     b.classList.toggle('on', b.dataset.t === tab);
     b.onclick = () => { location.hash = b.dataset.t === 'business' ? '#/settings' : `#/settings?tab=${b.dataset.t}`; };
   });
   const pane = el.querySelector('#pane');
-  ({ fees, ai, business, integrations }[tab])(pane);
+  ({ fees, ai, business, integrations, reviews }[tab])(pane);
 }
 
 async function integrations(el) {
@@ -174,4 +174,63 @@ async function ai(el) {
     const { error: er } = await db.from('org_settings').update({ ai_staff_instructions: el.querySelector('#si').value.trim(), ai_public_instructions: el.querySelector('#pi').value.trim(), ai_public_enabled: el.querySelector('#pe').checked }).eq('id', 1);
     er ? fail(er) : toast('AI settings saved');
   };
+}
+
+async function reviews(el) {
+  const [{ data: sm, error }, { data: list }] = await Promise.all([
+    db.from('review_summary').select('*').eq('id', 1).single(),
+    db.from('site_reviews').select('*').order('sort').order('review_date', { ascending: false })]);
+  if (error) { el.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
+  const stars = (n) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(n);
+  el.innerHTML = `<div class="alert info">These reviews appear in the Google reviews strip on your homepage. Copy them exactly as written on Google (real, unedited reviews only), or connect automatic sync with a Google Places API key.</div>
+    <div class="grid g-2" style="align-items:start">
+      <form class="card" id="sf"><div class="card-h"><h3>Rating summary</h3>${sm.synced_at ? `<small class="dk-muted">Synced ${new Date(sm.synced_at).toLocaleString('en-CA')}</small>` : ''}</div><div class="card-b">
+        <div class="row-2"><div class="field"><label>Google rating</label><input class="input" id="sr" type="number" step="0.1" min="0" max="5" value="${esc(sm.rating)}"></div>
+          <div class="field"><label>Number of reviews</label><input class="input" id="sc" type="number" min="0" value="${esc(sm.review_count)}"></div></div>
+        <div class="field"><label>"See all reviews" link (your Google Maps listing)</label><input class="input" id="su" value="${esc(sm.reviews_url || '')}" placeholder="https://maps.google.com/..."></div>
+        <div class="field"><label>"Review us on Google" link (Business Profile → Ask for reviews → copy link)</label><input class="input" id="sw" value="${esc(sm.write_review_url || '')}" placeholder="https://g.page/r/.../review"></div>
+        <div class="field"><label>Google place ID (for automatic sync)</label><input class="input" id="sp" value="${esc(sm.place_id || '')}" placeholder="ChIJ..."></div>
+        <div class="row" style="justify-content:space-between"><button class="btn btn-sm" type="button" id="sync">${icon('history')} Sync from Google</button><button class="btn btn-primary" type="submit">Save</button></div></div></form>
+      <div class="card"><div class="card-h"><h3>Reviews on the website</h3><button class="btn btn-gold btn-sm" id="add">${icon('plus')} Add review</button></div>
+        <div class="card-b" style="padding-top:4px">${(list || []).length ? (list || []).map((r) => `<div class="check" style="align-items:flex-start">
+            <div style="flex:1;min-width:0"><b>${esc(r.author)}</b> <span style="color:#F29900">${stars(r.rating)}</span> <small class="dk-muted">${r.review_date || ''} · ${r.source}</small>
+              <div class="dk-muted" style="font-size:13px;margin-top:2px">${esc((r.body || '').slice(0, 140))}${(r.body || '').length > 140 ? '…' : ''}</div></div>
+            <span class="badge ${r.visible ? 'b-GREEN' : ''}">${r.visible ? 'Shown' : 'Hidden'}</span><button class="btn btn-sm" data-e="${r.id}">Edit</button></div>`).join('')
+          : '<div class="dk-empty">No reviews yet. Click <b>Add review</b> and copy your Google reviews here.</div>'}</div></div>
+    </div>`;
+  el.querySelector('#sf').onsubmit = async (e) => {
+    e.preventDefault();
+    const url = (v) => v.trim() || null;
+    const patch = { rating: Number(el.querySelector('#sr').value || 5), review_count: Number(el.querySelector('#sc').value || 0), reviews_url: url(el.querySelector('#su').value), write_review_url: url(el.querySelector('#sw').value), place_id: url(el.querySelector('#sp').value) };
+    if ([patch.reviews_url, patch.write_review_url].some((u) => u && !/^https:\/\//.test(u))) return fail(new Error('Links must start with https://'));
+    const { error: er } = await db.from('review_summary').update(patch).eq('id', 1);
+    er ? fail(er) : toast('Saved');
+  };
+  el.querySelector('#sync').onclick = async (e) => {
+    e.target.disabled = true;
+    try { const r = await callFn('reviews-sync', {}); toast(`Synced: ${r.count} reviews, rating ${r.rating}`); reviews(el); } catch (err) { fail(err); }
+    e.target.disabled = false;
+  };
+  const edit = (r = {}) => modal({
+    title: r.id ? 'Edit review' : 'Add review', wide: true,
+    body: `<div class="row-2"><div class="field"><label>Reviewer name (as shown on Google)</label><input class="input" id="ra" value="${esc(r.author || '')}"></div>
+      <div class="row-2" style="gap:8px"><div class="field"><label>Stars</label><select class="input" id="rs">${[5, 4, 3, 2, 1].map((n) => `<option ${n === (r.rating || 5) ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+      <div class="field"><label>Review date</label><input class="input" type="date" id="rd" value="${esc(r.review_date || '')}"></div></div></div>
+      <div class="field"><label>Review text (exactly as written)</label><textarea class="input" id="rb" rows="5">${esc(r.body || '')}</textarea></div>
+      <div class="field"><label>Your reply (optional)</label><textarea class="input" id="rr" rows="2">${esc(r.owner_reply || '')}</textarea></div>
+      <div class="row-2"><div class="field"><label>Order (lower shows first)</label><input class="input" type="number" id="ro" value="${esc(r.sort ?? 100)}"></div>
+        <label class="row" style="gap:8px;align-self:end;margin-bottom:14px"><input type="checkbox" id="rv" ${r.visible === false ? '' : 'checked'}> Show on website</label></div>`,
+    actions: [
+      ...(r.id ? [{ label: 'Delete', cls: 'btn-danger', onClick: async () => { if (!confirm('Delete this review from the website?')) return false; const { error: er } = await db.from('site_reviews').delete().eq('id', r.id); if (er) throw er; toast('Deleted'); reviews(el); } }] : []),
+      { label: 'Cancel' },
+      { label: 'Save', cls: 'btn-primary', onClick: async (m) => {
+        const v = (q) => m.querySelector(q).value.trim();
+        const row = { author: v('#ra'), rating: Number(v('#rs')), review_date: v('#rd') || null, body: v('#rb'), owner_reply: v('#rr') || null, sort: Number(v('#ro') || 100), visible: m.querySelector('#rv').checked, source: r.source || 'google' };
+        if (!row.author) throw new Error('Enter the reviewer name.');
+        const { error: er } = r.id ? await db.from('site_reviews').update(row).eq('id', r.id) : await db.from('site_reviews').insert(row);
+        if (er) throw er; toast('Review saved'); reviews(el);
+      } }],
+  });
+  el.querySelector('#add').onclick = () => edit();
+  el.querySelectorAll('[data-e]').forEach((b) => (b.onclick = () => edit((list || []).find((x) => x.id === b.dataset.e))));
 }

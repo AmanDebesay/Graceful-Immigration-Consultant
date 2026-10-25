@@ -221,3 +221,34 @@ html.has-gi-chat .float-top{bottom:156px}
 @keyframes gcDot{0%,80%,100%{opacity:.3}40%{opacity:1}}
 @media (max-width:640px){.gc-launch span{display:none}.gc-launch{padding:15px}.gc-panel{right:10px;left:10px;top:10px;bottom:10px;width:auto;height:auto}html.has-gi-chat .float-wa{bottom:86px}html.has-gi-chat .float-top{bottom:150px;right:24px}}
 @media print{.gi-chat{display:none}}
+
+/* Red footer (Canadian maple style) */
+.site-footer{background-color:#B3120F;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.05' stroke-width='2'%3E%3Cpath d='M0 40 80 0 160 40 160 120 80 160 0 120Z'/%3E%3Cpath d='M80 0v160M0 40l160 80M160 40 0 120'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(135deg,#C8191A 0%,#A70F0E 55%,#8E0B0B 100%);color:rgba(255,255,255,.88)}
+.site-footer .footer-news{border-bottom:1px solid rgba(255,255,255,.18)}
+.site-footer .footer-news .fn-copy strong{color:#fff}
+.site-footer .footer-news .fn-copy span,.site-footer .fn-consent{color:rgba(255,255,255,.8)}
+.fx-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;padding:44px 0 34px}
+.fx-brand{display:inline-flex;align-items:center;gap:14px;color:#fff}
+.fx-brand img{width:86px;height:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25))}
+.fx-brand b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:40px;letter-spacing:.1em;line-height:1;font-weight:600}
+.fx-brand small{display:block;font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;margin-top:6px;color:rgba(255,255,255,.9)}
+.fx-badges{display:flex;gap:16px;margin:24px 0 20px;flex-wrap:wrap}
+.fx-badges a{background:#fff;padding:8px 12px;display:flex;align-items:center;box-shadow:0 6px 16px rgba(0,0,0,.18)}
+.fx-badges img{height:54px;width:auto;display:block}
+.fx-social{display:flex;gap:6px;margin-bottom:18px}
+.fx-social a{width:40px;height:40px;background:#000;color:#fff!important;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;transition:background .15s}
+.fx-social a:hover{background:#2A2A2A}.fx-social svg{width:18px;height:18px}
+.fx-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:540px}
+.fx-btns a{background:#000;color:#fff!important;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 8px;font-size:12.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;text-align:center;transition:background .15s}
+.fx-btns a:hover{background:#2A2A2A}.fx-btns svg{width:14px;height:14px;flex:none}
+.fx-right h3{font-family:'Inter',system-ui,sans-serif;color:#fff;font-size:30px;font-weight:700;margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,.35);max-width:240px}
+.fx-posts{list-style:none;margin:0 0 26px;padding:0;display:grid;gap:9px}
+.fx-posts a{color:#fff;font-weight:600;font-size:15.5px;line-height:1.35}
+.fx-posts a:hover{text-decoration:underline}
+.fx-nav{display:flex;flex-wrap:wrap;gap:10px 30px}
+.fx-nav a{color:#fff;font-weight:700;font-size:14.5px;text-transform:uppercase;letter-spacing:.04em}
+.fx-nav a:hover{text-decoration:underline}
+.site-footer .footer-bottom{border-top:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.75)}
+.site-footer .footer-bottom a{color:rgba(255,255,255,.85)}
+@media (max-width:900px){.fx-grid{grid-template-columns:1fr;gap:32px}.fx-brand b{font-size:32px}}
+@media (max-width:560px){.fx-btns{grid-template-columns:1fr 1fr}.fx-badges img{height:42px}}

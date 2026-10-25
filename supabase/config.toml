@@ -444,3 +444,9 @@ verify_jwt = false
 
 [functions.receipt-inbox]
 verify_jwt = false
+
+[functions.news]
+verify_jwt = false
+
+[functions.reviews-sync]
+verify_jwt = false
