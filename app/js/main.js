@@ -5,6 +5,7 @@ import { showLogin, showSetPassword, showLinkError, showMfaChallenge } from './a
 const NAV = [
   { group: 'Overview' },
   { path: '/', label: 'Dashboard', icon: 'home', show: () => isStaff() },
+  { path: '/assistant', label: 'AI Assistant', icon: 'sparkle', show: () => isStaff() },
   { group: 'CRM' },
   { path: '/contacts', label: 'Contacts', icon: 'users', show: () => can('crm.view') },
   { path: '/companies', label: 'Companies', icon: 'briefcase', show: () => can('crm.view') },
@@ -39,6 +40,7 @@ const NAV = [
 const ROUTES = [
   [/^\/$/, 'dashboard', 'Dashboard'],
   [/^\/resources$/, 'resources', 'Legal & Research Resources'],
+  [/^\/assistant$/, 'assistant', 'AI Assistant'],
   [/^\/assessments$/, 'assessments', 'Assessments'],
   [/^\/assessments\/new$/, 'assessment-new', 'New assessment'],
   [/^\/assessments\/([\w-]+)$/, 'assessment', 'Assessment'],

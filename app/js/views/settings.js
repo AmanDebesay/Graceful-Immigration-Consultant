@@ -9,14 +9,14 @@ const money = (n) => Number(n || 0).toLocaleString('en-CA', { style: 'currency',
 const total = (p) => (p.milestones || []).reduce((s, m) => s + Number(m.fee || 0), 0);
 
 export async function render(el) {
-  const tab = /tab=fees/.test(location.hash) ? 'fees' : 'business';
-  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button></div></div><div id="pane"></div>`;
+  const tab = (location.hash.match(/tab=(fees|ai)/) || [])[1] || 'business';
+  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="ai">AI assistant</button></div></div><div id="pane"></div>`;
   el.querySelectorAll('#tabs button').forEach((b) => {
     b.classList.toggle('on', b.dataset.t === tab);
-    b.onclick = () => { location.hash = b.dataset.t === 'fees' ? '#/settings?tab=fees' : '#/settings'; };
+    b.onclick = () => { location.hash = b.dataset.t === 'business' ? '#/settings' : `#/settings?tab=${b.dataset.t}`; };
   });
   const pane = el.querySelector('#pane');
-  tab === 'fees' ? fees(pane) : business(pane);
+  ({ fees, ai, business }[tab])(pane);
 }
 
 async function business(el) {
@@ -108,4 +108,29 @@ function editPackage(p, done) {
         if (error) throw error; toast('Service saved'); done();
       } }],
   });
+}
+
+async function ai(el) {
+  const since = new Date(Date.now() - 30 * 86400000).toISOString();
+  const [{ data: s, error }, { data: use }] = await Promise.all([
+    db.from('org_settings').select('ai_staff_instructions, ai_public_instructions, ai_public_enabled').eq('id', 1).single(),
+    db.from('ai_usage').select('kind, input_tokens, output_tokens').gte('created_at', since).limit(10000)]);
+  if (error) { el.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
+  const sum = (k) => (use || []).filter((u) => u.kind === k).reduce((a, u) => ({ n: a.n + 1, tok: a.tok + u.input_tokens + u.output_tokens }), { n: 0, tok: 0 });
+  const st = sum('staff'), pu = sum('public');
+  el.innerHTML = `<div class="alert info">Both assistants run on Claude by Anthropic. To make the dashboard assistant work like the Claude you've trained, copy the <b>custom instructions</b> (and any key knowledge) from your Claude Project and paste them below. Messages are sent to Anthropic for processing and are not used to train AI models; conversations are not stored here, only usage counts.</div>
+    <div class="grid g-2" style="align-items:start">
+      <form class="card" id="af"><div class="card-h"><h3>Dashboard assistant (staff)</h3></div><div class="card-b">
+        <div class="field"><label for="si">Your instructions and knowledge</label><textarea class="input" id="si" rows="14" placeholder="e.g. How I like assessments structured, my preferred programs, office procedures, fee policies, templates, tone…">${esc(s.ai_staff_instructions)}</textarea>
+        <small class="dk-muted">Used for every staff conversation, together with built-in rules (cite IRPA/IRPR, verify current rules, flag deadlines first).</small></div></div></form>
+      <div class="card"><div class="card-h"><h3>Website assistant (public)</h3><label class="row" style="gap:8px;font-weight:600"><input type="checkbox" id="pe" ${s.ai_public_enabled ? 'checked' : ''}> Show on website</label></div><div class="card-b">
+        <div class="field"><label for="pi">Extra instructions for the public assistant</label><textarea class="input" id="pi" rows="8" placeholder="e.g. Office hours, holiday closures, a current promotion, how to send documents…">${esc(s.ai_public_instructions)}</textarea>
+        <small class="dk-muted">It already knows your services, consultation fees, languages, phone, email and booking page, and it never gives immigration advice.</small></div></div></div>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-top:16px"><span class="dk-muted">Last 30 days: staff ${st.n} answers (${st.tok.toLocaleString()} tokens) · website ${pu.n} answers (${pu.tok.toLocaleString()} tokens)</span>
+      <button class="btn btn-primary" id="saveAi">Save AI settings</button></div>`;
+  el.querySelector('#saveAi').onclick = async () => {
+    const { error: er } = await db.from('org_settings').update({ ai_staff_instructions: el.querySelector('#si').value.trim(), ai_public_instructions: el.querySelector('#pi').value.trim(), ai_public_enabled: el.querySelector('#pe').checked }).eq('id', 1);
+    er ? fail(er) : toast('AI settings saved');
+  };
 }

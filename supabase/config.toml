@@ -429,3 +429,9 @@ verify_jwt = false
 
 [functions.agreement-sign]
 verify_jwt = false
+
+[functions.ai-assist]
+verify_jwt = false
+
+[functions.public-chat]
+verify_jwt = false

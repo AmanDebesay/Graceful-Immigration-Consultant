@@ -18,6 +18,7 @@ export async function render(el, [id], { setTitle }) {
 
   el.innerHTML = `
     <div class="toolbar"><a class="btn btn-sm" href="#/assessments">← All assessments</a><div class="grow"></div>
+      <a class="btn btn-gold" href="#/assistant?a=${s.id}">${icon('sparkle')} Review with AI</a>
       ${c.id ? `<a class="btn" href="#/contacts/${c.id}">${icon('user')} Open contact</a>` : ''}
       <button class="btn" id="addTask">${icon('checksq')} Add task</button>
       ${manage && s.status !== 'reviewed' ? `<button class="btn btn-primary" id="markReviewed">${icon('check')} Mark reviewed</button>` : ''}

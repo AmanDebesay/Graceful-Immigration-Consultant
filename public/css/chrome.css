@@ -180,3 +180,44 @@ font{background:none!important}
 .lang-menu a{text-decoration:none}
 @media (max-width:980px){.tb-online{display:none!important}}
 @media (max-width:640px){.tb-mail{display:none!important}.topbar .wrap{padding:0 16px}}
+
+/* Website AI chat assistant */
+.gi-chat{--gc-navy:#0B2A5C;--gc-gold:#E2AE45;font-family:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;line-height:1.5}
+.gi-chat *{box-sizing:border-box}
+.gi-chat svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gc-launch{position:fixed;right:22px;bottom:22px;z-index:95;display:flex;align-items:center;gap:9px;border:0;cursor:pointer;border-radius:999px;padding:13px 20px 13px 15px;background:linear-gradient(135deg,#F6D88E,#E2AE45);color:var(--gc-navy);font:700 14.5px/1 inherit;font-family:inherit;box-shadow:0 12px 28px rgba(184,134,31,.38);transition:transform .2s}
+.gc-launch:hover{transform:translateY(-3px)}
+.gc-launch svg{width:22px;height:22px}
+.gi-chat.open .gc-launch{display:none}
+html.has-gi-chat .float-wa{bottom:88px;padding:13px}
+html.has-gi-chat .float-wa span{display:none}
+html.has-gi-chat .float-top{bottom:156px}
+.gc-panel{position:fixed;right:22px;bottom:22px;z-index:130;width:min(380px,calc(100vw - 24px));height:min(600px,calc(100vh - 44px));background:#fff;border-radius:20px;box-shadow:0 24px 60px rgba(7,27,58,.28);display:flex;flex-direction:column;overflow:hidden;border:1px solid #EFE9DD}
+.gc-panel[hidden]{display:none}
+.gc-panel header{display:flex;align-items:center;gap:11px;padding:14px 16px;background:linear-gradient(120deg,#071B3A,#0B2A5C);color:#fff}
+.gc-panel header b{display:block;font-size:15px}.gc-panel header small{font-size:11.5px;color:rgba(255,255,255,.7)}
+.gc-panel header div{flex:1}
+.gc-av{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.12);color:#F2C462;display:flex;align-items:center;justify-content:center}.gc-av svg{width:19px;height:19px}
+.gc-x{background:none;border:0;color:#fff;font-size:26px;line-height:1;cursor:pointer;opacity:.8;padding:0 4px}
+.gc-x:hover{opacity:1}
+.gc-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#FBF8F2}
+.gc-m{max-width:88%;padding:10px 13px;border-radius:15px;font-size:14px;overflow-wrap:anywhere}
+.gc-m p{margin:0 0 6px}.gc-m p:last-child{margin:0}.gc-m ul{margin:0 0 6px 18px;padding:0}.gc-m li{margin-bottom:2px}
+.gc-m.assistant{background:#fff;border:1px solid #EFE9DD;border-top-left-radius:4px;color:#1C2333;align-self:flex-start}
+.gc-m.user{background:var(--gc-navy);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.gc-m a{color:#2F5BA8;text-decoration:underline;font-weight:600}
+.gc-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px;background:#FBF8F2}
+.gc-chips:empty{display:none}
+.gc-chips button{border:1px solid #EAD9B0;background:#fff;color:var(--gc-navy);border-radius:999px;padding:7px 12px;font:600 12.5px/1.2 inherit;font-family:inherit;cursor:pointer}
+.gc-chips button:hover{background:#FBF1DC}
+.gc-form{display:flex;gap:8px;padding:12px;border-top:1px solid #F1ECE2}
+.gc-form input{flex:1;min-width:0;border:1px solid #E1D8C6;border-radius:999px;padding:11px 15px;font:14px inherit;font-family:inherit;outline:none}
+.gc-form input:focus{border-color:var(--gc-gold);box-shadow:0 0 0 3px rgba(226,174,69,.2)}
+.gc-form button{width:44px;height:44px;border-radius:50%;border:0;background:linear-gradient(135deg,#F6D88E,#E2AE45);color:var(--gc-navy);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.gc-form button svg{width:19px;height:19px}.gc-form button:disabled{opacity:.5}
+.gc-note{margin:0;padding:0 14px 10px;font-size:11px;color:#6B7385}
+.gc-typing{display:inline-flex;gap:4px}.gc-typing i{width:7px;height:7px;border-radius:50%;background:#C9B27A;animation:gcDot 1.2s infinite}
+.gc-typing i:nth-child(2){animation-delay:.15s}.gc-typing i:nth-child(3){animation-delay:.3s}
+@keyframes gcDot{0%,80%,100%{opacity:.3}40%{opacity:1}}
+@media (max-width:640px){.gc-launch span{display:none}.gc-launch{padding:15px}.gc-panel{right:10px;left:10px;top:10px;bottom:10px;width:auto;height:auto}html.has-gi-chat .float-wa{bottom:86px}html.has-gi-chat .float-top{bottom:150px;right:24px}}
+@media print{.gi-chat{display:none}}
