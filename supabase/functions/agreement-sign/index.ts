@@ -1,5 +1,6 @@
 // Public endpoint for clients to view and e-sign an agreement using their private link token.
 import { adminClient, corsHeaders, escapeHtml, json, rateLimit, sendEmail } from "../_shared/common.ts";
+import { HUB, notifyTeams } from "../_shared/m365.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
@@ -35,6 +36,7 @@ Deno.serve(async (req) => {
         `<p><b>${escapeHtml(String(body.name))}</b> signed <b>${escapeHtml(data.title)}</b> (${escapeHtml(data.number)}).</p>
          <p><a href="https://gracefulimmigration.ca/app/#/agreements/${data.id}">Open in dashboard</a></p>`);
     }
+    await notifyTeams(admin, "✍️ Agreement signed by client", `Agreement ${data.number} was signed. Next: invoice and open the case file.`, `${HUB}#/agreements/${data.id}`);
     return json(req, { ok: true });
   }
   return json(req, { error: "Unknown action" }, 400);

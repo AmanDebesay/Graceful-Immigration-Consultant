@@ -435,3 +435,6 @@ verify_jwt = false
 
 [functions.public-chat]
 verify_jwt = false
+
+[functions.comms]
+verify_jwt = false

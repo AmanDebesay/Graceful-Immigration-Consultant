@@ -1,4 +1,4 @@
-import { db, esc, toast, fail, icon, modal } from '../core.js';
+import { db, esc, toast, fail, icon, modal, callFn } from '../core.js';
 
 const FIELDS = [
   ['business_name', 'Business legal name'], ['rcic_name', 'RCIC name'], ['licence_number', 'CICC licence number'],
@@ -9,14 +9,54 @@ const money = (n) => Number(n || 0).toLocaleString('en-CA', { style: 'currency',
 const total = (p) => (p.milestones || []).reduce((s, m) => s + Number(m.fee || 0), 0);
 
 export async function render(el) {
-  const tab = (location.hash.match(/tab=(fees|ai)/) || [])[1] || 'business';
-  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="ai">AI assistant</button></div></div><div id="pane"></div>`;
+  const tab = (location.hash.match(/tab=(fees|ai|integrations)/) || [])[1] || 'business';
+  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="ai">AI assistant</button><button data-t="integrations">Integrations</button></div></div><div id="pane"></div>`;
   el.querySelectorAll('#tabs button').forEach((b) => {
     b.classList.toggle('on', b.dataset.t === tab);
     b.onclick = () => { location.hash = b.dataset.t === 'business' ? '#/settings' : `#/settings?tab=${b.dataset.t}`; };
   });
   const pane = el.querySelector('#pane');
-  ({ fees, ai, business }[tab])(pane);
+  ({ fees, ai, business, integrations }[tab])(pane);
+}
+
+async function integrations(el) {
+  const [{ data: integ, error }, { data: org }, status] = await Promise.all([
+    db.from('integration_settings').select('teams_webhook_url, shared_mailbox').eq('id', 1).single(),
+    db.from('org_settings').select('ircc_rep_id').eq('id', 1).single(),
+    callFn('comms', { action: 'status' }).catch(() => ({})),
+  ]);
+  if (error) { el.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
+  const badge = (on) => `<span class="badge ${on ? 'b-GREEN' : 'b-AMBER'}">${on ? 'Connected' : 'Not connected'}</span>`;
+  el.innerHTML = `<div class="grid g-2" style="align-items:start">
+    <div class="card"><div class="card-h"><h3>${icon('mail')} Microsoft 365 email</h3>${badge(status.email)}</div><div class="card-b">
+      <p class="dk-muted" style="margin-bottom:12px">Staff send client emails from their own company mailbox or the shared mailbox. Emails are saved in Outlook Sent Items and on the client's file, and a client's Outlook emails show on their <b>Emails</b> tab. System emails (new-assessment alerts, agreement notices) are sent from the shared mailbox.</p>
+      <div class="field"><label for="sm">Shared mailbox</label><input class="input" id="sm" value="${esc(integ.shared_mailbox)}"></div>
+      ${status.email ? '' : '<div class="alert info">To connect, register an app in Microsoft Entra and add its three values as Supabase secrets (MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET). Your developer has the step-by-step guide.</div>'}</div></div>
+    <div class="card"><div class="card-h"><h3>${icon('chat')} Microsoft Teams alerts</h3>${badge(!!integ.teams_webhook_url)}</div><div class="card-b">
+      <p class="dk-muted" style="margin-bottom:12px">Posts new assessments (urgent ones highlighted) and signed agreements to a Teams channel. No client names are posted; each alert links to the file in the dashboard.</p>
+      <div class="field"><label for="tw">Teams workflow link</label><input class="input" id="tw" value="${esc(integ.teams_webhook_url || '')}" placeholder="https://…logic.azure.com/… or https://…powerplatform.com/…">
+        <small class="dk-muted">In Teams: open the channel → ⋯ → <b>Workflows</b> → <b>Post to a channel when a webhook request is received</b> → copy the link it gives you.</small></div>
+      <button class="btn btn-sm" id="testTeams" ${integ.teams_webhook_url ? '' : 'disabled'}>Send test message</button></div></div>
+    <div class="card"><div class="card-h"><h3>${icon('globe')} IRCC</h3></div><div class="card-b">
+      <div class="field"><label for="rid">Representative IRCC ID (shown on the IRCC Portal tab; not a password)</label><input class="input" id="rid" value="${esc(org?.ircc_rep_id || '')}" placeholder="From your IRCC enrolment email"></div>
+      <small class="dk-muted">Never store your IRCC password here. You sign in to the IRCC Portal yourself.</small></div></div>
+  </div>
+  <div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn btn-primary" id="saveInt">Save integrations</button></div>`;
+  el.querySelector('#saveInt').onclick = async () => {
+    const tw = el.querySelector('#tw').value.trim() || null, sm = el.querySelector('#sm').value.trim().toLowerCase(), rid = el.querySelector('#rid').value.trim() || null;
+    if (tw && !/^https:\/\//.test(tw)) return fail(new Error('The Teams link must start with https://'));
+    if (!/@gracefulimmigration\.ca$/.test(sm)) return fail(new Error('The shared mailbox must be a company address.'));
+    const [a, b] = await Promise.all([
+      db.from('integration_settings').update({ teams_webhook_url: tw, shared_mailbox: sm }).eq('id', 1),
+      db.from('org_settings').update({ ircc_rep_id: rid }).eq('id', 1)]);
+    if (a.error || b.error) return fail(a.error || b.error);
+    toast('Integrations saved'); integrations(el);
+  };
+  el.querySelector('#testTeams').onclick = async (e) => {
+    e.target.disabled = true;
+    try { await callFn('comms', { action: 'teams_test' }); toast('Test message sent to Teams'); } catch (err) { fail(err); }
+    e.target.disabled = false;
+  };
 }
 
 async function business(el) {

@@ -1,5 +1,5 @@
 // Shared CRM forms: log activity, deal editor, case editor.
-import { db, state, esc, icon, modal, toast, staffOptions, today } from './core.js';
+import { db, state, esc, icon, modal, toast, staffOptions, today, callFn } from './core.js';
 import { money, itemsList, contactsList, contactOptions } from './fin.js';
 
 export const ACT_TYPES = [['call', 'Call', 'phone'], ['email', 'Email', 'mail'], ['meeting', 'Meeting', 'calendar'], ['whatsapp', 'WhatsApp', 'phone'], ['sms', 'Text message', 'phone'], ['note', 'Note', 'note']];
@@ -116,6 +116,53 @@ export async function editCase(c = {}, { contactId } = {}) {
 }
 
 export { money };
+
+// ── Email a client from Microsoft 365 (my mailbox or the shared mailbox) ──
+const EMAIL_TEMPLATES = [
+  ['', 'Blank email', ''],
+  ['Your consultation with Graceful Immigration', 'Consultation confirmation',
+    'Hello {first},\n\nThank you for booking a consultation with Graceful Immigration Consultant Inc. Your consultation is confirmed for [date and time] by [Zoom / Microsoft Teams]. The meeting link will be sent before the call.\n\nPayment: please call (403) 915-4230 to pay the consultation fee before the meeting.\n\nPlease have your passport and any letters from IRCC nearby during the call.'],
+  ['Documents needed for your file', 'Request documents',
+    'Hello {first},\n\nTo continue with your application, please send us the following documents:\n\n- [document 1]\n- [document 2]\n- [document 3]\n\nPlease scan each document in colour as a PDF. Do not send passports or identity documents by WhatsApp. Reply to this email or ask us for a secure upload link.\n\nIf you have any questions, call us at (403) 915-4230.'],
+  ['Update on your application', 'Application update',
+    'Hello {first},\n\nI wanted to give you an update on your file: [update].\n\nNext steps: [next steps].\n\nPlease let me know if you have any questions.'],
+  ['Payment reminder', 'Payment reminder',
+    'Hello {first},\n\nThis is a friendly reminder that [amount] is due for [milestone/invoice number]. You can pay by Interac e-Transfer to info@gracefulimmigration.ca or by calling (403) 915-4230.\n\nThank you.'],
+];
+
+let commsStatus = null;
+export async function composeEmail({ contact = null, to = '', subject = '', body = '' } = {}) {
+  if (!commsStatus) commsStatus = await callFn('comms', { action: 'status' }).catch((e) => ({ error: e.message }));
+  const st = commsStatus;
+  const first = (contact?.full_name || '').split(' ')[0] || 'there';
+  modal({
+    title: contact ? `Email ${contact.full_name}` : 'New email', wide: true,
+    body: `${!st.email ? `<div class="alert info">Email isn't connected to Microsoft 365 yet, so it can't be sent from here. The owner can connect it in <b>Business Settings → Integrations</b>.</div>` : ''}
+      <div class="row-2"><div class="field"><label>From</label><select class="input" id="fr">
+          <option value="me">${esc(state.profile.email)} (me)</option>${(st.mailboxes || []).filter((m) => m !== state.profile.email.toLowerCase()).map((m) => `<option value="shared">${esc(m)} (shared)</option>`).join('')}</select></div>
+        <div class="field"><label>Template</label><select class="input" id="tp">${EMAIL_TEMPLATES.map(([, l], i) => `<option value="${i}">${esc(l)}</option>`).join('')}</select></div></div>
+      <div class="row-2"><div class="field"><label>To</label><input class="input" id="to" value="${esc(to || contact?.email || '')}"></div>
+        <div class="field"><label>Cc (optional)</label><input class="input" id="cc" placeholder="Separate addresses with commas"></div></div>
+      <div class="field"><label>Subject</label><input class="input" id="su" value="${esc(subject)}"></div>
+      <div class="field"><label>Message</label><textarea class="input" id="bo" rows="12">${esc(body)}</textarea>
+        <small class="dk-muted">Your name, title and the office phone are added as a signature. The email is saved in Outlook Sent Items${contact ? ' and on this client\'s file' : ''}.</small></div>`,
+    onOpen: (m) => {
+      m.querySelector('#tp').onchange = (e) => {
+        const [s, , b] = EMAIL_TEMPLATES[+e.target.value];
+        if (s) m.querySelector('#su').value = s;
+        if (b) m.querySelector('#bo').value = b.replace(/\{first\}/g, first);
+      };
+    },
+    actions: [{ label: 'Cancel' }, { label: 'Send email', cls: 'btn-gold', onClick: async (m) => {
+      if (!st.email) throw new Error('Email is not connected to Microsoft 365 yet.');
+      const text = m.querySelector('#bo').value;
+      if (/\[[^\]]+\]/.test(text) && !confirm('The message still has [placeholders] in square brackets. Send anyway?')) return false;
+      const r = await callFn('comms', { action: 'send', contact_id: contact?.id || null, from: m.querySelector('#fr').value,
+        to: m.querySelector('#to').value, cc: m.querySelector('#cc').value, subject: m.querySelector('#su').value, body: text });
+      toast(`Email sent from ${r.from}`); changed();
+    } }],
+  });
+}
 
 // ── Appointments & client document expiry dates (dashboard widgets) ──
 export const APPT_KINDS = [['consultation', 'Client consultation'], ['document_review', 'Document review'], ['follow_up', 'Follow-up meeting'], ['hearing', 'IRB hearing / interview'], ['other', 'Other']];

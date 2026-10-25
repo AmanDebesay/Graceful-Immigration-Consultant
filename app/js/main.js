@@ -1,11 +1,14 @@
 // App bootstrap: session → profile & permissions → shell → hash router.
-import { db, state, can, isStaff, esc, icon, avatarHtml, fmtDate, ROLE_LABEL, loadStaff, fail } from './core.js';
+import { db, state, can, isStaff, esc, icon, avatarHtml, fmtDate, ROLE_LABEL, loadStaff, fail, toast } from './core.js';
 import { showLogin, showSetPassword, showLinkError, showMfaChallenge } from './auth.js';
 
 const NAV = [
   { group: 'Overview' },
   { path: '/', label: 'Dashboard', icon: 'home', show: () => isStaff() },
   { path: '/assistant', label: 'AI Assistant', icon: 'sparkle', show: () => isStaff() },
+  { path: '/chat', label: 'Team Chat', icon: 'chat', show: () => isStaff(), count: 'chat_unread' },
+  { group: 'IRCC' },
+  { path: '/ircc', label: 'IRCC Portal', icon: 'globe', show: () => can('crm.view') },
   { group: 'CRM' },
   { path: '/contacts', label: 'Contacts', icon: 'users', show: () => can('crm.view') },
   { path: '/companies', label: 'Companies', icon: 'briefcase', show: () => can('crm.view') },
@@ -41,6 +44,8 @@ const ROUTES = [
   [/^\/$/, 'dashboard', 'Dashboard'],
   [/^\/resources$/, 'resources', 'Legal & Research Resources'],
   [/^\/assistant$/, 'assistant', 'AI Assistant'],
+  [/^\/chat$/, 'chat', 'Team Chat'],
+  [/^\/ircc$/, 'ircc', 'IRCC Portal'],
   [/^\/assessments$/, 'assessments', 'Assessments'],
   [/^\/assessments\/new$/, 'assessment-new', 'New assessment'],
   [/^\/assessments\/([\w-]+)$/, 'assessment', 'Assessment'],
@@ -174,7 +179,22 @@ function buildShell() {
   setupSearch();
   setupNewMenu();
   setupBell();
+  setupChatAlerts();
   refreshCounts();
+}
+
+// New team-chat messages: update the unread count and show a toast when not on the chat page.
+let chatAlerts = null;
+function setupChatAlerts() {
+  if (chatAlerts) db.removeChannel(chatAlerts);
+  chatAlerts = db.channel('team-chat-alerts').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, ({ new: m }) => {
+    if (m.author_id === state.profile.id) return;
+    refreshCounts();
+    if (!location.hash.startsWith('#/chat')) {
+      const who = state.staff.find((s) => s.id === m.author_id);
+      toast(`💬 ${who?.full_name || 'Team'}: ${m.body.length > 70 ? m.body.slice(0, 70) + '…' : m.body}`);
+    }
+  }).subscribe();
 }
 
 // Profile changes (e.g. a new photo) refresh the chip without a reload.
@@ -251,7 +271,10 @@ function renderNav() {
 }
 
 export async function refreshCounts() {
-  try { counts = (await db.rpc('dashboard_stats')).data || {}; } catch { counts = {}; }
+  try {
+    const [s, u] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread')]);
+    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0) };
+  } catch { counts = {}; }
   if (shellBuilt) {
     renderNav();
     const n = (counts.new_assessments || 0) + (counts.tasks_overdue || 0), b = document.getElementById('bellN');

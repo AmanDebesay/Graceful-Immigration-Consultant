@@ -1,7 +1,7 @@
 import { db, state, can, esc, icon, STAGES, triageBadge, priorityBadge, staffName, staffOptions, fmtDate, fmtDateTime, timeAgo,
-  modal, confirmBox, toast, fail, today, SERVICE_LABEL, initials, rpc } from '../core.js';
+  modal, confirmBox, toast, fail, today, SERVICE_LABEL, initials, rpc, callFn } from '../core.js';
 import { money, invoiceBadge, newInvoice, receivePayment, trustTxn } from '../fin.js';
-import { logActivity, editDeal, editCase, dealBadge, caseBadge, ACT_LABEL, ACT_ICON } from '../crm.js';
+import { logActivity, editDeal, editCase, dealBadge, caseBadge, ACT_LABEL, ACT_ICON, composeEmail } from '../crm.js';
 
 export async function render(el, [id], { setTitle }) {
   const { data: c, error } = await db.from('contacts').select('*, companies(id, name)').eq('id', id).single();
@@ -20,7 +20,8 @@ export async function render(el, [id], { setTitle }) {
   el.innerHTML = `
     <div class="toolbar"><a class="btn btn-sm" href="#/contacts">← Contacts</a><div class="grow"></div>
       ${c.phone ? `<a class="btn" href="tel:${esc(c.phone)}">${icon('phone')} Call</a>` : ''}
-      ${c.email ? `<a class="btn" href="mailto:${esc(c.email)}">${icon('mail')} Email</a>` : ''}
+      ${c.email && edit ? `<button class="btn" id="emailBtn">${icon('mail')} Email</button>` : ''}
+      <a class="btn" href="#/chat?contact=${c.id}">${icon('chat')} Team chat</a>
       ${edit ? `<button class="btn" id="logAct">${icon('note')} Log activity</button>` : ''}
       ${can('agreements.manage') ? `<button class="btn btn-gold" id="genAgr">${icon('file')} Generate agreement</button>` : ''}
       <div style="position:relative"><button class="btn btn-primary" id="moreNew">${icon('plus')} New ▾</button></div>
@@ -58,7 +59,7 @@ export async function render(el, [id], { setTitle }) {
         </div></div>
       </div>
       <div class="card">
-        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['deals', 'Deals'], ['cases', 'Cases'], ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ['assessments', 'Assessments']]
+        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ['assessments', 'Assessments']]
           .map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
         <div class="card-b" id="tabBody"></div>
       </div>
@@ -66,6 +67,7 @@ export async function render(el, [id], { setTitle }) {
 
   // Header actions
   el.querySelector('#logAct')?.addEventListener('click', () => logActivity({ contactId: id, companyId: c.company_id }));
+  el.querySelector('#emailBtn')?.addEventListener('click', () => composeEmail({ contact: c }));
   el.querySelector('#genAgr')?.addEventListener('click', async () => (await import('./agreements.js')).newAgreement({ contactId: id }));
   el.querySelector('#moreNew').onclick = (e) => {
     e.stopPropagation();
@@ -134,7 +136,7 @@ export async function render(el, [id], { setTitle }) {
   async function showTab() {
     tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === tab));
     body.innerHTML = '<div class="loading" style="min-height:120px"><div class="spin"></div></div>';
-    ({ agreements: agreementsTab, activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab })[tab]();
+    ({ emails: emailsTab, agreements: agreementsTab, activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab })[tab]();
   }
 
   async function activityTab() {
@@ -159,6 +161,30 @@ export async function render(el, [id], { setTitle }) {
       if (er) return fail(er);
       toast('Note saved'); showTab();
     });
+  }
+  async function emailsTab() {
+    const sent = await db.from('activities').select('id, subject, body, occurred_at, author_id').eq('contact_id', id).eq('type', 'email').order('occurred_at', { ascending: false }).limit(50);
+    body.innerHTML = `<div class="row" style="justify-content:space-between;margin-bottom:12px"><small class="dk-muted">${c.email ? `Emails with <b>${esc(c.email)}</b> from your Outlook and the shared mailbox.` : 'Add an email address to this client to see and send emails.'}</small>
+        ${c.email && edit ? `<button class="btn btn-primary btn-sm" id="ce">${icon('mail')} New email</button>` : ''}</div>
+      <div id="outlook"><div class="loading" style="min-height:80px"><div class="spin"></div>Checking Outlook…</div></div>
+      <h4 style="margin:18px 0 8px;color:var(--navy)">Sent from the Practice Hub</h4>
+      ${(sent.data || []).length ? `<div class="timeline">${sent.data.map((a) => `<div class="tl"><div class="tl-dot">${icon('mail')}</div><div class="tl-body"><div class="meta">${esc(staffName(a.author_id))} · ${fmtDateTime(a.occurred_at)}</div><b>${esc(a.subject || '')}</b><div class="text" style="margin-top:4px">${esc(a.body || '')}</div></div></div>`).join('')}</div>`
+        : '<div class="dk-muted">Nothing sent from the dashboard yet.</div>'}`;
+    body.querySelector('#ce')?.addEventListener('click', () => composeEmail({ contact: c }));
+    const box = body.querySelector('#outlook');
+    if (!c.email) { box.innerHTML = ''; return; }
+    try {
+      const r = await callFn('comms', { action: 'inbox', contact_id: id });
+      if (!box.isConnected) return;
+      box.innerHTML = (r.messages || []).length ? `<div class="mail-list">${r.messages.map((m) => `<a class="mail-row" ${m.webLink ? `href="${esc(m.webLink)}" target="_blank" rel="noopener"` : ''}>
+          <span class="mail-dir ${m.from.toLowerCase() === c.email.toLowerCase() ? 'in' : 'out'}">${m.from.toLowerCase() === c.email.toLowerCase() ? 'From client' : 'To client'}</span>
+          <span class="mail-main"><b>${esc(m.subject)}</b><small>${esc(m.preview)}</small></span>
+          <span class="mail-meta">${fmtDateTime(m.date)}<small>${esc(m.mailbox)}</small></span></a>`).join('')}</div>`
+        : '<div class="dk-muted">No emails with this client in Outlook yet.</div>';
+      if ((r.warnings || []).length) box.insertAdjacentHTML('beforeend', `<div class="alert err" style="margin-top:8px">${esc(r.warnings.join(' · '))}</div>`);
+    } catch (err) {
+      if (box.isConnected) box.innerHTML = `<div class="alert info">${esc(err.message)}</div>`;
+    }
   }
   async function agreementsTab() {
     const { agrBadge, AGR_TYPE, newAgreement } = await import('./agreements.js');

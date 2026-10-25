@@ -2,6 +2,7 @@
 // triages it, files it under a CRM contact, creates a review task and notifies the office.
 import { adminClient, callerProfile, corsHeaders, escapeHtml, hasPerm, json, rateLimit, sendEmail } from "../_shared/common.ts";
 import { Answers, triage } from "../_shared/triage.ts";
+import { HUB, notifyTeams } from "../_shared/m365.ts";
 
 const TEXT_KEYS = ["fullName", "email", "phone", "contactPref", "language", "languageOther", "location", "status",
   "citizenship", "firstEntryDate", "entryMethod", "cameFromUS", "claimMade", "claimDate", "bocSubmitted", "hearingDate",
@@ -130,6 +131,12 @@ Deno.serve(async (req) => {
       <p style="margin-top:16px"><a href="https://gracefulimmigration.ca/app/#/assessments/${submission.id}">Open in dashboard</a></p></div>`;
     await sendEmail(settings.notify_email, `New assessment (${t.level}): ${fullName}`, html);
   }
+
+  // Teams alert (no client name or details; the link opens the file in the dashboard)
+  const services = Array.isArray(answers.services) ? (answers.services as string[]).join(", ") : "";
+  await notifyTeams(admin, `${t.level === "RED" ? "🔴 URGENT" : t.level === "AMBER" ? "🟠" : "🟢"} New ${t.level} assessment ${isStaff ? "(entered by staff)" : "from the website"}`,
+    `${services ? `Services: ${services}. ` : ""}${t.red.length ? `${t.red.length} red flag(s) — review today.` : "Review task created."}`,
+    `${HUB}#/assessments/${submission.id}`, t.level === "RED");
 
   return json(req, { ok: true, urgent: t.level === "RED", id: isStaff ? submission.id : undefined });
 });

@@ -75,8 +75,19 @@ export function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
 
-/** Sends email through Resend when RESEND_API_KEY is configured. Never throws. */
+/** Sends a system email: through Microsoft 365 when connected (from the shared mailbox), otherwise
+    through Resend when RESEND_API_KEY is configured. Never throws. */
 export async function sendEmail(to: string | string[], subject: string, html: string, text?: string): Promise<boolean> {
+  const { graphConfigured, graphSendMail } = await import("./m365.ts");
+  if (graphConfigured()) {
+    try {
+      const { data } = await adminClient().from("integration_settings").select("shared_mailbox").eq("id", 1).single();
+      await graphSendMail({ from: data?.shared_mailbox ?? "info@gracefulimmigration.ca", to: Array.isArray(to) ? to : [to], subject, html });
+      return true;
+    } catch (e) {
+      console.error("Microsoft 365 send failed", e);
+    }
+  }
   const key = Deno.env.get("RESEND_API_KEY");
   if (!key) return false;
   const from = Deno.env.get("EMAIL_FROM") ?? "Graceful Immigration <notifications@gracefulimmigration.ca>";
