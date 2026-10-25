@@ -143,7 +143,10 @@ export async function composeEmail({ contact = null, to = '', subject = '', body
         <div class="field"><label>Template</label><select class="input" id="tp">${EMAIL_TEMPLATES.map(([, l], i) => `<option value="${i}">${esc(l)}</option>`).join('')}</select></div></div>
       <div class="row-2"><div class="field"><label>To</label><input class="input" id="to" value="${esc(to || contact?.email || '')}"></div>
         <div class="field"><label>Cc (optional)</label><input class="input" id="cc" placeholder="Separate addresses with commas"></div></div>
+      <div class="row-2"><div class="field"><label>Bcc (optional)</label><input class="input" id="bcc"></div>
+        <div class="field"><label>Attachments (up to about 3 MB in total)</label><input class="input" type="file" id="af" multiple></div></div>
       <div class="field"><label>Subject</label><input class="input" id="su" value="${esc(subject)}"></div>
+      <label class="row" style="gap:6px;margin:-4px 0 10px"><input type="checkbox" id="hi"> Mark as high importance</label>
       <div class="field"><label>Message</label><textarea class="input" id="bo" rows="12">${esc(body)}</textarea>
         <small class="dk-muted">Your name, title and the office phone are added as a signature. The email is saved in Outlook Sent Items${contact ? ' and on this client\'s file' : ''}.</small></div>`,
     onOpen: (m) => {
@@ -157,8 +160,16 @@ export async function composeEmail({ contact = null, to = '', subject = '', body
       if (!st.email) throw new Error('Email is not connected to Microsoft 365 yet.');
       const text = m.querySelector('#bo').value;
       if (/\[[^\]]+\]/.test(text) && !confirm('The message still has [placeholders] in square brackets. Send anyway?')) return false;
+      const files = [...m.querySelector('#af').files];
+      if (files.reduce((n, f) => n + f.size, 0) > 3 * 1024 * 1024) throw new Error('Attachments are larger than 3 MB in total. Share big files another way.');
+      const attachments = await Promise.all(files.map((f) => new Promise((res, rej) => {
+        const fr = new FileReader(); fr.onerror = () => rej(new Error(`Could not read ${f.name}`));
+        fr.onload = () => res({ name: f.name, contentType: f.type || 'application/octet-stream', contentBytes: String(fr.result).split(',')[1] || '' });
+        fr.readAsDataURL(f);
+      })));
       const r = await callFn('comms', { action: 'send', contact_id: contact?.id || null, from: m.querySelector('#fr').value,
-        to: m.querySelector('#to').value, cc: m.querySelector('#cc').value, subject: m.querySelector('#su').value, body: text });
+        to: m.querySelector('#to').value, cc: m.querySelector('#cc').value, bcc: m.querySelector('#bcc').value, subject: m.querySelector('#su').value, body: text,
+        attachments, importance: m.querySelector('#hi').checked ? 'high' : 'normal' });
       toast(`Email sent from ${r.from}`); changed();
     } }],
   });

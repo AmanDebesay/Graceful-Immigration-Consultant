@@ -40,19 +40,107 @@ async function graph(path: string, init: RequestInit = {}) {
 const addr = (list: string[]) => list.map((a) => ({ emailAddress: { address: a } }));
 
 /** Sends an email from a company mailbox; it is saved in that mailbox's Sent Items. */
-export async function graphSendMail(opts: { from: string; to: string[]; cc?: string[]; subject: string; html: string; replyTo?: string }) {
+export type Attachment = { name: string; contentType: string; contentBytes: string };
+const fileAtt = (a: Attachment) => ({ "@odata.type": "#microsoft.graph.fileAttachment", name: a.name, contentType: a.contentType, contentBytes: a.contentBytes });
+
+export async function graphSendMail(opts: { from: string; to: string[]; cc?: string[]; bcc?: string[]; subject: string; html: string; replyTo?: string; attachments?: Attachment[]; importance?: string }) {
   if (!isCompanyEmail(opts.from)) throw new Error("Email can only be sent from a company mailbox.");
   await graph(`/users/${encodeURIComponent(opts.from)}/sendMail`, {
     method: "POST",
     body: JSON.stringify({
       message: {
         subject: opts.subject, body: { contentType: "HTML", content: opts.html },
-        toRecipients: addr(opts.to), ccRecipients: addr(opts.cc ?? []),
+        toRecipients: addr(opts.to), ccRecipients: addr(opts.cc ?? []), bccRecipients: addr(opts.bcc ?? []),
         ...(opts.replyTo ? { replyTo: addr([opts.replyTo]) } : {}),
+        ...(opts.importance === "high" ? { importance: "high" } : {}),
+        ...(opts.attachments?.length ? { attachments: opts.attachments.map(fileAtt) } : {}),
       },
       saveToSentItems: true,
     }),
   });
+}
+
+const mb = (m: string) => { if (!isCompanyEmail(m)) throw new Error("Only company mailboxes can be used."); return encodeURIComponent(m); };
+
+/** Top-level mail folders with unread counts (well-known ones first). */
+export async function graphFolders(mailbox: string) {
+  const data = await graph(`/users/${mb(mailbox)}/mailFolders?$top=60&$select=id,displayName,unreadItemCount,totalItemCount`);
+  // v1.0 has no wellKnownName property: look up the ids of the standard folders by their well-known names.
+  const names = ["inbox", "sentitems", "drafts", "archive", "deleteditems", "junkemail"];
+  const ids = await Promise.all(names.map((n) => graph(`/users/${mb(mailbox)}/mailFolders/${n}?$select=id`).then((f) => f?.id as string).catch(() => null)));
+  const wkById = Object.fromEntries(ids.map((id, i) => [id, names[i]]).filter(([id]) => id));
+  return ((data?.value ?? []) as any[]).map((f) => ({ id: f.id, name: f.displayName, unread: f.unreadItemCount, total: f.totalItemCount, wk: wkById[f.id] ?? null }));
+}
+
+/** Read/unread and follow-up flag. */
+export async function graphMark(mailbox: string, id: string, patch: { isRead?: boolean; flagged?: boolean }) {
+  const body: Record<string, unknown> = {};
+  if (typeof patch.isRead === "boolean") body.isRead = patch.isRead;
+  if (typeof patch.flagged === "boolean") body.flag = { flagStatus: patch.flagged ? "flagged" : "notFlagged" };
+  await graph(`/users/${mb(mailbox)}/messages/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+
+/** Moves a message to a folder (id or well-known name such as archive, deleteditems, inbox). */
+export async function graphMove(mailbox: string, id: string, destination: string) {
+  await graph(`/users/${mb(mailbox)}/messages/${encodeURIComponent(id)}/move`, { method: "POST", body: JSON.stringify({ destinationId: destination }) });
+}
+
+export async function graphForward(mailbox: string, id: string, to: string[], html: string) {
+  await graph(`/users/${mb(mailbox)}/messages/${encodeURIComponent(id)}/forward`, { method: "POST", body: JSON.stringify({ comment: html, toRecipients: addr(to) }) });
+}
+
+/** One attachment's file content (base64). */
+export async function graphAttachment(mailbox: string, id: string, attachmentId: string) {
+  const a = await graph(`/users/${mb(mailbox)}/messages/${encodeURIComponent(id)}/attachments/${encodeURIComponent(attachmentId)}`);
+  return { name: a.name, contentType: a.contentType, size: a.size, contentBytes: a.contentBytes as string | undefined };
+}
+
+/** File attachments (with content) of a message — used by the receipts inbox. */
+export async function graphFileAttachments(mailbox: string, id: string) {
+  const data = await graph(`/users/${mb(mailbox)}/messages/${encodeURIComponent(id)}/attachments`);
+  return ((data?.value ?? []) as any[]).filter((a) => a["@odata.type"] === "#microsoft.graph.fileAttachment" && !a.isInline)
+    .map((a) => ({ name: a.name as string, contentType: a.contentType as string, size: a.size as number, contentBytes: a.contentBytes as string }));
+}
+
+// ── Calendar ──
+const TZ = "America/Edmonton";
+const ev = (e: any) => ({
+  id: e.id, subject: e.subject ?? "(no title)", start: e.start?.dateTime, end: e.end?.dateTime, isAllDay: !!e.isAllDay,
+  location: e.location?.displayName ?? "", organizer: e.organizer?.emailAddress?.address ?? "",
+  attendees: (e.attendees ?? []).map((a: any) => ({ email: a.emailAddress?.address, name: a.emailAddress?.name, response: a.status?.response })),
+  isOnlineMeeting: !!e.isOnlineMeeting, joinUrl: e.onlineMeeting?.joinUrl ?? null, preview: e.bodyPreview ?? "", showAs: e.showAs,
+  categories: e.categories ?? [], webLink: e.webLink ?? "", isCancelled: !!e.isCancelled, reminder: e.reminderMinutesBeforeStart ?? null,
+});
+
+/** Events between two ISO dates, expanded for recurring series, in Alberta time. */
+export async function graphCalendarView(mailbox: string, startIso: string, endIso: string) {
+  const sel = "$select=id,subject,start,end,isAllDay,location,organizer,attendees,isOnlineMeeting,onlineMeeting,bodyPreview,showAs,categories,webLink,isCancelled,reminderMinutesBeforeStart";
+  const data = await graph(`/users/${mb(mailbox)}/calendarView?startDateTime=${encodeURIComponent(startIso)}&endDateTime=${encodeURIComponent(endIso)}&$top=500&$orderby=start/dateTime&${sel}`,
+    { headers: { Prefer: `outlook.timezone="${TZ}"` } });
+  return ((data?.value ?? []) as any[]).map(ev);
+}
+
+export type EventInput = { subject: string; start: string; end: string; isAllDay?: boolean; location?: string; body?: string; attendees?: string[]; teams?: boolean; reminder?: number; showAs?: string };
+const eventBody = (e: EventInput) => ({
+  subject: e.subject, isAllDay: !!e.isAllDay,
+  start: { dateTime: e.start, timeZone: TZ }, end: { dateTime: e.end, timeZone: TZ },
+  location: { displayName: e.location ?? "" }, body: { contentType: "Text", content: e.body ?? "" },
+  attendees: (e.attendees ?? []).map((a) => ({ emailAddress: { address: a }, type: "required" })),
+  reminderMinutesBeforeStart: e.reminder ?? 15, isReminderOn: true, showAs: e.showAs ?? "busy",
+  ...(e.teams ? { isOnlineMeeting: true, onlineMeetingProvider: "teamsForBusiness" } : {}),
+});
+
+export async function graphCreateEvent(mailbox: string, e: EventInput) {
+  return ev(await graph(`/users/${mb(mailbox)}/events`, { method: "POST", body: JSON.stringify(eventBody(e)), headers: { Prefer: `outlook.timezone="${TZ}"` } }));
+}
+export async function graphUpdateEvent(mailbox: string, id: string, e: EventInput) {
+  const b: any = eventBody(e); if (!e.teams) { delete b.isOnlineMeeting; delete b.onlineMeetingProvider; }
+  return ev(await graph(`/users/${mb(mailbox)}/events/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(b), headers: { Prefer: `outlook.timezone="${TZ}"` } }));
+}
+/** Cancels a meeting (notifies attendees) when the mailbox organizes it; otherwise deletes it. */
+export async function graphDeleteEvent(mailbox: string, id: string, comment = "") {
+  try { await graph(`/users/${mb(mailbox)}/events/${encodeURIComponent(id)}/cancel`, { method: "POST", body: JSON.stringify({ comment }) }); }
+  catch { await graph(`/users/${mb(mailbox)}/events/${encodeURIComponent(id)}`, { method: "DELETE" }); }
 }
 
 /** Recent messages in a company mailbox to or from an address (newest first). */
@@ -72,13 +160,14 @@ const pick = (m: any) => ({
   id: m.id, subject: m.subject ?? "(no subject)", from: m.from?.emailAddress?.address ?? "", fromName: m.from?.emailAddress?.name ?? "",
   to: (m.toRecipients ?? []).map((r: any) => r.emailAddress?.address).filter(Boolean),
   date: m.receivedDateTime ?? m.sentDateTime, preview: m.bodyPreview ?? "", isRead: m.isRead ?? true, hasAttachments: !!m.hasAttachments, webLink: m.webLink ?? "",
+  flagged: m.flag?.flagStatus === "flagged", importance: m.importance ?? "normal",
 });
 
 /** A page of messages from a company mailbox folder (newest first), optionally filtered by a search. */
 export async function graphListMail(mailbox: string, folder: string, opts: { top?: number; skip?: number; search?: string } = {}) {
   if (!isCompanyEmail(mailbox)) throw new Error("Only company mailboxes can be read.");
-  const f = FOLDERS[folder] ?? "inbox", top = Math.min(opts.top ?? 30, 50);
-  const sel = "$select=id,subject,from,toRecipients,receivedDateTime,sentDateTime,bodyPreview,isRead,hasAttachments,webLink";
+  const f = encodeURIComponent(FOLDERS[folder] ?? (folder || "inbox")), top = Math.min(opts.top ?? 30, 50);
+  const sel = "$select=id,subject,from,toRecipients,receivedDateTime,sentDateTime,bodyPreview,isRead,hasAttachments,webLink,flag,importance";
   const q = opts.search
     ? `?$search=${encodeURIComponent(`"${opts.search.replace(/"/g, "")}"`)}&$top=${top}&${sel}`
     : `?$orderby=receivedDateTime desc&$top=${top}&$skip=${opts.skip ?? 0}&${sel}`;
@@ -89,11 +178,11 @@ export async function graphListMail(mailbox: string, folder: string, opts: { top
 /** One message with its body (HTML) and attachment names. */
 export async function graphGetMail(mailbox: string, id: string) {
   if (!isCompanyEmail(mailbox)) throw new Error("Only company mailboxes can be read.");
-  const m = await graph(`/users/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(id)}?$select=id,subject,from,toRecipients,ccRecipients,receivedDateTime,sentDateTime,body,bodyPreview,isRead,hasAttachments,webLink`);
-  let attachments: { name: string; size: number }[] = [];
+  const m = await graph(`/users/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(id)}?$select=id,subject,from,toRecipients,ccRecipients,receivedDateTime,sentDateTime,body,bodyPreview,isRead,hasAttachments,webLink,flag,importance`);
+  let attachments: { id: string; name: string; size: number }[] = [];
   if (m.hasAttachments) {
-    const a = await graph(`/users/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(id)}/attachments?$select=name,size`);
-    attachments = ((a?.value ?? []) as any[]).map((x) => ({ name: x.name, size: x.size }));
+    const a = await graph(`/users/${encodeURIComponent(mailbox)}/messages/${encodeURIComponent(id)}/attachments?$select=id,name,size,isInline`);
+    attachments = ((a?.value ?? []) as any[]).filter((x) => !x.isInline).map((x) => ({ id: x.id, name: x.name, size: x.size }));
   }
   return { ...pick(m), cc: (m.ccRecipients ?? []).map((r: any) => r.emailAddress?.address).filter(Boolean), bodyType: m.body?.contentType, body: m.body?.content ?? "", attachments };
 }

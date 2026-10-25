@@ -72,6 +72,8 @@ Deno.serve(async (req) => {
   const accountList = `Expense categories (id — code name):\n${expenseAccts.map((a) => `${a.id} — ${a.code} ${a.name}`).join("\n")}\n\nPayment accounts:\n${payAccts.map((a) => `${a.id} — ${a.code} ${a.name}`).join("\n") || "(none)"}`;
   const fileBlock = r.mime_type === "application/pdf"
     ? { type: "document" as const, source: { type: "base64" as const, media_type: "application/pdf" as const, data } }
+    : r.mime_type === "text/plain"   // an emailed receipt without attachments, kept as text
+    ? { type: "document" as const, source: { type: "text" as const, media_type: "text/plain" as const, data: new TextDecoder().decode(await file.arrayBuffer()) } }
     : { type: "image" as const, source: { type: "base64" as const, media_type: r.mime_type as "image/jpeg" | "image/png" | "image/webp" | "image/gif", data } };
 
   const client = new Anthropic();

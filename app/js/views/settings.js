@@ -21,7 +21,7 @@ export async function render(el) {
 
 async function integrations(el) {
   const [{ data: integ, error }, { data: org }, status] = await Promise.all([
-    db.from('integration_settings').select('teams_webhook_url, shared_mailbox').eq('id', 1).single(),
+    db.from('integration_settings').select('teams_webhook_url, shared_mailbox, receipts_mailbox').eq('id', 1).single(),
     db.from('org_settings').select('ircc_rep_id').eq('id', 1).single(),
     callFn('comms', { action: 'status' }).catch(() => ({})),
   ]);
@@ -31,6 +31,7 @@ async function integrations(el) {
     <div class="card"><div class="card-h"><h3>${icon('mail')} Microsoft 365 email</h3>${badge(status.email)}</div><div class="card-b">
       <p class="dk-muted" style="margin-bottom:12px">Staff send client emails from their own company mailbox or the shared mailbox. Emails are saved in Outlook Sent Items and on the client's file, and a client's Outlook emails show on their <b>Emails</b> tab. System emails (new-assessment alerts, agreement notices) are sent from the shared mailbox.</p>
       <div class="field"><label for="sm">Shared mailbox</label><input class="input" id="sm" value="${esc(integ.shared_mailbox)}"></div>
+      <div class="field"><label for="rm">Receipts mailbox (receipts emailed here appear in Accounting → Receipts)</label><input class="input" id="rm" value="${esc(integ.receipts_mailbox)}"></div>
       ${status.email ? '' : '<div class="alert info">To connect, register an app in Microsoft Entra and add its three values as Supabase secrets (MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET). Your developer has the step-by-step guide.</div>'}</div></div>
     <div class="card"><div class="card-h"><h3>${icon('chat')} Microsoft Teams alerts</h3>${badge(!!integ.teams_webhook_url)}</div><div class="card-b">
       <p class="dk-muted" style="margin-bottom:12px">Posts new assessments (urgent ones highlighted) and signed agreements to a Teams channel. No client names are posted; each alert links to the file in the dashboard.</p>
@@ -43,11 +44,11 @@ async function integrations(el) {
   </div>
   <div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn btn-primary" id="saveInt">Save integrations</button></div>`;
   el.querySelector('#saveInt').onclick = async () => {
-    const tw = el.querySelector('#tw').value.trim() || null, sm = el.querySelector('#sm').value.trim().toLowerCase(), rid = el.querySelector('#rid').value.trim() || null;
+    const tw = el.querySelector('#tw').value.trim() || null, sm = el.querySelector('#sm').value.trim().toLowerCase(), rm = el.querySelector('#rm').value.trim().toLowerCase(), rid = el.querySelector('#rid').value.trim() || null;
     if (tw && !/^https:\/\//.test(tw)) return fail(new Error('The Teams link must start with https://'));
-    if (!/@gracefulimmigration\.ca$/.test(sm)) return fail(new Error('The shared mailbox must be a company address.'));
+    if (!/@gracefulimmigration\.ca$/.test(sm) || !/@gracefulimmigration\.ca$/.test(rm)) return fail(new Error('Mailboxes must be company addresses.'));
     const [a, b] = await Promise.all([
-      db.from('integration_settings').update({ teams_webhook_url: tw, shared_mailbox: sm }).eq('id', 1),
+      db.from('integration_settings').update({ teams_webhook_url: tw, shared_mailbox: sm, receipts_mailbox: rm }).eq('id', 1),
       db.from('org_settings').update({ ircc_rep_id: rid }).eq('id', 1)]);
     if (a.error || b.error) return fail(a.error || b.error);
     toast('Integrations saved'); integrations(el);

@@ -4,7 +4,16 @@
 //   inbox       → recent Outlook emails with a client (my mailbox + shared mailbox)
 //   teams_test  → post a test alert to the Teams channel (settings.manage)
 import { adminClient, callerProfile, corsHeaders, escapeHtml, hasPerm, json } from "../_shared/common.ts";
-import { graphConfigured, graphFindMail, graphGetMail, graphListMail, graphReply, graphSendMail, HUB, notifyTeams } from "../_shared/m365.ts";
+import { graphAttachment, graphCalendarView, graphConfigured, graphCreateEvent, graphDeleteEvent, graphFindMail, graphFolders, graphForward, graphGetMail, graphListMail,
+  graphMark, graphMove, graphReply, graphSendMail, graphUpdateEvent, HUB, notifyTeams } from "../_shared/m365.ts";
+
+// Microsoft's "Access is denied" usually means a permission hasn't been granted to the app yet.
+const friendly = (e: unknown) => {
+  const m = (e as Error)?.message ?? String(e);
+  return /Access is denied|ErrorAccessDenied|Authorization_RequestDenied/i.test(m)
+    ? "Microsoft 365 hasn't allowed this yet. An administrator needs to add the Mail.ReadWrite and Calendars.ReadWrite permissions to the Graceful Practice Hub app and grant consent."
+    : /requested user .* is invalid|MailboxNotEnabled|ResourceNotFound/i.test(m) ? "This account doesn't have a Microsoft 365 mailbox yet." : m;
+};
 
 const EMAIL = /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]{2,}$/;
 const list = (v: unknown) => (Array.isArray(v) ? v : String(v ?? "").split(/[,;\s]+/)).map((x) => String(x).trim().toLowerCase()).filter(Boolean);
@@ -30,10 +39,14 @@ Deno.serve(async (req) => {
       if (!(await hasPerm(admin, caller.role, "crm.edit"))) return json(req, { error: "You don't have permission to email clients." }, 403);
       if (!graphConfigured()) return json(req, { error: "Email isn't connected to Microsoft 365 yet. Ask the owner to finish the setup in Business Settings → Integrations." }, 503);
       const from = body.from === "shared" ? shared : mine;
-      const to = list(body.to), cc = list(body.cc);
+      const to = list(body.to), cc = list(body.cc), bcc = list(body.bcc);
       const subject = String(body.subject ?? "").trim().slice(0, 250);
       const text = String(body.body ?? "").trim().slice(0, 20000);
-      if (!to.length || to.length > 10 || cc.length > 10 || ![...to, ...cc].every((a) => EMAIL.test(a))) return json(req, { error: "Check the email addresses." }, 400);
+      if (!to.length || to.length > 10 || cc.length > 10 || bcc.length > 10 || ![...to, ...cc, ...bcc].every((a) => EMAIL.test(a))) return json(req, { error: "Check the email addresses." }, 400);
+      const atts = (Array.isArray(body.attachments) ? body.attachments : []).slice(0, 10).map((a: any) => ({
+        name: String(a?.name ?? "file").slice(0, 150), contentType: String(a?.contentType ?? "application/octet-stream").slice(0, 100), contentBytes: String(a?.contentBytes ?? ""),
+      }));
+      if (atts.reduce((n, a) => n + a.contentBytes.length, 0) > 4_000_000) return json(req, { error: "Attachments are too large (about 3 MB in total). Share bigger files another way." }, 400);
       if (!subject || !text) return json(req, { error: "Add a subject and a message." }, 400);
       const contactId = typeof body.contact_id === "string" ? body.contact_id : null;
 
@@ -45,13 +58,13 @@ Deno.serve(async (req) => {
         <p style="margin:18px 0 0;color:#5B6476;font-size:13px;border-top:1px solid #E7E2D6;padding-top:10px">${sig.map(escapeHtml).join("<br>")}</p>
         <p style="color:#8A93A3;font-size:11px;margin-top:10px">This email and any attachments are confidential and intended only for the addressee.</p></div>`;
       try {
-        await graphSendMail({ from, to, cc, subject, html });
+        await graphSendMail({ from, to, cc, bcc, subject, html, attachments: atts, importance: body.importance === "high" ? "high" : "normal" });
       } catch (e) {
-        return json(req, { error: (e as Error).message }, 502);
+        return json(req, { error: friendly(e) }, 502);
       }
       await admin.from("activities").insert({
         type: "email", direction: "outbound", subject, contact_id: contactId, author_id: caller.id,
-        body: `From: ${from}\nTo: ${to.join(", ")}${cc.length ? `\nCc: ${cc.join(", ")}` : ""}\n\n${text}`,
+        body: `From: ${from}\nTo: ${to.join(", ")}${cc.length ? `\nCc: ${cc.join(", ")}` : ""}${atts.length ? `\nAttachments: ${atts.map((a) => a.name).join(", ")}` : ""}\n\n${text}`,
       });
       return json(req, { ok: true, from });
     }
@@ -101,7 +114,67 @@ Deno.serve(async (req) => {
         }
         return json(req, { ok: true });
       } catch (e) {
-        return json(req, { error: (e as Error).message }, 502);
+        return json(req, { error: friendly(e) }, 502);
+      }
+    }
+
+    // ── Outlook actions: folders, read/unread, flag, move/archive/delete, forward, attachments ──
+    case "folders":
+    case "mark":
+    case "move":
+    case "forward":
+    case "attachment": {
+      if (!graphConfigured()) return json(req, { error: "Email isn't connected to Microsoft 365 yet." }, 503);
+      const useShared = body.mailbox === "shared";
+      if (useShared && !(await hasPerm(admin, caller.role, "crm.edit"))) return json(req, { error: "You don't have access to the shared mailbox." }, 403);
+      const box = useShared ? shared : mine, id = String(body.id ?? "");
+      try {
+        if (body.action === "folders") return json(req, { folders: await graphFolders(box) });
+        if (!id) return json(req, { error: "Missing message." }, 400);
+        if (body.action === "mark") { await graphMark(box, id, { isRead: body.isRead as boolean | undefined, flagged: body.flagged as boolean | undefined }); return json(req, { ok: true }); }
+        if (body.action === "move") { await graphMove(box, id, String(body.destination ?? "archive")); return json(req, { ok: true }); }
+        if (body.action === "attachment") return json(req, { attachment: await graphAttachment(box, id, String(body.attachmentId ?? "")) });
+        const to = list(body.to);
+        if (!to.length || !to.every((a) => EMAIL.test(a))) return json(req, { error: "Enter who to forward to." }, 400);
+        await graphForward(box, id, to, `<p>${escapeHtml(String(body.body ?? "")).replace(/\n/g, "<br>")}</p>`);
+        return json(req, { ok: true });
+      } catch (e) {
+        return json(req, { error: friendly(e) }, 502);
+      }
+    }
+
+    // ── Outlook calendar: my calendar, or the shared mailbox's calendar ──
+    case "cal_list":
+    case "cal_save":
+    case "cal_delete": {
+      if (!graphConfigured()) return json(req, { error: "Microsoft 365 isn't connected yet." }, 503);
+      const useShared = body.mailbox === "shared";
+      if (useShared && !(await hasPerm(admin, caller.role, "crm.edit"))) return json(req, { error: "You don't have access to the shared calendar." }, 403);
+      const box = useShared ? shared : mine;
+      try {
+        if (body.action === "cal_list") {
+          const start = String(body.start ?? ""), end = String(body.end ?? "");
+          if (!/^\d{4}-\d{2}-\d{2}/.test(start) || !/^\d{4}-\d{2}-\d{2}/.test(end)) return json(req, { error: "Invalid range." }, 400);
+          return json(req, { mailbox: box, events: await graphCalendarView(box, start, end) });
+        }
+        if (body.action === "cal_delete") { await graphDeleteEvent(box, String(body.id ?? ""), String(body.comment ?? "")); return json(req, { ok: true }); }
+        const e = body.event as Record<string, unknown> ?? {};
+        const input = {
+          subject: String(e.subject ?? "").trim().slice(0, 250), start: String(e.start ?? ""), end: String(e.end ?? ""), isAllDay: !!e.isAllDay,
+          location: String(e.location ?? "").slice(0, 250), body: String(e.body ?? "").slice(0, 8000), attendees: list(e.attendees).filter((a) => EMAIL.test(a)).slice(0, 30),
+          teams: !!e.teams, reminder: Number.isFinite(Number(e.reminder)) ? Number(e.reminder) : 15, showAs: ["free", "tentative", "busy", "oof", "workingElsewhere"].includes(String(e.showAs)) ? String(e.showAs) : "busy",
+        };
+        if (!input.subject) return json(req, { error: "Give the event a title." }, 400);
+        if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(input.start) || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(input.end) || input.end <= input.start) return json(req, { error: "Check the start and end times." }, 400);
+        const saved = body.id ? await graphUpdateEvent(box, String(body.id), input) : await graphCreateEvent(box, input);
+        // Log on the client file when a client is invited
+        if (!body.id && input.attendees.length) {
+          const { data: cs } = await admin.from("contacts").select("id, email").in("email", input.attendees);
+          for (const c of cs ?? []) await admin.from("activities").insert({ type: "meeting", direction: "outbound", subject: `Meeting scheduled: ${input.subject}`, contact_id: c.id, author_id: caller.id, body: `${input.start.replace("T", " ")} – ${input.end.slice(11)} (Alberta time)${input.teams ? " · Microsoft Teams" : input.location ? ` · ${input.location}` : ""}` });
+        }
+        return json(req, { event: saved });
+      } catch (e) {
+        return json(req, { error: friendly(e) }, 502);
       }
     }
 

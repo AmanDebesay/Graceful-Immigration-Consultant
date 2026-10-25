@@ -29,7 +29,9 @@ export async function render(el) {
       <input type="file" id="files" accept="image/*,application/pdf" multiple hidden>
       <span class="rc-drop-ico">${icon('camera')}</span>
       <span><b>Drop receipts here, or click to upload</b><small>Photos or PDFs, several at once. On a phone you can take a picture. Each receipt is read automatically and waits for your review.</small></span>
-    </label>` : ''}
+    </label>
+    <div class="rc-mailbar" id="mailbar">${icon('mail')}<span>Or email receipts to <b id="rcBox">receipts@gracefulimmigration.ca</b> from your company address (forward them, or use it for Uber, Amazon and other e-receipts).</span>
+      <small id="rcMailState" class="dk-muted"></small><button class="btn btn-sm" id="checkMail">Check email now</button></div>` : ''}
     <div class="toolbar"><div class="seg" id="flt">${[['review', 'For review'], ['approved', 'In the books'], ['all', 'All']].map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
       <div class="grow"></div><span class="dk-muted" id="cnt"></span></div>
     <div id="grid" class="rc-grid"></div>`;
@@ -56,8 +58,9 @@ export async function render(el) {
     const [label, cls] = STATUS[r.status] || [r.status, ''];
     const thumb = !url ? `<div class="rc-thumb">${icon('file')}</div>` : r.mime_type === 'application/pdf'
       ? `<a class="rc-thumb" href="${url}" target="_blank" rel="noopener">${icon('file')}<small>PDF · open</small></a>`
+      : r.mime_type === 'text/plain' ? `<a class="rc-thumb" href="${url}" target="_blank" rel="noopener">${icon('mail')}<small>Email text · open</small></a>`
       : `<a class="rc-thumb" href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="Receipt"></a>`;
-    const head = `<div class="rc-head"><span class="pill ${cls}">${label}</span><small>${esc(r.file_name || '')}</small></div>`;
+    const head = `<div class="rc-head"><span class="pill ${cls}">${label}</span>${r.source === 'email' ? `<span class="chip" title="${esc(r.email_subject || '')}">${icon('mail')} Emailed by ${esc(r.email_from || '')}</span>` : ''}<small>${esc(r.file_name || '')}</small></div>`;
     if (r.status === 'processing') return `<div class="dk-card rc-card" data-r="${r.id}">${head}<div class="rc-body">${thumb}<div class="rc-fields"><div class="loading" style="min-height:120px"><div class="spin"></div>Reading the receipt…</div></div></div></div>`;
     if (r.status === 'approved') return `<div class="dk-card rc-card done" data-r="${r.id}">${head}<div class="rc-body">${thumb}<div class="rc-fields">
         <h4>${esc(r.vendor || 'Receipt')}</h4><p class="dk-muted">${r.receipt_date ? fmtDate(r.receipt_date) : ''} · ${money(r.total)}${Number(r.tax) ? ` · GST ${money(r.tax)}` : ''}</p>
@@ -151,11 +154,31 @@ export async function render(el) {
     if (!ids.length) return;
     toast(`${ids.length} receipt${ids.length > 1 ? 's' : ''} uploaded — reading now…`);
     draw();
-    // Read up to 3 at a time
+    await readAll(ids);
+  }
+
+  // Reads receipts up to 3 at a time
+  async function readAll(ids) {
     const queue = [...ids];
     const worker = async () => { while (queue.length) { const id = queue.shift(); try { await callFn('receipt-scan', { receipt_id: id }); } catch (err) { /* shown on the card */ } if (el.isConnected) draw(); } };
     await Promise.all([worker(), worker(), worker()]);
   }
+
+  // Receipts emailed to the receipts mailbox
+  async function checkMail(quiet) {
+    const state = el.querySelector('#rcMailState'), btn = el.querySelector('#checkMail');
+    if (!state) return;
+    btn.disabled = true; state.textContent = 'Checking…';
+    try {
+      const r = await callFn('receipt-inbox', {});
+      el.querySelector('#rcBox').textContent = r.mailbox;
+      state.textContent = `Checked ${new Date().toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' })}${r.skipped ? ` · ${r.skipped} ignored (not from a company address)` : ''}`;
+      if (r.created.length) { toast(`${r.created.length} emailed receipt${r.created.length > 1 ? 's' : ''} imported — reading now…`); filter = 'review'; draw(); await readAll(r.created); }
+      else if (!quiet) toast('No new receipts in the mailbox');
+    } catch (err) { state.textContent = err.message; }
+    btn.disabled = false;
+  }
+  el.querySelector('#checkMail')?.addEventListener('click', () => checkMail(false));
 
   const drop = el.querySelector('#drop');
   if (drop) {
@@ -165,4 +188,5 @@ export async function render(el) {
     drop.addEventListener('drop', (e) => upload(e.dataTransfer.files));
   }
   draw();
+  if (manage) checkMail(true);
 }
