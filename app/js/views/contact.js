@@ -22,6 +22,7 @@ export async function render(el, [id], { setTitle }) {
       ${c.phone ? `<a class="btn" href="tel:${esc(c.phone)}">${icon('phone')} Call</a>` : ''}
       ${c.email ? `<a class="btn" href="mailto:${esc(c.email)}">${icon('mail')} Email</a>` : ''}
       ${edit ? `<button class="btn" id="logAct">${icon('note')} Log activity</button>` : ''}
+      ${can('agreements.manage') ? `<button class="btn btn-gold" id="genAgr">${icon('file')} Generate agreement</button>` : ''}
       <div style="position:relative"><button class="btn btn-primary" id="moreNew">${icon('plus')} New ▾</button></div>
       ${edit ? `<button class="btn" id="editBtn">Edit</button>` : ''}
       ${can('crm.delete') ? `<button class="btn btn-danger" id="delBtn" aria-label="Delete">${icon('trash')}</button>` : ''}
@@ -65,6 +66,7 @@ export async function render(el, [id], { setTitle }) {
 
   // Header actions
   el.querySelector('#logAct')?.addEventListener('click', () => logActivity({ contactId: id, companyId: c.company_id }));
+  el.querySelector('#genAgr')?.addEventListener('click', async () => (await import('./agreements.js')).newAgreement({ contactId: id }));
   el.querySelector('#moreNew').onclick = (e) => {
     e.stopPropagation();
     const old = document.querySelector('.dropdown'); if (old) return old.remove();
@@ -161,7 +163,7 @@ export async function render(el, [id], { setTitle }) {
   async function agreementsTab() {
     const { agrBadge, AGR_TYPE, newAgreement } = await import('./agreements.js');
     const { data } = await db.from('agreements').select('id, number, type, status, created_at, client_signed_at').eq('contact_id', id).order('created_at', { ascending: false });
-    body.innerHTML = `${can('agreements.manage') ? `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn btn-primary btn-sm" id="na">${icon('plus')} New agreement</button></div>` : ''}
+    body.innerHTML = `${can('agreements.manage') ? `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn btn-primary btn-sm" id="na">${icon('plus')} Generate agreement</button></div>` : ''}
       ${(data || []).length ? `<table class="t"><tbody>${data.map((g) => `<tr class="click" onclick="location.hash='#/agreements/${g.id}'"><td><b>${esc(g.number)}</b><br><small style="color:var(--muted)">${esc(AGR_TYPE[g.type])}</small></td>
         <td>${agrBadge(g.status)}</td><td>${g.client_signed_at ? 'Signed ' + fmtDate(g.client_signed_at) : fmtDate(g.created_at)}</td></tr>`).join('')}</tbody></table>`
       : '<div class="empty">No agreements yet. An Initial Consultation Agreement is required before paid advice, and a Retainer Agreement for representation.</div>'}`;

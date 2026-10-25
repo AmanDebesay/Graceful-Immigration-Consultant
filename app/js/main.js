@@ -240,21 +240,28 @@ async function route() {
   document.getElementById('pageTitle').textContent = title;
   document.title = `${title} · Graceful Practice Hub`;
   renderNav();
-  view.innerHTML = '<div class="loading"><div class="spin"></div>Loading…</div>';
+  // Each visit renders into its own container, so a slow page that finishes after the user
+  // has moved on writes into a detached element instead of over the current page.
+  const seq = ++routeSeq;
+  const host = document.createElement('div');
+  host.innerHTML = '<div class="loading"><div class="spin"></div>Loading…</div>';
+  view.replaceChildren(host);
   try {
     const page = await import(`./views/${mod}.js`);
-    await page.render(view, m.slice(1), { setTitle: (t) => { document.getElementById('pageTitle').textContent = t; } });
+    await page.render(host, m.slice(1), { setTitle: (t) => { if (seq === routeSeq) document.getElementById('pageTitle').textContent = t; } });
   } catch (e) {
-    view.innerHTML = `<div class="alert err">Something went wrong loading this page: ${esc(e.message)}</div>`;
-    fail(e);
+    host.innerHTML = `<div class="alert err">Something went wrong loading this page: ${esc(e.message)}</div>`;
+    if (seq === routeSeq) fail(e);
   }
 }
+let routeSeq = 0;
 
 window.addEventListener('hashchange', () => { if (!/access_token|error_description/.test(location.hash)) route(); });
 window.addEventListener('auth-changed', () => { shellBuilt = false; boot(); });
 db.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') { shellBuilt = false; showLogin(); }
-  if (event === 'PASSWORD_RECOVERY') { sessionStorage.setItem('gi_auth_kind', 'recovery'); showSetPassword('recovery'); }
+  // The code screen (auth.js showCode) sets its own password, so it ignores this event.
+  if (event === 'PASSWORD_RECOVERY' && !window.__giCodeFlow) { sessionStorage.setItem('gi_auth_kind', 'recovery'); showSetPassword('recovery'); }
 });
 
 boot().catch(fail);

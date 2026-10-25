@@ -26,9 +26,10 @@ export function showLogin(message) {
       <div class="field"><label for="pw">Password</label><input class="input" id="pw" type="password" autocomplete="current-password" required></div>
       <button class="btn btn-primary" type="submit">Sign in</button>
     </form>
-    <div class="auth-links"><a href="#" id="forgot">Forgot password?</a><a href="../public/index.html">Back to website</a></div>`);
+    <div class="auth-links"><a href="#" id="forgot">Forgot password?</a><a href="#" id="hasCode">Have a code?</a><a href="../public/index.html">Back to website</a></div>`);
   if (message) ok(message);
   document.getElementById('forgot').onclick = (e) => { e.preventDefault(); showForgot(); };
+  document.getElementById('hasCode').onclick = (e) => { e.preventDefault(); showCode(em.value.trim()); };
   document.getElementById('loginForm').onsubmit = async (e) => {
     e.preventDefault();
     const btn = e.target.querySelector('button'); btn.disabled = true;
@@ -42,19 +43,59 @@ export function showLogin(message) {
 }
 
 function showForgot() {
-  frame(`<h1>Reset password</h1><p>We'll email you a link to set a new password.</p>
+  frame(`<h1>Reset password</h1><p>We'll email you a code to set a new password.</p>
     <div id="authMsg" class="alert" hidden></div>
     <form id="fForm"><div class="field"><label for="em">Email</label><input class="input" id="em" type="email" required></div>
-    <button class="btn btn-primary" type="submit">Send reset link</button></form>
-    <div class="auth-links"><a href="#" id="back">Back to sign in</a></div>`);
+    <button class="btn btn-primary" type="submit">Send reset email</button></form>
+    <div class="auth-links"><a href="#" id="back">Back to sign in</a><a href="#" id="hasCode2">I already have a code</a></div>`);
+  document.getElementById('hasCode2').onclick = (e) => { e.preventDefault(); showCode(em.value.trim()); };
   document.getElementById('back').onclick = (e) => { e.preventDefault(); showLogin(); };
   document.getElementById('fForm').onsubmit = async (e) => {
     e.preventDefault();
     const btn = e.target.querySelector('button'); btn.disabled = true;
     const { error } = await db.auth.resetPasswordForEmail(em.value.trim(), { redirectTo: appUrl() });
     btn.disabled = false;
-    if (error) return err(error.message);
-    ok('If an account exists for that email, a reset link is on its way. Check your inbox.');
+    if (error) return err(/rate limit/i.test(error.message) ? 'Too many reset emails were sent in the last hour. Please try again later or ask an administrator for a code.' : error.message);
+    showCode(em.value.trim(), 'If an account exists for that email, a reset email is on its way. Click the link in it, or if the email shows a 6-digit code, enter it below. If the link says it has expired, ask your administrator for a code.');
+  };
+}
+
+/** Set a password with a 6-digit code (from a reset/invite email, or given by an administrator).
+    Codes survive email link scanners such as Microsoft 365 Safe Links, which use up one-time links. */
+export function showCode(email = '', message) {
+  frame(`<h1>Set your password</h1><p>Enter your email, the 6-digit code you received, and a new password.</p>
+    <div id="authMsg" class="alert" hidden></div>
+    <form id="cForm">
+      <div class="field"><label for="em">Email</label><input class="input" id="em" type="email" autocomplete="email" required value="${esc(email)}"></div>
+      <div class="field"><label for="code">6-digit code</label><input class="input otp" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></div>
+      <div class="field"><label for="p1">New password</label><input class="input" id="p1" type="password" autocomplete="new-password" required minlength="10"></div>
+      <div class="field"><label for="p2">Confirm password</label><input class="input" id="p2" type="password" autocomplete="new-password" required></div>
+      <p style="font-size:12.5px;color:var(--muted);margin:-4px 0 14px">At least 10 characters, with upper and lower case letters and a number.</p>
+      <button class="btn btn-primary" type="submit">Set password &amp; sign in</button>
+    </form>
+    <div class="auth-links"><a href="#" id="back">Back to sign in</a></div>`);
+  if (message) ok(message);
+  document.getElementById('back').onclick = (e) => { e.preventDefault(); showLogin(); };
+  document.getElementById(email ? 'code' : 'em').focus();
+  document.getElementById('cForm').onsubmit = async (e) => {
+    e.preventDefault();
+    if (p1.value !== p2.value) return err('The passwords do not match.');
+    if (!/[a-z]/.test(p1.value) || !/[A-Z]/.test(p1.value) || !/\d/.test(p1.value) || p1.value.length < 10) {
+      return err('Use at least 10 characters with upper and lower case letters and a number.');
+    }
+    const btn = e.target.querySelector('button'); btn.disabled = true;
+    const mail = em.value.trim(), token = code.value.trim();
+    window.__giCodeFlow = true;
+    let res = await db.auth.verifyOtp({ email: mail, token, type: 'recovery' });
+    if (res.error) res = await db.auth.verifyOtp({ email: mail, token, type: 'invite' });
+    if (res.error) { window.__giCodeFlow = false; btn.disabled = false; return err('That code is wrong or has expired. Request a new one with "Forgot password?".'); }
+    const { error } = await db.auth.updateUser({ password: p1.value });
+    window.__giCodeFlow = false;
+    btn.disabled = false;
+    if (error && !/different from the old/i.test(error.message)) return err(error.message);
+    sessionStorage.removeItem('gi_auth_kind');
+    location.hash = '#/';
+    window.dispatchEvent(new Event('auth-changed'));
   };
 }
 
@@ -80,6 +121,7 @@ export function showSetPassword(kind) {
     }
     const btn = e.target.querySelector('button'); btn.disabled = true;
     const { error } = await db.auth.updateUser({ password: p1.value });
+    window.__giCodeFlow = false;
     btn.disabled = false;
     if (error && !/different from the old/i.test(error.message)) return err(error.message);
     sessionStorage.removeItem('gi_auth_kind');
@@ -90,7 +132,7 @@ export function showSetPassword(kind) {
 
 export function showLinkError(desc) {
   showLogin();
-  err(/expired|invalid/i.test(desc) ? 'That link has expired or was already used. Ask an administrator for a new invite, or use "Forgot password?".' : desc);
+  err(/expired|invalid/i.test(desc) ? 'That link has expired or was already used (some email security scanners open links automatically). Use "Have a code?" with the code from your email, or "Forgot password?".' : desc);
 }
 
 /** Shows the 6-digit code screen; resolves once the session reaches aal2. */

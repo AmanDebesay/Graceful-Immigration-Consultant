@@ -20,7 +20,7 @@ export const CICC = {
   code: 'https://laws.justice.gc.ca/eng/regulations/SOR-2022-128/index.html',
 };
 
-export function defaults(type, { contact = {}, settings = {}, caseRow = null, item = null } = {}) {
+export function defaults(type, { contact = {}, settings = {}, caseRow = null, pkg = null, consult = null } = {}) {
   const today = new Date().toLocaleDateString('en-CA');
   const base = {
     agreement_date: today, language: 'English',
@@ -31,10 +31,10 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, it
     gst_rate: settings.gst_number ? Number(settings.gst_rate || 5) : 0, gst_number: settings.gst_number || '', province: 'Alberta',
   };
   if (type === 'consultation') {
-    return { ...base, purpose: 'Initial assessment of eligibility and immigration options in Canada.', consult_date: today, consult_length: '60 minutes',
-      consult_method: 'Video call', fee: item?.unit_price ?? 60, payment_method: 'Interac e-Transfer or by phone before the consultation' };
+    return { ...base, purpose: 'Initial assessment of eligibility and immigration options in Canada.', consult_date: today, consult_length: `${consult?.minutes || 60} minutes`,
+      consult_method: 'Video call (Zoom or Microsoft Teams)', fee: Number(consult?.fee ?? 60), payment_method: 'Interac e-Transfer or by phone before the consultation' };
   }
-  return { ...base,
+  const d = { ...base,
     file_number: caseRow?.case_number || '', program: caseRow?.application_type ? `${caseRow.application_type}` : '',
     preliminary_advice: '', consultation_ref: '', assistants: '', comm_methods: 'Email and telephone; WhatsApp for scheduling only', response_time: '2 business days',
     update_time: '2 business days',
@@ -49,6 +49,12 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, it
     disbursements: 'Courier and postage: at cost (estimated $0–$50)\nCertified translations: at cost, quoted before ordering\nDocument notarization: at cost',
     payment_days: 14, interest: 0, admin_fee: 0, cooling_off: true, dispute_days: 30, successor: '',
     payment_methods: 'Interac e-Transfer to the business email, cheque, or cash with receipt' };
+  if (pkg) {
+    d.program = pkg.program || d.program;
+    if (pkg.scope) d.scope = pkg.scope;
+    if ((pkg.milestones || []).length) d.milestones = pkg.milestones.map((m) => ({ name: m.name || '', included: m.included || '', fee: Number(m.fee || 0) }));
+  }
+  return d;
 }
 
 const STYLE = `<style>

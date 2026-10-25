@@ -1,12 +1,25 @@
-import { db, esc, toast, fail } from '../core.js';
+import { db, esc, toast, fail, icon, modal } from '../core.js';
 
 const FIELDS = [
   ['business_name', 'Business legal name'], ['rcic_name', 'RCIC name'], ['licence_number', 'CICC licence number'],
-  ['phone', 'Business phone'], ['email', 'Public email'], ['address', 'Business address'],
+  ['phone', 'Business phone'], ['email', 'Public email'], ['address', 'Business address (printed on agreements, as CICC requires)'],
   ['gst_number', 'GST/HST registration number'], ['gst_rate', 'GST rate (%)'], ['notify_email', 'Send new-assessment alerts to'],
 ];
+const money = (n) => Number(n || 0).toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
+const total = (p) => (p.milestones || []).reduce((s, m) => s + Number(m.fee || 0), 0);
 
 export async function render(el) {
+  const tab = /tab=fees/.test(location.hash) ? 'fees' : 'business';
+  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button></div></div><div id="pane"></div>`;
+  el.querySelectorAll('#tabs button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.t === tab);
+    b.onclick = () => { location.hash = b.dataset.t === 'fees' ? '#/settings?tab=fees' : '#/settings'; };
+  });
+  const pane = el.querySelector('#pane');
+  tab === 'fees' ? fees(pane) : business(pane);
+}
+
+async function business(el) {
   const { data: s, error } = await db.from('org_settings').select('*').eq('id', 1).single();
   if (error) { el.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
   el.innerHTML = `<div class="card" style="max-width:760px"><div class="card-h"><h3>Business details</h3>
@@ -22,4 +35,77 @@ export async function render(el) {
     const { error: er } = await db.from('org_settings').update(patch).eq('id', 1);
     er ? fail(er) : toast('Settings saved');
   };
+}
+
+async function fees(el) {
+  const [{ data: s }, { data: pk, error }] = await Promise.all([
+    db.from('org_settings').select('consult_fee_30, consult_fee_60, gst_number, gst_rate').eq('id', 1).single(),
+    db.from('service_packages').select('*').order('sort').order('name')]);
+  if (error) { el.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
+  const unpriced = pk.filter((p) => p.active && total(p) === 0).length;
+  el.innerHTML = `<div class="alert info">Set your prices once here. When you click <b>Generate agreement</b> for a client, the service you pick fills in the program, the services and the milestone fees automatically. You can still adjust them for that client before you sign and send.
+      ${s.gst_number ? `GST (${s.gst_rate}%) is added on top of these fees.` : 'Fees are shown without GST (no GST number in Business details).'}</div>
+    <div class="card" style="max-width:760px;margin-bottom:16px"><div class="card-h"><h3>Consultation fees</h3><small style="color:var(--muted)">Initial Consultation Agreement</small></div>
+      <form class="card-b" id="cf"><div class="row-2">
+        <div class="field"><label for="c30">30-minute consultation (CAD)</label><input class="input" id="c30" type="number" step="0.01" min="0" value="${esc(s.consult_fee_30)}"></div>
+        <div class="field"><label for="c60">60-minute consultation (CAD)</label><input class="input" id="c60" type="number" step="0.01" min="0" value="${esc(s.consult_fee_60)}"></div></div>
+        <div class="row" style="justify-content:flex-end"><button class="btn btn-primary" type="submit">Save consultation fees</button></div></form></div>
+    <div class="card"><div class="card-h"><h3>Services & prices</h3><div class="grow"></div><button class="btn btn-gold btn-sm" id="add">${icon('plus')} Add service</button></div>
+      ${unpriced ? `<div class="alert err" style="margin:12px 16px 0">${unpriced} active service${unpriced > 1 ? 's have' : ' has'} no price yet. Click a row to set its milestone fees.</div>` : ''}
+      <div class="table-wrap"><table class="t"><thead><tr><th>Service</th><th>Milestones</th><th class="r">Total fee</th><th>Status</th></tr></thead><tbody>
+      ${pk.map((p) => `<tr class="click" data-id="${p.id}"><td><b>${esc(p.name)}</b><br><small style="color:var(--muted)">${esc(p.program)}</small></td>
+        <td>${(p.milestones || []).length}</td><td class="r">${total(p) ? money(total(p)) : '<span class="badge b-gold">Set price</span>'}</td>
+        <td>${p.active ? '<span class="badge b-GREEN">Active</span>' : '<span class="badge">Hidden</span>'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  el.querySelector('#cf').onsubmit = async (e) => {
+    e.preventDefault();
+    const { error: er } = await db.from('org_settings').update({ consult_fee_30: Number(el.querySelector('#c30').value || 0), consult_fee_60: Number(el.querySelector('#c60').value || 0) }).eq('id', 1);
+    er ? fail(er) : toast('Consultation fees saved');
+  };
+  el.querySelector('#add').onclick = () => editPackage(null, () => fees(el));
+  el.querySelectorAll('tr[data-id]').forEach((tr) => (tr.onclick = () => editPackage(pk.find((p) => p.id === tr.dataset.id), () => fees(el))));
+}
+
+function editPackage(p, done) {
+  const pkg = p ? structuredClone(p) : { name: '', program: '', scope: null, active: true, sort: 200,
+    milestones: [{ name: 'Signing of this agreement', included: 'Eligibility assessment, document checklist and file opening', fee: 0 },
+      { name: 'Application ready for submission', included: 'Forms completed, documents reviewed, submission letter prepared', fee: 0 },
+      { name: 'Application submitted to IRCC', included: 'Submission and acknowledgement of receipt; follow-up until decision', fee: 0 }] };
+  const row = (m, i) => `<div class="ms-row" data-i="${i}" style="display:grid;grid-template-columns:1.1fr 1.6fr 110px 34px;gap:8px;margin-bottom:8px">
+      <input class="input" data-m="name" placeholder="Milestone" value="${esc(m.name)}">
+      <input class="input" data-m="included" placeholder="What is included" value="${esc(m.included)}">
+      <input class="input" data-m="fee" type="number" step="0.01" min="0" placeholder="Fee" value="${esc(m.fee || '')}">
+      <button class="btn btn-sm" type="button" data-del title="Remove">✕</button></div>`;
+  modal({
+    title: p ? 'Edit service' : 'Add service', wide: true,
+    body: `<div class="field"><label>Service name (shown when generating)</label><input class="input" id="pn" value="${esc(pkg.name)}"></div>
+      <div class="field"><label>Program wording in the agreement (be specific — CICC requires the exact category and program)</label><input class="input" id="pp" value="${esc(pkg.program)}"></div>
+      <label style="font-size:12.5px;font-weight:600">Fees by milestone (CAD, before GST) — the fee is earned when each milestone is completed</label>
+      <div id="ms" style="margin-top:6px">${pkg.milestones.map(row).join('')}</div>
+      <div class="row" style="justify-content:space-between;margin:4px 0 14px"><button class="btn btn-sm" type="button" id="am">${icon('plus')} Add milestone</button><b id="tot"></b></div>
+      <div class="field"><label>Services to be provided (one per line). Leave blank to use the standard list.</label><textarea class="input" id="ps" rows="4">${esc(pkg.scope || '')}</textarea></div>
+      <label class="row" style="gap:8px"><input type="checkbox" id="pa" ${pkg.active ? 'checked' : ''}> Active (offered when generating agreements)</label>`,
+    onOpen: (m) => {
+      const read = () => [...m.querySelectorAll('.ms-row')].map((r) => ({ name: r.querySelector('[data-m="name"]').value.trim(), included: r.querySelector('[data-m="included"]').value.trim(), fee: Number(r.querySelector('[data-m="fee"]').value || 0) }));
+      const sum = () => { m.querySelector('#tot').textContent = 'Total: ' + money(read().reduce((s, x) => s + x.fee, 0)); };
+      const wire = () => { m.querySelectorAll('[data-del]').forEach((b) => (b.onclick = () => { b.closest('.ms-row').remove(); sum(); })); m.querySelectorAll('[data-m="fee"]').forEach((i) => (i.oninput = sum)); sum(); };
+      m.querySelector('#am').onclick = () => { const list = read(); list.push({ name: '', included: '', fee: 0 }); m.querySelector('#ms').innerHTML = list.map(row).join(''); wire(); };
+      m._read = read; wire();
+    },
+    actions: [
+      ...(p ? [{ label: 'Delete', cls: 'btn-danger', onClick: async () => {
+        if (!confirm(`Delete "${p.name}"? Agreements already generated keep their fees.`)) return false;
+        const { error } = await db.from('service_packages').delete().eq('id', p.id); if (error) throw error; toast('Service deleted'); done();
+      } }] : []),
+      { label: 'Cancel' },
+      { label: 'Save', cls: 'btn-primary', onClick: async (m) => {
+        const milestones = m._read().filter((x) => x.name || x.fee);
+        const rec = { name: m.querySelector('#pn').value.trim(), program: m.querySelector('#pp').value.trim(), scope: m.querySelector('#ps').value.trim() || null,
+          active: m.querySelector('#pa').checked, milestones };
+        if (!rec.name || !rec.program) throw new Error('Enter the service name and the program wording.');
+        if (!milestones.length) throw new Error('Add at least one milestone.');
+        if (milestones.some((x) => !x.name)) throw new Error('Every milestone needs a name.');
+        const { error } = p ? await db.from('service_packages').update(rec).eq('id', p.id) : await db.from('service_packages').insert(rec);
+        if (error) throw error; toast('Service saved'); done();
+      } }],
+  });
 }

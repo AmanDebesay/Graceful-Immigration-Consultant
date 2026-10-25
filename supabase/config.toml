@@ -50,9 +50,9 @@ port = 54329
 # Configure one of the supported pooler modes: `transaction`, `session`.
 pool_mode = "transaction"
 # How many server connections to allow per user/database pair.
-default_pool_size = 20
+default_pool_size = 15
 # Maximum number of client connections allowed.
-max_client_conn = 100
+max_client_conn = 200
 
 # [db.vault]
 # secret_key = "env(SECRET_VALUE)"
@@ -146,7 +146,7 @@ max_catalogs = 2
 
 # Store vector embeddings in S3 for large and durable datasets
 [storage.vector]
-enabled = true
+enabled = false
 max_buckets = 10
 max_indexes = 5
 
@@ -244,10 +244,14 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
+# Code-based templates live in supabase/templates/ (invite.html, recovery.html). Enable these sections
+# once custom SMTP is configured — the free plan rejects template changes on the default email provider.
 # [auth.email.template.invite]
-# subject = "You have been invited"
+# subject = "Your Graceful Practice Hub invitation code"
 # content_path = "./supabase/templates/invite.html"
+# [auth.email.template.recovery]
+# subject = "Your Graceful password reset code"
+# content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

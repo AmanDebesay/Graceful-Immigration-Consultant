@@ -1,19 +1,30 @@
 import { db, state, can, esc, icon, fmtDate, timeAgo, modal } from '../core.js';
-import { contactsList, contactOptions, orgSettings, itemsList, downloadCsv } from '../fin.js';
+import { contactsList, contactOptions, downloadCsv } from '../fin.js';
 import { defaults } from '../agreement-templates.js';
 
 export const AGR_STATUS = { draft: ['Draft', ''], sent: ['Sent', 'b-blue'], viewed: ['Viewed by client', 'b-gold'], signed: ['Signed', 'b-GREEN'], void: ['Void', ''] };
 export const agrBadge = (s) => `<span class="badge ${AGR_STATUS[s]?.[1] || ''}">${AGR_STATUS[s]?.[0] || s}</span>`;
 export const AGR_TYPE = { consultation: 'Initial Consultation Agreement', retainer: 'Retainer (Service) Agreement' };
 
+const money = (n) => Number(n || 0).toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
+const pkgTotal = (p) => (p.milestones || []).reduce((s, m) => s + Number(m.fee || 0), 0);
+
 export async function newAgreement({ contactId, caseId, type = 'retainer' } = {}) {
-  const contacts = await contactsList();
+  const [contacts, { data: settings }, { data: pkgs }] = await Promise.all([contactsList(), db.from('org_settings').select('*').eq('id', 1).single(),
+    db.from('service_packages').select('*').eq('active', true).order('sort').order('name')]);
   modal({
-    title: 'New agreement',
-    body: `<div class="field"><label>Agreement type</label><select class="input" id="t">
-        <option value="consultation" ${type === 'consultation' ? 'selected' : ''}>Initial Consultation Agreement (before paid advice)</option>
-        <option value="retainer" ${type === 'retainer' ? 'selected' : ''}>Retainer / Service Agreement (representation)</option></select></div>
-      <div class="field"><label>Client</label><select class="input" id="c">${contactOptions(contacts, contactId)}</select></div>
+    title: 'Generate agreement',
+    body: `<div class="field"><label>Client</label><select class="input" id="c">${contactOptions(contacts, contactId)}</select>
+        <small style="color:var(--muted)">Not in the list? Add the client first under Contacts → New contact.</small></div>
+      <div class="field"><label>Agreement type</label><select class="input" id="t">
+        <option value="consultation" ${type === 'consultation' ? 'selected' : ''}>Initial Consultation Agreement — before paid advice (RA 4.1)</option>
+        <option value="retainer" ${type === 'retainer' ? 'selected' : ''}>Retainer / Service Agreement — representation (RA 5.1)</option></select></div>
+      <div class="field" id="pw"><label>Service (prices from Business Settings → Fee schedule)</label><select class="input" id="p">
+        ${(pkgs || []).map((x) => `<option value="${x.id}">${esc(x.name)} — ${pkgTotal(x) ? money(pkgTotal(x)) : 'price not set'}</option>`).join('')}
+        <option value="">Custom — enter the program and fees in the editor</option></select>
+        <div id="pinfo" style="font-size:12.5px;margin-top:6px"></div></div>
+      <div class="field" id="lw"><label>Consultation length</label><select class="input" id="l">
+        <option value="30">30 minutes — ${money(settings.consult_fee_30 ?? 30)}</option><option value="60" selected>60 minutes — ${money(settings.consult_fee_60 ?? 60)}</option></select></div>
       <div class="field" id="cw"><label>Case (optional)</label><select class="input" id="k"><option value="">None</option></select></div>`,
     onOpen: (m) => {
       const load = async () => {
@@ -21,17 +32,29 @@ export async function newAgreement({ contactId, caseId, type = 'retainer' } = {}
         const { data } = cid ? await db.from('cases').select('id, case_number, title').eq('contact_id', cid) : { data: [] };
         m.querySelector('#k').innerHTML = '<option value="">None</option>' + (data || []).map((x) => `<option value="${x.id}" ${x.id === caseId ? 'selected' : ''}>${esc(x.case_number)} · ${esc(x.title)}</option>`).join('');
       };
-      m.querySelector('#c').onchange = load; load();
+      const sync = () => {
+        const retainer = m.querySelector('#t').value === 'retainer';
+        m.querySelector('#pw').hidden = !retainer; m.querySelector('#cw').hidden = !retainer; m.querySelector('#lw').hidden = retainer;
+        const pk = (pkgs || []).find((x) => x.id === m.querySelector('#p').value);
+        m.querySelector('#pinfo').innerHTML = !pk ? '<span style="color:var(--muted)">You will fill in the program and milestone fees in the editor.</span>'
+          : pkgTotal(pk) ? `<span style="color:var(--muted)">${pk.milestones.map((x) => `${esc(x.name)}: ${money(x.fee)}`).join(' · ')}</span>`
+            : '<span style="color:#B42318">This service has no price yet. Set it in Business Settings → Fee schedule, or enter the fees in the editor.</span>';
+      };
+      m.querySelector('#c').onchange = load; m.querySelector('#t').onchange = sync; m.querySelector('#p').onchange = sync;
+      load(); sync();
     },
-    actions: [{ label: 'Cancel' }, { label: 'Create draft', cls: 'btn-primary', onClick: async (m) => {
-      const t = m.querySelector('#t').value, cid = m.querySelector('#c').value, kid = m.querySelector('#k').value || null;
+    actions: [{ label: 'Cancel' }, { label: 'Generate agreement', cls: 'btn-gold', onClick: async (m) => {
+      const t = m.querySelector('#t').value, cid = m.querySelector('#c').value, kid = t === 'retainer' ? m.querySelector('#k').value || null : null;
       if (!cid) throw new Error('Choose a client.');
-      const [{ data: contact }, settings, items, { data: caseRow }] = await Promise.all([
-        db.from('contacts').select('*').eq('id', cid).single(), orgSettings(), itemsList(),
+      const pkg = t === 'retainer' ? (pkgs || []).find((x) => x.id === m.querySelector('#p').value) || null : null;
+      const minutes = Number(m.querySelector('#l').value);
+      const [{ data: contact }, { data: caseRow }] = await Promise.all([
+        db.from('contacts').select('*').eq('id', cid).single(),
         kid ? db.from('cases').select('*').eq('id', kid).single() : { data: null }]);
-      const item = items.find((i) => /1-Hour/i.test(i.name));
-      const data = defaults(t, { contact, settings, caseRow, item });
-      const { data: row, error } = await db.from('agreements').insert({ type: t, title: `${t === 'consultation' ? 'Initial Consultation Agreement' : 'Service Agreement'} — ${contact.full_name}`,
+      const fee = minutes === 30 ? settings.consult_fee_30 ?? 30 : settings.consult_fee_60 ?? 60;
+      const data = defaults(t, { contact, settings, caseRow, pkg, consult: { minutes, fee } });
+      const title = t === 'consultation' ? 'Initial Consultation Agreement' : `Service Agreement${pkg ? ' (' + pkg.name + ')' : ''}`;
+      const { data: row, error } = await db.from('agreements').insert({ type: t, title: `${title} — ${contact.full_name}`,
         contact_id: cid, case_id: kid, data, created_by: state.profile.id }).select('id').single();
       if (error) throw error;
       location.hash = `#/agreements/${row.id}`;
@@ -42,7 +65,7 @@ export async function newAgreement({ contactId, caseId, type = 'retainer' } = {}
 export async function render(el) {
   let filter = 'all';
   el.innerHTML = `<div class="toolbar"><div class="seg" id="f">${[['all', 'All'], ['draft', 'Drafts'], ['out', 'Awaiting signature'], ['signed', 'Signed'], ['void', 'Void']].map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
-    <div class="grow"></div><button class="btn" id="csv">${icon('file')} Export</button>${can('agreements.manage') ? `<button class="btn btn-gold" id="new">${icon('plus')} New agreement</button>` : ''}</div>
+    <div class="grow"></div><button class="btn" id="csv">${icon('file')} Export</button>${can('agreements.manage') ? `<button class="btn btn-gold" id="new">${icon('plus')} Generate agreement</button>` : ''}</div>
     <div class="alert info">Agreements follow the CICC Retainer Agreement Regulation and the 2024 Service Agreement Guide. An Initial Consultation Agreement is required before paid advice (RA 4.1). A Retainer Agreement is required for representation and must be provided within 10 days of starting work (RA 5.1).</div>
     <div class="card"><div class="table-wrap" id="list"></div></div>`;
   el.querySelector('#f').onclick = (e) => { if (e.target.dataset.k) { filter = e.target.dataset.k; draw(); } };
