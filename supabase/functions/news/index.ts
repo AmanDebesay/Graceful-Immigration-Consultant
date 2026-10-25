@@ -3,10 +3,10 @@
 // Cached for 2 hours so visitors never wait on the feeds.
 import { adminClient, corsHeaders, json } from "../_shared/common.ts";
 
-const IRCC = "https://api.io.canada.ca/io-server/gc/news/en/v2?dept=departmentofcitizenshipandimmigration&sort=publishedDate&orderBy=desc&pick=30&format=atom";
+const IRCC = "https://api.io.canada.ca/io-server/gc/news/en/v2?dept=departmentofcitizenshipandimmigration&sort=publishedDate&orderBy=desc&pick=50&format=atom";
 const OUTLETS = ["cbc.ca", "ctvnews.ca", "globalnews.ca", "theglobeandmail.com", "thecanadianpress.com", "cp24.com"];
 const MEDIA = "https://news.google.com/rss/search?q=" + encodeURIComponent(
-  `Canada immigration (IRCC OR "permanent residents" OR refugees OR "study permit" OR "work permit" OR citizenship) when:21d (${OUTLETS.map((o) => "site:" + o).join(" OR ")})`,
+  `Canada immigration (IRCC OR "permanent residents" OR refugees OR "study permit" OR "work permit" OR citizenship) when:30d (${OUTLETS.map((o) => "site:" + o).join(" OR ")})`,
 ) + "&hl=en-CA&gl=CA&ceid=CA:en";
 const RELEVANT = /immigra|refugee|asylum|resettle|permanent resid|\bPR\b|citizenship|visa|study permit|work permit|foreign worker|international student|IRCC|express entry|newcomer|francophone|caregiver|deport|border/i;
 const TTL_MS = 2 * 60 * 60 * 1000;
@@ -28,7 +28,7 @@ async function ircc() {
     summary: tag(e, "summary").replace(/^[A-Z][a-z]+ \d{1,2}, \d{4}\s*[—-]\s*[^—]*—\s*/, "").slice(0, 220),
     type: tag(e, "category") || (e.match(/<category term="([^"]+)"/) ?? [])[1] || "",
   })).filter((x) => x.title && x.url.startsWith("https://www.canada.ca/") && !/media advisor/i.test(x.type)
-    && !/to make an announcement|media advisory/i.test(x.title) && RELEVANT.test(`${x.title} ${x.summary}`)).slice(0, 6);
+    && !/to make an announcement|media advisory/i.test(x.title) && RELEVANT.test(`${x.title} ${x.summary}`)).slice(0, 10);
 }
 
 async function media() {
@@ -37,7 +37,7 @@ async function media() {
   return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(([, i]) => {
     const raw = tag(i, "title"), source = tag(i, "source");
     return { title: raw.replace(new RegExp(`\\s+-\\s+${source.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`), ""), source, url: tag(i, "link"), date: new Date(tag(i, "pubDate")).toISOString().slice(0, 10) };
-  }).filter((x) => x.title && x.url.startsWith("https://") && RELEVANT.test(x.title) && !seen.has(x.title) && seen.add(x.title)).slice(0, 6);
+  }).filter((x) => x.title && x.url.startsWith("https://") && RELEVANT.test(x.title) && !seen.has(x.title) && seen.add(x.title)).slice(0, 10);
 }
 
 Deno.serve(async (req) => {

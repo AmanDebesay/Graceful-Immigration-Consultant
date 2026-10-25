@@ -150,6 +150,7 @@
           <a href="blog.html">Immigration Tips &amp; Updates</a>
           <a href="blog.html#mistakes">Guides &amp; Checklists</a>
           <a href="blog.html#faq">Frequently Asked Questions</a>
+          <a href="news.html">Immigration News &amp; Updates</a>
         </div>
       </div>
       <a href="index.html#contact">Contact</a>
@@ -441,6 +442,10 @@
         <img src="img/res-faq.jpg" alt="Compass resting on an open map" width="800" height="533" loading="lazy">
         <div class="res-body"><div><h3>Frequently Asked Questions</h3><p>Find answers to common questions about Canadian immigration.</p></div><svg><use href="#i-arrow"/></svg></div>
       </a>
+      <a href="news.html" class="res">
+        <img src="img/res-news.jpg" alt="Parliament buildings in Ottawa" width="800" height="470" loading="lazy">
+        <div class="res-body"><div><h3>Immigration News &amp; Updates</h3><p>Official IRCC announcements, media headlines and our latest guides.</p></div><svg><use href="#i-arrow"/></svg></div>
+      </a>
     </div>
   </div>
 </section>
@@ -489,51 +494,6 @@
       <p class="form-foot">WhatsApp is for scheduling only. Please do not send documents or personal details by WhatsApp or email. We will give you a secure way to share them.</p>
     </div>
   </div>
-</section>
-
-<!-- NEWS -->
-<section class="section news-sec" id="news">
-  <div class="wrap">
-    <div class="section-head center reveal">
-      <span class="eyebrow">Stay informed</span>
-      <h2>Immigration News &amp; Updates</h2>
-      <p>Our latest guides, official announcements from Immigration, Refugees and Citizenship Canada, and immigration headlines from Canadian media.</p>
-    </div>
-    <div class="news-grid">
-      <div class="news-col reveal"><h3><span class="nc-ic nc-blog"><svg><use href="#i-file"/></svg></span>From our blog</h3>
-        <ul class="news-list">
-          <li><a href="blog.html#mistakes">5 common mistakes that delay your immigration application</a><small>Guide</small></li>
-          <li><a href="blog.html#crs-score">Express Entry CRS score: how to improve your ranking</a><small>Guide</small></li>
-          <li><a href="blog.html#spousal-guide">A step-by-step guide to spousal sponsorship in Canada</a><small>Guide</small></li>
-          <li><a href="blog.html#lmia-guide">What employers need to know about the LMIA process</a><small>Guide</small></li>
-          <li><a href="refugee-claims.html">Refugee claims in Canada: from the Basis of Claim to your hearing</a><small>Service guide</small></li>
-        </ul>
-        <a class="news-more" href="blog.html">All articles →</a></div>
-      <div class="news-col reveal"><h3><span class="nc-ic nc-gov">🍁</span>Official IRCC news</h3>
-        <ul class="news-list" id="newsIrcc"><li class="news-load">Loading the latest announcements…</li></ul>
-        <a class="news-more" href="https://www.canada.ca/en/immigration-refugees-citizenship/news.html" target="_blank" rel="noopener">IRCC newsroom →</a></div>
-      <div class="news-col reveal"><h3><span class="nc-ic nc-media"><svg><use href="#i-globe"/></svg></span>In the news</h3>
-        <ul class="news-list" id="newsMedia"><li class="news-load">Loading headlines…</li></ul>
-        <small class="news-note">Headlines from CBC, CTV, Global News and The Globe and Mail. Links open the original article.</small></div>
-    </div>
-  </div>
-  <script>
-  (function () {
-    var KEY = 'sb_publishable_ZcaXkELPK820lTD41ffw2Q_iMTta3uT';
-    var esc = function (t) { var d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; };
-    var date = function (d) { return d ? new Date(d + 'T12:00:00').toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) : ''; };
-    var uniq = function (l) { var s = {}; return (l || []).filter(function (x) { return s[x.title] ? false : (s[x.title] = 1); }); };
-    var put = function (id, items, meta) {
-      document.getElementById(id).innerHTML = items.length ? items.slice(0, 5).map(function (x) {
-        return '<li><a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + esc(x.title) + '</a><small>' + esc(meta(x)) + '</small></li>'; }).join('')
-        : '<li class="news-load">No recent updates right now.</li>';
-    };
-    fetch('https://bmzhcprthrocbqluxpwa.supabase.co' + '/functions/v1/news', { headers: { apikey: KEY, Authorization: 'Bearer ' + KEY } }).then(function (r) { return r.json(); }).then(function (d) {
-      put('newsIrcc', uniq(d.ircc), function (x) { return date(x.date) + ' · Government of Canada'; });
-      put('newsMedia', uniq(d.media), function (x) { return date(x.date) + ' · ' + x.source; });
-    }).catch(function () { ['newsIrcc', 'newsMedia'].forEach(function (id) { document.getElementById(id).innerHTML = '<li class="news-load">News is unavailable right now.</li>'; }); });
-  })();
-  </script>
 </section>
 
 </main>
