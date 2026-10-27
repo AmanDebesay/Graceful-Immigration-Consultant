@@ -199,6 +199,27 @@
       <h2>Pick a time &amp; tell us about you</h2>
       <p>Choose a time, then share your name, date of birth and what you'd like help with.</p>
     </div>
+    <div class="cal-hub" id="calHub">
+      <div class="ch-now">
+        <div class="ch-clock"><span class="ch-k">Your time</span><b id="chYourTime">--:--</b><small id="chYourDate">&nbsp;</small></div>
+        <div class="ch-clock ch-mt"><span class="ch-k">Canada · Mountain Time</span><b id="chMtTime">--:--</b><small id="chMtDate">&nbsp;</small></div>
+        <div class="ch-wx" id="chWx" aria-live="polite"><div class="ch-wx-load">Loading weather…</div></div>
+      </div>
+      <div class="ch-month">
+        <div class="ch-mhead">
+          <button type="button" class="ch-nav" id="chPrev" aria-label="Previous month">&lsaquo;</button>
+          <h3 id="chMonth">&nbsp;</h3>
+          <button type="button" class="ch-nav" id="chNext" aria-label="Next month">&rsaquo;</button>
+        </div>
+        <div class="ch-grid" id="chGrid"></div>
+        <p class="ch-info" id="chInfo">Tap a highlighted day to see the holiday.</p>
+      </div>
+      <div class="ch-hols">
+        <h4><svg class="ca-flag" viewBox="0 0 40 20" role="img" aria-label="Canada"><rect width="40" height="20" fill="#fff"/><rect width="10" height="20" fill="#D52B1E"/><rect x="30" width="10" height="20" fill="#D52B1E"/><path fill="#D52B1E" transform="translate(13 3) scale(.14)" d="M50 2l8 16 8-4-3 20 13-12 4 8 14-2-6 16 8 4-22 16 4 8-24-4v30h-8V68l-24 4 4-8L4 48l8-4-6-16 14 2 4-8 13 12-3-20 8 4z"/></svg> Upcoming holidays</h4>
+        <ul id="chHols"></ul>
+        <p class="ch-note">Canadian and Alberta statutory holidays. Booking times below are shown in your own time zone.</p>
+      </div>
+    </div>
     <div class="book-layout" id="bookLayout">
       <aside class="book-profile">
         <img src="img/consultant.jpg" alt="Aman Debesay, Regulated Canadian Immigration Consultant" width="360" height="360">
@@ -338,55 +359,156 @@
     else a.replaceWith(document.createTextNode(a.textContent + ' sent with your agreement'));
   });
 
-  // Calendly booking pages for each consultation length.
-  const CALENDLY = {
-    '30': 'https://calendly.com/aman-debesay-gracefulimmigration/30min',
-    '60': ''
-  };
-
+  // Microsoft Bookings page (connected to the Outlook calendar; each booking gets a Teams link).
+  const BOOKINGS = 'https://bookings.cloud.microsoft/book/GracefulImmigrationConsultant@gracefulimmigration.ca/';
   const calendar = document.getElementById('calendar');
-  let widgetLoaded = null;
-
-  function loadWidget() {
-    if (!widgetLoaded) {
-      widgetLoaded = new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = 'https://assets.calendly.com/assets/external/widget.js';
-        s.onload = resolve;
-        s.onerror = reject;
-        document.head.appendChild(s);
-      });
-    }
-    return widgetLoaded;
-  }
-
-  const PLAN_LABEL = { '30': ['30-Minute Consultation · $30', '30 min'], '60': ['1-Hour Consultation · $60', '1 hour'] };
+  const PLAN_LABEL = { '30': ['30-Minute Consultation · $30', '30 min', '30-minute'], '60': ['1-Hour Consultation · $60', '1 hour', '1-hour'] };
 
   function showPlan(plan, scroll) {
     document.querySelectorAll('.price-card').forEach(b => b.classList.toggle('active', b.dataset.plan === plan));
     document.getElementById('bookSelected').textContent = PLAN_LABEL[plan][0];
     document.getElementById('bookLength').textContent = PLAN_LABEL[plan][1];
     if (scroll) document.getElementById('bookLayout').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    const url = CALENDLY[plan];
-    if (!url) {
-      calendar.innerHTML = '<div class="calendar-empty">Online booking is coming soon. To book now, call <a href="tel:+14039154230">(403) 915-4230</a> or email <a href="mailto:info@gracefulimmigration.ca">info@gracefulimmigration.ca</a>.</div>';
-      return;
+    if (!calendar.querySelector('iframe')) {
+      calendar.innerHTML = '<div class="bk-tip"><svg><use href="#i-clock"/></svg><span>Choose the <b id="bkPlan"></b> consultation, then pick a day and time.</span></div>' +
+        '<iframe class="bk-frame" src="' + BOOKINGS + '" title="Book a consultation with Graceful Immigration Consultant" loading="lazy"></iframe>' +
+        '<p class="bk-open">Calendar not showing? <a href="' + BOOKINGS + '" target="_blank" rel="noopener">Open the booking page</a> or call <a href="tel:+14039154230">(403) 915-4230</a>.</p>';
     }
-    calendar.innerHTML = '<div class="calendar-empty">Loading available times…</div>';
-    loadWidget().then(() => {
-      calendar.innerHTML = '<div class="calendly-inline-widget"></div>';
-      Calendly.initInlineWidget({
-        url: url + (url.includes('?') ? '&' : '?') + 'hide_gdpr_banner=1&background_color=ffffff&primary_color=0b2a5c',
-        parentElement: calendar.firstElementChild
-      });
-    }).catch(() => {
-      calendar.innerHTML = '<div class="calendar-empty">The calendar could not load. <a href="' + url + '" target="_blank" rel="noopener">Open the booking page</a> or call <a href="tel:+14039154230">(403) 915-4230</a>.</div>';
-    });
+    document.getElementById('bkPlan').textContent = PLAN_LABEL[plan][2];
   }
 
   document.querySelectorAll('.price-card').forEach(b => b.addEventListener('click', () => showPlan(b.dataset.plan, true)));
   const pre = new URLSearchParams(location.search).get('length');
   showPlan(pre === '60' ? '60' : '30', pre === '30' || pre === '60');
+</script>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+  var MT = 'America/Edmonton';
+
+  // Live clocks
+  function tick() {
+    var now = new Date();
+    $('chYourTime').textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    $('chYourDate').textContent = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    $('chMtTime').textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone: MT });
+    $('chMtDate').textContent = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', timeZone: MT });
+  }
+  tick(); setInterval(tick, 1000 * 15);
+
+  // Canadian (federal) and Alberta statutory holidays for any year
+  function nthMonday(y, m, n) { var first = new Date(y, m, 1).getDay(); return 1 + (8 - first) % 7 + (n - 1) * 7; }
+  function easter(y) {
+    var a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
+        g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4,
+        l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+    return new Date(y, Math.floor((h + l - 7 * m + 114) / 31) - 1, ((h + l - 7 * m + 114) % 31) + 1);
+  }
+  var cache = {};
+  function holidays(y) {
+    if (cache[y]) return cache[y];
+    var gf = easter(y); gf.setDate(gf.getDate() - 2);
+    var vic = new Date(y, 4, 24); while (vic.getDay() !== 1) vic.setDate(vic.getDate() - 1);
+    var list = [[0, 1, "New Year's Day"], [1, nthMonday(y, 1, 3), 'Family Day (Alberta)'], [gf.getMonth(), gf.getDate(), 'Good Friday'],
+      [4, vic.getDate(), 'Victoria Day'], [6, 1, 'Canada Day'], [7, nthMonday(y, 7, 1), 'Heritage Day (Alberta)'],
+      [8, nthMonday(y, 8, 1), 'Labour Day'], [8, 30, 'National Day for Truth and Reconciliation'],
+      [9, nthMonday(y, 9, 2), 'Thanksgiving'], [10, 11, 'Remembrance Day'], [11, 25, 'Christmas Day'], [11, 26, 'Boxing Day']];
+    var map = {}; list.forEach(function (h) { map[y + '-' + pad(h[0] + 1) + '-' + pad(h[1])] = h[2]; });
+    return (cache[y] = map);
+  }
+  function holidayOn(d) { return holidays(d.getFullYear())[d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())]; }
+
+  // Month grid
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var view = new Date(today.getFullYear(), today.getMonth(), 1);
+  function render() {
+    $('chMonth').textContent = view.toLocaleDateString([], { month: 'long', year: 'numeric' });
+    var g = $('chGrid'), html = '';
+    for (var i = 0; i < 7; i++) { html += '<span class="ch-wd">' + new Date(2023, 0, 1 + i).toLocaleDateString([], { weekday: 'narrow' }) + '</span>'; }
+    var lead = view.getDay(), days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+    for (i = 0; i < lead; i++) html += '<span></span>';
+    for (var d = 1; d <= days; d++) {
+      var dt = new Date(view.getFullYear(), view.getMonth(), d), h = holidayOn(dt), cls = ['ch-d'];
+      if (dt.getDay() === 0 || dt.getDay() === 6) cls.push('we');
+      if (dt < today) cls.push('past');
+      if (+dt === +today) cls.push('today');
+      if (h) cls.push('hol');
+      html += '<button type="button" class="' + cls.join(' ') + '"' + (h ? ' data-hol="' + h + '" title="' + h + '"' : '') +
+        ' aria-label="' + dt.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + (h ? ', ' + h : '') + '">' + d + '</button>';
+    }
+    g.innerHTML = html;
+    $('chPrev').disabled = view <= new Date(today.getFullYear(), today.getMonth(), 1);
+  }
+  $('chGrid').addEventListener('click', function (e) {
+    var b = e.target.closest('.ch-d'); if (!b) return;
+    var d = new Date(view.getFullYear(), view.getMonth(), +b.textContent);
+    var label = d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    $('chInfo').innerHTML = b.dataset.hol ? '<b>' + label + '</b> · ' + b.dataset.hol + ' (statutory holiday)'
+      : '<b>' + label + '</b>' + (d.getDay() === 0 || d.getDay() === 6 ? ' · weekend' : '') + ' · see open times in the booking calendar below';
+  });
+  $('chPrev').addEventListener('click', function () { view.setMonth(view.getMonth() - 1); render(); });
+  $('chNext').addEventListener('click', function () { view.setMonth(view.getMonth() + 1); render(); });
+  render();
+
+  // Upcoming holidays
+  var up = [], y = today.getFullYear();
+  [y, y + 1].forEach(function (yy) { var m = holidays(yy); Object.keys(m).sort().forEach(function (k) {
+    var p = k.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]); if (dt >= today) up.push([dt, m[k]]); }); });
+  $('chHols').innerHTML = up.slice(0, 5).map(function (h) {
+    var days = Math.round((h[0] - today) / 864e5);
+    return '<li><span class="ch-hd"><b>' + h[0].getDate() + '</b>' + h[0].toLocaleDateString([], { month: 'short' }) + '</span><span><b>' + h[1] + '</b><small>' +
+      h[0].toLocaleDateString([], { weekday: 'long' }) + ' · ' + (days === 0 ? 'today' : days === 1 ? 'tomorrow' : 'in ' + days + ' days') + '</small></span></li>';
+  }).join('');
+
+  // Weather (Open-Meteo, no account needed). Default: southern Alberta; visitors may use their own location.
+  var ICON = {
+    sun: '<circle cx="12" cy="12" r="4.5" fill="#F4B63F"/><g stroke="#F4B63F" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g>',
+    moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="#F3D27A"/>',
+    cloud: '<path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.1 11 3.5 3.5 0 0 0 7 18z" fill="#C9D3E3"/>',
+    part: '<circle cx="8" cy="8" r="3.6" fill="#F4B63F"/><path d="M9 19h9a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.9 13 3 3 0 0 0 9 19z" fill="#DCE3EE"/>',
+    rain: '<path d="M7 14h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.1 7 3.5 3.5 0 0 0 7 14z" fill="#B7C3D7"/><g stroke="#4F8FE0" stroke-width="2" stroke-linecap="round"><path d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/></g>',
+    snow: '<path d="M7 14h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.1 7 3.5 3.5 0 0 0 7 14z" fill="#C9D3E3"/><g fill="#8FB6EA"><circle cx="8" cy="18" r="1.3"/><circle cx="12" cy="20" r="1.3"/><circle cx="16" cy="18" r="1.3"/></g>',
+    storm: '<path d="M7 14h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.1 7 3.5 3.5 0 0 0 7 14z" fill="#9AA8BF"/><path d="M12.5 14l-3 5h3l-1.5 4 4.5-6h-3l1.5-3z" fill="#F4B63F"/>',
+    fog: '<g stroke="#B7C3D7" stroke-width="2" stroke-linecap="round"><path d="M4 9h16M6 13h12M4 17h16"/></g>'
+  };
+  function wx(code, day) {
+    if (code === 0) return [day === 0 ? 'moon' : 'sun', 'Clear'];
+    if (code <= 2) return ['part', 'Partly cloudy'];
+    if (code === 3) return ['cloud', 'Cloudy'];
+    if (code === 45 || code === 48) return ['fog', 'Fog'];
+    if (code >= 95) return ['storm', 'Thunderstorm'];
+    if ((code >= 71 && code <= 77) || code === 85 || code === 86) return ['snow', 'Snow'];
+    return ['rain', code < 60 ? 'Drizzle' : 'Rain'];
+  }
+  var svg = function (k, cls) { return '<svg class="' + cls + '" viewBox="0 0 24 24" aria-hidden="true">' + ICON[k] + '</svg>'; };
+  function loadWx(lat, lon, place) {
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+      '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4')
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (j) {
+        var c = j.current, w = wx(c.weather_code, c.is_day), dl = j.daily, f = '';
+        for (var i = 1; i < dl.time.length; i++) {
+          var p = dl.time[i].split('-'), dd = new Date(+p[0], +p[1] - 1, +p[2]);
+          f += '<li><span>' + dd.toLocaleDateString([], { weekday: 'short' }) + '</span>' + svg(wx(dl.weather_code[i], 1)[0], 'ch-wi-s') +
+            '<span>' + Math.round(dl.temperature_2m_max[i]) + '° <i>' + Math.round(dl.temperature_2m_min[i]) + '°</i></span></li>';
+        }
+        $('chWx').innerHTML = '<div class="ch-wx-now">' + svg(w[0], 'ch-wi') + '<div><b>' + Math.round(c.temperature_2m) + '°C</b><span>' + w[1] +
+          ' · feels ' + Math.round(c.apparent_temperature) + '° · wind ' + Math.round(c.wind_speed_10m) + ' km/h</span></div></div>' +
+          '<div class="ch-wx-place"><span>' + place + '</span>' + (navigator.geolocation && place !== 'Your location' ? '<button type="button" id="chLoc">Use my location</button>' : '') + '</div>' +
+          '<ul class="ch-fc">' + f + '</ul>';
+        var b = $('chLoc');
+        if (b) b.addEventListener('click', function () {
+          b.textContent = 'Locating…';
+          navigator.geolocation.getCurrentPosition(function (pos) { loadWx(pos.coords.latitude.toFixed(2), pos.coords.longitude.toFixed(2), 'Your location'); },
+            function () { b.textContent = 'Location not available'; }, { timeout: 10000, maximumAge: 6e5 });
+        });
+      })
+      .catch(function () { $('chWx').innerHTML = '<div class="ch-wx-load">Weather is not available right now.</div>'; });
+  }
+  loadWx(49.69, -112.84, 'Southern Alberta, Canada');
+})();
 </script>
 </body>
 </html>
