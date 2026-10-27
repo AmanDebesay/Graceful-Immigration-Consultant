@@ -450,3 +450,6 @@ verify_jwt = false
 
 [functions.reviews-sync]
 verify_jwt = false
+
+[functions.booking]
+verify_jwt = false

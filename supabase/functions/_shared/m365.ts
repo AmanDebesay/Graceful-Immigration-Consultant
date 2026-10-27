@@ -31,7 +31,7 @@ async function graph(path: string, init: RequestInit = {}) {
   });
   if (!res.ok) {
     let msg = `${res.status}`;
-    try { const e = await res.json(); msg = e.error?.message ?? msg; } catch { /* no body */ }
+    try { const e = await res.json(); msg = e.error?.message || msg; } catch { /* no body */ }
     throw new Error(`Microsoft 365: ${msg}`);
   }
   return res.status === 202 || res.status === 204 ? null : res.json();
@@ -221,3 +221,8 @@ export async function notifyTeams(admin: SupabaseClient, title: string, text: st
 }
 
 export const HUB = "https://gracefulimmigration.ca/app/";
+
+/** Microsoft Bookings (needs application permissions Bookings.Read.All and BookingsAppointment.ReadWrite.All). */
+export const BOOKING_BUSINESS = "GracefulImmigrationConsultant@gracefulimmigration.ca";
+export const bookings = (path: string, init: RequestInit = {}) =>
+  graph(`/solutions/bookingBusinesses/${encodeURIComponent(BOOKING_BUSINESS)}${path}`, init);
