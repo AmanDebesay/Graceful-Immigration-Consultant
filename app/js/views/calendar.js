@@ -1,7 +1,7 @@
 // Calendar: the staff member's Outlook calendar (or the shared mailbox's) via Microsoft 365.
 // Day / week / month views, create and edit events with Teams meetings, invite clients.
-import { can, esc, icon, toast, fail, callFn, modal } from '../core.js';
-import { contactsList } from '../fin.js';
+import { db, can, esc, icon, toast, fail, callFn, modal } from '../core.js';
+import { contactsList, exportRange, fetchAll } from '../fin.js';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const HOUR_PX = 48;
@@ -27,9 +27,25 @@ export async function render(el) {
       <h2 id="calTitle"></h2><div class="grow"></div>
       <select class="input" id="box" style="width:auto">${boxes.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('')}</select>
       <div class="seg" id="views">${[['day', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([k, l]) => `<button data-v="${k}">${l}</button>`).join('')}</div>
+      ${can('crm.view') ? `<button class="btn" id="dlAppts">${icon('file')} Download bookings</button>` : ''}
       <button class="btn btn-gold" id="newEv">${icon('plus')} New event</button></div>
     <div class="dk-card cal-card" id="cal"></div>`;
 
+  const tf = (iso) => iso ? new Date(iso).toLocaleString('en-CA', { timeZone: 'America/Edmonton', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+  el.querySelector('#dlAppts')?.addEventListener('click', () => exportRange({
+    title: 'Download bookings', file: 'appointments',
+    note: 'Appointments recorded in the dashboard, including every consultation booked on the website. Times are Alberta time.',
+    run: async (fromIso, toIso) => {
+      const list = await fetchAll(() => {
+        let q = db.from('appointments').select('title, kind, starts_at, ends_at, location, meeting_link, notes, created_at, contacts(full_name, email)').order('starts_at');
+        if (fromIso) q = q.gte('starts_at', fromIso);
+        if (toIso) q = q.lte('starts_at', toIso);
+        return q;
+      });
+      return [['Starts (Alberta)', 'Ends (Alberta)', 'Title', 'Type', 'Client', 'Client email', 'Location', 'Meeting link', 'Notes', 'Recorded'],
+        ...list.map((a) => [tf(a.starts_at), tf(a.ends_at), a.title, a.kind, a.contacts?.full_name || '', a.contacts?.email || '', a.location, a.meeting_link || '', a.notes || '', tf(a.created_at)])];
+    },
+  }));
   const range = () => {
     if (view === 'day') return [anchor, addDays(anchor, 1)];
     if (view === 'week') { const s = addDays(anchor, -anchor.getDay()); return [s, addDays(s, 7)]; }

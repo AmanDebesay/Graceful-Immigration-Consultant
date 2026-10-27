@@ -52,8 +52,39 @@ export const isPayFrom = (a) => ['bank', 'credit_card'].includes(a.subtype);
 export function downloadCsv(name, rows) {
   const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
   a.download = name; a.click();
+}
+
+/** Asks for a date range, then downloads the rows returned by run(fromIso, toIso) as a CSV that opens in Excel. */
+export function exportRange({ title, file, note = '', run }) {
+  const y = new Date().getFullYear(), pad = (n) => String(n).padStart(2, '0'), d = new Date();
+  const todayStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  modal({
+    title,
+    body: `${note ? `<p style="color:var(--muted);margin-bottom:12px">${note}</p>` : ''}<div class="row-2"><div class="field"><label>From</label><input class="input" type="date" id="exFrom" value="${y}-01-01"></div>
+      <div class="field"><label>To</label><input class="input" type="date" id="exTo" value="${todayStr}"></div></div>
+      <p style="color:var(--muted);font-size:13px">The file opens in Excel. Leave From empty to include everything.</p>`,
+    actions: [{ label: 'Cancel' }, { label: 'Download for Excel', cls: 'btn-primary', onClick: async (m) => {
+      const f = m.querySelector('#exFrom').value, t = m.querySelector('#exTo').value;
+      const fromIso = f ? new Date(f + 'T00:00:00').toISOString() : null, toIso = t ? new Date(t + 'T23:59:59').toISOString() : null;
+      const rows = await run(fromIso, toIso);
+      if (rows.length < 2) throw new Error('Nothing found in that date range.');
+      downloadCsv(`${file}-${f || 'all'}-to-${t || todayStr}.csv`, rows);
+      toast(`Downloaded ${rows.length - 1} record${rows.length === 2 ? '' : 's'}`);
+    } }],
+  });
+}
+
+/** Fetches every row of a query in pages of 1000. build() must return a fresh query each time. */
+export async function fetchAll(build) {
+  const out = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await build().range(from, from + 999);
+    if (error) throw error;
+    out.push(...data);
+    if (data.length < 1000) return out;
+  }
 }
 
 const changed = () => { clearFinCache(); window.dispatchEvent(new Event('books-changed')); };

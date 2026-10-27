@@ -20,7 +20,7 @@ export async function render(el) {
   el.querySelector('#csv').onclick = () => {
     const csv = ['email,name,language,consent_at', ...active.map((s) => [s.email, s.full_name || '', s.language || '', s.consent_at].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))].join('\n');
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
     a.download = 'newsletter-subscribers.csv'; a.click();
   };
 }

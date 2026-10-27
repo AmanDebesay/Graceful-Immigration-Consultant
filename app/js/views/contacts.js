@@ -1,5 +1,5 @@
 import { db, state, can, esc, icon, STAGES, stageBadge, triageBadge, staffName, staffOptions, timeAgo, modal, toast } from '../core.js';
-import { clearFinCache } from '../fin.js';
+import { clearFinCache, downloadCsv } from '../fin.js';
 
 export async function render(el) {
   let stage = 'all', q = '';
@@ -36,10 +36,7 @@ export async function render(el) {
   el.querySelector('#stage').onchange = (e) => { stage = e.target.value; load(); };
   el.querySelector('#csv').onclick = () => {
     const cols = ['full_name', 'email', 'phone', 'citizenship', 'language', 'stage', 'priority', 'source', 'created_at'];
-    const csv = [cols.join(','), ...rows.map((r) => cols.map((k) => `"${String(r[k] ?? '').replace(/"/g, '""')}"`).join(','))].join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    a.download = `contacts-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    downloadCsv('contacts.csv', [cols, ...rows.map((r) => cols.map((k) => r[k] ?? ''))]);
   };
   el.querySelector('#add')?.addEventListener('click', () => openAdd());
   el.querySelector('#imp')?.addEventListener('click', () => {

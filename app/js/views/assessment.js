@@ -41,11 +41,17 @@ export async function render(el, [id], { setTitle }) {
         <div class="card"><div class="card-h"><h3>Internal triage</h3><small style="color:var(--muted)">Never shown to the client</small></div>
           <div class="card-b flags">${flags || '<div class="flag note">No flags raised.</div>'}</div></div>
       </div>
-      <div class="card"><div class="card-h"><h3>Answers</h3><button class="btn btn-sm" id="print">Print</button></div>
+      <div class="card"><div class="card-h"><h3>Answers</h3><button class="btn btn-sm no-print" id="print">${icon('file')} Download PDF / Print</button></div>
         <div class="card-b"><dl class="answers">${(s.rows || []).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('') || '<div>No answers recorded.</div>'}</dl></div></div>
     </div>`;
 
-  el.querySelector('#print').onclick = () => window.print();
+  el.querySelector('#print').onclick = () => {
+    // The page title becomes the suggested PDF file name.
+    const old = document.title;
+    document.title = `Assessment - ${c.full_name || 'client'} - ${s.created_at.slice(0, 10)}`;
+    window.addEventListener('afterprint', () => { document.title = old; }, { once: true });
+    window.print();
+  };
   const status = el.querySelector('#status');
   if (status) status.onchange = () => setStatus(status.value);
   el.querySelector('#markReviewed')?.addEventListener('click', () => setStatus('reviewed'));

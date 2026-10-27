@@ -1,4 +1,5 @@
 import { db, can, esc, icon, fmtDateTime, timeAgo, triageBadge, SERVICE_LABEL } from '../core.js';
+import { exportRange, fetchAll } from '../fin.js';
 
 const STATUS = [['open', 'Open'], ['new', 'New'], ['in_review', 'In review'], ['reviewed', 'Reviewed'], ['archived', 'Archived'], ['all', 'All']];
 const STATUS_BADGE = { new: 'b-blue', in_review: 'b-gold', reviewed: 'b-GREEN', archived: '' };
@@ -13,6 +14,7 @@ export async function render(el) {
       <div class="seg" id="stSeg">${STATUS.map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
       <div class="seg" id="lvSeg">${['all', 'RED', 'AMBER', 'GREEN'].map((k) => `<button data-k="${k}">${k === 'all' ? 'All levels' : k}</button>`).join('')}</div>
       <div class="grow"></div>
+      <button class="btn" id="dl">${icon('file')} Download</button>
       <a class="btn" href="../public/assessment.html" target="_blank" rel="noopener">${icon('external')} Public form</a>
       ${can('intake.view') ? `<a class="btn btn-primary" href="#/assessments/new">${icon('plus')} New assessment</a>` : ''}
     </div>
@@ -45,5 +47,28 @@ export async function render(el) {
       </tbody></table>`;
     box.querySelectorAll('tr[data-id]').forEach((tr) => (tr.onclick = () => (location.hash = `#/assessments/${tr.dataset.id}`)));
   }
+  el.querySelector('#dl').onclick = () => exportRange({
+    title: 'Download assessments', file: 'assessments',
+    note: 'Every answer is included, one row per assessment, using the status and priority filters you have selected.',
+    run: async (fromIso, toIso) => {
+      const list = await fetchAll(() => {
+        let q = db.from('intake_submissions').select('created_at, triage_level, status, source, rows, triage, answers, contacts(full_name, email, phone)').order('created_at');
+        if (fromIso) q = q.gte('created_at', fromIso);
+        if (toIso) q = q.lte('created_at', toIso);
+        if (status === 'open') q = q.in('status', ['new', 'in_review']); else if (status !== 'all') q = q.eq('status', status);
+        if (level !== 'all') q = q.eq('triage_level', level);
+        return q;
+      });
+      const labels = [];
+      list.forEach((s) => (s.rows || []).forEach(([k]) => { if (!labels.includes(k)) labels.push(k); }));
+      return [['Submitted', 'Priority', 'Status', 'Source', 'Name', 'Email', 'Phone', ...labels, 'Urgent flags (internal)', 'Caution flags (internal)'],
+        ...list.map((s) => {
+          const ans = Object.fromEntries(s.rows || []);
+          return [fmtDateTime(s.created_at), s.triage_level, STATUS_LABEL[s.status] || s.status, s.source === 'staff' ? 'Staff' : 'Website',
+            s.contacts?.full_name || s.answers?.fullName || '', s.contacts?.email || '', s.contacts?.phone || '',
+            ...labels.map((k) => ans[k] ?? ''), (s.triage?.red || []).join(' | '), (s.triage?.amber || []).join(' | ')];
+        })];
+    },
+  });
   load();
 }
