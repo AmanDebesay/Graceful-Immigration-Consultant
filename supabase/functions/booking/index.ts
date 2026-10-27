@@ -6,6 +6,9 @@ import { bookings, HUB, notifyTeams } from "../_shared/m365.ts";
 
 const TZ = "America/Edmonton";
 const DAY = 864e5;
+// Safety net: never offer times outside 7 am – 9 pm Alberta time, whatever Bookings reports.
+const EARLIEST_HOUR = 7, LATEST_END_HOUR = 21;
+const albertaHour = (t: number) => { const p = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(t)).split(":"); return +p[0] + +p[1] / 60; };
 const PROBE_HASH = "04ddbf5c9f6397165cd28bb526190a512983af86b8c13a3e58b780b2779bf847";
 
 /** ISO 8601 duration (PT30M, PT1H30M, P1D) in milliseconds. */
@@ -28,13 +31,12 @@ function zoned(date: string, time: string, tz = TZ): number {
   return guess - off(first);
 }
 const localDate = (t: number) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(t));
-const weekday = (date: string) => ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][new Date(date + "T12:00:00Z").getUTCDay()];
 const addDays = (date: string, n: number) => new Date(Date.parse(date + "T12:00:00Z") + n * DAY).toISOString().slice(0, 10);
 
 /** Graph dateTimeTimeZone -> epoch ms. */
 function dt(x: { dateTime: string; timeZone?: string }): number {
   const tz = x.timeZone ?? "UTC", s = x.dateTime.replace(/\.\d+$/, "");
-  if (/^(utc|gmt)$/i.test(tz) || /[zZ]|[+-]\d\d:\d\d$/.test(s)) return Date.parse(/[zZ]|[+-]\d\d:\d\d$/.test(s) ? s : s + "Z");
+  if (/^(utc|gmt)$|\(UTC\)|Coordinated Universal/i.test(tz) || /[zZ]|[+-]\d\d:\d\d$/.test(s)) return Date.parse(/[zZ]|[+-]\d\d:\d\d$/.test(s) ? s : s + "Z");
   try { return zoned(s.slice(0, 10), s.slice(11, 16), tz); } catch { return Date.parse(s + "Z"); }
 }
 
@@ -49,13 +51,15 @@ async function publicServices(): Promise<Svc[]> {
   return ((data?.value ?? []) as any[]).filter((s) => !s.isHiddenFromCustomers).map(svc);
 }
 
-/** Open start times for a service between two local dates (inclusive), as UTC epoch ms with the staff member who is free. */
+/** Open start times for a service between two local dates (inclusive), as UTC epoch ms with the staff member who is free.
+    Follows Bookings exactly: its staff availability already applies business/staff hours (in the Bookings time zone)
+    and Outlook busy times; existing appointments are subtracted again as a safety net. */
 async function openSlots(service: Svc, from: string, to: string) {
   const business = await bookings("");
-  const policy = service.policy ?? business.schedulingPolicy ?? {};
+  const policy = ms(service.policy?.timeSlotInterval) ? service.policy : (business.schedulingPolicy ?? {});
   const interval = ms(policy.timeSlotInterval) || 30 * 60000;
   const now = Date.now();
-  const earliest = now + (ms(policy.minimumLeadTime) || 0);
+  const earliest = now + ms(policy.minimumLeadTime);
   const latest = now + (ms(policy.maximumAdvance) || 365 * DAY);
   const dur = service.minutes * 60000;
 
@@ -68,32 +72,25 @@ async function openSlots(service: Svc, from: string, to: string) {
   const iso = (t: number) => new Date(t).toISOString().slice(0, 19);
   const avail = await bookings("/getStaffAvailability", { method: "POST", body: JSON.stringify({
     staffIds, startDateTime: { dateTime: iso(startT), timeZone: "UTC" }, endDateTime: { dateTime: iso(endT), timeZone: "UTC" } }) });
-  const free = new Map<string, [number, number][]>();
-  for (const s of (avail?.value ?? []) as any[]) {
-    free.set(s.staffId, ((s.availabilityItems ?? []) as any[])
-      .filter((i) => i.status === "available" || i.status === "slotsAvailable")
-      .map((i) => [dt(i.startDateTime), dt(i.endDateTime)] as [number, number]));
-  }
-  // Existing appointments, with their buffers (in case availability does not already include them).
   const appts = ((await bookings(`/calendarView?start=${encodeURIComponent(new Date(startT - DAY).toISOString())}&end=${encodeURIComponent(new Date(endT + DAY).toISOString())}`))?.value ?? []) as any[];
   const busy = appts.map((a) => ({ s: dt(a.startDateTime) - ms(a.preBuffer), e: dt(a.endDateTime) + ms(a.postBuffer), staff: (a.staffMemberIds ?? []) as string[] }));
 
-  const hours = new Map<string, { startTime: string; endTime: string }[]>(
-    ((business.businessHours ?? []) as any[]).map((h) => [h.day, h.timeSlots ?? []]));
-  const out: { t: number; staff: string }[] = [];
-  for (let day = from; day <= to; day = addDays(day, 1)) {
-    for (const slot of hours.get(weekday(day)) ?? []) {
-      const bs = zoned(day, slot.startTime.slice(0, 5)), be = zoned(day, slot.endTime.slice(0, 5));
-      for (let t = bs; t + dur <= be; t += interval) {
-        if (t < earliest || t > latest) continue;
+  const found = new Map<number, string>();
+  const order = new Map(staffIds.map((id, i) => [id, i]));
+  for (const st of ((avail?.value ?? []) as any[]).sort((x, y) => (order.get(x.staffId) ?? 99) - (order.get(y.staffId) ?? 99))) {
+    for (const i of (st.availabilityItems ?? []) as any[]) {
+      if (i.status !== "available") continue;
+      const ws = dt(i.startDateTime), we = dt(i.endDateTime);
+      for (let t = Math.ceil((ws + service.pre) / interval) * interval; t + dur + service.post <= we; t += interval) {
+        if (t < earliest || t > latest || t < startT || found.has(t)) continue;
+        const h0 = albertaHour(t), h1 = h0 + service.minutes / 60;
+        if (h0 < EARLIEST_HOUR || h1 > LATEST_END_HOUR) continue;
         const a = t - service.pre, b = t + dur + service.post;
-        const who = staffIds.find((id) => (free.get(id) ?? []).some(([s, e]) => s <= a && b <= e) &&
-          !busy.some((x) => (!x.staff.length || x.staff.includes(id)) && x.s < b && a < x.e));
-        if (who) out.push({ t, staff: who });
+        if (!busy.some((x) => (!x.staff.length || x.staff.includes(st.staffId)) && x.s < b && a < x.e)) found.set(t, st.staffId);
       }
     }
   }
-  return out;
+  return [...found].sort((x, y) => x[0] - y[0]).map(([t, staff]) => ({ t, staff }));
 }
 
 const friendly = (e: unknown) => {
@@ -111,11 +108,24 @@ Deno.serve(async (req) => {
   const admin = adminClient();
 
   try {
+    if (body.action === "probe_cancel" && await sha256(String(body.token ?? "")) === PROBE_HASH) {
+      const day = new Date().toISOString();
+      const list = ((await bookings(`/calendarView?start=${encodeURIComponent(day)}&end=${encodeURIComponent(new Date(Date.now() + 14 * DAY).toISOString())}`))?.value ?? []) as any[];
+      const hits = list.filter((a) => (a.customers ?? []).some((c: any) => c.name === "QA Test - please ignore"));
+      for (const a of hits) await bookings(`/appointments/${a.id}/cancel`, { method: "POST", body: JSON.stringify({ cancellationMessage: "Test booking cancelled." }) });
+      return json(req, { cancelled: hits.length });
+    }
     if (body.action === "probe" && await sha256(String(body.token ?? "")) === PROBE_HASH) {
       const out: Record<string, unknown> = {};
       for (const [k, p] of [["business", ""], ["services", "/services"], ["staff", "/staffMembers"]] as const) {
         try { out[k] = await bookings(p); } catch (e) { out[k] = String(e); }
       }
+      try {
+        const staffIds = (((out.staff as any)?.value ?? []) as any[]).map((x) => x.id);
+        const t0 = new Date(), t1 = new Date(Date.now() + 2 * DAY);
+        out.avail = await bookings("/getStaffAvailability", { method: "POST", body: JSON.stringify({ staffIds,
+          startDateTime: { dateTime: t0.toISOString().slice(0, 19), timeZone: "UTC" }, endDateTime: { dateTime: t1.toISOString().slice(0, 19), timeZone: "UTC" } }) });
+      } catch (e) { out.avail = String(e); }
       return json(req, out);
     }
 
