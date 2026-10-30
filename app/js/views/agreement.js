@@ -1,6 +1,6 @@
 import { db, state, can, esc, icon, fmtDateTime, rpc, toast, fail, modal, confirmBox } from '../core.js';
 import { render as renderDoc, requiredMissing, withSignatures, certificate } from '../agreement-templates.js';
-import { agrBadge, AGR_TYPE } from './agreements.js';
+import { agrBadge, AGR_TYPE, PRO_BONO_REASON, proBonoBadge } from './agreements.js';
 
 export async function signaturePad(container) {
   container.innerHTML = `<div class="seg" style="margin-bottom:8px"><button type="button" data-m="draw" class="on">Draw</button><button type="button" data-m="type">Type</button></div>
@@ -89,7 +89,14 @@ async function editor(el, a, setTitle) {
   const T = a.type;
   const f = (k, label, type = 'text', extra = '') => `<div class="field"><label>${label}</label>${type === 'textarea'
     ? `<textarea class="input" data-k="${k}" ${extra}>${esc(d[k] ?? '')}</textarea>` : `<input class="input" type="${type}" data-k="${k}" value="${esc(d[k] ?? '')}" ${extra}>`}</div>`;
-  const sec = (title, inner, open = false) => `<details class="agr-sec" ${open ? 'open' : ''}><summary>${title}</summary><div class="agr-sec-b">${inner}</div></details>`;
+  const sec = (title, inner, open = false, id = '') => `<details class="agr-sec" ${id ? `id="${id}"` : ''} ${open ? 'open' : ''}><summary>${title}</summary><div class="agr-sec-b">${inner}</div></details>`;
+  const free = () => d.fee_basis === 'pro_bono';
+  const feeArr = sec('Fee arrangement', `<div class="row-2"><div class="field"><label>Paying or pro bono</label><select class="input" data-k="fee_basis">
+      <option value="paid" ${free() ? '' : 'selected'}>Paying client — professional fees apply</option><option value="pro_bono" ${free() ? 'selected' : ''}>Pro bono — no professional fees</option></select></div>
+    <div class="field pb-only" ${free() ? '' : 'hidden'}><label>Why pro bono</label><select class="input" data-k="pro_bono_reason">
+      ${Object.entries(PRO_BONO_REASON).map(([k, l]) => `<option value="${k}" ${(d.pro_bono_reason || 'family') === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>
+    <div class="pb-only" ${free() ? '' : 'hidden'}><div class="row-2">${f('relationship', 'Relationship to you (family/friend, e.g. “cousin”, “friend for 10 years”)')}${f('pro_bono_note', 'Reason in your words (used for “Other reason”)')}</div>
+      <small style="color:var(--muted)">Family and friend files add a personal-relationship disclosure the client consents to. Government fees stay the client's responsibility.</small></div>`, true);
   const msRows = () => (d.milestones || []).map((m, i) => `<div class="ms-row" data-i="${i}"><input class="input" data-m="name" placeholder="Milestone" value="${esc(m.name)}">
     <input class="input" data-m="included" placeholder="What is included" value="${esc(m.included)}"><input class="input" data-m="fee" type="number" step="0.01" placeholder="Fee" value="${esc(m.fee)}" style="max-width:100px" title="Professional fee">
     <input class="input" data-m="disb" type="number" step="0.01" placeholder="Disb." value="${esc(m.disb ?? '')}" style="max-width:90px" title="Estimated disbursements for this milestone">
@@ -103,9 +110,9 @@ async function editor(el, a, setTitle) {
     <div class="row-2">${f('business_phone', 'Business phone')}${f('business_email', 'Business email')}</div>
     <div class="row-2">${f('gst_rate', 'GST rate % (0 = not applicable)', 'number', 'step="0.01"')}${f('province', 'Governing law (province)')}</div>`, true);
   const body = T === 'consultation'
-    ? parties + sec('Consultation', `${f('purpose', 'Purpose of the consultation', 'textarea')}<div class="row-2">${f('consult_date', 'Consultation date', 'date')}${f('consult_length', 'Length')}</div>
+    ? parties + feeArr + sec('Consultation', `${f('purpose', 'Purpose of the consultation', 'textarea')}<div class="row-2">${f('consult_date', 'Consultation date', 'date')}${f('consult_length', 'Length')}</div>
       <div class="row-2">${f('consult_method', 'Method (phone, video, in person)')}${f('fee', 'Fee before tax (CAD)', 'number', 'step="0.01"')}</div>${f('payment_method', 'Payment method')}`, true)
-    : parties
+    : parties + feeArr
       + sec('1–2. Preliminary advice & general provisions', `${f('file_number', 'File number')}${f('preliminary_advice', 'Summary of preliminary advice given to the client', 'textarea', 'rows="4"')}
         ${f('consultation_ref', 'Initial Consultation Agreement no. (if any)')}${f('assistants', 'People who will assist (names and their role)')}
         <div class="row-2">${f('response_time', 'Respond to client inquiries within')}${f('update_time', 'Share government updates within')}</div>${f('comm_methods', 'Preferred method of correspondence')}`)
@@ -120,13 +127,13 @@ async function editor(el, a, setTitle) {
         <div id="dayBox" ${d.billing === 'daily' ? '' : 'hidden'}><div class="row-2">${f('daily_rate', 'Daily rate (CAD)', 'number', 'step="0.01"')}${f('est_days', 'Anticipated days', 'number', 'step="0.5"')}</div></div>
         <div id="schedBox" ${['hourly', 'daily'].includes(d.billing) ? '' : 'hidden'}><div class="row-2">${f('hourly_schedule', 'Schedule of payments')}${f('invoice_frequency', 'How often invoices are provided (e.g. monthly)')}</div></div>
         <div class="row-2" style="margin-top:12px">${f('retainer', 'Advance payment held in trust (CAD, 0 = none)', 'number', 'step="0.01"')}${f('payment_days', 'Invoices payable within (days)', 'number')}</div>
-        ${f('retainer_replenish', 'When the retainer is replenished')}`)
+        ${f('retainer_replenish', 'When the retainer is replenished')}`, false, 'feeSec')
       + sec('8–10. Disbursements, payment terms & refunds', `${f('disbursements', 'Expected disbursements with estimates (one per line)', 'textarea', 'rows="3"')}${f('payment_methods', 'Payment methods')}
         <div class="row-2">${f('interest', 'Interest on overdue amounts (% per month, 0 = none)', 'number', 'step="0.1"')}${f('admin_fee', 'Admin fee for client-initiated discharge (CAD, 0 = none)', 'number', 'step="0.01"')}</div>
         <label class="row" style="gap:8px"><input type="checkbox" data-k="cooling_off" ${d.cooling_off ? 'checked' : ''}> Include 48-hour cooling-off period with full refund</label>`)
       + sec('15–16. Absence & disputes', `${f('successor', 'Arrangement if you become unavailable (e.g. designated successor RCIC)', 'textarea')}${f('dispute_days', 'Respond to written complaints within (business days)', 'number')}`);
 
-  el.innerHTML = `<div class="toolbar"><a class="btn btn-sm" href="#/agreements">← Agreements</a>${agrBadge('draft')}<span style="color:var(--muted)">${esc(AGR_TYPE[T])} · ${esc(a.contacts?.full_name || '')}</span>
+  el.innerHTML = `<div class="toolbar"><a class="btn btn-sm" href="#/agreements">← Agreements</a>${agrBadge('draft')}<span style="color:var(--muted)">${esc(AGR_TYPE[T])} · ${esc(a.contacts?.full_name || '')}</span><span id="pbb">${proBonoBadge(d.fee_basis)}</span>
       <div class="grow"></div><button class="btn btn-danger" id="del">${icon('trash')}</button><button class="btn" id="save">Save draft</button><button class="btn btn-gold" id="send">${icon('check')} Sign & send</button></div>
     <div id="missing"></div>
     <div class="agr-layout"><div class="card agr-form">${body}</div><div class="card agr-preview"><div class="card-h"><h3>Live preview</h3><small style="color:var(--muted)">Exactly what the client will sign</small></div><div class="card-b" id="pv"></div></div></div>`;
@@ -142,7 +149,13 @@ async function editor(el, a, setTitle) {
     el.querySelector('#missing').innerHTML = miss.length ? `<div class="alert info">Still needed before sending: <b>${miss.map(esc).join(', ')}</b></div>` : '';
   };
   let t; el.querySelector('.agr-form').addEventListener('input', () => { clearTimeout(t); t = setTimeout(preview, 250); });
+  const syncFree = () => {
+    el.querySelectorAll('.pb-only').forEach((x) => (x.hidden = !free()));
+    const fs = el.querySelector('#feeSec'); if (fs) fs.hidden = free();
+    el.querySelector('#pbb').innerHTML = proBonoBadge(d.fee_basis);
+  };
   el.querySelector('.agr-form').addEventListener('change', (e) => {
+    if (e.target.dataset.k === 'fee_basis') { read(); syncFree(); }
     if (e.target.dataset.k === 'billing') {
       const b = e.target.value;
       el.querySelector('#flatBox').hidden = ['hourly', 'daily'].includes(b); el.querySelector('#hourBox').hidden = b !== 'hourly';
@@ -153,7 +166,7 @@ async function editor(el, a, setTitle) {
   });
   const wireMs = () => el.querySelectorAll('[data-delm]').forEach((b) => (b.onclick = () => { b.closest('.ms-row').remove(); preview(); }));
   el.querySelector('#addMs')?.addEventListener('click', () => { read(); d.milestones.push({ name: '', included: '', fee: 0, disb: 0, due: '' }); el.querySelector('#ms').innerHTML = msRows(); wireMs(); });
-  wireMs(); preview();
+  wireMs(); syncFree(); preview();
 
   const save = async () => { read(); const { error } = await db.from('agreements').update({ data: d }).eq('id', a.id); if (error) throw error; };
   el.querySelector('#save').onclick = async () => { try { await save(); toast('Draft saved'); } catch (e) { fail(e); } };

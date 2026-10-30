@@ -81,8 +81,9 @@ async function business(el) {
 async function fees(el) {
   const [{ data: s }, { data: pk, error }] = await Promise.all([
     db.from('org_settings').select('consult_fee_30, consult_fee_60, gst_number, gst_rate').eq('id', 1).single(),
-    db.from('service_packages').select('*').order('sort').order('name')]);
+    db.from('service_packages').select('*').order('category').order('sort').order('name')]);
   if (error) { el.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
+  const cats = [...new Set(pk.map((p) => p.category || 'Other services'))];
   const unpriced = pk.filter((p) => p.active && total(p) === 0).length;
   el.innerHTML = `<div class="alert info">Set your prices once here. When you click <b>Generate agreement</b> for a client, the service you pick fills in the program, the services and the milestone fees automatically. You can still adjust them for that client before you sign and send.
       ${s.gst_number ? `GST (${s.gst_rate}%) is added on top of these fees.` : 'Fees are shown without GST (no GST number in Business details).'}</div>
@@ -94,20 +95,21 @@ async function fees(el) {
     <div class="card"><div class="card-h"><h3>Services & prices</h3><div class="grow"></div><button class="btn btn-gold btn-sm" id="add">${icon('plus')} Add service</button></div>
       ${unpriced ? `<div class="alert err" style="margin:12px 16px 0">${unpriced} active service${unpriced > 1 ? 's have' : ' has'} no price yet. Click a row to set its milestone fees.</div>` : ''}
       <div class="table-wrap"><table class="t"><thead><tr><th>Service</th><th>Milestones</th><th class="r">Total fee</th><th>Status</th></tr></thead><tbody>
-      ${pk.map((p) => `<tr class="click" data-id="${p.id}"><td><b>${esc(p.name)}</b><br><small style="color:var(--muted)">${esc(p.program)}</small></td>
+      ${cats.map((c) => `<tr><th colspan="4" style="background:var(--bg-soft,#F4F6FA);font-size:12px;letter-spacing:.06em;text-transform:uppercase">${esc(c)}</th></tr>`
+        + pk.filter((p) => (p.category || 'Other services') === c).map((p) => `<tr class="click" data-id="${p.id}"><td><b>${esc(p.name)}</b><br><small style="color:var(--muted)">${esc(p.program)}</small></td>
         <td>${(p.milestones || []).length}</td><td class="r">${total(p) ? money(total(p)) : '<span class="badge b-gold">Set price</span>'}</td>
-        <td>${p.active ? '<span class="badge b-GREEN">Active</span>' : '<span class="badge">Hidden</span>'}</td></tr>`).join('')}</tbody></table></div></div>`;
+        <td>${p.active ? '<span class="badge b-GREEN">Active</span>' : '<span class="badge">Hidden</span>'}</td></tr>`).join('')).join('')}</tbody></table></div></div>`;
   el.querySelector('#cf').onsubmit = async (e) => {
     e.preventDefault();
     const { error: er } = await db.from('org_settings').update({ consult_fee_30: Number(el.querySelector('#c30').value || 0), consult_fee_60: Number(el.querySelector('#c60').value || 0) }).eq('id', 1);
     er ? fail(er) : toast('Consultation fees saved');
   };
-  el.querySelector('#add').onclick = () => editPackage(null, () => fees(el));
-  el.querySelectorAll('tr[data-id]').forEach((tr) => (tr.onclick = () => editPackage(pk.find((p) => p.id === tr.dataset.id), () => fees(el))));
+  el.querySelector('#add').onclick = () => editPackage(null, () => fees(el), cats);
+  el.querySelectorAll('tr[data-id]').forEach((tr) => (tr.onclick = () => editPackage(pk.find((p) => p.id === tr.dataset.id), () => fees(el), cats)));
 }
 
-function editPackage(p, done) {
-  const pkg = p ? structuredClone(p) : { name: '', program: '', scope: null, active: true, sort: 200,
+function editPackage(p, done, cats = []) {
+  const pkg = p ? structuredClone(p) : { name: '', category: '', program: '', scope: null, active: true, sort: 200,
     milestones: [{ name: 'Signing of this agreement', included: 'Eligibility assessment, document checklist and file opening', fee: 0 },
       { name: 'Application ready for submission', included: 'Forms completed, documents reviewed, submission letter prepared', fee: 0 },
       { name: 'Application submitted to IRCC', included: 'Submission and acknowledgement of receipt; follow-up until decision', fee: 0 }] };
@@ -118,7 +120,8 @@ function editPackage(p, done) {
       <button class="btn btn-sm" type="button" data-del title="Remove">✕</button></div>`;
   modal({
     title: p ? 'Edit service' : 'Add service', wide: true,
-    body: `<div class="field"><label>Service name (shown when generating)</label><input class="input" id="pn" value="${esc(pkg.name)}"></div>
+    body: `<div class="row-2"><div class="field"><label>Service name (shown when generating)</label><input class="input" id="pn" value="${esc(pkg.name)}"></div>
+      <div class="field"><label>Category</label><input class="input" id="pc" list="pcl" value="${esc(pkg.category || '')}" placeholder="e.g. Refusals & reconsideration"><datalist id="pcl">${cats.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></div></div>
       <div class="field"><label>Program wording in the agreement (be specific — CICC requires the exact category and program)</label><input class="input" id="pp" value="${esc(pkg.program)}"></div>
       <label style="font-size:12.5px;font-weight:600">Fees by milestone (CAD, before GST) — the fee is earned when each milestone is completed</label>
       <div id="ms" style="margin-top:6px">${pkg.milestones.map(row).join('')}</div>
@@ -140,7 +143,7 @@ function editPackage(p, done) {
       { label: 'Cancel' },
       { label: 'Save', cls: 'btn-primary', onClick: async (m) => {
         const milestones = m._read().filter((x) => x.name || x.fee);
-        const rec = { name: m.querySelector('#pn').value.trim(), program: m.querySelector('#pp').value.trim(), scope: m.querySelector('#ps').value.trim() || null,
+        const rec = { name: m.querySelector('#pn').value.trim(), category: m.querySelector('#pc').value.trim() || 'Other services', program: m.querySelector('#pp').value.trim(), scope: m.querySelector('#ps').value.trim() || null,
           active: m.querySelector('#pa').checked, milestones };
         if (!rec.name || !rec.program) throw new Error('Enter the service name and the program wording.');
         if (!milestones.length) throw new Error('Add at least one milestone.');

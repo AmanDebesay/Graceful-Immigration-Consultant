@@ -19,7 +19,7 @@ export const CICC = {
   code: 'https://laws.justice.gc.ca/eng/regulations/SOR-2022-128/index.html',
 };
 
-export function defaults(type, { contact = {}, settings = {}, caseRow = null, pkg = null, consult = null } = {}) {
+export function defaults(type, { contact = {}, settings = {}, caseRow = null, pkg = null, consult = null, proBono = null } = {}) {
   const today = new Date().toLocaleDateString('en-CA');
   const base = {
     agreement_date: today, language: 'English',
@@ -28,10 +28,11 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
     rcic_name: settings.rcic_name || '', rcic_id: settings.licence_number || '', business_name: settings.business_name || '',
     business_address: settings.address || '', business_phone: settings.phone || '', business_email: settings.email || '',
     gst_rate: settings.gst_number ? Number(settings.gst_rate || 5) : 0, gst_number: settings.gst_number || '', province: 'Alberta',
+    fee_basis: proBono ? 'pro_bono' : 'paid', pro_bono_reason: proBono || '', relationship: '', pro_bono_note: '',
   };
   if (type === 'consultation') {
     return { ...base, purpose: 'Initial assessment of eligibility and immigration options in Canada.', consult_date: today, consult_length: `${consult?.minutes || 60} minutes`,
-      consult_method: 'Video call (Zoom or Microsoft Teams)', fee: Number(consult?.fee ?? 60), payment_method: 'Interac e-Transfer or by phone before the consultation' };
+      consult_method: 'Video call (Zoom or Microsoft Teams)', fee: proBono ? 0 : Number(consult?.fee ?? 60), payment_method: proBono ? 'Not applicable (no fee)' : 'Interac e-Transfer or by phone before the consultation' };
   }
   const d = { ...base,
     file_number: caseRow?.case_number || '', program: caseRow?.application_type ? `${caseRow.application_type}` : '',
@@ -53,6 +54,7 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
     if (pkg.scope) d.scope = pkg.scope;
     if ((pkg.milestones || []).length) d.milestones = pkg.milestones.map((m) => ({ name: m.name || '', included: m.included || '', fee: Number(m.fee || 0) }));
   }
+  if (proBono) { d.milestones = d.milestones.map((m) => ({ ...m, fee: 0 })); d.billing = 'flat'; d.cooling_off = false; }
   return d;
 }
 
@@ -63,6 +65,21 @@ const BILLING = {
   hourly: 'Billing by the hour',
   daily: 'Billing by the day',
 };
+
+// Pro bono: no professional fees. Family/friend files add a personal-relationship disclosure (conflict of interest, informed consent).
+export const isProBono = (d) => d.fee_basis === 'pro_bono';
+const PB_WHY = {
+  family: 'because the Client is a family member of the RCIC',
+  friend: 'because the Client is a personal friend of the RCIC',
+  hardship: 'to help the Client, who is facing financial hardship',
+  community: 'as community and charitable service',
+};
+const pbWhy = (d) => PB_WHY[d.pro_bono_reason] || (d.pro_bono_note ? `for the following reason: ${e(d.pro_bono_note)}` : '');
+const personal = (d) => isProBono(d) && ['family', 'friend'].includes(d.pro_bono_reason);
+function relationshipClause(d) {
+  if (!personal(d)) return '';
+  return `<p class="callout"><b>Personal relationship disclosure.</b> The RCIC has disclosed that the Client is ${d.pro_bono_reason === 'family' ? 'a family member' : 'a personal friend'} of the RCIC${d.relationship ? ` (${e(d.relationship)})` : ''}. The RCIC confirms that this relationship will not affect their professional judgment, independence, confidentiality or the standard of care owed under the Code of Professional Conduct, and that the Client will be treated as any other client. The Client was told they are free to choose a different representative and to seek independent advice, and consents to the RCIC acting for them. If the relationship ever creates a conflict of interest, the RCIC will tell the Client and, where required, withdraw.</p>`;
+}
 
 const STYLE = `<style>
 .gi-agr{font-family:Georgia,'Times New Roman',serif;color:#1C2333;font-size:14px;line-height:1.62;max-width:820px;margin:0 auto;position:relative}
@@ -146,16 +163,18 @@ function closing(d) {
 const regulator = `<p>The RCIC is a Licensee of the ${CICC.name}, the national regulator of immigration and citizenship consultants in Canada. ${CICC.address}. Telephone ${CICC.phone}. Email ${CICC.email}. Website ${CICC.web}.</p>`;
 
 function consultation(d) {
-  const tax = Math.round(Number(d.fee || 0) * Number(d.gst_rate || 0)) / 100;
-  const total = Number(d.fee || 0) + tax;
+  const free = isProBono(d);
+  const tax = free ? 0 : Math.round(Number(d.fee || 0) * Number(d.gst_rate || 0)) / 100;
+  const total = free ? 0 : Number(d.fee || 0) + tax;
   return `${STYLE}<div class="gi-agr">${letterhead(d, 'INITIAL CONSULTATION AGREEMENT', 'Retainer Agreement Regulation, section 4.1')}
   <div class="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Consultation', `${longDate(d.consult_date)} · ${e(d.consult_length)} · ${e(d.consult_method)}`)}${glanceRow('Purpose', e(d.purpose))}
-    ${glanceRow('Fee', `${money(total)} CAD${d.gst_rate ? ` (incl. GST ${money(tax)})` : ' (GST not applicable)'}`)}${glanceRow('Language of service', e(d.language))}</dl></div>
-  <p class="intro">This Initial Consultation Agreement (the “Agreement”) is made between the Regulated Canadian Immigration Consultant named above (the “RCIC”) and the Client, as required by section 4.1 of the Retainer Agreement Regulation of the College of Immigration and Citizenship Consultants before advice is given for a fee. It records the purpose, the fee and the date of the consultation.</p>
+    ${glanceRow('Fee', free ? '<b>No fee — pro bono</b>' : `${money(total)} CAD${d.gst_rate ? ` (incl. GST ${money(tax)})` : ' (GST not applicable)'}`)}${glanceRow('Language of service', e(d.language))}</dl></div>
+  <p class="intro">This Initial Consultation Agreement (the “Agreement”) is made between the Regulated Canadian Immigration Consultant named above (the “RCIC”) and the Client, as required by section 4.1 of the Retainer Agreement Regulation of the College of Immigration and Citizenship Consultants${free ? '. Although no fee is charged, it records' : ' before advice is given for a fee. It records'} the purpose, the fee and the date of the consultation.</p>
   ${H(1, 'Purpose and scope of the consultation')}
   <p>This Agreement is for a one-time initial consultation only, specifically for: <b>${e(d.purpose)}</b></p>
   <p>The consultation will take place on ${longDate(d.consult_date)}, for ${e(d.consult_length)}, by ${e(d.consult_method)}.</p>
   <p>No immigration application preparation, submission or ongoing representation is included. Any further services require a separate written Retainer (Service) Agreement.</p>
+  ${relationshipClause(d)}
   ${H(2, 'Limited-scope service')}
   <ul><li>The consultation is limited to general information, assessment and guidance based on the information the Client provides.</li>
     <li>The RCIC will not act as the Client's representative before Immigration, Refugees and Citizenship Canada (IRCC), the Immigration and Refugee Board (IRB) or any other authority under this Agreement.</li>
@@ -163,10 +182,10 @@ function consultation(d) {
   ${H(3, 'No guarantee of outcome')}
   <p>Any opinion given is based solely on the information the Client provides at the time of the consultation. The RCIC does not guarantee eligibility, approval, processing times or any particular outcome; all decisions are made by government authorities.</p>
   ${H(4, 'Consultation fee')}
-  <table><thead><tr><th>Description</th><th class="r">Amount (CAD)</th></tr></thead><tbody><tr><td>Consultation fee</td><td class="r">${money(d.fee)}</td></tr>
+  ${free ? `<p>This consultation is provided <b>pro bono, free of charge</b>${pbWhy(d) ? ', ' + pbWhy(d) : ''}. No fee, tax or deposit is payable. Providing the consultation without charge does not lower the standard of professional care, confidentiality or any other duty the RCIC owes the Client.</p>` : `<table><thead><tr><th>Description</th><th class="r">Amount (CAD)</th></tr></thead><tbody><tr><td>Consultation fee</td><td class="r">${money(d.fee)}</td></tr>
     <tr><td>GST ${d.gst_rate ? `(${e(d.gst_rate)}%)` : ''}</td><td class="r">${d.gst_rate ? money(tax) : 'Not applicable'}</td></tr></tbody>
     <tfoot><tr><th>Total payable in advance</th><th class="r">${money(total)}</th></tr></tfoot></table>
-  <p>Payment method: ${e(d.payment_method)}. The fee is earned once the consultation has taken place and is non-refundable, unless otherwise required by law. If the RCIC cancels and the consultation is not rescheduled, the fee will be refunded in full.</p>
+  <p>Payment method: ${e(d.payment_method)}. The fee is earned once the consultation has taken place and is non-refundable, unless otherwise required by law. If the RCIC cancels and the consultation is not rescheduled, the fee will be refunded in full.</p>`}
   ${H(5, 'Confidentiality and privacy')}
   <p>The RCIC must keep confidential all information about the Client acquired in the professional relationship, as required by the Code of Professional Conduct, unless disclosure is authorized by the Client or required by law. The Client consents to the collection, use and secure storage in Canada of personal information for this consultation, in accordance with PIPEDA and Alberta's Personal Information Protection Act, and accepts the risks of communication by email or other electronic means.</p>
   ${H(6, 'Language')}<p>This Agreement is written in English. The consultation will be provided in ${e(d.language)}. The Client may bring or arrange an interpreter.</p>
@@ -178,6 +197,7 @@ function consultation(d) {
 }
 
 function retainer(d) {
+  const free = isProBono(d);
   const rate = Number(d.gst_rate || 0);
   const billing = BILLING[d.billing] ? d.billing : 'flat';
   const ms = (d.milestones || []).filter((m) => m.name);
@@ -187,7 +207,11 @@ function retainer(d) {
   const per = billing === 'daily' ? ['day', d.daily_rate, d.est_days] : ['hour', d.hourly_rate, d.est_hours];
   const est = Number(per[1] || 0) * Number(per[2] || 0);
   const totalFees = billing === 'hourly' || billing === 'daily' ? est : msTotal;
-  const fees = billing === 'hourly' || billing === 'daily'
+  const fees = free
+    ? `<p>The RCIC will provide the services in this Agreement <b>pro bono</b>${pbWhy(d) ? ', ' + pbWhy(d) : ''}. <b>No professional fees will be charged</b> for them, and no advance payment or retainer is required. Providing the services without charge does not lower the standard of professional care, diligence, confidentiality or any other duty the RCIC owes the Client.</p>
+       <p>The services are completed in these stages:</p>${ms.length ? `<ul>${ms.map((m) => `<li><b>${e(m.name)}</b>${m.included ? ` — ${e(m.included)}` : ''}</li>`).join('')}</ul>` : '<p>As described in section 4.</p>'}
+       <p>Professional fees may be charged only under a new written agreement, or an amendment signed by both parties, before any paid work begins.</p>`
+    : billing === 'hourly' || billing === 'daily'
     ? `<p>Professional fees are determined by <b>${BILLING[billing].toLowerCase()}</b>. This method will not change for the services in this Agreement.</p>
        <table><thead><tr><th>Rate</th><th>Anticipated ${per[0]}s</th><th class="r">Estimated professional fees</th><th class="r">GST</th><th class="r">Estimated total</th></tr></thead>
        <tbody><tr><td>${money(per[1])} per ${per[0]}</td><td>${e(per[2])}</td><td class="r">${money(est)}</td><td class="r">${rate ? money(tax(est)) : 'Not applicable'}</td><td class="r">${money(est + tax(est))}</td></tr></tbody></table>
@@ -199,9 +223,9 @@ function retainer(d) {
        <tr><th colspan="5">Total professional fees including GST</th><th class="r">${money(msTotal + tax(msTotal))}</th></tr></tfoot></table>
        <p>${billing === 'flat_dates' ? 'Each payment is due on the date shown.' : 'An invoice is issued when each milestone is completed.'} Invoices are payable within ${e(d.payment_days)} days.</p>`;
   return `${STYLE}<div class="gi-agr">${letterhead(d, 'RETAINER AGREEMENT', 'Service Agreement for Immigration and Citizenship Services', d.file_number ? `<span>File no. <b>${e(d.file_number)}</b></span>` : '')}
-  <div class="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Category and program', e(d.program || '________________'))}${glanceRow('Billing method', BILLING[billing])}
-    ${glanceRow(billing === 'hourly' || billing === 'daily' ? 'Estimated professional fees' : 'Total professional fees', `${money(totalFees)} + ${rate ? `GST ${money(tax(totalFees))}` : 'GST not applicable'} = <b>${money(totalFees + tax(totalFees))}</b> CAD`)}
-    ${glanceRow('Retainer held in trust', Number(d.retainer) > 0 ? money(d.retainer) : 'None')}${glanceRow('Language of service', e(d.language))}
+  <div class="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Category and program', e(d.program || '________________'))}${free ? glanceRow('Fee arrangement', '<b>Pro bono — no professional fees</b>') : glanceRow('Billing method', BILLING[billing])
+    + glanceRow(billing === 'hourly' || billing === 'daily' ? 'Estimated professional fees' : 'Total professional fees', `${money(totalFees)} + ${rate ? `GST ${money(tax(totalFees))}` : 'GST not applicable'} = <b>${money(totalFees + tax(totalFees))}</b> CAD`)
+    + glanceRow('Retainer held in trust', Number(d.retainer) > 0 ? money(d.retainer) : 'None')}${glanceRow('Language of service', e(d.language))}
     ${glanceRow('Preferred correspondence', e(d.comm_methods))}</dl></div>
   <p class="intro">This Retainer Agreement (the “Agreement”) sets out the exact duties of the Regulated Canadian Immigration Consultant named above (the “RCIC”) and of the Client, so that both parties have clear expectations about what will be provided, how it will be provided and at what cost. It is made in accordance with the College of Immigration and Citizenship Consultants Act, the Code of Professional Conduct and the Retainer Agreement Regulation. The RCIC is a Licensee of the College of Immigration and Citizenship Consultants (the “College”).</p>
 
@@ -213,6 +237,7 @@ function retainer(d) {
   ${H(2, 'General provisions')}
   <p>The RCIC commits to providing quality immigration and/or citizenship services and to adequately supervising any person who assists with them. People likely to assist the RCIC: ${e(d.assistants || 'none at this time; the Client will be told in writing if this changes')}.</p>
   <p>When necessary, the RCIC will obtain assistance from other professionals or services, including an interpreter or translator, and will obtain the Client's written consent before any additional fees are incurred. The RCIC will provide professional, ethical and competent services as required by the College's Code of Professional Conduct (${CICC.code}).</p>
+  ${relationshipClause(d)}
   <p>The RCIC will provide services in <b>${e(d.language)}</b>; this Agreement is written in English. Original documents provided by the Client will be returned as soon as their purpose is complete.</p>
   <p>The RCIC will keep the Client informed of the status of the file, including new government requests or decisions and the completion of key milestones. Government correspondence will be shared within ${e(d.update_time)} of receipt, and the RCIC will respond to the Client's inquiries within ${e(d.response_time)}.</p>
 
@@ -232,22 +257,22 @@ function retainer(d) {
   ${H(6, 'Services not included')}${bullets(d.excluded, '<p>None listed.</p>')}
   <p>This Agreement applies only to immigration and citizenship services. If the Client requests additional services, a separate Retainer Agreement or a signed addendum to this Agreement will be required before that work begins.</p>
 
-  ${H(7, 'Professional fees and billing method')}${fees}
-  <p>All amounts are in <b>Canadian dollars (CAD)</b>. Applicable taxes: ${rate ? `GST at ${e(rate)}% (${e(d.province)})${d.gst_number ? `, registration no. ${e(d.gst_number)}` : ''}` : '<b>Not applicable</b>'}. Contingency billing (payment only on a successful decision) is not used. All fees are fair and reasonable.</p>
+  ${H(7, free ? 'Professional fees (pro bono)' : 'Professional fees and billing method')}${fees}
+  ${free ? '' : `<p>All amounts are in <b>Canadian dollars (CAD)</b>. Applicable taxes: ${rate ? `GST at ${e(rate)}% (${e(d.province)})${d.gst_number ? `, registration no. ${e(d.gst_number)}` : ''}` : '<b>Not applicable</b>'}. Contingency billing (payment only on a successful decision) is not used. All fees are fair and reasonable.</p>
   <p><b>Retainer held in trust:</b> ${Number(d.retainer) > 0 ? `The Client will deposit ${money(d.retainer)} in advance. These funds will be held in the RCIC's client (trust) account until earned, withdrawn only after an invoice is issued, and maintained in accordance with the College's Client Account Regulation. ${e(d.retainer_replenish)}` : 'No funds will be held in trust; no advance payment is required.'}</p>
-  <p><b>Invoices:</b> each invoice will state the Client's name, the services rendered, the dates they were rendered and the total professional fees payable for them.</p>
+  <p><b>Invoices:</b> each invoice will state the Client's name, the services rendered, the dates they were rendered and the total professional fees payable for them.</p>`}
 
   ${H(8, 'Disbursements and government fees')}
   <p>The following disbursements may be incurred. They are billed to the Client at cost on the next invoice, with receipts:</p>${bullets(d.disbursements, '<p>None expected.</p>')}
   <p>If disbursements will exceed these estimates, the RCIC will obtain the Client's written agreement first. Government fees (for example processing, biometrics and right of permanent residence fees) are the Client's responsibility, are paid directly to the government and may change without notice: https://www.cic.gc.ca/english/information/fees/fees.asp</p>
 
   ${H(9, 'Terms of payment')}
-  <p>Invoices are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. ${Number(d.interest) > 0 ? `Interest of ${e(d.interest)}% per month may be charged on overdue amounts.` : 'No interest is charged on overdue amounts.'} ${Number(d.admin_fee) > 0 ? `An administrative fee of ${money(d.admin_fee)} applies to processing a Client-initiated discharge of representation or early termination of this Agreement.` : 'No administrative fee is charged for a Client-initiated discharge or early termination.'}</p>
+  ${free ? `<p>No professional fees are invoiced. Disbursements, if any, are invoiced at cost with receipts and are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. No interest or administrative fee is charged.</p>` : `<p>Invoices are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. ${Number(d.interest) > 0 ? `Interest of ${e(d.interest)}% per month may be charged on overdue amounts.` : 'No interest is charged on overdue amounts.'} ${Number(d.admin_fee) > 0 ? `An administrative fee of ${money(d.admin_fee)} applies to processing a Client-initiated discharge of representation or early termination of this Agreement.` : 'No administrative fee is charged for a Client-initiated discharge or early termination.'}</p>`}
 
   ${H(10, 'Refund policy')}
-  ${d.cooling_off ? '<p>The Client may cancel this Agreement in writing within forty-eight (48) hours of signing it for a full refund of all amounts paid.</p>' : ''}
+  ${free ? `<p>No professional fees are paid under this Agreement, so no refund of professional fees arises. If the Agreement ends, the Client will receive an itemized account of any disbursements, and any amount the Client advanced for disbursements and that was not used will be returned.</p>` : `${d.cooling_off ? '<p>The Client may cancel this Agreement in writing within forty-eight (48) hours of signing it for a full refund of all amounts paid.</p>' : ''}
   <p>If this Agreement ends, the Client will receive an itemized account of all funds received and services provided, and an invoice for any outstanding services or disbursements. Unused or unearned fees will be refunded in accordance with the College's Client File Management Regulation and Client Account Regulation.</p>
-  <p class="callout"><b>Fees are not refundable in the event of an application refusal</b>, provided the RCIC performed the agreed services professionally. If an error or omission by the RCIC requires a refund, it will be provided and the RCIC will notify their professional liability insurer.</p>
+  <p class="callout"><b>Fees are not refundable in the event of an application refusal</b>, provided the RCIC performed the agreed services professionally. If an error or omission by the RCIC requires a refund, it will be provided and the RCIC will notify their professional liability insurer.</p>`}
   <div class="ini">Client initials <span class="gi-initials">______</span></div>
 
   ${H(11, 'Obligations of the Client')}
@@ -260,8 +285,8 @@ function retainer(d) {
   <p>Preferred method of correspondence: <b>${e(d.comm_methods)}</b>. The Client accepts the risks of electronic communication and will share documents only through the secure method the RCIC provides.</p>
 
   ${H(13, 'Discharge or withdrawal of representation')}
-  <p><b>Discharge by the Client.</b> The Client may discharge the RCIC at any time by written notice, in accordance with the laws of ${e(d.province)}. The Client will then pay only for services rendered and disbursements incurred up to that date${Number(d.admin_fee) > 0 ? `, plus the administrative fee of ${money(d.admin_fee)}` : ''}; any unearned funds will be refunded.</p>
-  <p><b>Withdrawal by the RCIC.</b> The RCIC may withdraw if the Client fails to honour this Agreement, including non-payment after reasonable notice, unless serious prejudice to the Client would result. The RCIC must withdraw if discharged, if instructed to act illegally or contrary to the Code of Professional Conduct, if a conflict of interest arises, or if the RCIC is not competent to handle the matter, and may withdraw where there has been a serious loss of confidence (for example deception, inadequate instructions, or refusal to act on the RCIC's advice on a significant point). Withdrawal will never be done for an improper purpose or so as to prejudice the Client.</p>
+  <p><b>Discharge by the Client.</b> The Client may discharge the RCIC at any time by written notice, in accordance with the laws of ${e(d.province)}. The Client will then pay ${free ? 'only for disbursements incurred up to that date, with no professional fees' : 'only for services rendered and disbursements incurred up to that date'}${!free && Number(d.admin_fee) > 0 ? `, plus the administrative fee of ${money(d.admin_fee)}` : ''}; any unearned funds will be refunded.</p>
+  <p><b>Withdrawal by the RCIC.</b> The RCIC may withdraw if the Client fails to honour this Agreement${free ? '' : ', including non-payment after reasonable notice'}, unless serious prejudice to the Client would result. The RCIC must withdraw if discharged, if instructed to act illegally or contrary to the Code of Professional Conduct, if a conflict of interest arises, or if the RCIC is not competent to handle the matter, and may withdraw where there has been a serious loss of confidence (for example deception, inadequate instructions, or refusal to act on the RCIC's advice on a significant point). Withdrawal will never be done for an improper purpose or so as to prejudice the Client.</p>
   <p><b>What happens next.</b> On discharge or withdrawal the RCIC will: deliver to the Client all documents, files and property belonging to the Client; give the Client all information required about the matter; provide an invoice for services rendered (or an account of time spent); provide an itemized account of all Client funds and refund unearned funds; promptly account for outstanding fees and disbursements; co-operate with any successor to minimize expense and avoid prejudice; and make best efforts to notify, in writing within ten (10) calendar days, any government agency where the RCIC is the Client's representative.</p>
 
   ${H(14, 'If the RCIC cannot be reached')}
@@ -285,10 +310,14 @@ export function render(type, d) { return type === 'consultation' ? consultation(
 export function requiredMissing(type, d) {
   const need = [['client_name', 'Client name'], ['client_address', 'Client address'], ['client_phone', 'Client phone'], ['rcic_name', 'RCIC name'],
     ['rcic_id', 'College ID'], ['business_address', 'Business address'], ['business_phone', 'Business phone']];
-  if (type === 'consultation') need.push(['purpose', 'Purpose of consultation'], ['fee', 'Consultation fee']);
+  const free = isProBono(d);
+  if (type === 'consultation') need.push(['purpose', 'Purpose of consultation'], ...(free ? [] : [['fee', 'Consultation fee']]));
   else need.push(['program', 'Category and program'], ['scope', 'Scope of services'], ['preliminary_advice', 'Summary of preliminary advice']);
   const miss = need.filter(([k]) => !String(d[k] ?? '').trim()).map(([, l]) => l);
-  if (type === 'retainer') {
+  if (free && ['family', 'friend'].includes(d.pro_bono_reason) && !String(d.relationship || '').trim()) miss.push('Relationship to the RCIC');
+  if (free && d.pro_bono_reason === 'other' && !String(d.pro_bono_note || '').trim()) miss.push('Reason for pro bono');
+  if (type === 'retainer' && free) { if (!String(d.comm_methods || '').trim()) miss.push('Preferred method of correspondence'); }
+  else if (type === 'retainer') {
     if (['flat', 'flat_dates'].includes(d.billing || 'flat') && !(d.milestones || []).some((m) => m.name && Number(m.fee) > 0)) miss.push('At least one milestone with a fee');
     if (d.billing === 'flat_dates' && (d.milestones || []).some((m) => m.name && !m.due)) miss.push('A due date for every milestone');
     if (d.billing === 'hourly' && !(Number(d.hourly_rate) > 0)) miss.push('Hourly rate');
