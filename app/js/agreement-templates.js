@@ -29,6 +29,7 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
     business_address: settings.address || '', business_phone: settings.phone || '', business_email: settings.email || '',
     gst_rate: settings.gst_number ? Number(settings.gst_rate || 5) : 0, gst_number: settings.gst_number || '', province: 'Alberta',
     fee_basis: proBono ? 'pro_bono' : 'paid', pro_bono_reason: proBono || '', relationship: '', pro_bono_note: '',
+    co_clients: [], joint_instructions: 'Any of the Clients may give routine instructions; decisions that affect the application need the agreement of all the Clients.',
   };
   if (type === 'consultation') {
     return { ...base, purpose: 'Initial assessment of eligibility and immigration options in Canada.', consult_date: today, consult_length: `${consult?.minutes || 60} minutes`,
@@ -79,6 +80,22 @@ const personal = (d) => isProBono(d) && ['family', 'friend'].includes(d.pro_bono
 function relationshipClause(d) {
   if (!personal(d)) return '';
   return `<p class="callout"><b>Personal relationship disclosure.</b> The RCIC has disclosed that the Client is ${d.pro_bono_reason === 'family' ? 'a family member' : 'a personal friend'} of the RCIC${d.relationship ? ` (${e(d.relationship)})` : ''}. The RCIC confirms that this relationship will not affect their professional judgment, independence, confidentiality or the standard of care owed under the Code of Professional Conduct, and that the Client will be treated as any other client. The Client was told they are free to choose a different representative and to seek independent advice, and consents to the RCIC acting for them. If the relationship ever creates a conflict of interest, the RCIC will tell the Client and, where required, withdraw.</p>`;
+}
+
+// Joint agreements: additional clients (data.co_clients) sign with their own links; the main client is client 1.
+export const coClients = (d) => (d.co_clients || []).filter((c) => String(c.name || '').trim());
+const isJoint = (d) => coClients(d).length > 0;
+const clientNames = (d) => [d.client_name, ...coClients(d).map((c) => c.name)].map(e).join(', ').replace(/, ([^,]*)$/, ' and $1');
+const iniBox = (d) => `<div class="ini">Client initials <span class="gi-initials">______</span>${coClients(d).map((c, i) => ` <span class="gi-initials" data-ini="${i + 2}">______</span>`).join('')}</div>`;
+function jointClause(d, consultation = false) {
+  if (!isJoint(d)) return '';
+  const free = d.fee_basis === 'pro_bono';
+  return `<p class="callout"><b>Joint ${consultation ? 'consultation' : 'representation'}.</b> This Agreement is made with more than one client (${clientNames(d)}), and “the Client” means each of them, jointly and individually. Each Client understands and agrees that:</p>
+  <ul><li>information any Client gives the RCIC about this matter may be shared with the other Clients; it will not be kept confidential between them;</li>
+    ${consultation ? '' : `<li>${e(d.joint_instructions || 'All the Clients must agree on instructions about the application.')}</li>`}
+    <li>if the Clients' interests come into conflict (for example a separation or a disagreement about the application), the RCIC will tell all the Clients and may have to stop acting for one or all of them, as required by the Code of Professional Conduct;</li>
+    ${free ? '' : `<li>the Clients are jointly and individually responsible for the ${consultation ? 'consultation fee, which is payable once for the joint consultation' : 'fees and disbursements in this Agreement'};</li>`}
+    <li>each Client may seek independent advice before agreeing to joint ${consultation ? 'consultation' : 'representation'}, and signs this Agreement personally.</li></ul>`;
 }
 
 const STYLE = `<style>
@@ -145,15 +162,17 @@ function letterhead(d, title, kind, extra = '') {
   <div class="title"><h1>${e(title)}</h1><div class="kind">${e(kind)}</div><div class="orn"><i></i>✦<i></i></div></div>
   <div class="meta">${d.number ? `<span>Agreement no. <b>${e(d.number)}</b></span>` : ''}<span>Date <b>${longDate(d.agreement_date)}</b></span>${extra}<span>Written in <b>English</b></span></div>
   <div class="parties"><div><span class="lbl">Licensee (RCIC)</span><span class="nm">${e(d.rcic_name)}</span>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>${e(d.business_name)}<br>${e(d.business_address)}<br>${e(d.business_phone)} · ${e(d.business_email)}</div>
-    <div><span class="lbl">Client</span><span class="nm">${e(d.client_name)}</span>${d.client_dob ? `Date of birth: ${longDate(d.client_dob)}<br>` : ''}${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone || 'Phone: ________________')}${d.client_email ? ' · ' + e(d.client_email) : ''}</div></div>`;
+    <div><span class="lbl">${isJoint(d) ? 'Clients (joint)' : 'Client'}</span><span class="nm">${e(d.client_name)}</span>${d.client_dob ? `Date of birth: ${longDate(d.client_dob)}<br>` : ''}${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone || 'Phone: ________________')}${d.client_email ? ' · ' + e(d.client_email) : ''}
+      ${coClients(d).map((c) => `<span class="nm" style="margin-top:10px">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${c.dob ? `Date of birth: ${longDate(c.dob)}<br>` : ''}${c.address ? `${e(c.address)}<br>` : ''}${[c.phone, c.email].filter(Boolean).map(e).join(' · ')}`).join('')}</div></div>`;
 }
 function runningFooter(d, title) {
   return `<div class="runfoot"><span>${e(d.business_name)} · ${e(title)}${d.number ? ' · ' + e(d.number) : ''}</span><span>Client initials: ________</span></div>`;
 }
 function signatures(d, title, n) {
   return `<div class="sigpage">${H(n, 'Signatures')}
-  <p>IN WITNESS WHEREOF, the Client and the RCIC have each read this ${e(title)} and signed it personally (not through a designate) on the dates written below. Where the parties are not physically together, signatures are given electronically, a method both parties agree to.</p>
+  <p>IN WITNESS WHEREOF, the Client${isJoint(d) ? 's' : ''} and the RCIC have each read this ${e(title)} and signed it personally (not through a designate) on the dates written below. Where the parties are not physically together, signatures are given electronically, a method both parties agree to.</p>
   <div class="sigs"><div class="sig"><div class="gi-sig" data-sig="client"></div><b>${e(d.client_name)}</b><br>Client<br>Date: <span data-sig-date="client">________________</span></div>
+    ${coClients(d).map((c, i) => `<div class="sig"><div class="gi-sig" data-sig="client-${i + 2}"></div><b>${e(c.name)}</b><br>Client<br>Date: <span data-sig-date="client-${i + 2}">________________</span></div>`).join('')}
     <div class="sig"><div class="gi-sig" data-sig="rcic"></div><b>${e(d.rcic_name)}</b><br>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>Date: <span data-sig-date="rcic">________________</span></div></div>
   <p class="note" style="margin-top:14px">Electronic signatures are legally recognized under the Personal Information Protection and Electronic Documents Act (PIPEDA), Alberta's Electronic Transactions Act and CICC By-law 2021-2, s.1.1(aa). The signed document is fingerprinted (SHA-256) so any later change can be detected.</p></div>`;
 }
@@ -166,7 +185,8 @@ function consultation(d) {
   const free = isProBono(d);
   const tax = free ? 0 : Math.round(Number(d.fee || 0) * Number(d.gst_rate || 0)) / 100;
   const total = free ? 0 : Number(d.fee || 0) + tax;
-  return `${STYLE}<div class="gi-agr">${letterhead(d, 'INITIAL CONSULTATION AGREEMENT', 'Retainer Agreement Regulation, section 4.1')}
+  const T = isJoint(d) ? 'Joint Initial Consultation Agreement' : 'Initial Consultation Agreement';
+  return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), 'Retainer Agreement Regulation, section 4.1')}
   <div class="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Consultation', `${longDate(d.consult_date)} · ${e(d.consult_length)} · ${e(d.consult_method)}`)}${glanceRow('Purpose', e(d.purpose))}
     ${glanceRow('Fee', free ? '<b>No fee — pro bono</b>' : `${money(total)} CAD${d.gst_rate ? ` (incl. GST ${money(tax)})` : ' (GST not applicable)'}`)}${glanceRow('Language of service', e(d.language))}</dl></div>
   <p class="intro">This Initial Consultation Agreement (the “Agreement”) is made between the Regulated Canadian Immigration Consultant named above (the “RCIC”) and the Client, as required by section 4.1 of the Retainer Agreement Regulation of the College of Immigration and Citizenship Consultants${free ? '. Although no fee is charged, it records' : ' before advice is given for a fee. It records'} the purpose, the fee and the date of the consultation.</p>
@@ -174,7 +194,7 @@ function consultation(d) {
   <p>This Agreement is for a one-time initial consultation only, specifically for: <b>${e(d.purpose)}</b></p>
   <p>The consultation will take place on ${longDate(d.consult_date)}, for ${e(d.consult_length)}, by ${e(d.consult_method)}.</p>
   <p>No immigration application preparation, submission or ongoing representation is included. Any further services require a separate written Retainer (Service) Agreement.</p>
-  ${relationshipClause(d)}
+  ${relationshipClause(d)}${jointClause(d, true)}
   ${H(2, 'Limited-scope service')}
   <ul><li>The consultation is limited to general information, assessment and guidance based on the information the Client provides.</li>
     <li>The RCIC will not act as the Client's representative before Immigration, Refugees and Citizenship Canada (IRCC), the Immigration and Refugee Board (IRB) or any other authority under this Agreement.</li>
@@ -192,8 +212,8 @@ function consultation(d) {
   ${H(7, 'Regulator and complaints')}${regulator}<p>Information about the College's complaints process: ${CICC.complaints}</p>
   ${H(8, 'Governing law')}<p>This Agreement is governed by the laws of the Province of ${e(d.province)} and the federal laws of Canada applicable therein.</p>
   ${H(9, 'Acknowledgement')}<p>The Client acknowledges that they have read and understood this Agreement, had the opportunity to ask questions, and agree to be bound by its terms. The Client will receive a copy of the signed Agreement by email.</p>
-  <div class="ini">Client initials <span class="gi-initials">______</span></div>
-  ${signatures(d, 'Initial Consultation Agreement', 10)}${closing(d)}${runningFooter(d, 'Initial Consultation Agreement')}</div>`;
+  ${iniBox(d)}
+  ${signatures(d, T, 10)}${closing(d)}${runningFooter(d, T)}</div>`;
 }
 
 function retainer(d) {
@@ -222,8 +242,9 @@ function retainer(d) {
        <tfoot><tr><th colspan="3">Totals</th><th class="r">${money(msTotal)}</th><th class="r">${rate ? money(tax(msTotal)) : 'N/A'}</th><th class="r">${disbTotal ? money(disbTotal) : '—'}</th></tr>
        <tr><th colspan="5">Total professional fees including GST</th><th class="r">${money(msTotal + tax(msTotal))}</th></tr></tfoot></table>
        <p>${billing === 'flat_dates' ? 'Each payment is due on the date shown.' : 'An invoice is issued when each milestone is completed.'} Invoices are payable within ${e(d.payment_days)} days.</p>`;
-  return `${STYLE}<div class="gi-agr">${letterhead(d, 'RETAINER AGREEMENT', 'Service Agreement for Immigration and Citizenship Services', d.file_number ? `<span>File no. <b>${e(d.file_number)}</b></span>` : '')}
-  <div class="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Category and program', e(d.program || '________________'))}${free ? glanceRow('Fee arrangement', '<b>Pro bono — no professional fees</b>') : glanceRow('Billing method', BILLING[billing])
+  const T = isJoint(d) ? 'Joint Retainer Agreement' : 'Retainer Agreement';
+  return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), 'Service Agreement for Immigration and Citizenship Services', d.file_number ? `<span>File no. <b>${e(d.file_number)}</b></span>` : '')}
+  <div class="glance"><h3>Key terms at a glance</h3><dl>${isJoint(d) ? glanceRow('Clients (joint)', clientNames(d)) : ''}${glanceRow('Category and program', e(d.program || '________________'))}${free ? glanceRow('Fee arrangement', '<b>Pro bono — no professional fees</b>') : glanceRow('Billing method', BILLING[billing])
     + glanceRow(billing === 'hourly' || billing === 'daily' ? 'Estimated professional fees' : 'Total professional fees', `${money(totalFees)} + ${rate ? `GST ${money(tax(totalFees))}` : 'GST not applicable'} = <b>${money(totalFees + tax(totalFees))}</b> CAD`)
     + glanceRow('Retainer held in trust', Number(d.retainer) > 0 ? money(d.retainer) : 'None')}${glanceRow('Language of service', e(d.language))}
     ${glanceRow('Preferred correspondence', e(d.comm_methods))}</dl></div>
@@ -232,12 +253,12 @@ function retainer(d) {
   ${H(1, 'Summary of preliminary advice')}
   ${para(d.preliminary_advice) || '<p>________________</p>'}${d.consultation_ref ? `<p>Reference: Initial Consultation Agreement ${e(d.consultation_ref)}.</p>` : ''}
   <p>The RCIC has also advised that any existing or potential criminal matter may affect the outcome and that additional documents may be required; the RCIC does not provide criminal law advice.</p>
-  <div class="ini">Client initials <span class="gi-initials">______</span></div>
+  ${iniBox(d)}
 
   ${H(2, 'General provisions')}
   <p>The RCIC commits to providing quality immigration and/or citizenship services and to adequately supervising any person who assists with them. People likely to assist the RCIC: ${e(d.assistants || 'none at this time; the Client will be told in writing if this changes')}.</p>
   <p>When necessary, the RCIC will obtain assistance from other professionals or services, including an interpreter or translator, and will obtain the Client's written consent before any additional fees are incurred. The RCIC will provide professional, ethical and competent services as required by the College's Code of Professional Conduct (${CICC.code}).</p>
-  ${relationshipClause(d)}
+  ${relationshipClause(d)}${jointClause(d)}
   <p>The RCIC will provide services in <b>${e(d.language)}</b>; this Agreement is written in English. Original documents provided by the Client will be returned as soon as their purpose is complete.</p>
   <p>The RCIC will keep the Client informed of the status of the file, including new government requests or decisions and the completion of key milestones. Government correspondence will be shared within ${e(d.update_time)} of receipt, and the RCIC will respond to the Client's inquiries within ${e(d.response_time)}.</p>
 
@@ -273,12 +294,12 @@ function retainer(d) {
   ${free ? `<p>No professional fees are paid under this Agreement, so no refund of professional fees arises. If the Agreement ends, the Client will receive an itemized account of any disbursements, and any amount the Client advanced for disbursements and that was not used will be returned.</p>` : `${d.cooling_off ? '<p>The Client may cancel this Agreement in writing within forty-eight (48) hours of signing it for a full refund of all amounts paid.</p>' : ''}
   <p>If this Agreement ends, the Client will receive an itemized account of all funds received and services provided, and an invoice for any outstanding services or disbursements. Unused or unearned fees will be refunded in accordance with the College's Client File Management Regulation and Client Account Regulation.</p>
   <p class="callout"><b>Fees are not refundable in the event of an application refusal</b>, provided the RCIC performed the agreed services professionally. If an error or omission by the RCIC requires a refund, it will be provided and the RCIC will notify their professional liability insurer.</p>`}
-  <div class="ini">Client initials <span class="gi-initials">______</span></div>
+  ${iniBox(d)}
 
   ${H(11, 'Obligations of the Client')}
   <p>The Client: (a) is responsible for providing the RCIC with all required documentation to process the file; (b) is responsible for providing up-to-date and reliable contact information in a timely manner; (c) is responsible for providing accurate information, and understands that any inaccuracies may negatively affect the outcome of the application; and (d) understands that the RCIC's obligations under this Agreement are null and void if the Client knowingly provides inaccurate, misleading or false material information, and that the Client's financial obligations remain.</p>
   <p>The Client will also inform the RCIC promptly of any material change in their circumstances and of any direct contact from a government authority.</p>
-  <div class="ini">Client initials <span class="gi-initials">______</span></div>
+  ${iniBox(d)}
 
   ${H(12, 'Confidentiality and correspondence')}
   <p>The Client's personal information and documents are collected and protected according to the Code of Professional Conduct, PIPEDA and Alberta's Personal Information Protection Act. They are stored in an encrypted, access-controlled system hosted in Canada, seen only by people working on the file, and kept confidential indefinitely, except where disclosure is authorized by the Client, required for the applications in this Agreement or required by law. Another person may access the file only with the Client's written authorization.</p>
@@ -301,8 +322,8 @@ function retainer(d) {
 
   ${H(17, 'Acknowledgement and copy')}
   <p>The Client acknowledges having read and understood this Agreement, had the opportunity to ask questions and to seek independent legal advice, and received access to the Code of Professional Conduct, and agrees to be bound by these terms. The RCIC will send the Client a signed copy of this Agreement by email as confirmation and keep a copy, with that confirmation, in the Client's file.</p>
-  <div class="ini">Client initials <span class="gi-initials">______</span></div>
-  ${signatures(d, 'Retainer Agreement', 18)}${closing(d)}${runningFooter(d, 'Retainer Agreement')}</div>`;
+  ${iniBox(d)}
+  ${signatures(d, T, 18)}${closing(d)}${runningFooter(d, T)}</div>`;
 }
 
 export function render(type, d) { return type === 'consultation' ? consultation(d) : retainer(d); }
@@ -314,6 +335,10 @@ export function requiredMissing(type, d) {
   if (type === 'consultation') need.push(['purpose', 'Purpose of consultation'], ...(free ? [] : [['fee', 'Consultation fee']]));
   else need.push(['program', 'Category and program'], ['scope', 'Scope of services'], ['preliminary_advice', 'Summary of preliminary advice']);
   const miss = need.filter(([k]) => !String(d[k] ?? '').trim()).map(([, l]) => l);
+  (d.co_clients || []).forEach((c, i) => {
+    if (!String(c.name || '').trim()) miss.push(`Name of additional client ${i + 2}`);
+    else if (!String(c.email || '').trim() && !String(c.phone || '').trim()) miss.push(`Email or phone for ${c.name} (to send their signing link)`);
+  });
   if (free && ['family', 'friend'].includes(d.pro_bono_reason) && !String(d.relationship || '').trim()) miss.push('Relationship to the RCIC');
   if (free && d.pro_bono_reason === 'other' && !String(d.pro_bono_note || '').trim()) miss.push('Reason for pro bono');
   if (type === 'retainer' && free) { if (!String(d.comm_methods || '').trim()) miss.push('Preferred method of correspondence'); }
@@ -336,8 +361,12 @@ export function withSignatures(html, a) {
     .replace('<div class="gi-sig" data-sig="rcic"></div>', `<div class="gi-sig" data-sig="rcic">${sig(a.rcic_signature)}</div>`)
     .replace('<span data-sig-date="client">________________</span>', `<span data-sig-date="client">${d(a.client_signed_at)}</span>`)
     .replace('<span data-sig-date="rcic">________________</span>', `<span data-sig-date="rcic">${d(a.rcic_signed_at)}</span>`)
-    .replace(/<span class="gi-initials">______<\/span>/g, `<span class="gi-initials">${a.client_initials ? e(a.client_initials) : '______'}</span>`);
+    .replace(/<span class="gi-initials">______<\/span>/g, `<span class="gi-initials">${a.client_initials ? e(a.client_initials) : '______'}</span>`)
+    .replace(/<div class="gi-sig" data-sig="client-(\d+)"><\/div>/g, (m, n) => `<div class="gi-sig" data-sig="client-${n}">${sig(signer(a, n)?.signature)}</div>`)
+    .replace(/<span data-sig-date="client-(\d+)">________________<\/span>/g, (m, n) => `<span data-sig-date="client-${n}">${d(signer(a, n)?.signed_at)}</span>`)
+    .replace(/<span class="gi-initials" data-ini="(\d+)">______<\/span>/g, (m, n) => `<span class="gi-initials" data-ini="${n}">${signer(a, n)?.initials ? e(signer(a, n).initials) : '______'}</span>`);
 }
+const signer = (a, n) => (a.signers || a.agreement_signers || []).find((x) => String(x.position) === String(n));
 
 export function certificate(a, events = []) {
   const f = (t) => t ? new Date(t).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'medium' }) : '—';
@@ -345,7 +374,8 @@ export function certificate(a, events = []) {
     <h2 style="margin-top:0">Signature certificate</h2>
     <table><tr><th>Document</th><td>${e(a.number)} · ${e(a.title)}</td></tr><tr><th>Document fingerprint (SHA-256)</th><td style="word-break:break-all">${e(a.body_sha256 || '—')}</td></tr>
     <tr><th>RCIC signature</th><td>${e(a.rcic_name || '')} · ${f(a.rcic_signed_at)}</td></tr>
-    <tr><th>Client signature</th><td>${e(a.client_name || '—')}${a.client_initials ? ` (initials ${e(a.client_initials)})` : ''} · ${f(a.client_signed_at)}${a.client_ip ? ` · IP ${e(a.client_ip)}` : ''}</td></tr></table>
+    <tr><th>Client signature</th><td>${e(a.client_name || '—')}${a.client_initials ? ` (initials ${e(a.client_initials)})` : ''} · ${f(a.client_signed_at)}${a.client_ip ? ` · IP ${e(a.client_ip)}` : ''}</td></tr>
+    ${[...(a.signers || a.agreement_signers || [])].sort((x, y) => x.position - y.position).map((x) => `<tr><th>Client ${x.position} signature</th><td>${e(x.signed_name || x.name)}${x.initials ? ` (initials ${e(x.initials)})` : ''} · ${f(x.signed_at)}${x.ip ? ` · IP ${e(x.ip)}` : ''}</td></tr>`).join('')}</table>
     ${events.length ? `<table><tr><th>Event</th><th>When</th><th>IP / device</th></tr>${events.map((v) => `<tr><td>${e(v.event)}</td><td>${f(v.created_at)}</td><td style="word-break:break-all">${e([v.ip, (v.user_agent || '').slice(0, 80)].filter(Boolean).join(' · '))}</td></tr>`).join('')}</table>` : ''}
   </div>`;
 }

@@ -23,10 +23,35 @@ export async function signaturePad(container) {
   return () => mode === 'draw' ? (drawn ? cv.toDataURL('image/png') : '') : container.querySelector('[data-p="type"] input').value.trim();
 }
 
+// Joint agreement: every client gets their own private link.
+function jointShare(token, a, co) {
+  const people = [{ name: a.contacts?.full_name, email: a.contacts?.email, phone: a.contacts?.phone, token, signed_at: a.client_signed_at, contact: a.contacts }, ...co];
+  const msg = (x) => `Hello ${String(x.name || '').split(' ')[0]}, please review and sign your ${AGR_TYPE[a.type]} (${a.number}) from Graceful Immigration Consultant Inc. here: ${signLink(x.token)}  This link is private to you and valid for 30 days. Each person named in the agreement signs with their own link.`;
+  const wa = (ph) => String(ph || '').replace(/\D/g, '').replace(/^(?=\d{10}$)/, '1');
+  modal({
+    title: 'Send to clients for signature', wide: true,
+    body: `<p style="margin-bottom:12px">This is a joint agreement. Each client has their <b>own private link</b>; send each person only their link. The agreement is complete when everyone has signed.</p>
+      ${people.map((x, i) => `<div class="card" style="padding:12px 14px;margin-bottom:10px"><div class="row" style="justify-content:space-between"><b>${esc(x.name || '')}</b>${x.signed_at ? '<span class="badge b-GREEN">Signed</span>' : '<span class="badge b-gold">Waiting</span>'}</div>
+        <div class="row" style="flex-wrap:nowrap;margin-top:8px"><input class="input" value="${esc(signLink(x.token))}" readonly><button class="btn" data-cp="${i}">Copy</button></div>
+        <div class="row" style="margin-top:8px">${x.email ? `<button class="btn btn-sm btn-primary" data-em="${i}">${icon('mail')} Email</button>` : ''}
+          ${x.phone ? `<a class="btn btn-sm" target="_blank" rel="noopener" href="https://wa.me/${wa(x.phone)}?text=${encodeURIComponent(msg(x))}">WhatsApp</a>` : ''}</div></div>`).join('')}
+      <div class="row"><button class="btn" id="rn">Issue new links for everyone</button></div>`,
+    onOpen: (m) => {
+      m.querySelectorAll('[data-cp]').forEach((b) => (b.onclick = async () => { await navigator.clipboard.writeText(signLink(people[b.dataset.cp].token)).catch(() => {}); toast('Link copied'); }));
+      m.querySelectorAll('[data-em]').forEach((b) => (b.onclick = async () => {
+        const x = people[b.dataset.em];
+        (await import('../crm.js')).composeEmail({ contact: x.contact || { id: a.contact_id, full_name: x.name, email: x.email }, to: x.email, subject: `Please sign: ${AGR_TYPE[a.type]} ${a.number}`,
+          body: `Hello ${String(x.name || '').split(' ')[0]},\n\nPlease review and sign your ${AGR_TYPE[a.type]} (${a.number}) from Graceful Immigration Consultant Inc. using this private link:\n\n${signLink(x.token)}\n\nThis link is private to you and valid for 30 days. Each person named in the agreement signs with their own link. If you have any questions before signing, reply to this email or call (403) 915-4230.` });
+      }));
+      m.querySelector('#rn').onclick = async () => { try { const r = await rpc('renew_agreement_link', { p_id: a.id }); toast('New links issued — the old links no longer work'); m.closest('.overlay').remove(); shareModal(r.token, a); } catch (e) { fail(e); } };
+    },
+  });
+}
+
 const signLink = (token) => `${location.origin}${location.pathname.replace(/app\/?.*$/, '')}public/sign.html?t=${token}`;
 
 export async function render(el, [id], { setTitle }) {
-  const { data: a, error } = await db.from('agreements').select('*, contacts(id, full_name, email, phone), cases(case_number)').eq('id', id).single();
+  const { data: a, error } = await db.from('agreements').select('*, contacts(id, full_name, email, phone), cases(case_number), agreement_signers(*)').eq('id', id).single();
   if (error) { el.innerHTML = '<div class="alert err">Agreement not found.</div>'; return; }
   setTitle(`${a.number} · ${AGR_TYPE[a.type]}`);
   const manage = can('agreements.manage');
@@ -45,8 +70,11 @@ export async function render(el, [id], { setTitle }) {
       <div class="grid no-print" style="align-content:start">
         <div class="card"><div class="card-h"><h3>Progress</h3></div><div class="card-b timeline">
           ${(events || []).map((v) => `<div class="tl"><div class="tl-dot">${icon(v.event === 'signed' ? 'check' : v.event === 'viewed' ? 'search' : v.event === 'voided' ? 'x' : 'file')}</div>
-            <div class="tl-body"><div class="meta">${fmtDateTime(v.created_at)}${v.ip ? ' · IP ' + esc(v.ip) : ''}</div><b>${esc({ created: 'Draft created', sent: 'Signed by RCIC and sent', viewed: 'Opened by client', signed: 'Signed by client', voided: 'Voided', link_renewed: 'Signing link renewed' }[v.event] || v.event)}</b>
+            <div class="tl-body"><div class="meta">${fmtDateTime(v.created_at)}${v.ip ? ' · IP ' + esc(v.ip) : ''}</div><b>${esc({ created: 'Draft created', sent: 'Signed by RCIC and sent', viewed: 'Opened by client', signed: 'Signed by client', client_signed: 'Signed by one client', voided: 'Voided', link_renewed: 'Signing link renewed' }[v.event] || v.event)}</b>
             ${v.details?.signed_by ? ` · ${esc(v.details.signed_by)}` : ''}${v.details?.name ? ` · ${esc(v.details.name)}` : ''}</div></div>`).join('')}</div></div>
+        ${(a.agreement_signers || []).length ? `<div class="card"><div class="card-h"><h3>Clients signing</h3></div><div class="card-b">
+          ${[{ name: a.contacts?.full_name, signed_at: a.client_signed_at }, ...[...a.agreement_signers].sort((x, y) => x.position - y.position)].map((x) =>
+            `<div class="row" style="justify-content:space-between;margin-bottom:6px"><span>${esc(x.name || '')}</span>${x.signed_at ? `<span class="badge b-GREEN">Signed ${fmtDateTime(x.signed_at)}</span>` : '<span class="badge b-gold">Waiting</span>'}</div>`).join('')}</div></div>` : ''}
         ${a.body_sha256 ? `<div class="card"><div class="card-b" style="font-size:12px;word-break:break-all"><b>Document fingerprint (SHA-256)</b><br>${esc(a.body_sha256)}</div></div>` : ''}
         ${a.status === 'signed' ? `<div class="alert ok">Signed ${fmtDateTime(a.client_signed_at)}. RA 5.5: send the client a copy of the signed agreement by email and keep the confirmation on file.</div>
           ${a.contacts?.email ? `<button class="btn btn-primary" id="sendCopy">${icon('mail')} Email signed copy to client</button>` : ''}` : ''}
@@ -62,7 +90,9 @@ export async function render(el, [id], { setTitle }) {
   }));
 }
 
-function shareModal(token, a) {
+async function shareModal(token, a) {
+  const { data: co } = await db.from('agreement_signers').select('position, name, email, phone, token, signed_at').eq('agreement_id', a.id).order('position');
+  if ((co || []).length) return jointShare(token, a, co);
   const link = signLink(token);
   const first = (a.contacts?.full_name || '').split(' ')[0];
   const msg = `Hello ${first}, please review and sign your ${AGR_TYPE[a.type]} (${a.number}) from Graceful Immigration Consultant Inc. here: ${link}  The link is private to you and valid for 30 days.`;
@@ -103,12 +133,27 @@ async function editor(el, a, setTitle) {
     <input class="input ms-due" data-m="due" type="date" value="${esc(m.due ?? '')}" style="max-width:150px" title="Due date (predetermined-date billing)" ${d.billing === 'flat_dates' ? '' : 'hidden'}>
     <button class="btn btn-ghost btn-sm" data-delm="${i}" aria-label="Remove">${icon('trash')}</button></div>`).join('');
 
+  d.co_clients = d.co_clients || [];
+  const coRows = () => d.co_clients.map((c, i) => `<div class="co-row" data-i="${i}" style="display:grid;grid-template-columns:1fr 1fr 34px;gap:8px;margin-bottom:8px;padding:10px;border:1px solid var(--line);border-radius:10px">
+      <input class="input" data-c="name" placeholder="Full legal name" value="${esc(c.name || '')}"><input class="input" data-c="relationship" placeholder="Relationship (e.g. spouse)" value="${esc(c.relationship || '')}">
+      <button class="btn btn-ghost btn-sm" type="button" data-delc="${i}" aria-label="Remove client" title="Remove">${icon('trash')}</button>
+      <input class="input" data-c="email" type="email" placeholder="Email" value="${esc(c.email || '')}"><input class="input" data-c="phone" placeholder="Phone" value="${esc(c.phone || '')}"><span></span>
+      <input class="input" data-c="dob" type="date" title="Date of birth" value="${esc(c.dob || '')}"><input class="input" data-c="address" placeholder="Address (if different)" value="${esc(c.address || '')}"><span></span>
+      <input type="hidden" data-c="contact_id" value="${esc(c.contact_id || '')}"></div>`).join('');
+  // The number's code follows the client list (SA/JA, CA/JC); the database applies the same rule on save.
+  const number = () => !/^[A-Z]{2}-\d{8}-/.test(a.number || '') ? a.number
+    : (T === 'retainer' ? (d.co_clients.length ? 'JA' : 'SA') : (d.co_clients.length ? 'JC' : 'CA')) + a.number.slice(2);
   const parties = sec('Parties & date', `<div class="row-2">${f('agreement_date', 'Agreement date', 'date')}${f('language', 'Language of service (English or French)')}</div>
     <div class="row-2">${f('client_name', 'Client full legal name')}${f('client_dob', 'Client date of birth', 'date')}</div>
     ${f('client_address', 'Client home address')}<div class="row-2">${f('client_phone', 'Client phone')}${f('client_email', 'Client email')}</div>
     <div class="row-2">${f('rcic_name', 'RCIC name')}${f('rcic_id', 'College ID')}</div>${f('business_name', 'Business name')}${f('business_address', 'Business address (street, city, postal code)')}
     <div class="row-2">${f('business_phone', 'Business phone')}${f('business_email', 'Business email')}</div>
-    <div class="row-2">${f('gst_rate', 'GST rate % (0 = not applicable)', 'number', 'step="0.01"')}${f('province', 'Governing law (province)')}</div>`, true);
+    <div class="row-2">${f('gst_rate', 'GST rate % (0 = not applicable)', 'number', 'step="0.01"')}${f('province', 'Governing law (province)')}</div>
+    <div class="co-wrap"><label style="font-size:12.5px;font-weight:600;display:block;margin:14px 0 6px">Additional clients — joint ${T === 'consultation' ? 'consultation' : 'retainer'} (e.g. spouse, dependent adult child)</label>
+      <div id="co">${coRows()}</div>
+      <div class="row" style="gap:8px;margin-bottom:12px"><select class="input" id="coPick" style="max-width:320px"><option value="">Add a client from Contacts…</option></select>
+        <button class="btn btn-sm" type="button" id="coNew">${icon('plus')} Add a person not in Contacts</button></div>
+      ${T === 'retainer' ? `<div id="coInstr" ${(d.co_clients || []).length ? '' : 'hidden'}>${f('joint_instructions', 'How instructions are given by the clients')}</div>` : ''}</div>`, true);
   const body = T === 'consultation'
     ? parties + feeArr + sec('Consultation', `${f('purpose', 'Purpose of the consultation', 'textarea')}<div class="row-2">${f('consult_date', 'Consultation date', 'date')}${f('consult_length', 'Length')}</div>
       <div class="row-2">${f('consult_method', 'Method (phone, video, in person)')}${f('fee', 'Fee before tax (CAD)', 'number', 'step="0.01"')}</div>${f('payment_method', 'Payment method')}`, true)
@@ -140,11 +185,13 @@ async function editor(el, a, setTitle) {
 
   const read = () => {
     el.querySelectorAll('[data-k]').forEach((i) => { d[i.dataset.k] = i.type === 'checkbox' ? i.checked : i.type === 'number' ? (i.value === '' ? '' : Number(i.value)) : i.value; });
+    d.co_clients = [...el.querySelectorAll('.co-row')].map((r) => Object.fromEntries([...r.querySelectorAll('[data-c]')].map((i) => [i.dataset.c, i.value.trim()])));
     d.milestones = [...el.querySelectorAll('.ms-row')].map((r) => ({ disb: Number(r.querySelector('[data-m="disb"]')?.value || 0), due: r.querySelector('[data-m="due"]')?.value || '', name: r.querySelector('[data-m="name"]').value, included: r.querySelector('[data-m="included"]').value, fee: Number(r.querySelector('[data-m="fee"]').value || 0) }));
   };
   const preview = () => {
     read();
-    el.querySelector('#pv').innerHTML = renderDoc(T, { ...d, number: a.number });
+    el.querySelector('#pv').innerHTML = renderDoc(T, { ...d, number: number() });
+    if (number() !== a.number) { a.number = number(); setTitle(`${a.number} · ${AGR_TYPE[T]}`); }
     const miss = requiredMissing(T, d);
     el.querySelector('#missing').innerHTML = miss.length ? `<div class="alert info">Still needed before sending: <b>${miss.map(esc).join(', ')}</b></div>` : '';
   };
@@ -166,9 +213,29 @@ async function editor(el, a, setTitle) {
   });
   const wireMs = () => el.querySelectorAll('[data-delm]').forEach((b) => (b.onclick = () => { b.closest('.ms-row').remove(); preview(); }));
   el.querySelector('#addMs')?.addEventListener('click', () => { read(); d.milestones.push({ name: '', included: '', fee: 0, disb: 0, due: '' }); el.querySelector('#ms').innerHTML = msRows(); wireMs(); });
-  wireMs(); syncFree(); preview();
+  const drawCo = () => {
+    el.querySelector('#co').innerHTML = coRows();
+    el.querySelectorAll('[data-delc]').forEach((b) => (b.onclick = () => { read(); d.co_clients.splice(Number(b.dataset.delc), 1); drawCo(); }));
+    const ci = el.querySelector('#coInstr'); if (ci) ci.hidden = !d.co_clients.length;
+    preview();
+  };
+  el.querySelector('#coNew').onclick = () => { read(); d.co_clients.push({ name: '', relationship: '', dob: '', email: '', phone: '', address: '', contact_id: '' }); drawCo(); };
+  import('../fin.js').then(({ contactsList }) => contactsList()).then((list) => {
+    const pick = el.querySelector('#coPick');
+    pick.innerHTML += (list || []).filter((c) => c.id !== a.contact_id).map((c) => `<option value="${c.id}">${esc(c.full_name)}${c.email ? ' · ' + esc(c.email) : ''}</option>`).join('');
+    pick.onchange = async () => {
+      if (!pick.value) return;
+      const { data: c } = await db.from('contacts').select('*').eq('id', pick.value).single();
+      pick.value = ''; if (!c) return;
+      read();
+      d.co_clients.push({ contact_id: c.id, name: c.full_name || '', relationship: '', dob: c.date_of_birth || '', email: c.email || '', phone: c.phone || '',
+        address: [c.address, c.city, c.province, c.postal_code, c.country].filter(Boolean).join(', ') });
+      drawCo();
+    };
+  }).catch(() => {});
+  wireMs(); syncFree(); drawCo();
 
-  const save = async () => { read(); const { error } = await db.from('agreements').update({ data: d }).eq('id', a.id); if (error) throw error; };
+  const save = async () => { read(); d.co_clients = d.co_clients.filter((c) => Object.entries(c).some(([k, v]) => k !== 'contact_id' && v)); const { error } = await db.from('agreements').update({ data: d }).eq('id', a.id); if (error) throw error; };
   el.querySelector('#save').onclick = async () => { try { await save(); toast('Draft saved'); } catch (e) { fail(e); } };
   el.querySelector('#del').onclick = async () => {
     if (!(await confirmBox('Delete draft', 'Delete this draft agreement?', 'Delete', true))) return;
@@ -186,7 +253,7 @@ async function editor(el, a, setTitle) {
       onOpen: async (m) => { getSig = await signaturePad(m.querySelector('#pad')); },
       actions: [{ label: 'Cancel' }, { label: 'Sign & create link', cls: 'btn-gold', onClick: async () => {
         const sig = getSig(); if (!sig) throw new Error('Add your signature.');
-        const r = await rpc('send_agreement', { p_id: a.id, p_body_html: renderDoc(T, { ...d, number: a.number }), p_rcic_signature: sig });
+        const r = await rpc('send_agreement', { p_id: a.id, p_body_html: renderDoc(T, { ...d, number: number() }), p_rcic_signature: sig });
         toast('Agreement signed and ready to send');
         const { data: fresh } = await db.from('agreements').select('*, contacts(id, full_name, email, phone)').eq('id', a.id).single();
         await render(el, [a.id], { setTitle });

@@ -32,11 +32,12 @@ Deno.serve(async (req) => {
     if (error) return json(req, { error: error.message }, 400);
     const { data: s } = await admin.from("org_settings").select("notify_email").eq("id", 1).single();
     if (s?.notify_email) {
-      await sendEmail(s.notify_email, `Agreement ${data.number} signed`,
-        `<p><b>${escapeHtml(String(body.name))}</b> signed <b>${escapeHtml(data.title)}</b> (${escapeHtml(data.number)}).</p>
+      await sendEmail(s.notify_email, `Agreement ${data.number} ${data.complete ? "signed" : "signed by one client"}`,
+        `<p><b>${escapeHtml(String(body.name))}</b> signed <b>${escapeHtml(data.title)}</b> (${escapeHtml(data.number)}).${data.complete ? "" : " Other clients on this joint agreement still need to sign."}</p>
          <p><a href="https://gracefulimmigration.ca/app/#/agreements/${data.id}">Open in dashboard</a></p>`);
     }
-    await notifyTeams(admin, "✍️ Agreement signed by client", `Agreement ${data.number} was signed. Next: invoice and open the case file.`, `${HUB}#/agreements/${data.id}`);
+    await notifyTeams(admin, data.complete ? "✍️ Agreement signed by client" : "✍️ Joint agreement: one client signed",
+      data.complete ? `Agreement ${data.number} was signed. Next: invoice and open the case file.` : `${String(body.name)} signed agreement ${data.number}. Waiting for the other clients.`, `${HUB}#/agreements/${data.id}`);
     return json(req, { ok: true });
   }
   return json(req, { error: "Unknown action" }, 400);

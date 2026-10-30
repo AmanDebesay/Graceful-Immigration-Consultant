@@ -62,10 +62,16 @@
         <div class="card doc">${doc}${certificate({ ...a, client_name: a.client_signed_name })}</div>`;
       return;
     }
-    main.innerHTML = `<div class="banner info"><b>${esc(a.client_name)}</b>, please read your ${esc(a.title)} (${esc(a.number)}) carefully. It has already been signed by your consultant, ${esc(a.rcic_name)}. Questions before signing? Call <a href="tel:+14039154230">(403) 915-4230</a>.</div>
+    const joint = (a.signers || []).length > 0;
+    if (a.me_signed) {
+      main.innerHTML = `<div class="banner ok no-print"><b>${justSigned ? 'Thank you — you have signed.' : 'You have already signed this agreement.'}</b> This is a joint agreement: it will be complete once every client named in it has signed with their own link. You can open this link again later to see the fully signed copy.</div>
+        <div class="card doc">${doc}</div>`;
+      return;
+    }
+    main.innerHTML = `<div class="banner info"><b>${esc(a.client_name)}</b>, please read your ${esc(a.title)} (${esc(a.number)}) carefully. It has already been signed by your consultant, ${esc(a.rcic_name)}.${joint ? ' This is a <b>joint agreement</b>: each client named in it signs personally with their own private link.' : ''} Questions before signing? Call <a href="tel:+14039154230">(403) 915-4230</a>.</div>
       <div class="card doc">${doc}</div>
       <div class="card no-print" id="signCard"><h2>Sign this agreement</h2>
-        <p style="color:#667085">Your initials will be placed on each section marked “Client initials”, and your signature at the end.</p>
+        <p style="color:#667085">Your initials will be placed on each section marked “Client initials”${joint ? ' (in your own box)' : ''}, and your signature at the end.</p>
         <label for="nm">Full legal name</label><input type="text" id="nm" value="${esc(a.client_name)}" autocomplete="name">
         <label for="ini">Initials</label><input type="text" id="ini" maxlength="6" style="max-width:140px;text-transform:uppercase">
         <label>Signature</label><div class="seg"><button type="button" data-m="draw" class="on">Draw</button><button type="button" data-m="type">Type</button></div>
