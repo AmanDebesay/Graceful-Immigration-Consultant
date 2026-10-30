@@ -1,6 +1,7 @@
 // App bootstrap: session → profile & permissions → shell → hash router.
 import { db, state, can, isStaff, esc, icon, avatarHtml, fmtDate, ROLE_LABEL, loadStaff, fail, toast } from './core.js';
 import { showLogin, showSetPassword, showLinkError, showMfaChallenge } from './auth.js';
+performance.setResourceTimingBufferSize?.(2000); // keep the list of loaded scripts for healStaleModules
 
 const NAV = [
   { group: 'Overview' },
@@ -353,11 +354,23 @@ async function route() {
     const page = await import(`./views/${mod}.js`);
     await page.render(host, m.slice(1), { setTitle: (t, html) => { if (seq === routeSeq) document.getElementById('pageTitle')[html ? 'innerHTML' : 'textContent'] = t; } });
   } catch (e) {
+    if (await healStaleModules(e)) return;
     host.innerHTML = `<div class="alert err">Something went wrong loading this page: ${esc(e.message)}</div>`;
     if (seq === routeSeq) fail(e);
   }
 }
 let routeSeq = 0;
+
+// Right after a deploy the browser can hold an old cached copy of one module next to a new copy of another
+// (GitHub Pages caches for 10 minutes), which breaks imports. Re-download every app script, then reload once.
+async function healStaleModules(e) {
+  if (!/does not provide an export|dynamically imported module|Importing a module script failed|error loading dynamically/i.test(e?.message || '')) return false;
+  try { if (sessionStorage.getItem('gi_healed') > Date.now() - 60000) return false; sessionStorage.setItem('gi_healed', Date.now()); } catch { return false; }
+  const urls = new Set(performance.getEntriesByType('resource').map((r) => r.name.split('#')[0]).filter((u) => /\/app\/js\/.+\.js(\?|$)/.test(u)));
+  await Promise.all([...urls].map((u) => fetch(u, { cache: 'reload' }).catch(() => {})));
+  location.reload();
+  return true;
+}
 
 window.addEventListener('hashchange', () => { if (!/access_token|error_description/.test(location.hash)) route(); });
 window.addEventListener('auth-changed', () => { shellBuilt = false; boot(); });
