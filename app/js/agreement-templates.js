@@ -150,7 +150,6 @@ const STYLE = `<style>
 @media print{
   @page{margin:16mm 15mm 20mm}
   .gi-agr{font-size:11.5pt;max-width:none}
-  .gi-agr .runfoot{display:flex;position:fixed;bottom:-12mm;left:0;right:0;justify-content:space-between;font-family:Arial,Helvetica,sans-serif;font-size:8pt;color:#6B7385;border-top:1px solid #E3DCCD;padding-top:3mm}
 }
 </style>`;
 
@@ -170,8 +169,11 @@ function letterhead(d, title, kind, extra = '') {
     <div><span class="lbl">${isJoint(d) ? 'Clients (joint)' : 'Client'}</span><span class="nm">${e(d.client_name)}</span>${d.client_dob ? `Date of birth: ${longDate(d.client_dob)}<br>` : ''}${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone || 'Phone: ________________')}${d.client_email ? ' · ' + e(d.client_email) : ''}
       ${coClients(d).map((c) => `<span class="nm" style="margin-top:10px">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${c.dob ? `Date of birth: ${longDate(c.dob)}<br>` : ''}${c.address ? e(c.address) : `Address: same as ${e(d.client_name)}`}<br>${[c.phone, c.email].filter(Boolean).map(e).join(' · ')}`).join('')}</div></div>`;
 }
+// Printed page footer, drawn in the page's bottom margin so it can never overlap the text.
 function runningFooter(d, title) {
-  return `<div class="runfoot"><span>${e(d.business_name)} · ${e(title)}${d.number ? ' · ' + e(d.number) : ''}</span><span>Client initials: ________</span></div>`;
+  const css = (v) => String(v ?? '').replace(/[\\"]/g, '\\$&').replace(/[\n\r<>]/g, ' ');
+  return `<style>@media print{@page{@bottom-left{content:"${css(d.business_name)} · ${css(title)}${d.number ? ' · ' + css(d.number) : ''}";font:8pt Arial,Helvetica,sans-serif;color:#6B7385}
+    @bottom-right{content:"Client initials: ________   Page " counter(page) " of " counter(pages);font:8pt Arial,Helvetica,sans-serif;color:#6B7385}}}</style>`;
 }
 function signatures(d, title, n) {
   return `<div class="sigpage">${H(n, 'Signatures')}
