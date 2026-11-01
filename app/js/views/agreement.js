@@ -1,5 +1,5 @@
 import { db, state, can, esc, icon, fmtDateTime, rpc, toast, fail, modal, confirmBox } from '../core.js';
-import { render as renderDoc, requiredMissing, withSignatures, certificate } from '../agreement-templates.js';
+import { render as renderDoc, requiredMissing, withSignatures, certificate, defaultTitles, LH_DEFAULTS } from '../agreement-templates.js';
 import { agrBadge, AGR_TYPE, PRO_BONO_REASON, proBonoBadge } from './agreements.js';
 
 export async function signaturePad(container) {
@@ -125,7 +125,22 @@ async function shareModal(token, a) {
 async function editor(el, a, setTitle) {
   const d = { ...a.data };
   const T = a.type;
-  const f = (k, label, type = 'text', extra = '') => `<div class="field"><label>${label}</label>${type === 'textarea'
+  // Where each field shows up in the document: 'lh' letterhead, 'title', 'parties', 'glance' (key terms) or a section number.
+  const LH = ['business_name', 'tagline', 'rcic_name', 'rcic_designation', 'rcic_id', 'business_address', 'business_phone', 'business_email', 'website'];
+  const SEC = Object.assign(Object.fromEntries(LH.map((k) => [k, ['lh', 'parties']])), { doc_title: ['title'], doc_subtitle: ['title'], agreement_date: ['title'],
+    client_name: ['parties'], client_dob: ['parties'], client_address: ['parties'], client_phone: ['parties'], client_email: ['parties'], co: ['parties', 'glance', T === 'consultation' ? '1' : '2'] },
+    T === 'consultation'
+      ? { language: ['glance', '6'], gst_rate: ['glance', '4'], province: ['8'], fee_basis: ['glance', '4'], pro_bono_reason: ['4'], relationship: ['1'], pro_bono_note: ['4'], continuing_relationship: ['1'],
+          purpose: ['glance', '1'], consult_date: ['glance', '1'], consult_length: ['glance', '1'], consult_method: ['glance', '1'], fee: ['glance', '4'], payment_method: ['4'] }
+      : { language: ['glance', '2'], gst_rate: ['glance', '7'], province: ['7', '13', '16'], fee_basis: ['glance', '7'], pro_bono_reason: ['7'], relationship: ['2'], pro_bono_note: ['7'],
+          joint_instructions: ['2'], continuing_relationship: ['2'], file_number: ['title'], preliminary_advice: ['1'], consultation_ref: ['1'], assistants: ['2'], other_licensees: ['2'],
+          response_time: ['2'], update_time: ['2'], comm_methods: ['glance', '12'], program: ['glance', '4'], scope: ['4'], timeframes: ['4'], instructions: ['5'], designate: ['5'], excluded: ['6'],
+          billing: ['glance', '7'], milestones: ['glance', '7'], hourly_rate: ['glance', '7'], est_hours: ['glance', '7'], daily_rate: ['glance', '7'], est_days: ['glance', '7'],
+          hourly_schedule: ['7'], invoice_frequency: ['7'], retainer: ['glance', '7'], payment_days: ['7', '9'], retainer_replenish: ['7'], disbursements: ['8'], payment_methods: ['9'],
+          interest: ['9'], admin_fee: ['9', '13'], cooling_off: ['10'], successor: ['14'], dispute_days: ['15'] });
+  const TAG = { lh: 'Letterhead', title: 'Title', parties: 'Parties', glance: 'Key terms' };
+  const tag = (k) => { const s = (SEC[k] || []).filter((x) => x !== 'glance'); return s.length ? `<span class="sec-tag" title="Shown in: ${(SEC[k] || []).map((x) => TAG[x] || '§' + x).join(', ')}">${s.map((x) => TAG[x] || '§' + x).join(' · ')}</span>` : ''; };
+  const f = (k, label, type = 'text', extra = '') => `<div class="field"><label>${label} ${tag(k)}</label>${type === 'textarea'
     ? `<textarea class="input" data-k="${k}" ${extra}>${esc(d[k] ?? '')}</textarea>` : `<input class="input" type="${type}" data-k="${k}" value="${esc(d[k] ?? '')}" ${extra}>`}</div>`;
   const sec = (title, inner, open = false, id = '') => `<details class="agr-sec" ${id ? `id="${id}"` : ''} ${open ? 'open' : ''}><summary>${title}</summary><div class="agr-sec-b">${inner}</div></details>`;
   const free = () => d.fee_basis === 'pro_bono';
@@ -151,13 +166,19 @@ async function editor(el, a, setTitle) {
   // The number's code follows the client list (SA/JA, CA/JC); the database applies the same rule on save.
   const number = () => !/^[A-Z]{2}-\d{8}-/.test(a.number || '') ? a.number
     : (T === 'retainer' ? (d.co_clients.length ? 'JA' : 'SA') : (d.co_clients.length ? 'JC' : 'CA')) + a.number.slice(2);
-  const parties = sec('Parties & date', `<div class="row-2">${f('agreement_date', 'Agreement date', 'date')}${f('language', 'Language of service (English or French)')}</div>
+  const [defTitle, defSub] = defaultTitles(T, d);
+  const ph = (v) => `placeholder="${esc(v)}"`;
+  const letter = sec('Letterhead & title', `<p style="font-size:12.5px;color:var(--muted);margin-bottom:8px">Changes apply to this agreement only. Leave a box empty to use the standard wording shown in grey. Your usual details are set in Business Settings.</p>
+    ${f('doc_title', 'Document title', 'text', ph(defTitle))}${f('doc_subtitle', 'Subtitle under the title', 'text', ph(defSub))}
+    ${f('business_name', 'Business name')}${f('tagline', 'Tagline', 'text', ph(LH_DEFAULTS.tagline))}
+    <div class="row-2">${f('rcic_name', 'RCIC name')}${f('rcic_id', 'College ID')}</div>${f('rcic_designation', 'Your designation', 'text', ph(LH_DEFAULTS.rcic_designation))}
+    ${f('business_address', 'Business address (street, city, postal code)')}
+    <div class="row-2">${f('business_phone', 'Business phone')}${f('business_email', 'Business email')}</div>${f('website', 'Website', 'text', ph(LH_DEFAULTS.website))}`);
+  const parties = letter + sec('Parties & date', `<div class="row-2">${f('agreement_date', 'Agreement date', 'date')}${f('language', 'Language of service (English or French)')}</div>
     <div class="row-2">${f('client_name', 'Client full legal name')}${f('client_dob', 'Client date of birth', 'date')}</div>
     ${f('client_address', 'Client home address')}<div class="row-2">${f('client_phone', 'Client phone')}${f('client_email', 'Client email')}</div>
-    <div class="row-2">${f('rcic_name', 'RCIC name')}${f('rcic_id', 'College ID')}</div>${f('business_name', 'Business name')}${f('business_address', 'Business address (street, city, postal code)')}
-    <div class="row-2">${f('business_phone', 'Business phone')}${f('business_email', 'Business email')}</div>
     <div class="row-2">${f('gst_rate', 'GST rate % (0 = not applicable)', 'number', 'step="0.01"')}${f('province', 'Governing law (province)')}</div>
-    <div class="co-wrap"><label style="font-size:12.5px;font-weight:600;display:block;margin:14px 0 6px">Additional clients — joint ${T === 'consultation' ? 'consultation' : 'retainer'} (e.g. spouse, dependent adult child)</label>
+    <div class="co-wrap"><label style="font-size:12.5px;font-weight:600;display:block;margin:14px 0 6px">Additional clients — joint ${T === 'consultation' ? 'consultation' : 'retainer'} (e.g. spouse, dependent adult child) ${tag('co')}</label>
       <div id="co">${coRows()}</div>
       <div class="row" style="gap:8px;margin-bottom:12px"><select class="input" id="coPick" style="max-width:320px"><option value="">Add a client from Contacts…</option></select>
         <button class="btn btn-sm" type="button" id="coNew">${icon('plus')} Add a person not in Contacts</button></div>
@@ -178,7 +199,7 @@ async function editor(el, a, setTitle) {
       + sec('7. Fees & billing method', `<div class="field"><label>Billing method (choose one — cannot be switched later)</label><select class="input" data-k="billing">
           ${[['flat', 'Flat fee with payment by milestones'], ['flat_dates', 'Flat fee with payment on predetermined dates'], ['hourly', 'By the hour'], ['daily', 'By the day']].map(([k, l]) => `<option value="${k}" ${(d.billing || 'flat') === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
         <div id="flatBox" ${['hourly', 'daily'].includes(d.billing) ? 'hidden' : ''}><label style="font-size:12.5px;font-weight:600">Milestones in chronological order: fee, estimated disbursements${d.billing === 'flat_dates' ? ' and due date' : ''}</label><div id="ms">${msRows()}</div>
-          <button class="btn btn-sm" id="addMs">${icon('plus')} Add milestone</button></div>
+          <button class="btn btn-sm" id="addMs">${icon('plus')} Add milestone</button> ${tag('milestones')}</div>
         <div id="hourBox" ${d.billing === 'hourly' ? '' : 'hidden'}><div class="row-2">${f('hourly_rate', 'Hourly rate (CAD)', 'number', 'step="0.01"')}${f('est_hours', 'Anticipated hours', 'number', 'step="0.5"')}</div></div>
         <div id="dayBox" ${d.billing === 'daily' ? '' : 'hidden'}><div class="row-2">${f('daily_rate', 'Daily rate (CAD)', 'number', 'step="0.01"')}${f('est_days', 'Anticipated days', 'number', 'step="0.5"')}</div></div>
         <div id="schedBox" ${['hourly', 'daily'].includes(d.billing) ? '' : 'hidden'}><div class="row-2">${f('hourly_schedule', 'Schedule of payments')}${f('invoice_frequency', 'How often invoices are provided (e.g. monthly)')}</div></div>
@@ -199,9 +220,30 @@ async function editor(el, a, setTitle) {
     d.co_clients = [...el.querySelectorAll('.co-row')].map((r) => Object.fromEntries([...r.querySelectorAll('[data-c]')].map((i) => [i.dataset.c, i.value.trim()])));
     d.milestones = [...el.querySelectorAll('.ms-row')].map((r) => ({ disb: Number(r.querySelector('[data-m="disb"]')?.value || 0), due: r.querySelector('[data-m="due"]')?.value || '', name: r.querySelector('[data-m="name"]').value, included: r.querySelector('[data-m="included"]').value, fee: Number(r.querySelector('[data-m="fee"]').value || 0) }));
   };
+  // "You are editing here": mark the parts of the preview that the focused field changes, and bring the first one into view.
+  let active = null;
+  const keyOf = (t) => t?.dataset?.k || (t?.closest?.('.ms-row') ? 'milestones' : t?.closest?.('.co-wrap') ? 'co' : null);
+  const highlight = (scroll) => {
+    const pv = el.querySelector('#pv');
+    pv.querySelectorAll('.pv-hl').forEach((x) => x.classList.remove('pv-hl'));
+    const marks = [];
+    for (const s of SEC[active] || []) pv.querySelectorAll(`[data-sec="${s}"]`).forEach((h) => {
+      h.classList.add('pv-hl'); marks.push(h);
+      if (h.tagName === 'H2') for (let n = h.nextElementSibling; n && n.tagName !== 'H2' && !n.classList.contains('sigpage'); n = n.nextElementSibling) n.classList.add('pv-hl');
+    });
+    const first = marks.find((m) => !m.classList.contains('glance')) || marks[0];
+    if (scroll && first && matchMedia('(min-width:1181px)').matches) {
+      const r = first.getBoundingClientRect();
+      if (r.top < 90 || r.top > innerHeight * 0.6) scrollTo({ top: scrollY + r.top - 110, behavior: 'smooth' });
+    }
+  };
+  el.querySelector('.agr-form').addEventListener('focusin', (e) => { const k = keyOf(e.target); if (k && k !== active) { active = k; highlight(true); } });
   const preview = () => {
     read();
     el.querySelector('#pv').innerHTML = renderDoc(T, { ...d, number: number() });
+    if (active) highlight(false);
+    const [dt, ds] = defaultTitles(T, d), ti = el.querySelector('[data-k="doc_title"]'), si = el.querySelector('[data-k="doc_subtitle"]');
+    if (ti) ti.placeholder = dt; if (si) si.placeholder = ds;
     if (number() !== a.number) { a.number = number(); setTitle(`${a.number} · ${AGR_TYPE[T]}`); }
     const miss = requiredMissing(T, d);
     el.querySelector('#missing').innerHTML = miss.length ? `<div class="alert info">Still needed before sending: <b>${miss.map(esc).join(', ')}</b></div>` : '';

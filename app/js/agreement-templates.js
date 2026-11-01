@@ -153,16 +153,18 @@ const STYLE = `<style>
 }
 </style>`;
 
-const H = (n, t) => `<h2><span class="n">${n}</span>${t}</h2>`;
+const H = (n, t) => `<h2 data-sec="${n}"><span class="n">${n}</span>${t}</h2>`;
 const glanceRow = (k, v) => (v ? `<dt>${k}</dt><dd>${v}</dd>` : '');
 
+export const LH_DEFAULTS = { tagline: 'Guide · Support · Belong', rcic_designation: 'Regulated Canadian Immigration Consultant (RCIC-IRB)', website: 'gracefulimmigration.ca' };
+const lhv = (d, k) => (String(d[k] ?? '').trim() || LH_DEFAULTS[k]);
 function letterhead(d, title, kind, extra = '') {
-  return `<div class="lh"><img src="${LOGO}" alt="Graceful Immigration Consultant Inc.">
-    <div class="lh-name"><b>${e(d.business_name)}</b><span>Guide · Support · Belong</span><small>${e(d.rcic_name)}, Regulated Canadian Immigration Consultant (RCIC-IRB) · College ID ${e(d.rcic_id)}</small></div>
-    <div class="lh-contact">${e(d.business_address)}<br>${e(d.business_phone)}<br>${e(d.business_email)}<br>gracefulimmigration.ca</div></div>
-  <div class="title"><h1>${e(title)}</h1><div class="kind">${e(kind)}</div><div class="orn"><i></i>✦<i></i></div></div>
-  <div class="meta">${d.number ? `<span>Agreement no. <b>${e(d.number)}</b></span>` : ''}<span>Date <b>${longDate(d.agreement_date)}</b></span>${extra}<span>Written in <b>English</b></span></div>
-  <div class="parties"><div><span class="lbl">Licensee (RCIC)</span><span class="nm">${e(d.rcic_name)}</span>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>${e(d.business_name)}<br>${e(d.business_address)}<br>${e(d.business_phone)} · ${e(d.business_email)}</div>
+  return `<div class="lh" data-sec="lh"><img src="${LOGO}" alt="Graceful Immigration Consultant Inc.">
+    <div class="lh-name"><b>${e(d.business_name)}</b><span>${e(lhv(d, 'tagline'))}</span><small>${e(d.rcic_name)}, ${e(lhv(d, 'rcic_designation'))} · College ID ${e(d.rcic_id)}</small></div>
+    <div class="lh-contact">${e(d.business_address)}<br>${e(d.business_phone)}<br>${e(d.business_email)}<br>${e(lhv(d, 'website'))}</div></div>
+  <div class="title" data-sec="title"><h1>${e(String(d.doc_title || '').trim() || title)}</h1><div class="kind">${e(String(d.doc_subtitle || '').trim() || kind)}</div><div class="orn"><i></i>✦<i></i></div></div>
+  <div class="meta" data-sec="title">${d.number ? `<span>Agreement no. <b>${e(d.number)}</b></span>` : ''}<span>Date <b>${longDate(d.agreement_date)}</b></span>${extra}<span>Written in <b>English</b></span></div>
+  <div class="parties" data-sec="parties"><div><span class="lbl">Licensee (RCIC)</span><span class="nm">${e(d.rcic_name)}</span>${e(lhv(d, 'rcic_designation'))} · College ID ${e(d.rcic_id)}<br>${e(d.business_name)}<br>${e(d.business_address)}<br>${e(d.business_phone)} · ${e(d.business_email)}</div>
     <div><span class="lbl">${isJoint(d) ? 'Clients (joint)' : 'Client'}</span><span class="nm">${e(d.client_name)}</span>${d.client_dob ? `Date of birth: ${longDate(d.client_dob)}<br>` : ''}${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone || 'Phone: ________________')}${d.client_email ? ' · ' + e(d.client_email) : ''}
       ${coClients(d).map((c) => `<span class="nm" style="margin-top:10px">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${c.dob ? `Date of birth: ${longDate(c.dob)}<br>` : ''}${c.address ? e(c.address) : `Address: same as ${e(d.client_name)}`}<br>${[c.phone, c.email].filter(Boolean).map(e).join(' · ')}`).join('')}</div></div>`;
 }
@@ -178,7 +180,7 @@ function signatures(d, title, n) {
   <p class="note" style="margin-top:14px">Electronic signatures are legally recognized under the Personal Information Protection and Electronic Documents Act (PIPEDA), Alberta's Electronic Transactions Act and CICC By-law 2021-2, s.1.1(aa). The signed document is fingerprinted (SHA-256) so any later change can be detected.</p></div>`;
 }
 function closing(d) {
-  return `<div class="foot"><span>${e(d.business_name)} · ${e(d.business_address)}</span><span>${e(d.rcic_name)} · CICC College ID ${e(d.rcic_id)}</span></div>`;
+  return `<div class="foot" data-sec="lh"><span>${e(d.business_name)} · ${e(d.business_address)}</span><span>${e(d.rcic_name)} · CICC College ID ${e(d.rcic_id)}</span></div>`;
 }
 const regulator = `<p>The RCIC is a Licensee of the ${CICC.name}, the national regulator of immigration and citizenship consultants in Canada. ${CICC.address}. Telephone ${CICC.phone}. Email ${CICC.email}. Website ${CICC.web}.</p>`;
 
@@ -188,7 +190,7 @@ function consultation(d) {
   const total = free ? 0 : Number(d.fee || 0) + tax;
   const T = isJoint(d) ? 'Joint Initial Consultation Agreement' : 'Initial Consultation Agreement';
   return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), 'Retainer Agreement Regulation, section 4.1')}
-  <div class="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Consultation', `${longDate(d.consult_date)} · ${e(d.consult_length)} · ${e(d.consult_method)}`)}${glanceRow('Purpose', e(d.purpose))}
+  <div class="glance" data-sec="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Consultation', `${longDate(d.consult_date)} · ${e(d.consult_length)} · ${e(d.consult_method)}`)}${glanceRow('Purpose', e(d.purpose))}
     ${glanceRow('Fee', free ? '<b>No fee — pro bono</b>' : `${money(total)} CAD${d.gst_rate ? ` (incl. GST ${money(tax)})` : ' (GST not applicable)'}`)}${glanceRow('Language of service', e(d.language))}</dl></div>
   <p class="intro">This Initial Consultation Agreement (the “Agreement”) is made between the Regulated Canadian Immigration Consultant named above (the “RCIC”) and the Client, as required by section 4.1 of the Retainer Agreement Regulation of the College of Immigration and Citizenship Consultants${free ? '. Although no fee is charged, it records' : ' before advice is given for a fee. It records'} the purpose, the fee and the date of the consultation.</p>
   ${H(1, 'Purpose and scope of the consultation')}
@@ -245,7 +247,7 @@ function retainer(d) {
        <p>${billing === 'flat_dates' ? 'Each payment is due on the date shown.' : 'An invoice is issued when each milestone is completed.'} Invoices are payable within ${e(d.payment_days)} days.</p>`;
   const T = isJoint(d) ? 'Joint Retainer Agreement' : 'Retainer Agreement';
   return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), 'Service Agreement for Immigration and Citizenship Services', d.file_number ? `<span>File no. <b>${e(d.file_number)}</b></span>` : '')}
-  <div class="glance"><h3>Key terms at a glance</h3><dl>${isJoint(d) ? glanceRow('Clients (joint)', clientNames(d)) : ''}${glanceRow('Category and program', e(d.program || '________________'))}${free ? glanceRow('Fee arrangement', '<b>Pro bono — no professional fees</b>') : glanceRow('Billing method', BILLING[billing])
+  <div class="glance" data-sec="glance"><h3>Key terms at a glance</h3><dl>${isJoint(d) ? glanceRow('Clients (joint)', clientNames(d)) : ''}${glanceRow('Category and program', e(d.program || '________________'))}${free ? glanceRow('Fee arrangement', '<b>Pro bono — no professional fees</b>') : glanceRow('Billing method', BILLING[billing])
     + glanceRow(billing === 'hourly' || billing === 'daily' ? 'Estimated professional fees' : 'Total professional fees', `${money(totalFees)} + ${rate ? `GST ${money(tax(totalFees))}` : 'GST not applicable'} = <b>${money(totalFees + tax(totalFees))}</b> CAD`)
     + glanceRow('Retainer held in trust', Number(d.retainer) > 0 ? money(d.retainer) : 'None')}${glanceRow('Language of service', e(d.language))}
     ${glanceRow('Preferred correspondence', e(d.comm_methods))}</dl></div>
@@ -329,6 +331,12 @@ function retainer(d) {
 }
 
 export function render(type, d) { return type === 'consultation' ? consultation(d) : retainer(d); }
+export function defaultTitles(type, d) {
+  const j = isJoint(d);
+  return type === 'consultation'
+    ? [j ? 'JOINT INITIAL CONSULTATION AGREEMENT' : 'INITIAL CONSULTATION AGREEMENT', 'Retainer Agreement Regulation, section 4.1']
+    : [j ? 'JOINT RETAINER AGREEMENT' : 'RETAINER AGREEMENT', 'Service Agreement for Immigration and Citizenship Services'];
+}
 
 export function requiredMissing(type, d) {
   const need = [['client_name', 'Client name'], ['client_address', 'Client address'], ['client_phone', 'Client phone'], ['rcic_name', 'RCIC name'],
