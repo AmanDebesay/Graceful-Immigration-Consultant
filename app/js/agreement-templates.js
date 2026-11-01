@@ -142,6 +142,7 @@ const STYLE = `<style>
 .gi-agr .sig .gi-sig{height:74px;display:flex;align-items:flex-end;border-bottom:1.5px solid #1C2333;margin-bottom:6px}
 .gi-agr .sig img{max-height:70px;max-width:260px}.gi-agr .typed{font-family:'Brush Script MT','Segoe Script',cursive;font-size:30px;color:#0B2A5C}
 .gi-agr .sig b{color:#0B2A5C}
+.gi-agr .todo{color:#B42318;background:#FEF3F2;border:1px dashed #F04438;border-radius:4px;padding:1px 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px}
 .gi-agr .note{font-size:11.5px;color:#6B7385;font-family:Arial,Helvetica,sans-serif}
 .gi-agr .foot{margin-top:22px;padding-top:10px;border-top:3px double #C9A24A;display:flex;justify-content:space-between;gap:10px;font-family:Arial,Helvetica,sans-serif;font-size:10.5px;color:#6B7385}
 .gi-agr .runfoot{display:none}
@@ -154,6 +155,7 @@ const STYLE = `<style>
 </style>`;
 
 const H = (n, t) => `<h2 data-sec="${n}"><span class="n">${n}</span>${t}</h2>`;
+const todo = (what) => `<span class="todo">[To fill in: ${what}]</span>`;
 const glanceRow = (k, v) => (v ? `<dt>${k}</dt><dd>${v}</dd>` : '');
 
 export const LH_DEFAULTS = { tagline: 'Guide · Support · Belong', rcic_designation: 'Regulated Canadian Immigration Consultant (RCIC-IRB)', website: 'gracefulimmigration.ca' };
@@ -247,14 +249,14 @@ function retainer(d) {
        <p>${billing === 'flat_dates' ? 'Each payment is due on the date shown.' : 'An invoice is issued when each milestone is completed.'} Invoices are payable within ${e(d.payment_days)} days.</p>`;
   const T = isJoint(d) ? 'Joint Retainer Agreement' : 'Retainer Agreement';
   return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), 'Service Agreement for Immigration and Citizenship Services', d.file_number ? `<span>File no. <b>${e(d.file_number)}</b></span>` : '')}
-  <div class="glance" data-sec="glance"><h3>Key terms at a glance</h3><dl>${isJoint(d) ? glanceRow('Clients (joint)', clientNames(d)) : ''}${glanceRow('Category and program', e(d.program || '________________'))}${free ? glanceRow('Fee arrangement', '<b>Pro bono — no professional fees</b>') : glanceRow('Billing method', BILLING[billing])
+  <div class="glance" data-sec="glance"><h3>Key terms at a glance</h3><dl>${isJoint(d) ? glanceRow('Clients (joint)', clientNames(d)) : ''}${glanceRow('Category and program', d.program ? e(d.program) : todo('category and program'))}${free ? glanceRow('Fee arrangement', '<b>Pro bono — no professional fees</b>') : glanceRow('Billing method', BILLING[billing])
     + glanceRow(billing === 'hourly' || billing === 'daily' ? 'Estimated professional fees' : 'Total professional fees', `${money(totalFees)} + ${rate ? `GST ${money(tax(totalFees))}` : 'GST not applicable'} = <b>${money(totalFees + tax(totalFees))}</b> CAD`)
     + glanceRow('Retainer held in trust', Number(d.retainer) > 0 ? money(d.retainer) : 'None')}${glanceRow('Language of service', e(d.language))}
     ${glanceRow('Preferred correspondence', e(d.comm_methods))}</dl></div>
   <p class="intro">This Retainer Agreement (the “Agreement”) sets out the exact duties of the Regulated Canadian Immigration Consultant named above (the “RCIC”) and of the Client, so that both parties have clear expectations about what will be provided, how it will be provided and at what cost. It is made in accordance with the College of Immigration and Citizenship Consultants Act, the Code of Professional Conduct and the Retainer Agreement Regulation. The RCIC is a Licensee of the College of Immigration and Citizenship Consultants (the “College”).</p>
 
   ${H(1, 'Summary of preliminary advice')}
-  ${para(d.preliminary_advice) || '<p>________________</p>'}${d.consultation_ref ? `<p>Reference: Initial Consultation Agreement ${e(d.consultation_ref)}.</p>` : ''}
+  ${para(d.preliminary_advice) || `<p>${todo('summary of the preliminary advice given to the client — form section “1–2”')}</p>`}${d.consultation_ref ? `<p>Reference: Initial Consultation Agreement ${e(d.consultation_ref)}.</p>` : ''}
   <p>The RCIC has also advised that any existing or potential criminal matter may affect the outcome and that additional documents may be required; the RCIC does not provide criminal law advice.</p>
   ${iniBox(d)}
 
@@ -270,7 +272,7 @@ function retainer(d) {
   <p>The Client expressly authorizes the RCIC to act on the Client's behalf to the extent of the specific services described in this Agreement, including by completing a Use of a Representative form (IMM 5476) where required. Once this Agreement is signed, the Client may appoint a designate in writing to deal with the RCIC on their behalf.</p>
 
   ${H(4, 'Services to be provided')}
-  <p>The RCIC will represent the Client in the following immigration and/or citizenship category and program: <b>${e(d.program || '________________')}</b></p>
+  <p>The RCIC will represent the Client in the following immigration and/or citizenship category and program: <b>${d.program ? e(d.program) : todo('category and program — form section “3–6”')}</b></p>
   <p>The scope of services and major steps:</p>${bullets(d.scope)}
   <p>Estimated timeframes:</p>${bullets(d.timeframes)}
   <p class="callout">Once an application is submitted, government processing times are outside the RCIC's control and may change at any time.</p>
@@ -383,6 +385,7 @@ export function certificate(a, events = []) {
   return `<div class="gi-agr" style="margin-top:30px;border:1px solid #E3DCCD;border-radius:8px;padding:16px 18px;font-family:Arial,sans-serif;font-size:12.5px">
     <h2 style="margin-top:0">Signature certificate</h2>
     <table><tr><th>Document</th><td>${e(a.number)} · ${e(a.title)}</td></tr><tr><th>Document fingerprint (SHA-256)</th><td style="word-break:break-all">${e(a.body_sha256 || '—')}</td></tr>
+    ${a.sign_method === 'paper' ? `<tr><th>Signing method</th><td>Signed by hand on the printed copy${a.paper_signed_on ? ` on ${e(a.paper_signed_on)}` : ''}; the scanned signed copy is kept on file</td></tr>` : ''}
     <tr><th>RCIC signature</th><td>${e(a.rcic_name || '')} · ${f(a.rcic_signed_at)}</td></tr>
     <tr><th>Client signature</th><td>${e(a.client_name || '—')}${a.client_initials ? ` (initials ${e(a.client_initials)})` : ''} · ${f(a.client_signed_at)}${a.client_ip ? ` · IP ${e(a.client_ip)}` : ''}</td></tr>
     ${[...(a.signers || a.agreement_signers || [])].sort((x, y) => x.position - y.position).map((x) => `<tr><th>Client ${x.position} signature</th><td>${e(x.signed_name || x.name)}${x.initials ? ` (initials ${e(x.initials)})` : ''} · ${f(x.signed_at)}${x.ip ? ` · IP ${e(x.ip)}` : ''}</td></tr>`).join('')}</table>
