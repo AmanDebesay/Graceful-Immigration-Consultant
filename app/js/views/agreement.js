@@ -57,6 +57,8 @@ export async function render(el, [id], { setTitle }) {
   const manage = can('agreements.manage');
   if (a.status === 'draft' && manage) return editor(el, a, setTitle);
 
+  const people = [{ name: a.contacts?.full_name, email: a.contacts?.email, token: a.signing_token, signed_at: a.client_signed_at },
+    ...[...(a.agreement_signers || [])].sort((x, y) => x.position - y.position)];
   const { data: events } = await db.from('agreement_events').select('*').eq('agreement_id', id).order('created_at');
   const doc = withSignatures(a.body_html || '', a);
   el.innerHTML = `<div class="toolbar no-print"><a class="btn btn-sm" href="#/agreements">← Agreements</a>${agrBadge(a.status)}<div class="grow"></div>
@@ -73,17 +75,23 @@ export async function render(el, [id], { setTitle }) {
             <div class="tl-body"><div class="meta">${fmtDateTime(v.created_at)}${v.ip ? ' · IP ' + esc(v.ip) : ''}</div><b>${esc({ created: 'Draft created', sent: 'Signed by RCIC and sent', viewed: 'Opened by client', signed: 'Signed by client', client_signed: 'Signed by one client', voided: 'Voided', link_renewed: 'Signing link renewed' }[v.event] || v.event)}</b>
             ${v.details?.signed_by ? ` · ${esc(v.details.signed_by)}` : ''}${v.details?.name ? ` · ${esc(v.details.name)}` : ''}</div></div>`).join('')}</div></div>
         ${(a.agreement_signers || []).length ? `<div class="card"><div class="card-h"><h3>Clients signing</h3></div><div class="card-b">
-          ${[{ name: a.contacts?.full_name, signed_at: a.client_signed_at }, ...[...a.agreement_signers].sort((x, y) => x.position - y.position)].map((x) =>
-            `<div class="row" style="justify-content:space-between;margin-bottom:6px"><span>${esc(x.name || '')}</span>${x.signed_at ? `<span class="badge b-GREEN">Signed ${fmtDateTime(x.signed_at)}</span>` : '<span class="badge b-gold">Waiting</span>'}</div>`).join('')}</div></div>` : ''}
+          ${people.map((x, i) =>
+            `<div class="row" style="justify-content:space-between;margin-bottom:6px"><span>${esc(x.name || '')}</span><span>${x.signed_at ? `<span class="badge b-GREEN">Signed ${fmtDateTime(x.signed_at)}</span>` : '<span class="badge b-gold">Waiting</span>'}
+              ${a.status === 'signed' && x.email ? `<button class="btn btn-sm" data-copy="${i}" title="RA 5.5: email this client their signed copy">${icon('mail')} Send copy</button>` : ''}</span></div>`).join('')}</div></div>` : ''}
         ${a.body_sha256 ? `<div class="card"><div class="card-b" style="font-size:12px;word-break:break-all"><b>Document fingerprint (SHA-256)</b><br>${esc(a.body_sha256)}</div></div>` : ''}
         ${a.status === 'signed' ? `<div class="alert ok">Signed ${fmtDateTime(a.client_signed_at)}. RA 5.5: send the client a copy of the signed agreement by email and keep the confirmation on file.</div>
-          ${a.contacts?.email ? `<button class="btn btn-primary" id="sendCopy">${icon('mail')} Email signed copy to client</button>` : ''}` : ''}
+          ${a.contacts?.email && !(a.agreement_signers || []).length ? `<button class="btn btn-primary" id="sendCopy">${icon('mail')} Email signed copy to client</button>` : ''}` : ''}
       </div></div>`;
   el.querySelector('#share')?.addEventListener('click', () => shareModal(a.signing_token, a));
   // RA 5.5: email the signed copy as confirmation (sent from Outlook, kept in Sent Items and on the client file)
   el.querySelector('#sendCopy')?.addEventListener('click', async () => (await import('../crm.js')).composeEmail({
     contact: a.contacts, subject: `Your signed ${AGR_TYPE[a.type]} (${a.number})`,
     body: `Hello ${a.contacts.full_name.split(' ')[0]},\n\nThank you for signing. As confirmation, your signed copy of ${AGR_TYPE[a.type]} ${a.number} is available at this secure link (valid until ${new Date(a.token_expires_at).toLocaleDateString('en-CA')}):\n\n${signLink(a.signing_token)}\n\nYou can print it or save it as a PDF from that page. Please keep it for your records.` }));
+  el.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = async () => {
+    const x = people[b.dataset.copy];
+    (await import('../crm.js')).composeEmail({ contact: { ...a.contacts, full_name: x.name }, to: x.email, subject: `Your signed ${AGR_TYPE[a.type]} (${a.number})`,
+      body: `Hello ${String(x.name || '').split(' ')[0]},\n\nThank you for signing. Every client named in the agreement has now signed. As confirmation, your signed copy of ${AGR_TYPE[a.type]} ${a.number} is available at this secure link (valid until ${new Date(a.token_expires_at).toLocaleDateString('en-CA')}):\n\n${signLink(x.token)}\n\nYou can print it or save it as a PDF from that page. Please keep it for your records.` });
+  }));
   el.querySelector('#void')?.addEventListener('click', () => modal({
     title: `Void ${a.number}`, body: `<p style="margin-bottom:10px">The signing link stops working and the agreement is kept for your records. To change terms, void it and create a new one.</p><div class="field"><label>Reason</label><input class="input" id="r"></div>`,
     actions: [{ label: 'Cancel' }, { label: 'Void agreement', cls: 'btn-danger', onClick: async (m) => { await rpc('void_agreement', { p_id: id, p_reason: m.querySelector('#r').value || null }); toast('Agreement voided'); render(el, [id], { setTitle }); } }],
@@ -153,13 +161,16 @@ async function editor(el, a, setTitle) {
       <div id="co">${coRows()}</div>
       <div class="row" style="gap:8px;margin-bottom:12px"><select class="input" id="coPick" style="max-width:320px"><option value="">Add a client from Contacts…</option></select>
         <button class="btn btn-sm" type="button" id="coNew">${icon('plus')} Add a person not in Contacts</button></div>
-      ${T === 'retainer' ? `<div id="coInstr" ${(d.co_clients || []).length ? '' : 'hidden'}>${f('joint_instructions', 'How instructions are given by the clients')}</div>` : ''}</div>`, true);
+      <div id="coInstr" ${(d.co_clients || []).length ? '' : 'hidden'}>${T === 'retainer' ? f('joint_instructions', 'How instructions are given by the clients') : ''}
+        ${f('continuing_relationship', 'Continuing relationship to disclose (RA 6.2) — only if you already act regularly for one of these clients, e.g. “The RCIC has represented the main client on other files since 2025.”')}
+        <div class="alert info" style="font-size:12.5px">RA 6.3: avoid a joint agreement if a dispute between these clients is likely, or their interests may split as the file progresses (for example a separating couple).</div></div></div>`, true);
   const body = T === 'consultation'
     ? parties + feeArr + sec('Consultation', `${f('purpose', 'Purpose of the consultation', 'textarea')}<div class="row-2">${f('consult_date', 'Consultation date', 'date')}${f('consult_length', 'Length')}</div>
       <div class="row-2">${f('consult_method', 'Method (phone, video, in person)')}${f('fee', 'Fee before tax (CAD)', 'number', 'step="0.01"')}</div>${f('payment_method', 'Payment method')}`, true)
     : parties + feeArr
       + sec('1–2. Preliminary advice & general provisions', `${f('file_number', 'File number')}${f('preliminary_advice', 'Summary of preliminary advice given to the client', 'textarea', 'rows="4"')}
         ${f('consultation_ref', 'Initial Consultation Agreement no. (if any)')}${f('assistants', 'People who will assist (names and their role)')}
+        ${f('other_licensees', 'Other RCICs of the firm working on this file — name, College ID and what each will do (RA 6.5; leave blank if none)')}
         <div class="row-2">${f('response_time', 'Respond to client inquiries within')}${f('update_time', 'Share government updates within')}</div>${f('comm_methods', 'Preferred method of correspondence')}`)
       + sec('3–6. Services, instructions & exclusions', `${f('program', 'Immigration/citizenship category and program (be specific, e.g. “Permanent Residence — Family Class, spousal, outland”)')}
         ${f('scope', 'Scope of services & major steps (one per line)', 'textarea', 'rows="6"')}${f('timeframes', 'Estimated timeframes (one per line)', 'textarea', 'rows="3"')}

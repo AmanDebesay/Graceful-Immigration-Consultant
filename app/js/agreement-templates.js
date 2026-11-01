@@ -95,7 +95,8 @@ function jointClause(d, consultation = false) {
     ${consultation ? '' : `<li>${e(d.joint_instructions || 'All the Clients must agree on instructions about the application.')}</li>`}
     <li>if the Clients' interests come into conflict (for example a separation or a disagreement about the application), the RCIC will tell all the Clients and may have to stop acting for one or all of them, as required by the Code of Professional Conduct;</li>
     ${free ? '' : `<li>the Clients are jointly and individually responsible for the ${consultation ? 'consultation fee, which is payable once for the joint consultation' : 'fees and disbursements in this Agreement'};</li>`}
-    <li>each Client may seek independent advice before agreeing to joint ${consultation ? 'consultation' : 'representation'}, and signs this Agreement personally.</li></ul>`;
+    <li>each Client may seek independent advice before agreeing to joint ${consultation ? 'consultation' : 'representation'}, and signs this Agreement personally.</li></ul>
+  ${String(d.continuing_relationship || '').trim() ? `<p><b>Continuing relationship.</b> ${e(d.continuing_relationship)}</p>` : ''}`;
 }
 
 const STYLE = `<style>
@@ -163,7 +164,7 @@ function letterhead(d, title, kind, extra = '') {
   <div class="meta">${d.number ? `<span>Agreement no. <b>${e(d.number)}</b></span>` : ''}<span>Date <b>${longDate(d.agreement_date)}</b></span>${extra}<span>Written in <b>English</b></span></div>
   <div class="parties"><div><span class="lbl">Licensee (RCIC)</span><span class="nm">${e(d.rcic_name)}</span>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>${e(d.business_name)}<br>${e(d.business_address)}<br>${e(d.business_phone)} · ${e(d.business_email)}</div>
     <div><span class="lbl">${isJoint(d) ? 'Clients (joint)' : 'Client'}</span><span class="nm">${e(d.client_name)}</span>${d.client_dob ? `Date of birth: ${longDate(d.client_dob)}<br>` : ''}${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone || 'Phone: ________________')}${d.client_email ? ' · ' + e(d.client_email) : ''}
-      ${coClients(d).map((c) => `<span class="nm" style="margin-top:10px">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${c.dob ? `Date of birth: ${longDate(c.dob)}<br>` : ''}${c.address ? `${e(c.address)}<br>` : ''}${[c.phone, c.email].filter(Boolean).map(e).join(' · ')}`).join('')}</div></div>`;
+      ${coClients(d).map((c) => `<span class="nm" style="margin-top:10px">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${c.dob ? `Date of birth: ${longDate(c.dob)}<br>` : ''}${c.address ? e(c.address) : `Address: same as ${e(d.client_name)}`}<br>${[c.phone, c.email].filter(Boolean).map(e).join(' · ')}`).join('')}</div></div>`;
 }
 function runningFooter(d, title) {
   return `<div class="runfoot"><span>${e(d.business_name)} · ${e(title)}${d.number ? ' · ' + e(d.number) : ''}</span><span>Client initials: ________</span></div>`;
@@ -257,6 +258,7 @@ function retainer(d) {
 
   ${H(2, 'General provisions')}
   <p>The RCIC commits to providing quality immigration and/or citizenship services and to adequately supervising any person who assists with them. People likely to assist the RCIC: ${e(d.assistants || 'none at this time; the Client will be told in writing if this changes')}.</p>
+  ${String(d.other_licensees || '').trim() ? `<p>Other Licensees of the firm who will provide services on this file, and their functions: ${e(d.other_licensees)}. The RCIC signing this Agreement remains responsible for all of its elements, and every Licensee working on the file is jointly and severally responsible for the quality of the work and is subject to the College's by-laws, Code of Professional Conduct and regulations.</p>` : ''}
   <p>When necessary, the RCIC will obtain assistance from other professionals or services, including an interpreter or translator, and will obtain the Client's written consent before any additional fees are incurred. The RCIC will provide professional, ethical and competent services as required by the College's Code of Professional Conduct (${CICC.code}).</p>
   ${relationshipClause(d)}${jointClause(d)}
   <p>The RCIC will provide services in <b>${e(d.language)}</b>; this Agreement is written in English. Original documents provided by the Client will be returned as soon as their purpose is complete.</p>
@@ -291,7 +293,7 @@ function retainer(d) {
   ${free ? `<p>No professional fees are invoiced. Disbursements, if any, are invoiced at cost with receipts and are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. No interest or administrative fee is charged.</p>` : `<p>Invoices are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. ${Number(d.interest) > 0 ? `Interest of ${e(d.interest)}% per month may be charged on overdue amounts.` : 'No interest is charged on overdue amounts.'} ${Number(d.admin_fee) > 0 ? `An administrative fee of ${money(d.admin_fee)} applies to processing a Client-initiated discharge of representation or early termination of this Agreement.` : 'No administrative fee is charged for a Client-initiated discharge or early termination.'}</p>`}
 
   ${H(10, 'Refund policy')}
-  ${free ? `<p>No professional fees are paid under this Agreement, so no refund of professional fees arises. If the Agreement ends, the Client will receive an itemized account of any disbursements, and any amount the Client advanced for disbursements and that was not used will be returned.</p>` : `${d.cooling_off ? '<p>The Client may cancel this Agreement in writing within forty-eight (48) hours of signing it for a full refund of all amounts paid.</p>' : ''}
+  ${free ? `<p>No professional fees are paid under this Agreement, so no refund of professional fees arises, including if an application is refused. If the Agreement ends, the Client will receive an itemized account of any disbursements, and any amount the Client advanced for disbursements and that was not used will be returned.</p>` : `${d.cooling_off ? '<p>The Client may cancel this Agreement in writing within forty-eight (48) hours of signing it for a full refund of all amounts paid.</p>' : ''}
   <p>If this Agreement ends, the Client will receive an itemized account of all funds received and services provided, and an invoice for any outstanding services or disbursements. Unused or unearned fees will be refunded in accordance with the College's Client File Management Regulation and Client Account Regulation.</p>
   <p class="callout"><b>Fees are not refundable in the event of an application refusal</b>, provided the RCIC performed the agreed services professionally. If an error or omission by the RCIC requires a refund, it will be provided and the RCIC will notify their professional liability insurer.</p>`}
   ${iniBox(d)}
@@ -337,7 +339,7 @@ export function requiredMissing(type, d) {
   const miss = need.filter(([k]) => !String(d[k] ?? '').trim()).map(([, l]) => l);
   (d.co_clients || []).forEach((c, i) => {
     if (!String(c.name || '').trim()) miss.push(`Name of additional client ${i + 2}`);
-    else if (!String(c.email || '').trim() && !String(c.phone || '').trim()) miss.push(`Email or phone for ${c.name} (to send their signing link)`);
+    else if (!String(c.phone || '').trim()) miss.push(`Phone number for ${c.name}`);
   });
   if (free && ['family', 'friend'].includes(d.pro_bono_reason) && !String(d.relationship || '').trim()) miss.push('Relationship to the RCIC');
   if (free && d.pro_bono_reason === 'other' && !String(d.pro_bono_note || '').trim()) miss.push('Reason for pro bono');
