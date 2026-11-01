@@ -140,7 +140,7 @@ export async function composeEmail({ contact = null, to = '', subject = '', body
     body: `${!st.email ? `<div class="alert info">Email isn't connected to Microsoft 365 yet, so it can't be sent from here. The owner can connect it in <b>Business Settings → Integrations</b>.</div>` : ''}
       <div class="row-2"><div class="field"><label>From</label><select class="input" id="fr">
           <option value="me">${esc(state.profile.email)} (me)</option>${(st.mailboxes || []).filter((m) => m !== state.profile.email.toLowerCase()).map((m) => `<option value="shared">${esc(m)} (shared)</option>`).join('')}</select></div>
-        <div class="field"><label>Template</label><select class="input" id="tp">${EMAIL_TEMPLATES.map(([, l], i) => `<option value="${i}">${esc(l)}</option>`).join('')}</select></div></div>
+        <div class="field"><label>Template</label><select class="input" id="tp">${EMAIL_TEMPLATES.map(([, l], i) => `<option value="${i}">${esc(i === 0 && body ? 'Message already prepared — keep it' : l)}</option>`).join('')}</select></div></div>
       <div class="row-2"><div class="field"><label>To</label><input class="input" id="to" value="${esc(to || contact?.email || '')}"></div>
         <div class="field"><label>Cc (optional)</label><input class="input" id="cc" placeholder="Separate addresses with commas"></div></div>
       <div class="row-2"><div class="field"><label>Bcc (optional)</label><input class="input" id="bcc"></div>
@@ -151,6 +151,8 @@ export async function composeEmail({ contact = null, to = '', subject = '', body
         <small class="dk-muted">Your name, title and the office phone are added as a signature. The email is saved in Outlook Sent Items${contact ? ' and on this client\'s file' : ''}.</small></div>`,
     onOpen: (m) => {
       m.querySelector('#tp').onchange = (e) => {
+        // A prepared message (e.g. a signing link) is only replaced after the user confirms.
+        if (body && +e.target.value && !confirm('Replace the prepared message (and any link in it) with this template?')) { e.target.value = '0'; return; }
         const [s, , b] = EMAIL_TEMPLATES[+e.target.value];
         if (s) m.querySelector('#su').value = s;
         if (b) m.querySelector('#bo').value = b.replace(/\{first\}/g, first);
