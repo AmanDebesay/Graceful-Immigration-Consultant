@@ -34,6 +34,10 @@ export function adminClient(): SupabaseClient {
 export const COMPANY_DOMAIN = "gracefulimmigration.ca";
 export const isCompanyEmail = (e?: string | null) => !!e && e.toLowerCase().endsWith("@" + COMPANY_DOMAIN);
 
+const jwtClaims = (t: string): Record<string, unknown> => {
+  try { return JSON.parse(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))); } catch { return {}; }
+};
+
 /** Returns the signed-in staff user making the request, or null. */
 export async function callerProfile(req: Request, admin: SupabaseClient) {
   const auth = req.headers.get("authorization") ?? "";
@@ -41,6 +45,8 @@ export async function callerProfile(req: Request, admin: SupabaseClient) {
   if (!token || !token.includes(".")) return null;
   const { data, error } = await admin.auth.getUser(token);
   if (error || !data.user) return null;
+  // Two-step verification is required: the (verified) token must come from a session that passed the code check.
+  if (jwtClaims(token).aal !== "aal2") return null;
   const { data: profile } = await admin.from("profiles").select("id, email, full_name, role, active").eq("id", data.user.id).single();
   if (!profile || !profile.active) return null;
   // Staff access only for company email addresses (checked against the auth email, not the profile copy).

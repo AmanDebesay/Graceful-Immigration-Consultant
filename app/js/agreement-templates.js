@@ -19,7 +19,7 @@ export const CICC = {
   code: 'https://laws.justice.gc.ca/eng/regulations/SOR-2022-128/index.html',
 };
 
-export function defaults(type, { contact = {}, settings = {}, caseRow = null, pkg = null, consult = null, proBono = null } = {}) {
+export function defaults(type, { contact = {}, settings = {}, caseRow = null, pkg = null, consult = null, proBono = null, parent = null } = {}) {
   const today = new Date().toLocaleDateString('en-CA');
   const base = {
     agreement_date: today, language: 'English',
@@ -31,6 +31,15 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
     fee_basis: proBono ? 'pro_bono' : 'paid', pro_bono_reason: proBono || '', relationship: '', pro_bono_note: '',
     co_clients: [], joint_instructions: 'Any of the Clients may give routine instructions; decisions that affect the application need the agreement of all the Clients.',
   };
+  // Letters and amendments start from the agreement they relate to (parent), when there is one.
+  const pd = parent?.data || {};
+  const fromParent = parent ? { parent_number: parent.number, parent_date: pd.agreement_date || String(parent.created_at || '').slice(0, 10), co_clients: pd.co_clients || [],
+    client_name: pd.client_name || base.client_name, client_address: pd.client_address || base.client_address, client_phone: pd.client_phone || base.client_phone, client_email: pd.client_email || base.client_email } : {};
+  if (type === 'amendment') return { ...base, ...fromParent, reason: '', changes: '', fee_change: '', effective_date: today };
+  if (type === 'non_engagement') return { ...base, contact_date: today, matter: '', reason_kind: 'scope', reason_note: '', advice_given: false, deadlines: '',
+    documents: 'No original documents were received from you. Copies of anything you sent us are kept confidentially in our records.', fees_note: 'No fees are owing.' };
+  if (type === 'termination') return { ...base, ...fromParent, close_kind: 'completed', effective_date: today, reason: '', file_status: '', deadlines: '', next_steps: '',
+    documents: '', final_account: '', trust_refund: 0, refund_days: 30, notify_ircc: true, authority: 'Immigration, Refugees and Citizenship Canada (IRCC)', retention_years: 6 };
   if (type === 'consultation') {
     return { ...base, purpose: 'Initial assessment of eligibility and immigration options in Canada.', consult_date: today, consult_length: `${consult?.minutes || 60} minutes`,
       consult_method: 'Video call (Zoom or Microsoft Teams)', fee: proBono ? 0 : Number(consult?.fee ?? 60), payment_method: proBono ? 'Not applicable (no fee)' : 'Interac e-Transfer or by phone before the consultation' };
@@ -164,7 +173,7 @@ function letterhead(d, title, kind, extra = '') {
     <div class="lh-name"><b>${e(d.business_name)}</b><span>${e(lhv(d, 'tagline'))}</span><small>${e(d.rcic_name)}, ${e(lhv(d, 'rcic_designation'))} · College ID ${e(d.rcic_id)}</small></div>
     <div class="lh-contact">${e(d.business_address)}<br>${e(d.business_phone)}<br>${e(d.business_email)}<br>${e(lhv(d, 'website'))}</div></div>
   <div class="title" data-sec="title"><h1>${e(String(d.doc_title || '').trim() || title)}</h1><div class="kind">${e(String(d.doc_subtitle || '').trim() || kind)}</div><div class="orn"><i></i>✦<i></i></div></div>
-  <div class="meta" data-sec="title">${d.number ? `<span>Agreement no. <b>${e(d.number)}</b></span>` : ''}<span>Date <b>${longDate(d.agreement_date)}</b></span>${extra}<span>Written in <b>English</b></span></div>
+  <div class="meta" data-sec="title">${d.number ? `<span>${e(d.number_label || 'Agreement no.')} <b>${e(d.number)}</b></span>` : ''}<span>Date <b>${longDate(d.agreement_date)}</b></span>${extra}<span>Written in <b>English</b></span></div>
   <div class="parties" data-sec="parties"><div><span class="lbl">Licensee (RCIC)</span><span class="nm">${e(d.rcic_name)}</span>${e(lhv(d, 'rcic_designation'))} · College ID ${e(d.rcic_id)}<br>${e(d.business_name)}<br>${e(d.business_address)}<br>${e(d.business_phone)} · ${e(d.business_email)}</div>
     <div><span class="lbl">${isJoint(d) ? 'Clients (joint)' : 'Client'}</span><span class="nm">${e(d.client_name)}</span>${d.client_dob ? `Date of birth: ${longDate(d.client_dob)}<br>` : ''}${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone || 'Phone: ________________')}${d.client_email ? ' · ' + e(d.client_email) : ''}
       ${coClients(d).map((c) => `<span class="nm" style="margin-top:10px">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${c.dob ? `Date of birth: ${longDate(c.dob)}<br>` : ''}${c.address ? e(c.address) : `Address: same as ${e(d.client_name)}`}<br>${[c.phone, c.email].filter(Boolean).map(e).join(' · ')}`).join('')}</div></div>`;
@@ -214,7 +223,7 @@ function consultation(d) {
     <tfoot><tr><th>Total payable in advance</th><th class="r">${money(total)}</th></tr></tfoot></table>
   <p>Payment method: ${e(d.payment_method)}. The fee is earned once the consultation has taken place and is non-refundable, unless otherwise required by law. If the RCIC cancels and the consultation is not rescheduled, the fee will be refunded in full.</p>`}
   ${H(5, 'Confidentiality and privacy')}
-  <p>The RCIC must keep confidential all information about the Client acquired in the professional relationship, as required by the Code of Professional Conduct, unless disclosure is authorized by the Client or required by law. The Client consents to the collection, use and secure storage in Canada of personal information for this consultation, in accordance with PIPEDA and Alberta's Personal Information Protection Act, and accepts the risks of communication by email or other electronic means.</p>
+  <p>The RCIC must keep confidential all information about the Client acquired in the professional relationship, as required by the Code of Professional Conduct, unless disclosure is authorized by the Client or required by law. The Client consents to the collection, use and secure storage in Canada of personal information for this consultation, in accordance with PIPEDA and Alberta's Personal Information Protection Act, and accepts the risks of communication by email or other electronic means. The RCIC may use an artificial intelligence assistant (Anthropic Claude, processed in the United States) for research and drafting; the Client's name, contact details and identification numbers are removed before any information is sent, it is not used to train AI models, and the RCIC personally reviews all work and gives all advice.</p>
   ${H(6, 'Language')}<p>This Agreement is written in English. The consultation will be provided in ${e(d.language)}. The Client may bring or arrange an interpreter.</p>
   ${H(7, 'Regulator and complaints')}${regulator}<p>Information about the College's complaints process: ${CICC.complaints}</p>
   ${H(8, 'Governing law')}<p>This Agreement is governed by the laws of the Province of ${e(d.province)} and the federal laws of Canada applicable therein.</p>
@@ -310,7 +319,7 @@ function retainer(d) {
   ${iniBox(d)}
 
   ${H(12, 'Confidentiality and correspondence')}
-  <p>The Client's personal information and documents are collected and protected according to the Code of Professional Conduct, PIPEDA and Alberta's Personal Information Protection Act. They are stored in an encrypted, access-controlled system hosted in Canada, seen only by people working on the file, and kept confidential indefinitely, except where disclosure is authorized by the Client, required for the applications in this Agreement or required by law. Another person may access the file only with the Client's written authorization.</p>
+  <p>The Client's personal information and documents are collected and protected according to the Code of Professional Conduct, PIPEDA and Alberta's Personal Information Protection Act. They are stored in an encrypted, access-controlled system hosted in Canada, seen only by people working on the file, and kept confidential indefinitely, except where disclosure is authorized by the Client, required for the applications in this Agreement or required by law. Another person may access the file only with the Client's written authorization. The RCIC may use an artificial intelligence assistant (Anthropic Claude, processed in the United States) for research and drafting; the Client's name, contact details and identification numbers are removed before any information is sent, it is not used to train AI models, and the RCIC personally reviews all work and gives all advice. Client documents are kept in the firm's Microsoft 365 OneDrive, in a private folder for the Client's file.</p>
   <p>Preferred method of correspondence: <b>${e(d.comm_methods)}</b>. The Client accepts the risks of electronic communication and will share documents only through the secure method the RCIC provides.</p>
 
   ${H(13, 'Discharge or withdrawal of representation')}
@@ -334,9 +343,98 @@ function retainer(d) {
   ${signatures(d, T, 18)}${closing(d)}${runningFooter(d, T)}</div>`;
 }
 
-export function render(type, d) { return type === 'consultation' ? consultation(d) : retainer(d); }
+
+// ── Amendment, non-engagement and closing/termination letters ──
+// The client acknowledges the two letters (same signing link); an amendment is signed by everyone, like the agreement it changes.
+export const NE_REASON = {
+  scope: 'Outside the services we provide', conflict: 'Conflict of interest', capacity: 'We cannot take it on in the time it needs',
+  not_proceeding: 'The client decided not to proceed', other: 'Other reason',
+};
+export const CLOSE_KIND = { completed: 'File completed — closing letter', client: 'Client ended the services', rcic: 'RCIC withdraws from representation' };
+const NE_TEXT = {
+  scope: 'the matter you asked about is outside the services we provide',
+  conflict: 'acting for you would create a conflict of interest, which the Code of Professional Conduct does not allow us to accept',
+  capacity: 'we are not able to give your matter the time and attention it needs within the time limits that apply',
+  not_proceeding: 'you told us that you do not wish to proceed with our services',
+};
+function ackSig(d, title, n) {
+  return `<div class="sigpage">${H(n, 'Signature and acknowledgement')}
+  <div class="sigs"><div class="sig"><div class="gi-sig" data-sig="rcic"></div><b>${e(d.rcic_name)}</b><br>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>Date: <span data-sig-date="rcic">________________</span></div></div>
+  <p style="margin-top:18px">Acknowledgement: I confirm that I received and read this ${e(title.toLowerCase())}. Signing confirms receipt only; it does not mean I agree with its contents.</p>
+  <div class="sigs"><div class="sig"><div class="gi-sig" data-sig="client"></div><b>${e(d.client_name)}</b><br>Client<br>Date: <span data-sig-date="client">________________</span></div>
+    ${coClients(d).map((c, i) => `<div class="sig"><div class="gi-sig" data-sig="client-${i + 2}"></div><b>${e(c.name)}</b><br>Client<br>Date: <span data-sig-date="client-${i + 2}">________________</span></div>`).join('')}</div></div>`;
+}
+const ref = (d) => d.parent_number ? `${e(d.parent_number)}${d.parent_date ? `, dated ${longDate(d.parent_date)}` : ''}` : todo('number and date of the agreement');
+const findHelp = `<p>To find another licensed representative, use the College's public register (${CICC.web}) for Regulated Canadian Immigration Consultants, or contact a lawyer or, in Quebec, a notary who is a member of a provincial or territorial law society or the Chambre des notaires du Québec.</p>`;
+
+function amendment(d) {
+  d = { ...d, number_label: 'Amendment no.' };
+  const T = isJoint(d) ? 'Amendment to Joint Retainer Agreement' : 'Amendment to Retainer Agreement';
+  return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), 'Written amendment signed by all parties')}
+  <p class="intro">This Amendment changes the Retainer Agreement no. ${ref(d)} (the “Agreement”) between the RCIC and the Client${isJoint(d) ? 's' : ''} named above. Changes to a retainer agreement are valid only when made in writing and signed by the Client${isJoint(d) ? 's' : ''} and the RCIC.</p>
+  ${H(1, 'Reason for the amendment')}${lines(d.reason).length ? para(d.reason) : `<p>${todo('why the agreement is being changed')}</p>`}
+  ${H(2, 'What changes')}${bullets(d.changes, `<p>${todo('each change, one per line (scope, fees, timelines…)')}</p>`)}
+  ${lines(d.fee_change).length ? `${H(3, 'Fees')}${bullets(d.fee_change)}<p>Unless stated above, the fees, billing method and payment terms of the Agreement do not change.</p>` : `${H(3, 'Fees')}<p>This Amendment does not change the fees, billing method or payment terms of the Agreement.</p>`}
+  ${H(4, 'Effective date')}<p>This Amendment takes effect on ${longDate(d.effective_date)}.</p>
+  ${H(5, 'Everything else stays the same')}<p>All other terms of the Agreement remain in full force. If this Amendment and the Agreement conflict, this Amendment applies. The Client may seek independent advice before signing and receives a copy of the signed Amendment by email.</p>
+  ${iniBox(d)}${signatures(d, T, 6)}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+function nonEngagement(d) {
+  d = { ...d, number_label: 'Letter no.' };
+  const T = 'Non-Engagement Letter';
+  const why = d.reason_kind === 'other' ? e(d.reason_note) || todo('reason') : NE_TEXT[d.reason_kind] || NE_TEXT.scope;
+  return `${STYLE}<div class="gi-agr">${letterhead(d, 'NON-ENGAGEMENT LETTER', 'We are not acting for you')}
+  <p>Dear ${e(String(d.client_name || '').split(' ')[0] || 'Client')},</p>
+  <p>Thank you for contacting ${e(d.business_name)} on ${longDate(d.contact_date)} about ${lines(d.matter).length ? e(d.matter) : todo('the matter they asked about')}. This letter confirms in writing that <b>we will not be representing you</b> in this matter, because ${why}.</p>
+  ${H(1, 'What this means for you')}
+  <ul><li>We have not been retained by you. There is no retainer agreement between us for this matter.</li>
+    <li>We have not filed, and will not file, any application, form, submission or appeal for you, and we will not contact any government authority on your behalf.</li>
+    <li>${d.advice_given ? 'Any general information shared during our discussion was preliminary, based only on what you told us at the time, and is not an opinion you should rely on.' : 'We have not given you an opinion on the merits of your matter, and nothing we discussed should be taken as one.'}</li>
+    <li>Not taking your matter is not an opinion that you have a weak case.</li></ul>
+  ${H(2, 'Time limits')}
+  <p><b>Immigration, refugee and citizenship matters often have strict deadlines, and missing one can end your options.</b> Please act promptly.</p>
+  ${lines(d.deadlines).length ? `<div class="callout"><b>Deadlines we are aware of:</b>${bullets(d.deadlines)}</div>` : ''}
+  ${findHelp}
+  ${H(3, 'Your documents and fees')}${para(d.documents || 'No original documents were received from you.')}${para(d.fees_note || 'No fees are owing.')}
+  ${H(4, 'Confidentiality')}<p>Everything you told us remains confidential under the Code of Professional Conduct, even though we are not acting for you.</p>
+  <p>Yours truly,</p>
+  ${ackSig(d, T, 5)}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+function termination(d) {
+  d = { ...d, number_label: 'Letter no.' };
+  const kind = d.close_kind || 'completed';
+  const [T, sub] = { completed: ['File Closing Letter', 'Completion of services'], client: ['Termination of Services', 'At the Client’s request'], rcic: ['Withdrawal of Representation', 'Written notice under the Code of Professional Conduct'] }[kind];
+  const first = e(String(d.client_name || '').split(' ')[0] || 'Client');
+  return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), sub)}
+  <p>Dear ${first},</p>
+  <p>${kind === 'completed' ? `The services under Retainer Agreement no. ${ref(d)} are complete, and we are closing your file effective ${longDate(d.effective_date)}.`
+    : kind === 'client' ? `As you instructed, our services under Retainer Agreement no. ${ref(d)} end effective ${longDate(d.effective_date)}. This letter confirms the end of our services in writing.`
+    : `This letter gives you written notice that we are withdrawing from representing you under Retainer Agreement no. ${ref(d)}, effective ${longDate(d.effective_date)}.`}</p>
+  ${kind === 'rcic' ? `${H(1, 'Reason')}${lines(d.reason).length ? para(d.reason) : `<p>${todo('the reason for withdrawing')}</p>`}<p>We are giving you reasonable notice so that you can arrange other representation, and we will not withdraw in a way that harms your matter.</p>`
+    : kind === 'client' && lines(d.reason).length ? `${H(1, 'Your instructions')}${para(d.reason)}` : ''}
+  ${H(2, 'Status of your file')}${lines(d.file_status).length ? bullets(d.file_status) : `<p>${todo('what was done and where the application stands')}</p>`}
+  ${H(3, 'Deadlines and next steps')}
+  ${lines(d.deadlines).length ? `<div class="callout"><b>Important deadlines:</b>${bullets(d.deadlines)}</div>` : `<p>${kind === 'completed' ? 'There are no outstanding deadlines on this file that we are aware of.' : todo('upcoming deadlines (or state there are none)')}</p>`}
+  ${lines(d.next_steps).length ? bullets(d.next_steps) : ''}
+  ${kind !== 'completed' ? `<p><b>From the effective date you are responsible for your matter</b>, including meeting every deadline, unless you appoint a new representative.</p>${findHelp}` : '<p>If you need help in the future, for example to renew a status document, please contact us. A new agreement will be needed for any new service.</p>'}
+  ${H(4, 'Government authorities')}<p>${d.notify_ircc ? `We will notify ${e(d.authority || 'Immigration, Refugees and Citizenship Canada (IRCC)')} that we no longer represent you, so that correspondence goes directly to you${kind === 'completed' ? ' from now on' : ' or your new representative'}.` : 'We do not need to notify any authority, because no representation is on file with one.'}</p>
+  ${H(5, 'Your documents and file')}${para(d.documents || 'All original documents you gave us are returned with this letter, or are available for you to collect.')}
+  <p>${kind === 'completed' ? '' : 'If you appoint a new representative, we will provide your file to them promptly when you authorize us in writing. '}As required, we keep a copy of your file confidentially for ${e(d.retention_years || 6)} years, then destroy it securely.</p>
+  ${H(6, 'Fees and money held in trust')}${lines(d.final_account).length ? bullets(d.final_account) : `<p>${todo('final account: fees earned, final invoice, refund of any unearned fees')}</p>`}
+  ${Number(d.trust_refund) > 0 ? `<p>We will refund <b>${money(d.trust_refund)}</b> held in trust for you within ${e(d.refund_days || 30)} days, with a final statement of account.</p>` : '<p>We hold no money in trust for you.</p>'}
+  <p>Our duty of confidentiality to you continues after this file is closed.</p>
+  <p>Yours truly,</p>
+  ${ackSig(d, T, 7)}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+export function render(type, d) { return ({ consultation, retainer, amendment, non_engagement: nonEngagement, termination }[type] || retainer)(d); }
 export function defaultTitles(type, d) {
   const j = isJoint(d);
+  if (type === 'amendment') return [j ? 'AMENDMENT TO JOINT RETAINER AGREEMENT' : 'AMENDMENT TO RETAINER AGREEMENT', 'Written amendment signed by all parties'];
+  if (type === 'non_engagement') return ['NON-ENGAGEMENT LETTER', 'We are not acting for you'];
+  if (type === 'termination') return ({ completed: ['FILE CLOSING LETTER', 'Completion of services'], client: ['TERMINATION OF SERVICES', 'At the Client’s request'], rcic: ['WITHDRAWAL OF REPRESENTATION', 'Written notice under the Code of Professional Conduct'] })[d.close_kind || 'completed'];
   return type === 'consultation'
     ? [j ? 'JOINT INITIAL CONSULTATION AGREEMENT' : 'INITIAL CONSULTATION AGREEMENT', 'Retainer Agreement Regulation, section 4.1']
     : [j ? 'JOINT RETAINER AGREEMENT' : 'RETAINER AGREEMENT', 'Service Agreement for Immigration and Citizenship Services'];
@@ -346,7 +444,10 @@ export function requiredMissing(type, d) {
   const need = [['client_name', 'Client name'], ['client_address', 'Client address'], ['client_phone', 'Client phone'], ['rcic_name', 'RCIC name'],
     ['rcic_id', 'College ID'], ['business_address', 'Business address'], ['business_phone', 'Business phone']];
   const free = isProBono(d);
-  if (type === 'consultation') need.push(['purpose', 'Purpose of consultation'], ...(free ? [] : [['fee', 'Consultation fee']]));
+  if (type === 'amendment') need.push(['parent_number', 'Agreement being amended'], ['reason', 'Reason for the amendment'], ['changes', 'What changes'], ['effective_date', 'Effective date']);
+  else if (type === 'non_engagement') { need.splice(1, 1); need.push(['matter', 'What the person asked about'], ['contact_date', 'Date they contacted you']); if (d.reason_kind === 'other') need.push(['reason_note', 'Reason']); }
+  else if (type === 'termination') { need.push(['parent_number', 'Agreement'], ['effective_date', 'Effective date'], ['file_status', 'Status of the file'], ['final_account', 'Final account']); if (d.close_kind === 'rcic') need.push(['reason', 'Reason for withdrawing']); if (d.close_kind !== 'completed') need.push(['deadlines', 'Upcoming deadlines (or “None”)']); }
+  else if (type === 'consultation') need.push(['purpose', 'Purpose of consultation'], ...(free ? [] : [['fee', 'Consultation fee']]));
   else need.push(['program', 'Category and program'], ['scope', 'Scope of services'], ['preliminary_advice', 'Summary of preliminary advice']);
   const miss = need.filter(([k]) => !String(d[k] ?? '').trim()).map(([, l]) => l);
   (d.co_clients || []).forEach((c, i) => {
@@ -355,6 +456,7 @@ export function requiredMissing(type, d) {
   });
   if (free && ['family', 'friend'].includes(d.pro_bono_reason) && !String(d.relationship || '').trim()) miss.push('Relationship to the RCIC');
   if (free && d.pro_bono_reason === 'other' && !String(d.pro_bono_note || '').trim()) miss.push('Reason for pro bono');
+  if (!['consultation', 'retainer'].includes(type)) return miss;
   if (type === 'retainer' && free) { if (!String(d.comm_methods || '').trim()) miss.push('Preferred method of correspondence'); }
   else if (type === 'retainer') {
     if (['flat', 'flat_dates'].includes(d.billing || 'flat') && !(d.milestones || []).some((m) => m.name && Number(m.fee) > 0)) miss.push('At least one milestone with a fee');

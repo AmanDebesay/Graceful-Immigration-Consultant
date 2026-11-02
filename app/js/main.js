@@ -1,11 +1,12 @@
 // App bootstrap: session → profile & permissions → shell → hash router.
-import { db, state, can, isStaff, esc, icon, avatarHtml, fmtDate, ROLE_LABEL, loadStaff, fail, toast } from './core.js';
-import { showLogin, showSetPassword, showLinkError, showMfaChallenge } from './auth.js';
+import { db, state, can, canDraftAgreements, isStaff, esc, icon, avatarHtml, fmtDate, ROLE_LABEL, loadStaff, fail, toast } from './core.js';
+import { showLogin, showSetPassword, showLinkError, showMfaChallenge, showMfaSetup } from './auth.js';
 performance.setResourceTimingBufferSize?.(2000); // keep the list of loaded scripts for healStaleModules
 
 const NAV = [
   { group: 'Overview' },
   { path: '/', label: 'Dashboard', icon: 'home', show: () => isStaff() },
+  { path: '/guide', label: 'How it works', icon: 'book', show: () => isStaff() },
   { path: '/assistant', label: 'AI Assistant', icon: 'sparkle', show: () => isStaff() },
   { path: '/email', label: 'Email', icon: 'mail', show: () => isStaff() },
   { path: '/calendar', label: 'Calendar', icon: 'calendar', show: () => isStaff() },
@@ -19,6 +20,7 @@ const NAV = [
   { path: '/pipeline', label: 'Lead Pipeline', icon: 'kanban', show: () => can('crm.view') },
   { path: '/activities', label: 'Activities', icon: 'phone', show: () => can('crm.view') },
   { path: '/cases', label: 'Cases', icon: 'file', show: () => can('crm.view') },
+  { path: '/checklists', label: 'Checklists', icon: 'checksq', show: () => can('checklists.work') || can('cases.approve') || can('crm.view'), count: 'my_checklists' },
   { path: '/assessments', label: 'Assessments', icon: 'clipboard', show: () => can('intake.view'), count: 'new_assessments' },
   { path: '/tasks', label: 'Tasks', icon: 'checksq', show: () => isStaff(), count: 'tasks_overdue', red: true },
   { path: '/crm-reports', label: 'CRM Reports', icon: 'trend', show: () => can('crm.view') },
@@ -35,7 +37,7 @@ const NAV = [
   { path: '/items', label: 'Products & Services', icon: 'clipboard', show: () => can('finance.view') || can('crm.edit') },
   { group: 'Business' },
   { path: '/newsletter', label: 'Newsletter', icon: 'mail', show: () => can('newsletter.view') },
-  { path: '/agreements', label: 'Agreements', icon: 'file', show: () => can('agreements.manage') || can('crm.view') },
+  { path: '/agreements', label: 'Agreements', icon: 'file', show: () => canDraftAgreements() || can('crm.view'), count: 'agr_review' },
   { group: 'Resources' },
   { path: '/resources', label: 'Legal & Research', icon: 'book', show: () => isStaff() },
   { group: 'Administration' },
@@ -65,6 +67,9 @@ const ROUTES = [
   [/^\/activities$/, 'activities', 'Activities'],
   [/^\/cases$/, 'cases', 'Cases'],
   [/^\/cases\/([\w-]+)$/, 'case', 'Case'],
+  [/^\/checklists$/, 'checklists', 'Checklists'],
+  [/^\/checklists\/([\w-]+)$/, 'checklist', 'Checklist'],
+  [/^\/guide$/, 'guide', 'How the dashboard works'],
   [/^\/crm-reports$/, 'crm-reports', 'CRM Reports'],
   [/^\/tasks$/, 'tasks', 'Tasks'],
   [/^\/accounting$/, 'accounting', 'Accounting'],
@@ -117,6 +122,8 @@ async function boot() {
     const totp = f?.totp?.find((x) => x.status === 'verified');
     if (totp) return showMfaChallenge(totp.id);
   }
+  // Required for everyone: no authenticator yet means setting one up now (the database also refuses access without it).
+  if (aal?.currentLevel !== 'aal2') return showMfaSetup();
 
   state.user = session.user;
   const { data: profile, error } = await db.from('profiles').select('*').eq('id', session.user.id).single();
@@ -152,7 +159,7 @@ function buildShell() {
     <aside class="sidebar" id="sidebar">
       <a class="sb-brand" href="#/"><img src="../public/img/logo-emblem.png" alt=""><b>GRACEFUL</b><span>Immigration Consultant Inc.</span></a>
       <nav class="sb-nav" id="sbNav"></nav>
-      <div class="sb-foot"><a class="sb-help" href="#/resources">${icon('book')}<span><b>Need help?</b><small>Legal &amp; research resources</small></span>${icon('arrowr')}</a>
+      <div class="sb-foot"><a class="sb-help" href="#/guide">${icon('book')}<span><b>Need help?</b><small>How the dashboard works</small></span>${icon('arrowr')}</a>
         <a class="sb-site" href="../public/index.html" target="_blank" rel="noopener">View website ↗</a></div>
     </aside>
     <div class="main">
@@ -178,7 +185,7 @@ function buildShell() {
     e.stopPropagation();
     const old = document.querySelector('.dropdown'); if (old) return old.remove();
     const d = document.createElement('div'); d.className = 'dropdown';
-    d.innerHTML = `<a href="#/account">${icon('user')} My profile &amp; photo</a><a href="#/resources">${icon('book')} Resources</a><button id="lo">${icon('logout')} Sign out</button>`;
+    d.innerHTML = `<a href="#/account">${icon('user')} My profile &amp; photo</a><a href="#/guide">${icon('book')} How it works</a><a href="#/resources">${icon('book')} Resources</a><button id="lo">${icon('logout')} Sign out</button>`;
     e.currentTarget.appendChild(d);
     d.querySelector('#lo').onclick = async () => { await db.auth.signOut(); location.hash = ''; location.reload(); };
     setTimeout(() => document.addEventListener('click', () => d.remove(), { once: true }));
@@ -244,7 +251,7 @@ async function setupNewMenu() {
   const fin = await import('./fin.js'), crm = await import('./crm.js');
   const groups = [
     ['Clients', [[can('crm.edit'), 'Client', () => (location.hash = '#/contacts?new=1')], [can('crm.edit'), 'Appointment', () => crm.editAppointment()], [can('crm.edit'), 'Document expiry date', () => crm.editKeyDate()], [can('crm.edit'), 'Deal', () => crm.editDeal()],
-      [can('crm.edit'), 'Case', () => crm.editCase()], [can('agreements.manage'), 'Agreement', async () => (await import('./views/agreements.js')).newAgreement()], [can('crm.edit'), 'Log activity', () => crm.logActivity()], [can('intake.view'), 'Assessment', () => (location.hash = '#/assessments/new')]]],
+      [can('crm.edit'), 'Case', () => crm.editCase()], [canDraftAgreements(), 'Agreement', async () => (await import('./views/agreements.js')).newAgreement()], [can('crm.edit'), 'Log activity', () => crm.logActivity()], [can('intake.view'), 'Assessment', () => (location.hash = '#/assessments/new')]]],
     ['Money in', [[can('finance.manage'), 'Invoice', () => fin.newInvoice()], [can('finance.manage'), 'Receive payment', () => fin.receivePayment()],
       [can('finance.manage'), 'Retainer into trust', () => fin.trustTxn('deposit')]]],
     ['Money out', [[can('finance.manage'), 'Expense', () => fin.newExpense()], [can('finance.manage'), 'Bill', () => fin.newBill()]]],
@@ -279,8 +286,11 @@ function renderNav() {
 
 export async function refreshCounts() {
   try {
-    const [s, u] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread')]);
-    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0) };
+    const me = state.profile.id;
+    const [s, u, cl, ar] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread'),
+      db.from('case_checklists').select('id', { count: 'exact', head: true }).eq('assigned_to', me).neq('stage', 'approved'),
+      can('agreements.manage') ? db.from('agreements').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('reviewer_id', me).not('review_requested_at', 'is', null) : { count: 0 }]);
+    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0), my_checklists: cl.count || 0, agr_review: ar.count || 0 };
   } catch { counts = {}; }
   if (shellBuilt) {
     renderNav();
@@ -306,7 +316,7 @@ function setupSearch() {
         q1(crm, 'cases', 'id, case_number, title, application_type, ircc_file_number, uci, contacts(full_name)', `case_number.ilike.${w},title.ilike.${w},application_type.ilike.${w},ircc_file_number.ilike.${w},uci.ilike.${w}`),
         q1(crm, 'companies', 'id, name', `name.ilike.${w}`),
         q1(fin, 'invoices', 'id, number, total, status, contacts(full_name)', `number.ilike.${w}`),
-        q1(can('agreements.manage') || crm, 'agreements', 'id, number, title, status', `number.ilike.${w},title.ilike.${w}`),
+        q1(canDraftAgreements() || crm, 'agreements', 'id, number, title, status', `number.ilike.${w},title.ilike.${w}`),
         can('intake.view') ? db.from('intake_submissions').select('id, created_at, triage_level, contacts!inner(full_name)').ilike('contacts.full_name', w).limit(4) : { data: [] },
         q1(true, 'tasks', 'id, title, due_date', `title.ilike.${w}`, 4),
         q1(crm, 'appointments', 'id, title, starts_at', `title.ilike.${w}`, 3),

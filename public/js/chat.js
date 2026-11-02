@@ -41,7 +41,7 @@
       '<div class="gc-log" aria-live="polite"></div>' +
       '<div class="gc-chips"></div>' +
       '<form class="gc-form"><input type="text" maxlength="1000" placeholder="Type your question…" aria-label="Your message"><button type="submit" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></button></form>' +
-      '<p class="gc-note">I\'m an AI assistant: I can help with our services and booking, not immigration advice. Please don\'t share passport numbers or other personal details here.</p>' +
+      '<p class="gc-note">I\'m an AI assistant: I can help with our services and booking, not immigration advice. Please don\'t share your name, contact details, ID numbers or case details here; we remove them automatically. <a href="privacy.html" target="_blank" rel="noopener">Privacy</a></p>' +
     '</section>';
   document.body.appendChild(root);
   document.documentElement.classList.add('has-gi-chat');

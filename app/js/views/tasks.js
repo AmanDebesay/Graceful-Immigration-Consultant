@@ -28,6 +28,7 @@ export async function render(el) {
           <small style="color:${!t.done && t.due_date && t.due_date < today() ? 'var(--red)' : 'var(--muted)'}">
           ${t.due_date ? 'Due ' + fmtDate(t.due_date) : 'No due date'}${scope === 'all' ? ' · ' + esc(staffName(t.assigned_to)) : ''}
           ${t.contacts ? ` · <a href="#/contacts/${t.contacts.id}">${esc(t.contacts.full_name)}</a>` : ''}</small></div>
+        ${/^#\//.test(t.link || '') ? `<a class="btn btn-sm" href="${esc(t.link)}">Open ${icon('arrowr')}</a>` : ''}
         ${priorityBadge(t.priority)}</div>`).join('') : `<div class="empty">${icon('checksq')}<div>Nothing here.</div></div>`;
     box.querySelectorAll('input[type=checkbox]').forEach((cb) => (cb.onchange = async () => {
       const { error: er } = await db.from('tasks').update({ done: cb.checked, done_at: cb.checked ? new Date().toISOString() : null }).eq('id', cb.dataset.id);

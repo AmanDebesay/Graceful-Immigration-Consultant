@@ -16,6 +16,23 @@ export function cleanMessages(raw: unknown, maxTurns: number, maxChars: number):
   return msgs;
 }
 
+// Removes personal identifiers before text leaves for the AI provider: email addresses, phone/ID-style numbers
+// (8+ digits: phone, UCI, SIN, passport, bank) and passport-style codes. Dates, years and IRCC form numbers are kept.
+const KEEP_CODE = /^(IMM|CIT|BOC|NOC|LMIA|TEER|CLB|IELTS|CELPIP|IRPR|IRPA|RAD|RPD|IAD|PRRA|ECA|EE|AAIP|GST)/i;
+const isDate = (m: string) => /^(19|20)\d{2}[-/.]\d{1,2}[-/.]\d{1,2}$/.test(m) || /^\d{1,2}[-/.]\d{1,2}[-/.](19|20)\d{2}$/.test(m)
+  || /^(19|20)\d{2}\s*[-–]\s*(19|20)\d{2}$/.test(m);
+export function redact(text: string, names: string[] = []): string {
+  let t = text
+    .replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, "[email removed]")
+    .replace(/\+?\d(?:[\s().-]{0,2}\d){7,}/g, (m) => (isDate(m.trim()) ? m : "[number removed]"))
+    .replace(/\b(?=[A-Z0-9]{6,10}\b)(?=[A-Z0-9]*\d)(?=[A-Z0-9]*[A-Z])[A-Z0-9]+\b/g, (m) => (KEEP_CODE.test(m) ? m : "[ID removed]"));
+  for (const n of names.map((x) => x.trim()).filter((x) => x.length >= 3)) {
+    t = t.replace(new RegExp(`(^|[^\\p{L}])${n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}])`, "giu"), "$1[name]");
+  }
+  return t;
+}
+export const redactMessages = (msgs: Msg[], names: string[] = []): Msg[] => msgs.map((m) => (m.role === "user" ? { ...m, content: redact(m.content, names) } : m));
+
 export async function streamClaude(req: Request, admin: SupabaseClient, opts: {
   kind: "staff" | "public"; userId?: string | null; model: string; system: string; messages: Msg[]; maxTokens: number;
 }): Promise<Response> {

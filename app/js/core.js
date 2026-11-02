@@ -13,6 +13,8 @@ export const state = { user: null, profile: null, perms: new Set(), staff: [], s
 
 export const can = (p) => state.profile?.role === 'owner' || state.perms.has(p);
 export const isStaff = () => state.profile && state.profile.role !== 'client';
+// Drafting is open to assistants; signing and sending stay with agreements.manage (the RCIC).
+export const canDraftAgreements = () => can('agreements.manage') || can('agreements.draft');
 
 export const ROLE_LABEL = {
   owner: 'Owner', rcic: 'RCIC', case_manager: 'Case Manager', bookkeeper: 'Bookkeeper', assistant: 'Assistant', client: 'Client',

@@ -9,7 +9,7 @@ let cached: { token: string; exp: number } | null = null;
 export const graphConfigured = () =>
   !!(Deno.env.get("MS_TENANT_ID") && Deno.env.get("MS_CLIENT_ID") && Deno.env.get("MS_CLIENT_SECRET"));
 
-async function graphToken(): Promise<string> {
+export async function graphToken(): Promise<string> {
   if (cached && cached.exp > Date.now() + 60_000) return cached.token;
   const res = await fetch(`https://login.microsoftonline.com/${Deno.env.get("MS_TENANT_ID")}/oauth2/v2.0/token`, {
     method: "POST",

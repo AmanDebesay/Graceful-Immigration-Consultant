@@ -1,4 +1,4 @@
-import { db, state, can, esc, icon, fmtDate, initials, today } from '../core.js';
+import { db, state, can, esc, icon, fmtDate, initials, today, timeAgo, staffName } from '../core.js';
 import { CASE_LABEL, APPT_LABEL, editAppointment, editKeyDate } from '../crm.js';
 
 const ACTIVE = ['open', 'in_progress', 'submitted', 'decision_pending'];
@@ -29,13 +29,18 @@ export async function render(el, _params, ctx) {
   const in120 = new Date(Date.now() + 120 * 86400000).toLocaleDateString('en-CA');
   const ago30 = new Date(Date.now() - 30 * 86400000).toLocaleDateString('en-CA');
   const none = { data: [] };
-  const [contacts, cases, appts, tasks, docs] = await Promise.all([
+  const work = can('checklists.work') || can('cases.approve'), manage = can('agreements.manage'), drafter = !manage && can('agreements.draft');
+  const [contacts, cases, appts, tasks, docs, myLists, agrQ] = await Promise.all([
     crm ? db.from('contacts').select('id, full_name, citizenship, stage, services, created_at').order('created_at', { ascending: false }).limit(5000) : none,
     crm ? db.from('cases').select('id, contact_id, title, application_type, status, opened_on, decision_on, created_at, contacts(full_name)').order('created_at', { ascending: false }).limit(5000) : none,
     crm ? db.from('appointments').select('id, contact_id, title, kind, starts_at, ends_at, location, meeting_link, notes, contacts(full_name)').gte('ends_at', nowIso).order('starts_at').limit(4) : none,
     db.from('tasks').select('id, title, due_date, done, contacts(full_name)').eq('done', false).eq('assigned_to', p.id).order('due_date', { ascending: true, nullsFirst: false }).limit(5),
     crm ? db.from('key_dates').select('id, contact_id, doc_type, expires_on, notes, contacts(full_name)').gte('expires_on', ago30).lte('expires_on', in120).order('expires_on').limit(4) : none,
+    work ? db.from('case_checklists').select('id, name, stage, updated_at, cases(case_number, contacts(full_name))').eq('assigned_to', p.id).neq('stage', 'approved').order('updated_at', { ascending: false }).limit(8) : none,
+    manage ? db.from('agreements').select('id, number, review_requested_at, review_requested_by, contacts(full_name)').eq('status', 'draft').eq('reviewer_id', p.id).not('review_requested_at', 'is', null).order('review_requested_at').limit(8)
+      : drafter ? db.from('agreements').select('id, number, review_requested_at, review_note, reviewer_id, contacts(full_name)').eq('status', 'draft').eq('created_by', p.id).order('created_at', { ascending: false }).limit(8) : none,
   ]);
+  const { clBadge } = work ? await import('./checklists.js') : {};
   const C = contacts.data || [], K = cases.data || [];
 
   // ── KPIs ──
@@ -82,6 +87,15 @@ export async function render(el, _params, ctx) {
 
   el.innerHTML = `
     ${!p.avatar_url ? `<div class="dk-nudge">${icon('camera')}<span><b>Add your photo.</b> It appears on your profile in the top right and helps your team and clients recognise you.</span><a class="btn btn-sm btn-gold" href="#/account">Add photo</a></div>` : ''}
+    ${work || manage || drafter ? `<div class="dk-card dk-queue" style="margin-bottom:18px"><div class="dk-h"><h3>Your work queue</h3>
+        <div class="row" style="gap:8px">${work ? `<a class="btn btn-gold btn-sm" href="#/checklists">${icon('checksq')} My checklists${(myLists.data || []).length ? ` (${myLists.data.length})` : ''}</a>` : ''}<a class="dk-link" href="#/guide">${icon('book')} How it works</a></div></div>
+      ${(myLists.data || []).length || (agrQ.data || []).length ? `<div class="dk-list">
+        ${(agrQ.data || []).map((a) => `<a class="rc" href="#/agreements/${a.id}"><span class="rc-av">${icon('file')}</span><b>${manage ? 'Review & sign' : 'Draft'} ${esc(a.number)}</b>
+          <span class="rc-type">${esc(a.contacts?.full_name || '')}${manage ? ` · from ${esc(staffName(a.review_requested_by))}` : ''}</span><span class="rc-date">${a.review_requested_at ? timeAgo(a.review_requested_at) : ''}</span>
+          <span class="pill ${manage ? 'p-amber' : a.review_requested_at ? 'p-gold' : a.review_note ? 'p-red' : 'p-grey'}">${manage ? 'Needs your review' : a.review_requested_at ? 'With RCIC' : a.review_note ? 'Changes requested' : 'In progress'}</span></a>`).join('')}
+        ${(myLists.data || []).map((c) => `<a class="rc" href="#/checklists/${c.id}"><span class="rc-av">${icon('checksq')}</span><b>${esc(c.cases?.contacts?.full_name || '')}</b>
+          <span class="rc-type">${esc(c.name)}</span><span class="rc-date">${timeAgo(c.updated_at)}</span>${clBadge(c.stage)}</a>`).join('')}</div>`
+        : `<div class="dk-empty">${icon('checksq')}<p>Nothing waiting for you. Work handed to you appears here and in Tasks.</p></div>`}</div>` : ''}
     <div class="dk-kpis">
       ${crm ? kpi('Total clients', clients.length, 'users', 'navy', trend(pct(newThis, newLast), 'from last month', `${newThis} new this month`), '#/contacts') : ''}
       ${crm ? kpi('Active cases', K.filter((k) => ACTIVE.includes(k.status)).length, 'folder', 'navy', trend(pct(openedThis, openedLast), 'from last month', `${openedThis} opened this month`), '#/cases') : ''}

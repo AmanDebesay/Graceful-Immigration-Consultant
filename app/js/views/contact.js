@@ -1,4 +1,4 @@
-import { db, state, can, esc, icon, STAGES, triageBadge, priorityBadge, staffName, staffOptions, fmtDate, fmtDateTime, timeAgo,
+import { db, state, can, canDraftAgreements, esc, icon, STAGES, triageBadge, priorityBadge, staffName, staffOptions, fmtDate, fmtDateTime, timeAgo,
   modal, confirmBox, toast, fail, today, SERVICE_LABEL, initials, rpc, callFn } from '../core.js';
 import { money, invoiceBadge, newInvoice, receivePayment, trustTxn } from '../fin.js';
 import { logActivity, editDeal, editCase, dealBadge, caseBadge, ACT_LABEL, ACT_ICON, composeEmail } from '../crm.js';
@@ -23,7 +23,7 @@ export async function render(el, [id], { setTitle }) {
       ${c.email && edit ? `<button class="btn" id="emailBtn">${icon('mail')} Email</button>` : ''}
       <a class="btn" href="#/chat?contact=${c.id}">${icon('chat')} Team chat</a>
       ${edit ? `<button class="btn" id="logAct">${icon('note')} Log activity</button>` : ''}
-      ${can('agreements.manage') ? `<button class="btn btn-gold" id="genAgr">${icon('file')} Generate agreement</button>` : ''}
+      ${canDraftAgreements() ? `<button class="btn btn-gold" id="genAgr">${icon('file')} Generate agreement</button>` : ''}
       <div style="position:relative"><button class="btn btn-primary" id="moreNew">${icon('plus')} New ▾</button></div>
       ${edit ? `<button class="btn" id="editBtn">Edit</button>` : ''}
       ${can('crm.delete') ? `<button class="btn btn-danger" id="delBtn" aria-label="Delete">${icon('trash')}</button>` : ''}
@@ -59,7 +59,7 @@ export async function render(el, [id], { setTitle }) {
         </div></div>
       </div>
       <div class="card">
-        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ['assessments', 'Assessments']]
+        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ['documents', 'Documents'], ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ['assessments', 'Assessments']]
           .map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
         <div class="card-b" id="tabBody"></div>
       </div>
@@ -73,7 +73,7 @@ export async function render(el, [id], { setTitle }) {
     e.stopPropagation();
     const old = document.querySelector('.dropdown'); if (old) return old.remove();
     const d = document.createElement('div'); d.className = 'dropdown'; d.style.left = '0'; d.style.right = 'auto';
-    const items = [[can('crm.edit'), 'deal', 'trend', 'Deal'], [can('crm.edit'), 'case', 'briefcase', 'Case'], [can('agreements.manage'), 'agr', 'file', 'Agreement'], [can('finance.manage'), 'inv', 'file', 'Invoice'],
+    const items = [[can('crm.edit'), 'deal', 'trend', 'Deal'], [can('crm.edit'), 'case', 'briefcase', 'Case'], [canDraftAgreements(), 'agr', 'file', 'Agreement'], [can('finance.manage'), 'inv', 'file', 'Invoice'],
       [can('finance.manage'), 'pay', 'check', 'Payment received'], [can('finance.manage'), 'trust', 'lock', 'Retainer into trust'], [true, 'task', 'checksq', 'Task']].filter((x) => x[0]);
     d.innerHTML = items.map(([, k, ic, l]) => `<button data-n="${k}">${icon(ic)} ${l}</button>`).join('');
     e.currentTarget.parentElement.appendChild(d);
@@ -126,6 +126,7 @@ export async function render(el, [id], { setTitle }) {
   });
 
   const tabs = el.querySelector('#tabs'), body = el.querySelector('#tabBody');
+  const documentsTab = async () => (await import('../files.js')).documentsPanel(body, { contactId: c.id });
   if (!tabs.querySelector(`[data-k="${tab}"]`)) tab = 'activity';
   tabs.onclick = (e) => { if (e.target.dataset.k) { tab = e.target.dataset.k; sessionStorage.setItem('gi_contact_tab', tab); showTab(); } };
   const rerender = () => render(el, [id], { setTitle });
@@ -136,7 +137,7 @@ export async function render(el, [id], { setTitle }) {
   async function showTab() {
     tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === tab));
     body.innerHTML = '<div class="loading" style="min-height:120px"><div class="spin"></div></div>';
-    ({ emails: emailsTab, agreements: agreementsTab, activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab })[tab]();
+    ({ emails: emailsTab, documents: documentsTab, agreements: agreementsTab, activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab })[tab]();
   }
 
   async function activityTab() {
@@ -189,7 +190,7 @@ export async function render(el, [id], { setTitle }) {
   async function agreementsTab() {
     const { agrBadge, AGR_TYPE, newAgreement } = await import('./agreements.js');
     const { data } = await db.from('agreements').select('id, number, type, status, created_at, client_signed_at').eq('contact_id', id).order('created_at', { ascending: false });
-    body.innerHTML = `${can('agreements.manage') ? `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn btn-primary btn-sm" id="na">${icon('plus')} Generate agreement</button></div>` : ''}
+    body.innerHTML = `${canDraftAgreements() ? `<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn btn-primary btn-sm" id="na">${icon('plus')} Generate agreement</button></div>` : ''}
       ${(data || []).length ? `<table class="t"><tbody>${data.map((g) => `<tr class="click" onclick="location.hash='#/agreements/${g.id}'"><td><b>${esc(g.number)}</b><br><small style="color:var(--muted)">${esc(AGR_TYPE[g.type])}</small></td>
         <td>${agrBadge(g.status)}</td><td>${g.client_signed_at ? 'Signed ' + fmtDate(g.client_signed_at) : fmtDate(g.created_at)}</td></tr>`).join('')}</tbody></table>`
       : '<div class="empty">No agreements yet. An Initial Consultation Agreement is required before paid advice, and a Retainer Agreement for representation.</div>'}`;

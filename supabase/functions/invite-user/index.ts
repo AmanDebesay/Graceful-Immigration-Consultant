@@ -13,6 +13,19 @@ Deno.serve(async (req) => {
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return json(req, { error: "Invalid request" }, 400); }
+
+  // Lost phone: an owner clears someone's authenticator so they set up a new one at their next sign-in.
+  if (body.action === "reset_mfa") {
+    if (caller.role !== "owner") return json(req, { error: "Only an owner can reset two-step verification." }, 403);
+    const userId = String(body.user_id ?? "");
+    if (userId === caller.id) return json(req, { error: "Ask the other owner to reset yours." }, 400);
+    const { data: f, error: le } = await admin.auth.admin.mfa.listFactors({ userId });
+    if (le) return json(req, { error: le.message }, 400);
+    for (const x of f?.factors ?? []) await admin.auth.admin.mfa.deleteFactor({ id: x.id, userId });
+    await admin.from("audit_log").insert({ actor_id: caller.id, action: "mfa_reset", entity: "profile", entity_id: userId, details: {} });
+    return json(req, { ok: true });
+  }
+
   const email = String(body.email ?? "").trim().toLowerCase();
   const fullName = String(body.full_name ?? "").trim().slice(0, 120);
   const jobTitle = String(body.job_title ?? "").trim().slice(0, 80) || null;

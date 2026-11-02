@@ -15,7 +15,7 @@ export const caseBadge = (s) => `<span class="badge ${CASE_CLS[s] || ''}">${esc(
 export const dealBadge = (s) => `<span class="badge ${s === 'won' ? 'b-GREEN' : s === 'lost' ? 'b-RED' : 'b-gold'}">${esc(DEAL_LABEL[s] || s)}</span>`;
 export const APP_TYPES = ['Spousal Sponsorship', 'Parent/Grandparent Sponsorship', 'Express Entry PR', 'Provincial Nominee (AAIP)', 'Work Permit', 'Work Permit Extension',
   'Study Permit', 'Study Permit Extension', 'Visitor Visa (TRV)', 'Super Visa', 'Visitor Record', 'PR Card Renewal', 'Citizenship', 'Refugee Claim', 'PRRA / H&C',
-  'Restoration of Status', 'LMIA (Employer)', 'Other'];
+  'Restoration of Status', 'LMIA (Employer)', 'Private Refugee Sponsorship', 'Refusal / Reconsideration', 'IRB Appeal (IAD/RAD)', 'Other'];
 
 const changed = () => window.dispatchEvent(new Event('crm-changed'));
 

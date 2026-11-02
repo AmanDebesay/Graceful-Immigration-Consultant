@@ -1,4 +1,5 @@
-import { db, esc, toast, fail, icon, modal, callFn } from '../core.js';
+import { db, esc, toast, fail, icon, modal, callFn, confirmBox } from '../core.js';
+import { APP_TYPES } from '../crm.js';
 
 const FIELDS = [
   ['business_name', 'Business legal name'], ['rcic_name', 'RCIC name'], ['licence_number', 'CICC licence number'],
@@ -9,19 +10,19 @@ const money = (n) => Number(n || 0).toLocaleString('en-CA', { style: 'currency',
 const total = (p) => (p.milestones || []).reduce((s, m) => s + Number(m.fee || 0), 0);
 
 export async function render(el) {
-  const tab = (location.hash.match(/tab=(fees|ai|integrations|reviews)/) || [])[1] || 'business';
-  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="ai">AI assistant</button><button data-t="integrations">Integrations</button><button data-t="reviews">Website reviews</button></div></div><div id="pane"></div>`;
+  const tab = (location.hash.match(/tab=(fees|checklists|ai|integrations|reviews)/) || [])[1] || 'business';
+  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="checklists">Checklists</button><button data-t="ai">AI assistant</button><button data-t="integrations">Integrations</button><button data-t="reviews">Website reviews</button></div></div><div id="pane"></div>`;
   el.querySelectorAll('#tabs button').forEach((b) => {
     b.classList.toggle('on', b.dataset.t === tab);
     b.onclick = () => { location.hash = b.dataset.t === 'business' ? '#/settings' : `#/settings?tab=${b.dataset.t}`; };
   });
   const pane = el.querySelector('#pane');
-  ({ fees, ai, business, integrations, reviews }[tab])(pane);
+  ({ fees, checklists, ai, business, integrations, reviews }[tab])(pane);
 }
 
 async function integrations(el) {
   const [{ data: integ, error }, { data: org }, status] = await Promise.all([
-    db.from('integration_settings').select('teams_webhook_url, shared_mailbox, receipts_mailbox').eq('id', 1).single(),
+    db.from('integration_settings').select('teams_webhook_url, shared_mailbox, receipts_mailbox, files_drive_user, files_root').eq('id', 1).single(),
     db.from('org_settings').select('ircc_rep_id').eq('id', 1).single(),
     callFn('comms', { action: 'status' }).catch(() => ({})),
   ]);
@@ -38,20 +39,34 @@ async function integrations(el) {
       <div class="field"><label for="tw">Teams workflow link</label><input class="input" id="tw" value="${esc(integ.teams_webhook_url || '')}" placeholder="https://…logic.azure.com/… or https://…powerplatform.com/…">
         <small class="dk-muted">In Teams: open the channel → ⋯ → <b>Workflows</b> → <b>Post to a channel when a webhook request is received</b> → copy the link it gives you.</small></div>
       <button class="btn btn-sm" id="testTeams" ${integ.teams_webhook_url ? '' : 'disabled'}>Send test message</button></div></div>
+    <div class="card"><div class="card-h"><h3>${icon('folder')} Client files (OneDrive)</h3>${badge(!!integ.files_drive_user && status.email)}</div><div class="card-b">
+      <p class="dk-muted" style="margin-bottom:12px">Uploaded client documents and signed agreements are saved in this OneDrive, one folder per client named <b>date + client name</b>, with sub-folders: 01 Agreements, 02 Client documents, 03 Forms &amp; submissions, 04 Correspondence, 05 IRCC decisions. Staff open files through the dashboard, so they don't need access to the OneDrive itself.</p>
+      <div class="field"><label for="du">OneDrive of (company account)</label><input class="input" id="du" value="${esc(integ.files_drive_user || '')}" placeholder="aman@gracefulimmigration.ca"></div>
+      <div class="field"><label for="dr">Main folder name</label><input class="input" id="dr" value="${esc(integ.files_root || 'Graceful Clients')}"></div>
+      <div class="alert info" style="font-size:12.5px">One-time setup in Microsoft Entra: the <b>Graceful Practice Hub</b> app needs the Microsoft Graph application permission <b>Files.ReadWrite.All</b>, with admin consent.</div>
+      <button class="btn btn-sm" id="testDrive" ${integ.files_drive_user ? '' : 'disabled'}>Test connection</button> <span id="driveRes" style="font-size:13px"></span></div></div>
     <div class="card"><div class="card-h"><h3>${icon('globe')} IRCC</h3></div><div class="card-b">
       <div class="field"><label for="rid">Representative IRCC ID (shown on the IRCC Portal tab; not a password)</label><input class="input" id="rid" value="${esc(org?.ircc_rep_id || '')}" placeholder="From your IRCC enrolment email"></div>
       <small class="dk-muted">Never store your IRCC password here. You sign in to the IRCC Portal yourself.</small></div></div>
   </div>
   <div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn btn-primary" id="saveInt">Save integrations</button></div>`;
   el.querySelector('#saveInt').onclick = async () => {
+    const du = el.querySelector('#du').value.trim().toLowerCase() || null, dr = el.querySelector('#dr').value.trim() || 'Graceful Clients';
+    if (du && !/@gracefulimmigration\.ca$/.test(du)) return fail(new Error('Use a company Microsoft 365 account for client files.'));
     const tw = el.querySelector('#tw').value.trim() || null, sm = el.querySelector('#sm').value.trim().toLowerCase(), rm = el.querySelector('#rm').value.trim().toLowerCase(), rid = el.querySelector('#rid').value.trim() || null;
     if (tw && !/^https:\/\//.test(tw)) return fail(new Error('The Teams link must start with https://'));
     if (!/@gracefulimmigration\.ca$/.test(sm) || !/@gracefulimmigration\.ca$/.test(rm)) return fail(new Error('Mailboxes must be company addresses.'));
     const [a, b] = await Promise.all([
-      db.from('integration_settings').update({ teams_webhook_url: tw, shared_mailbox: sm, receipts_mailbox: rm }).eq('id', 1),
+      db.from('integration_settings').update({ teams_webhook_url: tw, shared_mailbox: sm, receipts_mailbox: rm, files_drive_user: du, files_root: dr }).eq('id', 1),
       db.from('org_settings').update({ ircc_rep_id: rid }).eq('id', 1)]);
     if (a.error || b.error) return fail(a.error || b.error);
     toast('Integrations saved'); integrations(el);
+  };
+  el.querySelector('#testDrive').onclick = async (e) => {
+    e.target.disabled = true; const out = el.querySelector('#driveRes'); out.textContent = 'Checking…';
+    try { const r = await callFn('files', { action: 'test' }); out.innerHTML = `<span style="color:var(--green)">Connected — folder “${esc(r.name)}” is ready.</span>${r.web_url ? ` <a href="${esc(r.web_url)}" target="_blank" rel="noopener">Open in OneDrive</a>` : ''}`; }
+    catch (err) { out.innerHTML = `<span style="color:var(--red)">${esc(err.message)}</span>`; }
+    e.target.disabled = false;
   };
   el.querySelector('#testTeams').onclick = async (e) => {
     e.target.disabled = true;
@@ -236,4 +251,65 @@ async function reviews(el) {
   });
   el.querySelector('#add').onclick = () => edit();
   el.querySelectorAll('[data-e]').forEach((b) => (b.onclick = () => edit((list || []).find((x) => x.id === b.dataset.e))));
+}
+
+// Checklist templates are edited as plain text: "# Documents / # Forms / # RCIC review" start a part,
+// "## Heading" starts a group, a line starting with "?" is optional, every other line is a required item.
+const PART_HEAD = { documents: '# Documents', forms: '# Forms', review: '# RCIC review' };
+const toText = (items) => {
+  let out = [], stage = null, section = null;
+  for (const i of items || []) {
+    if (i.stage !== stage) { out.push((out.length ? '\n' : '') + PART_HEAD[i.stage]); stage = i.stage; section = null; }
+    if ((i.section || null) !== section) { if (i.section) out.push('## ' + i.section); section = i.section || null; }
+    out.push((i.required ? '' : '? ') + i.label);
+  }
+  return out.join('\n');
+};
+const fromText = (t) => {
+  const items = []; let stage = 'documents', section = null;
+  for (const raw of t.split('\n')) {
+    const ln = raw.trim(); if (!ln) continue;
+    if (ln.startsWith('## ')) { section = ln.slice(3).trim() || null; continue; }
+    if (ln.startsWith('#')) { const k = ln.replace(/^#+/, '').trim().toLowerCase(); stage = k.startsWith('form') ? 'forms' : k.includes('review') ? 'review' : 'documents'; section = null; continue; }
+    const opt = ln.startsWith('?');
+    items.push({ stage, section, label: opt ? ln.slice(1).trim() : ln, required: !opt });
+  }
+  return items;
+};
+
+async function checklists(el) {
+  const { data: tp, error } = await db.from('checklist_templates').select('*').order('sort').order('name');
+  if (error) { el.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
+  el.innerHTML = `<div class="alert info">These are the starting lists your team uses on each case (Cases → a case → <b>Start checklist</b>). Changing a list here does not change checklists already started.
+      Each list has three parts: <b>Documents</b> (collected by the assistant), <b>Forms</b> (case manager or RCIC) and <b>RCIC review</b> (only the RCIC ticks these, then approves).</div>
+    <div class="card"><div class="card-h"><h3>Checklist templates</h3><div class="grow"></div><button class="btn btn-gold btn-sm" id="add">${icon('plus')} New checklist</button></div>
+      <div class="table-wrap"><table class="t"><thead><tr><th>Checklist</th><th>Suggested for case types</th><th class="r">Items</th><th>Status</th></tr></thead><tbody>
+      ${(tp || []).map((t) => `<tr class="click" data-id="${t.id}"><td><b>${esc(t.name)}</b></td><td>${esc((t.application_types || []).join(', ') || 'Any (general)')}</td>
+        <td class="r">${(t.items || []).length}</td><td>${t.active ? '<span class="badge b-GREEN">Active</span>' : '<span class="badge">Hidden</span>'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  const edit = (t = { name: '', application_types: [], items: [], active: true, sort: (tp || []).length }) => modal({
+    title: t.id ? 'Edit checklist' : 'New checklist', wide: true,
+    body: `<div class="field"><label>Name</label><input class="input" id="nm" value="${esc(t.name)}"></div>
+      <div class="field"><label>Suggest for these case types</label><div class="row" style="gap:6px 14px;flex-wrap:wrap">${APP_TYPES.map((a) => `<label class="row" style="gap:6px;font-size:13px"><input type="checkbox" data-ty value="${esc(a)}" ${(t.application_types || []).includes(a) ? 'checked' : ''}>${esc(a)}</label>`).join('')}</div></div>
+      <div class="field"><label>Items — <code># Documents</code>, <code># Forms</code>, <code># RCIC review</code> start each part; <code>## Heading</code> groups items; start a line with <code>?</code> for “if applicable”</label>
+        <textarea class="input" id="tx" rows="18" style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">${esc(toText(t.items))}</textarea></div>
+      <label class="row" style="gap:8px"><input type="checkbox" id="ac" ${t.active ? 'checked' : ''}> Active (offered when starting a checklist)</label>
+      ${t.id ? '<div style="margin-top:12px"><button class="btn btn-sm btn-danger" id="dl" type="button">Delete this template</button></div>' : ''}`,
+    onOpen: (m) => m.querySelector('#dl')?.addEventListener('click', async () => {
+      if (!(await confirmBox('Delete template', `Delete “${t.name}”? Checklists already started are kept.`, 'Delete', true))) return;
+      const { error: e } = await db.from('checklist_templates').delete().eq('id', t.id);
+      if (e) return fail(e);
+      m.closest('.overlay').remove(); toast('Template deleted'); checklists(el);
+    }),
+    actions: [{ label: 'Cancel' }, { label: 'Save checklist', cls: 'btn-gold', onClick: async (m) => {
+      const row = { name: m.querySelector('#nm').value.trim(), application_types: [...m.querySelectorAll('[data-ty]:checked')].map((x) => x.value),
+        items: fromText(m.querySelector('#tx').value), active: m.querySelector('#ac').checked, sort: t.sort ?? 0, updated_at: new Date().toISOString() };
+      if (!row.name) throw new Error('Give the checklist a name.');
+      if (!row.items.length) throw new Error('Add at least one item.');
+      const { error: e } = t.id ? await db.from('checklist_templates').update(row).eq('id', t.id) : await db.from('checklist_templates').insert(row);
+      if (e) throw e;
+      toast('Checklist saved'); checklists(el);
+    } }],
+  });
+  el.querySelector('#add').onclick = () => edit();
+  el.querySelectorAll('tr[data-id]').forEach((tr) => (tr.onclick = () => edit(tp.find((x) => x.id === tr.dataset.id))));
 }

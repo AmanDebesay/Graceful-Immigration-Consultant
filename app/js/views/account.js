@@ -22,7 +22,7 @@ export async function render(el) {
     <div class="grid">
       <div class="card"><div class="card-h"><h3>Two-step verification</h3>${totp.length ? '<span class="badge b-GREEN">On</span>' : '<span class="badge b-AMBER">Off</span>'}</div>
         <div class="card-b">${totp.length
-          ? `<p style="margin-bottom:14px">Your account asks for a code from your authenticator app each time you sign in.</p><button class="btn btn-danger" id="mfaOff">Turn off</button>`
+          ? `<p style="margin-bottom:14px">Required for every account. You enter a code from your authenticator app each time you sign in. New phone? Set it up here first, then remove the app from the old phone. Lost your phone? Ask the owner to reset it on Team &amp; Access.</p><button class="btn" id="mfaOn">${icon('lock')} Move to a new phone</button>`
           : `<p style="margin-bottom:14px">Protect client data: require a 6-digit code from an app like Microsoft Authenticator or Google Authenticator when you sign in. Strongly recommended for everyone with access to client files.</p>
              <button class="btn btn-gold" id="mfaOn">${icon('lock')} Turn on two-step verification</button>`}</div></div>
       <div class="card"><div class="card-h"><h3>Password</h3></div><form class="card-b" id="pw">
@@ -79,11 +79,6 @@ export async function render(el) {
     if (error) return fail(error);
     e.target.reset(); toast('Password changed');
   };
-  el.querySelector('#mfaOff')?.addEventListener('click', async () => {
-    if (!(await confirmBox('Turn off two-step verification', 'Your account will only be protected by your password.', 'Turn off', true))) return;
-    for (const f of totp) { const { error } = await db.auth.mfa.unenroll({ factorId: f.id }); if (error) return fail(error); }
-    toast('Two-step verification turned off'); render(el);
-  });
   el.querySelector('#mfaOn')?.addEventListener('click', async () => {
     // Remove abandoned, unverified enrolments first
     for (const f of (factors?.all || []).filter((x) => x.status !== 'verified')) await db.auth.mfa.unenroll({ factorId: f.id });
@@ -100,7 +95,9 @@ export async function render(el) {
           const { data: ch, error: e1 } = await db.auth.mfa.challenge({ factorId: data.id }); if (e1) throw e1;
           const { error: e2 } = await db.auth.mfa.verify({ factorId: data.id, challengeId: ch.id, code: m.querySelector('#code').value.trim() });
           if (e2) throw new Error('That code is not correct. Try the newest code.');
-          toast('Two-step verification is on'); render(el);
+          // The new phone works, so the old one is removed
+          for (const f of totp) await db.auth.mfa.unenroll({ factorId: f.id });
+          toast(totp.length ? 'Your new phone is set up' : 'Two-step verification is on'); render(el);
         } }],
     });
   });

@@ -158,4 +158,36 @@ export function showMfaChallenge(factorId) {
   };
 }
 
+/** Two-step verification is required for every account: set up an authenticator app before the dashboard opens. */
+export async function showMfaSetup() {
+  const { data: f } = await db.auth.mfa.listFactors();
+  for (const x of (f?.all || []).filter((x) => x.status !== 'verified')) await db.auth.mfa.unenroll({ factorId: x.id });
+  const { data, error } = await db.auth.mfa.enroll({ factorType: 'totp', friendlyName: `Graceful ${Date.now()}` });
+  if (error) { frame(`<h1>Two-step verification</h1><div class="alert err">${esc(error.message)}</div><div class="auth-links"><a href="#" id="out">Sign out</a></div>`); }
+  else frame(`<h1>Protect your account</h1>
+    <p>Client files are confidential, so every account needs two-step verification. You'll enter a 6-digit code from your phone each time you sign in.</p>
+    <ol style="margin:0 0 12px 18px;line-height:1.7;font-size:14px"><li>Install <b>Microsoft Authenticator</b> (or Google Authenticator) on your phone.</li><li>In the app, add an account and scan this code.</li><li>Type the 6-digit code it shows.</li></ol>
+    <div class="qr" style="text-align:center"><img src="${data.totp.qr_code}" alt="QR code for your authenticator app" style="width:180px;height:180px"></div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;word-break:break-all">Can't scan? Enter this key: ${esc(data.totp.secret)}</p>
+    <div id="authMsg" class="alert" hidden></div>
+    <form id="mfaForm"><div class="field"><input class="input otp" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required placeholder="6-digit code"></div>
+    <button class="btn btn-primary" type="submit">Verify and continue</button></form>
+    <div class="auth-links"><a href="#" id="out">Sign out</a></div>`);
+  document.getElementById('out').onclick = async (e) => { e.preventDefault(); await db.auth.signOut(); showLogin(); };
+  const form = document.getElementById('mfaForm'); if (!form) return;
+  document.getElementById('code').focus();
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button'); btn.disabled = true;
+    try {
+      const { data: ch, error: e1 } = await db.auth.mfa.challenge({ factorId: data.id });
+      if (e1) throw e1;
+      const { error: e2 } = await db.auth.mfa.verify({ factorId: data.id, challengeId: ch.id, code: document.getElementById('code').value.trim() });
+      if (e2) throw e2;
+      window.dispatchEvent(new Event('auth-changed'));
+    } catch (x) { err(/Invalid|code/i.test(x.message || '') ? 'That code is not correct. Try the newest code in the app.' : x.message); }
+    finally { btn.disabled = false; }
+  };
+}
+
 export { esc, fail };

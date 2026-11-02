@@ -1,7 +1,7 @@
 // Staff AI assistant (Claude) for the Practice Hub: answers practice questions and reviews assessments.
-// Staff only (company email). Direct identifiers are removed from assessments before they are sent.
+// Staff only (company email, two-step verified). Names, emails, phone and ID numbers are removed before anything is sent.
 import { adminClient, callerProfile, corsHeaders, hasPerm, json } from "../_shared/common.ts";
-import { cleanMessages, streamClaude } from "../_shared/claude.ts";
+import { cleanMessages, redact, redactMessages, streamClaude } from "../_shared/claude.ts";
 
 const IDENTIFIERS = new Set(["fullName", "email", "phone", "contactPref"]);
 const LABELS: Record<string, string> = {
@@ -35,8 +35,9 @@ Deno.serve(async (req) => {
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return json(req, { error: "Invalid request" }, 400); }
-  const messages = cleanMessages(body.messages, 40, 12000);
-  if (!messages) return json(req, { error: "Send a question." }, 400);
+  const raw = cleanMessages(body.messages, 40, 12000);
+  if (!raw) return json(req, { error: "Send a question." }, 400);
+  let names: string[] = [];
 
   const { data: s } = await admin.from("org_settings").select("ai_staff_instructions, business_name, rcic_name").eq("id", 1).single();
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Edmonton" });
@@ -48,9 +49,11 @@ Deno.serve(async (req) => {
     if (!(await hasPerm(admin, caller.role, "intake.view"))) return json(req, { error: "You don't have access to assessments." }, 403);
     const { data: a } = await admin.from("intake_submissions").select("answers, triage_level, triage, created_at").eq("id", assessmentId).maybeSingle();
     if (!a) return json(req, { error: "Assessment not found." }, 404);
+    // The client's own name is also removed wherever it appears in their free-text answers.
+    names = String(a.answers?.fullName ?? "").split(/\s+/);
     const lines = Object.entries(a.answers ?? {})
       .filter(([k, v]) => !IDENTIFIERS.has(k) && v !== null && v !== "" && !(Array.isArray(v) && !v.length))
-      .map(([k, v]) => `- ${LABELS[k] ?? k}: ${Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : v}`);
+      .map(([k, v]) => `- ${LABELS[k] ?? k}: ${redact(Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : String(v), names)}`);
     const t = a.triage ?? {};
     system += `\n\nThe staff member has attached a client assessment (submitted ${String(a.created_at).slice(0, 10)}). Name and contact details were removed for privacy; refer to the person as "the client".
 Automatic triage level: ${a.triage_level}
@@ -61,6 +64,11 @@ Answers:
 ${lines.join("\n")}`;
   }
 
+  // Staff questions: identifiers typed by mistake are removed before sending.
+  const messages = redactMessages(raw, names);
+  system += `
+
+Privacy: client names, emails, phone and ID numbers are removed before messages reach you and appear as [name], [email removed], [number removed] or [ID removed]. Do not ask for them; refer to "the client".`;
   return streamClaude(req, admin, {
     kind: "staff", userId: caller.id, system, messages, maxTokens: 4000,
     model: Deno.env.get("AI_STAFF_MODEL") ?? "claude-opus-5-5",

@@ -5,11 +5,13 @@ const EDITABLE_ROLES = ['rcic', 'case_manager', 'bookkeeper', 'assistant'];
 
 export async function render(el) {
   const isOwner = state.profile.role === 'owner';
-  const [people, perms, rolePerms] = await Promise.all([
+  const [people, perms, rolePerms, mfaRows] = await Promise.all([
     db.from('profiles').select('*').order('role').order('full_name'),
     db.from('permissions').select('*').order('category'),
     db.from('role_permissions').select('*'),
+    db.rpc('staff_mfa_status'),
   ]);
+  const mfa = new Map((mfaRows.data || []).map((r) => [r.user_id, r.enabled]));
   const has = new Set((rolePerms.data || []).map((r) => `${r.role}:${r.permission}`));
   const staff = (people.data || []).filter((p) => p.role !== 'client');
   const clients = (people.data || []).filter((p) => p.role === 'client');
@@ -17,11 +19,12 @@ export async function render(el) {
   el.innerHTML = `
     <div class="toolbar"><div class="grow"></div><button class="btn btn-primary" id="invite">${icon('plus')} Invite team member</button></div>
     <div class="card" style="margin-bottom:18px"><div class="card-h"><h3>Team members</h3><small style="color:var(--muted)">${staff.length} people</small></div>
-      <div class="table-wrap"><table class="t"><thead><tr><th>Name</th><th>Role</th><th>Job title</th><th>Status</th><th>Since</th><th></th></tr></thead><tbody>
+      <div class="table-wrap"><table class="t"><thead><tr><th>Name</th><th>Role</th><th>Job title</th><th>Status</th><th>Two-step</th><th>Since</th><th></th></tr></thead><tbody>
       ${staff.map((p) => `<tr><td><div class="cell-name"><span class="avatar sm">${esc(initials(p.full_name || p.email))}</span><div><b>${esc(p.full_name || '—')}</b><span>${esc(p.email)}</span></div></div></td>
         <td>${roleBadge(p.role)}</td><td>${esc(p.job_title || '—')}</td>
-        <td>${p.active ? '<span class="badge b-GREEN">Active</span>' : '<span class="badge">Deactivated</span>'}</td><td>${fmtDate(p.created_at)}</td>
-        <td style="text-align:right">${p.id !== state.profile.id ? `<button class="btn btn-sm" data-edit="${p.id}">Change access</button>` : '<small style="color:var(--muted)">You</small>'}</td></tr>`).join('')}
+        <td>${p.active ? '<span class="badge b-GREEN">Active</span>' : '<span class="badge">Deactivated</span>'}</td>
+        <td>${mfa.get(p.id) ? '<span class="badge b-GREEN">On</span>' : '<span class="badge b-AMBER" title="They will be asked to set it up at their next sign-in">Not set up</span>'}</td><td>${fmtDate(p.created_at)}</td>
+        <td style="text-align:right;white-space:nowrap">${p.id !== state.profile.id ? `${isOwner && mfa.get(p.id) ? `<button class="btn btn-sm" data-mfa="${p.id}" title="Lost phone: they set up a new authenticator at their next sign-in">Reset two-step</button> ` : ''}<button class="btn btn-sm" data-edit="${p.id}">Change access</button>` : '<small style="color:var(--muted)">You</small>'}</td></tr>`).join('')}
       </tbody></table></div></div>
 
     <div class="card" style="margin-bottom:18px"><div class="card-h"><h3>What each role can do</h3>
@@ -37,6 +40,11 @@ export async function render(el) {
         <td style="text-align:right"><button class="btn btn-sm" data-edit="${p.id}">Change access</button></td></tr>`).join('')}</tbody></table></div>`
       : '<div class="empty" style="padding:28px">No client accounts yet. Invite a client with the role “Client” to give them portal access.</div>'}</div>`;
 
+  el.querySelectorAll('[data-mfa]').forEach((b) => (b.onclick = async () => {
+    const p = staff.find((x) => x.id === b.dataset.mfa);
+    if (!(await confirmBox('Reset two-step verification', `Use this when ${p.full_name || p.email} has lost their phone. Their authenticator stops working and they set up a new one at their next sign-in. Confirm who you are talking to first.`, 'Reset', true))) return;
+    try { await callFn('invite-user', { action: 'reset_mfa', user_id: p.id }); toast('Two-step verification reset'); render(el); } catch (e) { fail(e); }
+  }));
   el.querySelectorAll('input[data-perm]').forEach((cb) => (cb.onchange = async () => {
     try { await rpc('set_role_permission', { p_role: cb.dataset.role, p_permission: cb.dataset.perm, p_enabled: cb.checked }); toast('Permission updated'); }
     catch (e) { cb.checked = !cb.checked; fail(e); }

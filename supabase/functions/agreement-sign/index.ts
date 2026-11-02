@@ -1,6 +1,7 @@
 // Public endpoint for clients to view and e-sign an agreement using their private link token.
 import { adminClient, corsHeaders, escapeHtml, json, rateLimit, sendEmail } from "../_shared/common.ts";
 import { HUB, notifyTeams } from "../_shared/m365.ts";
+import { saveAgreementToDrive } from "../_shared/drive.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
@@ -38,6 +39,8 @@ Deno.serve(async (req) => {
     }
     await notifyTeams(admin, data.complete ? "✍️ Agreement signed by client" : "✍️ Joint agreement: one client signed",
       data.complete ? `Agreement ${data.number} was signed. Next: invoice and open the case file.` : `${String(body.name)} signed agreement ${data.number}. Waiting for the other clients.`, `${HUB}#/agreements/${data.id}`);
+    // File the signed copy in the client's OneDrive folder (if storage is set up); signing never fails because of it.
+    if (data.complete) await saveAgreementToDrive(admin, data.id).catch((e) => console.error("drive save", e));
     return json(req, { ok: true });
   }
   return json(req, { error: "Unknown action" }, 400);

@@ -68,7 +68,7 @@ export async function render(el) {
       <div class="ai-log" id="log"></div>
       <form class="ai-form" id="f"><textarea class="input" id="q" rows="2" placeholder="Ask about a case, a program, IRPA/IRPR, or ask for a draft…"></textarea>
         <button class="btn btn-gold" id="send" type="submit">${icon('arrowr')}</button></form>
-      <p class="ai-note">Assessments are sent without the client's name and contact details. Please don't paste passport or UCI numbers. Processed by Anthropic; not used to train AI models.</p>
+      <p class="ai-note"><b>Privacy:</b> refer to clients as “the client”, never by name. Emails, phone numbers and ID numbers (passport, UCI, SIN) are removed automatically before sending, and assessments are sent without the client's name and contact details. Processed by Anthropic in the United States; not used to train AI models. Always check the answer yourself before relying on it.</p>
     </div>
     <aside class="ai-side">
       ${can('intake.view') ? `<div class="dk-card"><div class="dk-h"><h3>Attach an assessment</h3></div><div id="alist" class="dk-muted">Loading…</div></div>` : ''}
