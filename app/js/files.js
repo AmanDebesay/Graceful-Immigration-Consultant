@@ -3,7 +3,10 @@
 import { can, esc, icon, fmtDateTime, callFn, toast, fail, modal, confirmBox, staffName, db } from './core.js';
 
 export const DOC_CAT = { documents: 'Client documents', agreements: 'Agreements', forms: 'Forms & submissions', correspondence: 'Correspondence', decisions: 'IRCC decisions' };
-export const canUploadDocs = () => can('crm.edit') || can('checklists.work') || can('agreements.manage');
+// Who can see, upload and delete is set by the owner on Team & Access (Documents permissions).
+export const canViewDocs = () => can('documents.view');
+export const canUploadDocs = () => can('documents.upload');
+export const canDeleteDocs = () => can('documents.delete');
 const size = (n) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 // OneDrive takes large files in pieces (multiples of 320 KB).
@@ -56,6 +59,7 @@ export function uploadDialog(ctx, done) {
 
 /** Documents list for a client (optionally only one case), with upload, open and delete. */
 export async function documentsPanel(el, { contactId, caseId = null }) {
+  if (!canViewDocs()) { el.innerHTML = `<div class="empty" style="padding:22px">${icon('lock')}<div>You don't have access to client documents. The owner can grant it on Team &amp; Access.</div></div>`; return; }
   const [{ data: docs, error }, { data: c }] = await Promise.all([
     (caseId ? db.from('client_documents').select('*').eq('case_id', caseId) : db.from('client_documents').select('*').eq('contact_id', contactId)).order('created_at', { ascending: false }),
     db.from('contacts').select('drive_folder_name').eq('id', contactId).single()]);
@@ -68,7 +72,7 @@ export async function documentsPanel(el, { contactId, caseId = null }) {
         ${canUploadDocs() ? `<button class="btn btn-gold btn-sm" id="up">${icon('plus')} Upload</button>` : ''}</div>
       ${c?.drive_folder_name ? `<small class="dk-muted" style="display:block;margin-bottom:8px">${icon('folder')} OneDrive folder: <b>${esc(c.drive_folder_name)}</b></small>` : ''}
       ${rows.length ? `<table class="t"><tbody>${rows.map((d) => `<tr><td><a href="#" data-open="${d.id}"><b>${esc(d.name)}</b></a><br><small style="color:var(--muted)">${esc(DOC_CAT[d.category])} · ${size(d.size || 0)} · ${fmtDateTime(d.created_at)}${d.uploaded_by ? ' · ' + esc(staffName(d.uploaded_by)) : ''}</small></td>
-          <td style="text-align:right;white-space:nowrap"><button class="btn btn-sm" data-open="${d.id}">Open</button>${can('crm.edit') || can('cases.approve') ? ` <button class="btn btn-ghost btn-sm" data-del="${d.id}" aria-label="Delete">${icon('trash')}</button>` : ''}</td></tr>`).join('')}</tbody></table>`
+          <td style="text-align:right;white-space:nowrap"><button class="btn btn-sm" data-open="${d.id}">Open</button>${canDeleteDocs() ? ` <button class="btn btn-ghost btn-sm" data-del="${d.id}" aria-label="Delete">${icon('trash')}</button>` : ''}</td></tr>`).join('')}</tbody></table>`
         : `<div class="empty" style="padding:22px">${icon('folder')}<div>No documents yet. Uploads and signed agreements are saved in the client's OneDrive folder.</div></div>`}`;
     el.querySelectorAll('#dc button').forEach((b) => { b.classList.toggle('on', b.dataset.k === cat); b.onclick = () => { cat = b.dataset.k; draw(); }; });
     el.querySelector('#up')?.addEventListener('click', () => uploadDialog({ contactId, caseId, folderName: c?.drive_folder_name }, () => documentsPanel(el, { contactId, caseId })));

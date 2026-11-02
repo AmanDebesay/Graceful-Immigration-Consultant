@@ -40,7 +40,7 @@ export async function render(el, [id], { setTitle }) {
           <div class="card-b" style="padding-top:4px;padding-bottom:4px">${(lists || []).map((l) => `<a class="check" href="#/checklists/${l.id}" style="text-decoration:none;color:inherit"><span style="flex:1"><b>${esc(l.name)}</b><br><small style="color:var(--muted)">${esc(staffName(l.assigned_to))}</small></span>
             ${l.stage === 'approved' ? '' : `<span class="row" style="gap:6px;flex-wrap:nowrap">${progressBar(stepProgress(l))}</span>`}${clBadge(l.stage)}</a>`).join('')
             || `<div class="empty" style="padding:16px">No checklist yet.${can('checklists.work') ? ' Start one to track documents, forms and the RCIC’s final approval.' : ''}</div>`}</div></div>
-        <div class="card"><div class="card-h"><h3>Documents</h3><small style="color:var(--muted)">OneDrive · this case</small></div><div class="card-b" id="docs"></div></div>
+        ${can('documents.view') ? `<div class="card"><div class="card-h"><h3>Documents</h3><small style="color:var(--muted)">OneDrive · this case</small></div><div class="card-b" id="docs"></div></div>` : ''}
         ${can('finance.view') ? `<div class="card"><div class="card-h"><h3>Billing</h3></div><div class="table-wrap">${(invs || []).length ? `<table class="t"><tbody>${invs.map((i) => `<tr class="click" onclick="location.hash='#/invoices/${i.id}'">
           <td>${esc(i.number)}<br><small style="color:var(--muted)">${fmtDate(i.issue_date)}</small></td><td>${invoiceBadge(i)}</td><td style="text-align:right">${money(i.total)}</td></tr>`).join('')}</tbody></table>`
           : '<div class="empty" style="padding:18px">No invoices linked to this case.</div>'}</div></div>` : ''}
@@ -48,7 +48,7 @@ export async function render(el, [id], { setTitle }) {
         ${(log || []).length ? `<div class="card"><div class="card-h"><h3>History</h3></div><div class="card-b" style="font-size:13px">${log.map((l) => `<div class="check"><span style="flex:1">${l.action === 'created' ? 'Case opened' : `Status: ${esc(label[l.details.from] || l.details.from)} → <b>${esc(label[l.details.to] || l.details.to)}</b>`}</span><small>${fmtDateTime(l.created_at)}</small></div>`).join('')}</div></div>` : ''}
       </div></div>`;
   el.querySelector('#ed')?.addEventListener('click', () => editCase(c));
-  import('../files.js').then(({ documentsPanel }) => documentsPanel(el.querySelector('#docs'), { contactId: c.contact_id, caseId: id }));
+  if (el.querySelector('#docs')) import('../files.js').then(({ documentsPanel }) => documentsPanel(el.querySelector('#docs'), { contactId: c.contact_id, caseId: id }));
   el.querySelector('#startCl')?.addEventListener('click', () => startChecklist({ id, case_number: c.case_number, title: c.title, application_type: c.application_type, contacts: c.contacts }));
   el.querySelector('#agr')?.addEventListener('click', async () => (await import('./agreements.js')).newAgreement({ contactId: c.contact_id, caseId: id, type: 'retainer' }));
   el.querySelector('#inv')?.addEventListener('click', async () => {

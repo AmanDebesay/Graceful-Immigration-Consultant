@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   let body: Record<string, any>;
   try { body = await req.json(); } catch { return json(req, { error: "Invalid request" }, 400); }
   const can = (p: string) => hasPerm(admin, caller.role, p);
-  const canUpload = async () => (await can("crm.edit")) || (await can("checklists.work")) || (await can("agreements.manage"));
+  const canUpload = () => can("documents.upload");
 
   // The case / checklist item / agreement must belong to the same client.
   async function links(contactId: string) {
@@ -84,16 +84,17 @@ Deno.serve(async (req) => {
         return json(req, data);
       }
       case "open": {
-        if (!((await can("crm.view")) || (await can("checklists.work")))) return json(req, { error: "Not allowed" }, 403);
-        const { data: d } = await admin.from("client_documents").select("drive_item_id").eq("id", body.id).maybeSingle();
+        if (!(await can("documents.view"))) return json(req, { error: "You don't have access to client documents. Ask the owner." }, 403);
+        const { data: d } = await admin.from("client_documents").select("drive_item_id, name, contact_id").eq("id", body.id).maybeSingle();
         if (!d) return json(req, { error: "Document not found." }, 404);
         const { user } = await driveConfig(admin);
         const item = await getItem(user, d.drive_item_id);
         if (!item) return json(req, { error: "This file is no longer in OneDrive (it may have been moved or deleted there)." }, 404);
+        await admin.from("audit_log").insert({ actor_id: caller.id, action: "document_opened", entity: "contact", entity_id: d.contact_id, details: { name: d.name } });
         return json(req, { url: item["@microsoft.graph.downloadUrl"], web_url: item.webUrl, name: item.name, mime: item.file?.mimeType });
       }
       case "delete": {
-        if (!((await can("crm.edit")) || (await can("cases.approve")))) return json(req, { error: "Only the case manager or RCIC can delete documents." }, 403);
+        if (!(await can("documents.delete"))) return json(req, { error: "You don't have permission to delete client documents." }, 403);
         const { data: d } = await admin.from("client_documents").select("id, drive_item_id, name, contact_id").eq("id", body.id).maybeSingle();
         if (!d) return json(req, { error: "Document not found." }, 404);
         const { user } = await driveConfig(admin);
