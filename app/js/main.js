@@ -1,6 +1,6 @@
 // App bootstrap: session → profile & permissions → shell → hash router.
 import { db, state, can, canDraftAgreements, isStaff, esc, icon, avatarHtml, fmtDate, ROLE_LABEL, loadStaff, fail, toast } from './core.js';
-import { showLogin, showSetPassword, showLinkError, showMfaChallenge, showMfaSetup } from './auth.js';
+import { showLogin, showSetPassword, showLinkError, showMfaChallenge } from './auth.js';
 performance.setResourceTimingBufferSize?.(2000); // keep the list of loaded scripts for healStaleModules
 
 const NAV = [
@@ -122,8 +122,6 @@ async function boot() {
     const totp = f?.totp?.find((x) => x.status === 'verified');
     if (totp) return showMfaChallenge(totp.id);
   }
-  // Required for everyone: no authenticator yet means setting one up now (the database also refuses access without it).
-  if (aal?.currentLevel !== 'aal2') return showMfaSetup();
 
   state.user = session.user;
   const { data: profile, error } = await db.from('profiles').select('*').eq('id', session.user.id).single();
