@@ -263,21 +263,45 @@ export async function payBill(bill) {
   });
 }
 
-// ── Transfer between accounts ──
-export async function newTransfer() {
+// ── Transfer between accounts (new, or edit an existing one: t = { id, date, from, to, amount, memo }) ──
+export const newTransfer = () => transferForm();
+export async function transferForm(t = null) {
+  const accs = await accounts();
+  const xferAcct = (a) => a.subtype === 'bank' || a.subtype === 'credit_card' || a.subtype === 'shareholder_loan' || a.type === 'equity';
+  modal({
+    title: t ? 'Edit transfer' : 'Transfer between accounts',
+    body: `<div class="alert info" style="font-size:12.5px;margin-bottom:12px">Money you put into the business: <b>From</b> Shareholder Loan <b>To</b> Operating Bank Account. When the business pays you back, do the reverse.</div>
+      <div class="row-2"><div class="field"><label>From</label><select class="input" id="tf">${acctOptions(accs, t?.from || null, xferAcct)}</select></div>
+      <div class="field"><label>To</label><select class="input" id="tt">${acctOptions(accs, t?.to || null, xferAcct)}</select></div></div>
+      <div class="row-2"><div class="field"><label>Date</label><input class="input" type="date" id="td" value="${t?.date || today()}"></div>
+      <div class="field"><label>Amount</label><input class="input" type="number" step="0.01" id="ta" value="${t?.amount ?? ''}"></div></div>
+      <div class="field"><label>Memo</label><input class="input" id="tm" placeholder="e.g. Funds advanced by shareholder, credit card payment" value="${esc(t?.memo || '')}"></div>`,
+    actions: [...(t ? [{ label: 'Delete transfer', cls: 'btn-danger', onClick: async () => {
+      if (!confirm('Delete this transfer? Use this only for a transfer entered by mistake.')) return false;
+      await rpc('delete_transfer', { p_entry: t.id }); toast('Transfer deleted'); changed();
+    } }] : []), { label: 'Cancel' }, { label: t ? 'Save changes' : 'Save transfer', cls: 'btn-primary', onClick: async (el) => {
+      const args = { p_date: el.querySelector('#td').value, p_from: el.querySelector('#tf').value, p_to: el.querySelector('#tt').value,
+        p_amount: num(el.querySelector('#ta').value), p_memo: el.querySelector('#tm').value || null };
+      if (t) await rpc('update_transfer', { p_entry: t.id, ...args }); else await rpc('record_transfer', args);
+      toast(t ? 'Transfer updated' : 'Transfer recorded'); changed();
+    } }],
+  });
+}
+
+// ── Edit a bill payment (date, amount, account, reference) ──
+export async function billPaymentForm(bp) {
   const accs = await accounts();
   modal({
-    title: 'Transfer between accounts',
-    body: `<div class="alert info" style="font-size:12.5px;margin-bottom:12px">Money you put into the business: <b>From</b> Shareholder Loan <b>To</b> Operating Bank Account. When the business pays you back, do the reverse.</div>
-      <div class="row-2"><div class="field"><label>From</label><select class="input" id="tf">${acctOptions(accs, null, (a) => a.subtype === 'bank' || a.subtype === 'credit_card' || a.subtype === 'shareholder_loan' || a.type === 'equity')}</select></div>
-      <div class="field"><label>To</label><select class="input" id="tt">${acctOptions(accs, null, (a) => a.subtype === 'bank' || a.subtype === 'credit_card' || a.subtype === 'shareholder_loan' || a.type === 'equity')}</select></div></div>
-      <div class="row-2"><div class="field"><label>Date</label><input class="input" type="date" id="td" value="${today()}"></div>
-      <div class="field"><label>Amount</label><input class="input" type="number" step="0.01" id="ta"></div></div>
-      <div class="field"><label>Memo</label><input class="input" id="tm" placeholder="e.g. Funds advanced by shareholder, credit card payment"></div>`,
-    actions: [{ label: 'Cancel' }, { label: 'Save transfer', cls: 'btn-primary', onClick: async (el) => {
-      await rpc('record_transfer', { p_date: el.querySelector('#td').value, p_from: el.querySelector('#tf').value, p_to: el.querySelector('#tt').value,
-        p_amount: num(el.querySelector('#ta').value), p_memo: el.querySelector('#tm').value || null });
-      toast('Transfer recorded'); changed();
+    title: `Edit bill payment${bp.bills?.bill_number ? ' · bill ' + bp.bills.bill_number : ''}`,
+    body: `<p style="margin-bottom:12px">${esc(bp.bills?.vendors?.name || '')} · bill total <b>${money(bp.bills?.amount)}</b></p>
+      <div class="row-2"><div class="field"><label>Payment date</label><input class="input" type="date" id="d" value="${bp.pay_date}"></div>
+      <div class="field"><label>Amount</label><input class="input" type="number" step="0.01" id="a" value="${bp.amount}"></div></div>
+      <div class="row-2"><div class="field"><label>Paid from</label><select class="input" id="acc">${acctOptions(accs, bp.account_id, isPayFrom)}</select></div>
+      <div class="field"><label>Reference</label><input class="input" id="r" value="${esc(bp.reference || '')}"></div></div>`,
+    actions: [{ label: 'Cancel' }, { label: 'Save changes', cls: 'btn-primary', onClick: async (el) => {
+      await rpc('update_bill_payment', { p_payment: bp.id, p_date: el.querySelector('#d').value, p_amount: num(el.querySelector('#a').value),
+        p_account: el.querySelector('#acc').value, p_reference: el.querySelector('#r').value || null });
+      toast('Bill payment updated'); changed();
     } }],
   });
 }

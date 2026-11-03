@@ -1,5 +1,5 @@
 import { db, can, esc, icon, fmtDate, rpc, toast, fail, today } from '../core.js';
-import { money, num, accounts, isBank, newTransfer, downloadCsv } from '../fin.js';
+import { money, num, accounts, isBank, newTransfer, downloadCsv, expenseForm, transferForm, billPaymentForm } from '../fin.js';
 
 const SRC = { invoice: 'Invoice', invoice_void: 'Invoice void', payment: 'Payment', payment_void: 'Payment void', expense: 'Expense', expense_void: 'Expense void',
   bill: 'Bill', bill_void: 'Bill void', bill_payment: 'Bill payment', trust: 'Trust', transfer: 'Transfer', manual: 'Journal' };
@@ -35,7 +35,7 @@ export async function render(el) {
     const acct = accs.find((a) => a.id === accountId);
     const body = el.querySelector('#body');
     if (!acct) { body.innerHTML = '<div class="empty">No bank accounts. Add one in Chart of Accounts.</div>'; return; }
-    const { data } = await db.from('journal_lines').select('id, debit, credit, description, cleared, reconciled_id, journal_entries(entry_date, memo, source_type, entry_no), contacts(full_name), vendors(name)')
+    const { data } = await db.from('journal_lines').select('id, entry_id, debit, credit, description, cleared, reconciled_id, journal_entries(id, entry_date, memo, source_type, source_id, entry_no), contacts(full_name), vendors(name)')
       .eq('account_id', accountId).limit(5000);
     lines = (data || []).sort((a, b) => a.journal_entries.entry_date.localeCompare(b.journal_entries.entry_date) || a.id - b.id);
     const liability = acct.subtype === 'credit_card';
@@ -43,12 +43,13 @@ export async function render(el) {
       let run = 0;
       const rows = lines.map((l) => { run += +l.debit - +l.credit; return { ...l, run }; }).reverse();
       body.innerHTML = `<div class="card"><div class="card-h"><h3>${esc(acct.name)} register</h3><small style="color:var(--muted)">${lines.length} transactions</small></div>
-        <div class="table-wrap">${rows.length ? `<table class="t"><thead><tr><th>Date</th><th>Type</th><th>Payee / client</th><th>Memo</th><th style="text-align:right">${liability ? 'Charge' : 'Payment'}</th><th style="text-align:right">${liability ? 'Payment' : 'Deposit'}</th><th style="text-align:center">✓</th><th style="text-align:right">Balance</th></tr></thead><tbody>
+        <div class="table-wrap">${rows.length ? `<table class="t"><thead><tr><th>Date</th><th>Type</th><th>Payee / client</th><th>Memo</th><th style="text-align:right">${liability ? 'Charge' : 'Payment'}</th><th style="text-align:right">${liability ? 'Payment' : 'Deposit'}</th><th style="text-align:center">✓</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody>
         ${rows.map((l) => `<tr><td>${fmtDate(l.journal_entries.entry_date)}</td><td><span class="badge plain">${SRC[l.journal_entries.source_type] || ''}</span></td>
           <td>${esc(l.contacts?.full_name || l.vendors?.name || '')}</td><td>${esc(l.description || l.journal_entries.memo || '')}</td>
           <td style="text-align:right">${+l.credit ? money(l.credit) : ''}</td><td style="text-align:right">${+l.debit ? money(l.debit) : ''}</td>
-          <td style="text-align:center">${l.reconciled_id ? '<b title="Reconciled">R</b>' : l.cleared ? 'C' : ''}</td><td style="text-align:right"><b>${money(liability ? -l.run : l.run)}</b></td></tr>`).join('')}</tbody></table>`
+          <td style="text-align:center">${l.reconciled_id ? '<b title="Reconciled">R</b>' : l.cleared ? 'C' : ''}</td><td style="text-align:right"><b>${money(liability ? -l.run : l.run)}</b></td><td style="text-align:right;white-space:nowrap">${action(l)}</td></tr>`).join('')}</tbody></table>`
         : `<div class="empty">${icon('briefcase')}<div>No transactions in this account yet.</div></div>`}</div></div>`;
+      body.querySelectorAll('[data-edit]').forEach((b) => (b.onclick = () => editLine(lines.find((x) => String(x.id) === b.dataset.edit))));
       return;
     }
     // Reconcile
@@ -91,6 +92,35 @@ export async function render(el) {
       } catch (e) { fail(e); }
     };
     calc();
+  }
+  // Edit straight from the register: expenses, transfers and bill payments open their form; other types open their page.
+  const EDIT = ['expense', 'transfer', 'bill_payment'];
+  const OPEN = { payment: () => '#/invoices', invoice: (e) => `#/invoices/${e.source_id}`, trust: () => '#/trust', manual: () => '#/journal' };
+  function action(l) {
+    const e = l.journal_entries;
+    if (l.reconciled_id) return `<span title="Reconciled with the bank statement, so it can't be changed" style="color:var(--muted)">${icon('lock')}</span>`;
+    if (manage && EDIT.includes(e.source_type)) return `<button class="btn btn-sm" data-edit="${l.id}">Edit</button>`;
+    if (OPEN[e.source_type]) return `<a class="btn btn-sm btn-ghost" href="${OPEN[e.source_type](e)}">Open</a>`;
+    return '';
+  }
+  async function editLine(l) {
+    const e = l.journal_entries;
+    try {
+      if (e.source_type === 'expense') {
+        const { data: x, error } = await db.from('expenses').select('*, receipts(id, file_path, file_name)').eq('id', e.source_id).single();
+        if (error) throw error;
+        if (x.voided) throw new Error('This expense was voided, so it can\u2019t be edited.');
+        return expenseForm(x);
+      }
+      if (e.source_type === 'bill_payment') {
+        const { data: bp, error } = await db.from('bill_payments').select('*, bills(bill_number, amount, vendors(name))').eq('id', e.source_id).single();
+        if (error) throw error;
+        return billPaymentForm(bp);
+      }
+      const { data: ls } = await db.from('journal_lines').select('account_id, debit, credit').eq('entry_id', e.id);
+      const to = ls.find((x) => +x.debit > 0), from = ls.find((x) => +x.credit > 0);
+      return transferForm({ id: e.id, date: e.entry_date, from: from?.account_id, to: to?.account_id, amount: to ? +to.debit : '', memo: e.memo === 'Transfer' ? '' : e.memo });
+    } catch (err) { fail(err); }
   }
   el.querySelector('#csv').onclick = () => downloadCsv('register.csv', [['Date', 'Type', 'Payee', 'Memo', 'Debit', 'Credit', 'Cleared'],
     ...lines.map((l) => [l.journal_entries.entry_date, SRC[l.journal_entries.source_type], l.contacts?.full_name || l.vendors?.name, l.description || l.journal_entries.memo, l.debit, l.credit, l.reconciled_id ? 'R' : ''])]);
