@@ -1,5 +1,6 @@
 // Reads an uploaded receipt (photo or PDF) with Claude and fills in the receipt for review:
 // vendor, date, totals, GST/HST, line items, and a suggested expense category and payment account.
+// It also tells a paid receipt from an unpaid bill (with its due date), and uses each known vendor's usual category.
 // Finance staff only. Nothing is posted to the books until a person approves the receipt.
 import Anthropic from "npm:@anthropic-ai/sdk";
 import { encodeBase64 } from "jsr:@std/encoding/base64";
@@ -12,6 +13,9 @@ Rules:
 - Read only what is printed. If a value is missing or unreadable, use null. Never guess amounts.
 - "total" is the amount actually paid, including tax and tip. "tax" is GST/HST only (sum them if both appear); 0 if the receipt shows no GST/HST.
 - Dates as YYYY-MM-DD. Amounts as numbers in the receipt's currency.
+- "is_receipt" is true for any receipt, invoice, bill or statement of charges (paid or unpaid); false only when the document is not a purchase document at all.
+- "doc_kind": "receipt" when it shows the amount was already paid (receipt, paid invoice, card slip); "bill" when it is an invoice or statement still to be paid (shows a due date, "amount due", "please remit", or terms like Net 30). For a bill, "due_date" is the payment due date (YYYY-MM-DD) or null if not shown; for a receipt, null.
+- When the vendor appears in the "Known vendors" list, use that vendor's usual category unless the purchase is clearly something else.
 - Choose the expense category that best fits from the provided list, using its id. Choose the payment account from the provided list when the receipt shows how it was paid (card brand/last digits, cash, e-transfer); otherwise "none".
 - In "notes", briefly flag anything a bookkeeper should check: foreign currency, partially illegible text, a personal-looking purchase, a missing GST number on a large purchase, or a document that is not a receipt.`;
 
@@ -47,9 +51,11 @@ Deno.serve(async (req) => {
   const schema = {
     type: "object",
     additionalProperties: false,
-    required: ["is_receipt", "vendor", "receipt_date", "subtotal", "tax", "total", "currency", "payment_hint", "receipt_number", "line_items", "account_id", "payment_account_id", "memo", "notes"],
+    required: ["is_receipt", "doc_kind", "due_date", "vendor", "receipt_date", "subtotal", "tax", "total", "currency", "payment_hint", "receipt_number", "line_items", "account_id", "payment_account_id", "memo", "notes"],
     properties: {
       is_receipt: { type: "boolean" },
+      doc_kind: { type: "string", enum: ["receipt", "bill"] },
+      due_date: { type: ["string", "null"] },
       vendor: { type: ["string", "null"] },
       receipt_date: { type: ["string", "null"] },
       subtotal: { type: ["number", "null"] },
@@ -69,7 +75,11 @@ Deno.serve(async (req) => {
     },
   };
 
-  const accountList = `Expense categories (id — code name):\n${expenseAccts.map((a) => `${a.id} — ${a.code} ${a.name}`).join("\n")}\n\nPayment accounts:\n${payAccts.map((a) => `${a.id} — ${a.code} ${a.name}`).join("\n") || "(none)"}`;
+  // Vendors already used, with the category they are normally booked to (learned when receipts are approved)
+  const { data: known } = await admin.from("vendors").select("name, default_account_id").eq("active", true).not("default_account_id", "is", null).order("created_at", { ascending: false }).limit(300);
+  const nameOf = new Map(expenseAccts.map((a) => [a.id, `${a.code} ${a.name}`]));
+  const knownList = (known ?? []).filter((v) => nameOf.has(v.default_account_id)).map((v) => `${v.name} → ${v.default_account_id} (${nameOf.get(v.default_account_id)})`).join("\n");
+  const accountList = `Expense categories (id — code name):\n${expenseAccts.map((a) => `${a.id} — ${a.code} ${a.name}`).join("\n")}\n\nPayment accounts:\n${payAccts.map((a) => `${a.id} — ${a.code} ${a.name}`).join("\n") || "(none)"}\n\nKnown vendors and their usual category:\n${knownList || "(none yet)"}`;
   const fileBlock = r.mime_type === "application/pdf"
     ? { type: "document" as const, source: { type: "base64" as const, media_type: "application/pdf" as const, data } }
     : r.mime_type === "text/plain"   // an emailed receipt without attachments, kept as text
@@ -86,7 +96,7 @@ Deno.serve(async (req) => {
       fallbacks: "default",
       output_config: { effort: "medium", format: { type: "json_schema", schema } },
       system: SYSTEM,
-      messages: [{ role: "user", content: [fileBlock, { type: "text", text: `${accountList}\n\nExtract the bookkeeping data from this receipt. Write "memo" as a short description of what was bought (e.g. "Printer ink and paper").` }] }],
+      messages: [{ role: "user", content: [fileBlock, { type: "text", text: `${accountList}\n\nExtract the bookkeeping data from this receipt or bill. Write "memo" as a short description of what was bought (e.g. "Printer ink and paper").` }] }],
     } as any);
   } catch (e) {
     const status = e instanceof Anthropic.RateLimitError ? 429 : 502;
@@ -107,10 +117,11 @@ Deno.serve(async (req) => {
     const { data: v } = await admin.from("vendors").select("id, default_account_id").ilike("name", String(x.vendor).replace(/[%_]/g, "")).eq("active", true).limit(1).maybeSingle();
     if (v) { vendorId = v.id; accountId = v.default_account_id ?? accountId; }
   }
-  const validDate = typeof x.receipt_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(x.receipt_date) ? x.receipt_date : null;
+  const isDate = (s: unknown) => typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : null;
+  const validDate = isDate(x.receipt_date);
   const money = (n: unknown) => (typeof n === "number" && isFinite(n) ? Math.round(n * 100) / 100 : null);
   const patch = {
-    status: "ready", error: null, vendor: x.vendor, receipt_date: validDate, subtotal: money(x.subtotal), tax: money(x.tax) ?? 0, total: money(x.total),
+    status: "ready", error: null, doc_kind: x.doc_kind === "bill" ? "bill" : "receipt", due_date: x.doc_kind === "bill" ? isDate(x.due_date) : null, vendor: x.vendor, receipt_date: validDate, subtotal: money(x.subtotal), tax: money(x.tax) ?? 0, total: money(x.total),
     currency: x.currency ? String(x.currency).toUpperCase().slice(0, 3) : "CAD", payment_hint: x.payment_hint, receipt_number: x.receipt_number,
     line_items: Array.isArray(x.line_items) ? x.line_items.slice(0, 60) : [], account_id: accountId,
     payment_account_id: x.payment_account_id && x.payment_account_id !== "none" ? x.payment_account_id : null, vendor_id: vendorId,

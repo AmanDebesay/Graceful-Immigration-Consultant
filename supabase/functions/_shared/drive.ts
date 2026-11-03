@@ -7,7 +7,7 @@ import { graphToken } from "./m365.ts";
 
 export const SUBFOLDER: Record<string, string> = {
   agreements: "01 Agreements", documents: "02 Client documents", forms: "03 Forms & submissions",
-  correspondence: "04 Correspondence", decisions: "05 IRCC decisions",
+  correspondence: "04 Correspondence", decisions: "05 IRCC decisions", representative: "06 Representative & consent",
 };
 const enc = encodeURIComponent;
 export const cleanName = (s: string) =>
@@ -73,6 +73,14 @@ export const uploadSession = (user: string, folderId: string, name: string) =>
   g(`${base(user)}/items/${folderId}:/${enc(name)}:/createUploadSession`, {
     method: "POST", body: JSON.stringify({ item: { "@microsoft.graph.conflictBehavior": "rename" } }),
   });
+// New content for an existing file: OneDrive keeps the earlier version in the file's version history.
+export const replaceSession = (user: string, id: string) =>
+  g(`${base(user)}/items/${enc(id)}/createUploadSession`, { method: "POST", body: JSON.stringify({ item: { "@microsoft.graph.conflictBehavior": "replace" } }) });
+/** Rename and/or move a file to another folder (a number is added if the name is taken). */
+export const updateItem = (user: string, id: string, change: { name?: string; folderId?: string }) =>
+  g(`${base(user)}/items/${enc(id)}?@microsoft.graph.conflictBehavior=rename`, {
+    method: "PATCH", body: JSON.stringify({ ...(change.name ? { name: change.name } : {}), ...(change.folderId ? { parentReference: { id: change.folderId } } : {}) }),
+  });
 export const getItem = (user: string, id: string) => g(`${base(user)}/items/${enc(id)}`, {}, true);
 export const deleteItem = (user: string, id: string) => g(`${base(user)}/items/${enc(id)}`, { method: "DELETE" }, true);
 export const rootFolder = async (admin: SupabaseClient) => {
@@ -126,7 +134,7 @@ export async function saveAgreementToDrive(admin: SupabaseClient, agreementId: s
   const item = await putSmall(f.user, f.folderId, name, signedHtml(a, events || []), "text/html; charset=utf-8");
   await admin.from("agreements").update({ drive_item_id: item.id }).eq("id", agreementId);
   const { data: doc } = await admin.from("client_documents").insert({
-    contact_id: a.contact_id, case_id: a.case_id, agreement_id: a.id, category: "agreements", name: item.name,
+    contact_id: a.contact_id, case_id: a.case_id, agreement_id: a.id, category: "agreements", doc_type: "Signed agreement", name: item.name,
     drive_item_id: item.id, web_url: item.webUrl, size: item.size, mime: "text/html", uploaded_by: by,
   }).select().single();
   return doc;

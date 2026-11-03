@@ -2,7 +2,7 @@ import { db, can, esc, icon, rpc, modal, toast, today } from '../core.js';
 import { money, clearFinCache, downloadCsv } from '../fin.js';
 
 const TYPES = [['asset', 'Assets'], ['liability', 'Liabilities'], ['equity', 'Equity'], ['income', 'Income'], ['expense', 'Expenses']];
-const SUBTYPES = { asset: [['bank', 'Bank'], ['fixed_asset', 'Fixed asset'], ['other', 'Other current asset']], liability: [['credit_card', 'Credit card'], ['other', 'Other liability']],
+const SUBTYPES = { asset: [['bank', 'Bank'], ['fixed_asset', 'Fixed asset'], ['other', 'Other current asset']], liability: [['credit_card', 'Credit card'], ['shareholder_loan', 'Shareholder loan'], ['other', 'Other liability']],
   equity: [['equity', 'Equity']], income: [['income', 'Income']], expense: [['expense', 'Expense'], ['cogs', 'Cost of services']] };
 
 export async function render(el) {

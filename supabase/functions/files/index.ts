@@ -4,11 +4,16 @@
 //   upload_session  → OneDrive upload URL for one file in the client's folder; the browser uploads straight to Microsoft
 //   register        → after upload: check the file is in that folder, then add it to the client's documents
 //   open            → short-lived download link
+//   update          → change a document's name, type or folder (the file is renamed/moved in OneDrive too)
+//   replace_session / replace_done → upload a new version of a file (OneDrive keeps the old one in version history)
 //   delete          → move to the OneDrive recycle bin and remove from the list
 //   save_agreement  → save a signed agreement's signed copy to "01 Agreements"
 import { adminClient, callerProfile, corsHeaders, hasPerm, json } from "../_shared/common.ts";
 import { graphConfigured } from "../_shared/m365.ts";
-import { cleanName, clientFolder, deleteItem, driveConfig, getItem, rootFolder, saveAgreementToDrive, SUBFOLDER, uploadSession } from "../_shared/drive.ts";
+import { cleanName, clientFolder, deleteItem, driveConfig, getItem, replaceSession, rootFolder, saveAgreementToDrive, SUBFOLDER, updateItem, uploadSession } from "../_shared/drive.ts";
+
+const ext = (n: string) => (/\.[A-Za-z0-9]{1,8}$/.exec(n) || [""])[0];
+const stem = (n: string) => n.slice(0, n.length - ext(n).length);
 
 const MAX = 250 * 1024 * 1024;
 const BLOCKED = /\.(exe|bat|cmd|com|msi|scr|ps1|vbs|js|jar|sh|dll)$/i;
@@ -77,7 +82,7 @@ Deno.serve(async (req) => {
         const item = await getItem(f.user, String(body.item_id ?? ""));
         if (!item || item.parentReference?.id !== f.folderId) return json(req, { error: "The uploaded file wasn't found in the client's folder." }, 400);
         const { data, error } = await admin.from("client_documents").insert({
-          contact_id: contactId, ...l, category, name: item.name, drive_item_id: item.id, web_url: item.webUrl,
+          contact_id: contactId, ...l, category, doc_type: String(body.doc_type ?? "").trim().slice(0, 120) || null, name: item.name, drive_item_id: item.id, web_url: item.webUrl,
           size: item.size, mime: item.file?.mimeType ?? null, uploaded_by: caller.id,
         }).select().single();
         if (error) throw error;
@@ -92,6 +97,51 @@ Deno.serve(async (req) => {
         if (!item) return json(req, { error: "This file is no longer in OneDrive (it may have been moved or deleted there)." }, 404);
         await admin.from("audit_log").insert({ actor_id: caller.id, action: "document_opened", entity: "contact", entity_id: d.contact_id, details: { name: d.name } });
         return json(req, { url: item["@microsoft.graph.downloadUrl"], web_url: item.webUrl, name: item.name, mime: item.file?.mimeType });
+      }
+      case "update": {
+        if (!(await can("documents.upload"))) return json(req, { error: "You don't have permission to change client documents." }, 403);
+        const { data: d } = await admin.from("client_documents").select("*").eq("id", body.id).maybeSingle();
+        if (!d) return json(req, { error: "Document not found." }, 404);
+        const category = String(body.category ?? d.category);
+        if (!SUBFOLDER[category]) return json(req, { error: "Choose a document type." }, 400);
+        const docType = String(body.doc_type ?? d.doc_type ?? "").trim().slice(0, 120) || null;
+        const wanted = body.name != null ? cleanName(stem(cleanName(String(body.name))) || stem(d.name)) + ext(d.name) : d.name;
+        if (BLOCKED.test(wanted)) return json(req, { error: "This type of file can't be stored." }, 400);
+        const change: { name?: string; folderId?: string } = {};
+        if (wanted !== d.name) change.name = wanted;
+        if (category !== d.category) change.folderId = (await clientFolder(admin, d.contact_id, category)).folderId;
+        let item: any = null;
+        if (change.name || change.folderId) item = await updateItem((await driveConfig(admin)).user, d.drive_item_id, change);
+        const { data, error } = await admin.from("client_documents").update({ category, doc_type: docType, ...(item ? { name: item.name, web_url: item.webUrl } : {}) }).eq("id", d.id).select().single();
+        if (error) throw error;
+        await admin.from("audit_log").insert({ actor_id: caller.id, action: "document_updated", entity: "contact", entity_id: d.contact_id,
+          details: { name: data.name, ...(d.name !== data.name ? { old_name: d.name } : {}), ...(d.doc_type !== docType ? { old_type: d.doc_type, type: docType } : {}), ...(d.category !== category ? { moved_to: SUBFOLDER[category] } : {}) } });
+        return json(req, data);
+      }
+      case "replace_session": {
+        if (!(await can("documents.upload"))) return json(req, { error: "You don't have permission to change client documents." }, 403);
+        const { data: d } = await admin.from("client_documents").select("drive_item_id").eq("id", body.id).maybeSingle();
+        if (!d) return json(req, { error: "Document not found." }, 404);
+        const name = cleanName(String(body.file_name ?? "")), size = Number(body.size ?? 0);
+        if (!name || BLOCKED.test(name)) return json(req, { error: "This type of file can't be uploaded." }, 400);
+        if (!(size > 0) || size > MAX) return json(req, { error: "Files must be between 1 byte and 250 MB." }, 400);
+        const s = await replaceSession((await driveConfig(admin)).user, d.drive_item_id);
+        return json(req, { upload_url: s.uploadUrl });
+      }
+      case "replace_done": {
+        if (!(await can("documents.upload"))) return json(req, { error: "You don't have permission to change client documents." }, 403);
+        const { data: d } = await admin.from("client_documents").select("*").eq("id", body.id).maybeSingle();
+        if (!d) return json(req, { error: "Document not found." }, 404);
+        const { user } = await driveConfig(admin);
+        let item = await getItem(user, d.drive_item_id);
+        if (!item) return json(req, { error: "This file is no longer in OneDrive." }, 404);
+        // A PDF replaced by a JPG (for example) keeps its name but gets the new file's extension.
+        const newExt = ext(cleanName(String(body.file_name ?? "")));
+        if (newExt && newExt.toLowerCase() !== ext(item.name).toLowerCase()) item = await updateItem(user, item.id, { name: stem(item.name) + newExt });
+        const { data, error } = await admin.from("client_documents").update({ name: item.name, web_url: item.webUrl, size: item.size, mime: item.file?.mimeType ?? null }).eq("id", d.id).select().single();
+        if (error) throw error;
+        await admin.from("audit_log").insert({ actor_id: caller.id, action: "document_replaced", entity: "contact", entity_id: d.contact_id, details: { name: item.name, uploaded: body.file_name ?? null } });
+        return json(req, data);
       }
       case "delete": {
         if (!(await can("documents.delete"))) return json(req, { error: "You don't have permission to delete client documents." }, 403);

@@ -1,5 +1,5 @@
 // Shared accounting helpers and the "+ New" transaction forms (invoice, payment, expense, bill, transfer, trust, journal).
-import { db, state, can, esc, icon, modal, toast, fail, rpc, today, fmtDate } from './core.js';
+import { db, state, can, esc, icon, modal, toast, fail, rpc, callFn, today, fmtDate } from './core.js';
 
 export const money = (n, { sign = false } = {}) => {
   const v = Number(n || 0);
@@ -131,55 +131,117 @@ export async function receivePayment(contactId) {
   loadOpen();
 }
 
-// ── Expense ──
-export async function newExpense() {
+// ── Receipt files ──
+/** Shrinks large photos to ≤2000px JPEG (also converts formats the browser can decode, e.g. iPhone photos). */
+export async function prepareReceipt(file) {
+  if (file.type === 'application/pdf') return { blob: file, type: 'application/pdf', ext: 'pdf' };
+  if (!file.type.startsWith('image/')) throw new Error(`${file.name}: only photos and PDFs can be uploaded.`);
+  const bmp = await createImageBitmap(file).catch(() => null);
+  if (!bmp) throw new Error(`${file.name}: this image format can't be read. Try a JPG, PNG or PDF.`);
+  const scale = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.88));
+  return { blob, type: 'image/jpeg', ext: 'jpg' };
+}
+async function storeReceipt(f, row) {
+  if (f.size > 25 * 1024 * 1024) throw new Error(`${f.name} is larger than 25 MB.`);
+  const p = await prepareReceipt(f);
+  if (p.blob.size > 10 * 1024 * 1024) throw new Error(`${f.name} is still larger than 10 MB after compressing.`);
+  const path = `${new Date().toISOString().slice(0, 7)}/${crypto.randomUUID()}.${p.ext}`;
+  const { error: ue } = await db.storage.from('receipts').upload(path, p.blob, { contentType: p.type });
+  if (ue) throw ue;
+  const { data, error } = await db.from('receipts').insert({ file_path: path, file_name: f.name.slice(0, 120), mime_type: p.type, ...row }).select('id').single();
+  if (error) throw error;
+  return data.id;
+}
+/** Uploads receipts/bills to be read by the AI and reviewed on the Receipts page. Returns the new receipt ids. */
+export async function uploadForReview(files) {
+  const ids = [];
+  for (const f of [...files].slice(0, 20)) { try { ids.push(await storeReceipt(f, {})); } catch (err) { fail(err); } }
+  return ids;
+}
+/** Reads uploaded receipts with the AI, up to 3 at a time. */
+export async function readReceipts(ids, onEach) {
+  const queue = [...ids];
+  const worker = async () => { while (queue.length) { const id = queue.shift(); try { await callFn('receipt-scan', { receipt_id: id }); } catch { /* shown on the card */ } onEach?.(id); } };
+  await Promise.all([worker(), worker(), worker()]);
+}
+/** Attaches receipt files to an expense or bill that is already in the books. */
+export async function attachReceipts(files, { expenseId = null, billId = null }) {
+  const user = (await db.auth.getUser()).data.user?.id;
+  for (const f of files) await storeReceipt(f, { status: 'approved', expense_id: expenseId, bill_id: billId, doc_kind: billId ? 'bill' : 'receipt', approved_at: new Date().toISOString(), approved_by: user });
+}
+/** Opens an attached receipt (one file), or lists them when there are several. */
+export async function viewReceipts(list) {
+  const { data } = await db.storage.from('receipts').createSignedUrls(list.map((r) => r.file_path), 3600);
+  const urls = (data || []).map((x) => x.signedUrl).filter(Boolean);
+  if (urls.length === 1) return window.open(urls[0], '_blank', 'noopener');
+  modal({ title: 'Receipts', body: list.map((r, i) => `<p><a href="${esc(urls[i] || '#')}" target="_blank" rel="noopener">${icon('file')} ${esc(r.file_name || `Receipt ${i + 1}`)}</a></p>`).join(''), actions: [{ label: 'Close' }] });
+}
+const attachField = (n) => `<div class="field"><label>${n ? `Attach another receipt (${n} attached)` : 'Attach receipt (optional)'}</label><input class="input" type="file" id="rcf" accept="image/*,application/pdf" multiple></div>`;
+
+// ── Expense (new or edit) ──
+export const newExpense = () => expenseForm();
+export async function expenseForm(x = null) {
   const [accs, vendors, contacts, s] = await Promise.all([accounts(), vendorsList(), contactsList(), orgSettings()]);
+  const named = x && !x.vendor_id ? x.payee || '' : '';
   modal({
-    title: 'New expense',
-    body: `<div class="row-2"><div class="field"><label>Payee (vendor)</label><select class="input" id="ev"><option value="">— Type a payee below —</option>${vendors.map((v) => `<option value="${v.id}" data-acct="${v.default_account_id || ''}">${esc(v.name)}</option>`).join('')}</select></div>
-      <div class="field"><label>Or payee name</label><input class="input" id="ep" placeholder="e.g. Staples"></div></div>
-      <div class="row-2"><div class="field"><label>Payment date</label><input class="input" type="date" id="ed" value="${today()}"></div>
-      <div class="field"><label>Paid from</label><select class="input" id="epa">${acctOptions(accs, accs.find((a) => a.system_key === 'operating_bank')?.id, isPayFrom)}</select></div></div>
-      <div class="field"><label>Category</label><select class="input" id="ea">${acctOptions(accs, null, (a) => a.type === 'expense' || a.subtype === 'fixed_asset')}</select></div>
-      <div class="row-2"><div class="field"><label>Total paid (incl. tax)</label><input class="input" type="number" step="0.01" id="eam"></div>
-      <div class="field"><label>GST/HST included</label><input class="input" type="number" step="0.01" id="etx" value="0"><small style="color:var(--muted)"><a href="#" id="calcTax">Calculate ${s.gst_rate || 5}%</a></small></div></div>
-      <div class="row-2"><div class="field"><label>Client (if a disbursement)</label><select class="input" id="ec">${contactOptions(contacts, null, 'None')}</select></div>
-      <div class="field"><label>Reference / receipt no.</label><input class="input" id="eref"></div></div>
-      <div class="field"><label>Memo</label><input class="input" id="em"></div>`,
+    title: x ? 'Edit expense' : 'New expense',
+    body: `<div class="row-2"><div class="field"><label>Payee (vendor)</label><select class="input" id="ev"><option value="">— Type a payee below —</option>${vendors.map((v) => `<option value="${v.id}" data-acct="${v.default_account_id || ''}" ${x?.vendor_id === v.id ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>Or payee name</label><input class="input" id="ep" placeholder="e.g. Staples" value="${esc(named)}"></div></div>
+      <div class="row-2"><div class="field"><label>Payment date</label><input class="input" type="date" id="ed" value="${x?.expense_date || today()}"></div>
+      <div class="field"><label>Paid from</label><select class="input" id="epa">${acctOptions(accs, x?.payment_account_id || accs.find((a) => a.system_key === 'operating_bank')?.id, isPayFrom)}</select></div></div>
+      <div class="field"><label>Category</label><select class="input" id="ea">${acctOptions(accs, x?.account_id || null, (a) => a.type === 'expense' || a.subtype === 'fixed_asset')}</select></div>
+      <div class="row-2"><div class="field"><label>Total paid (incl. tax)</label><input class="input" type="number" step="0.01" id="eam" value="${x?.amount ?? ''}"></div>
+      <div class="field"><label>GST/HST included</label><input class="input" type="number" step="0.01" id="etx" value="${x?.tax ?? 0}"><small style="color:var(--muted)"><a href="#" id="calcTax">Calculate ${s.gst_rate || 5}%</a></small></div></div>
+      <div class="row-2"><div class="field"><label>Client (if a disbursement)</label><select class="input" id="ec">${contactOptions(contacts, x?.contact_id || null, 'None')}</select></div>
+      <div class="field"><label>Reference / receipt no.</label><input class="input" id="eref" value="${esc(x?.reference || '')}"></div></div>
+      <div class="field"><label>Memo</label><input class="input" id="em" value="${esc(x?.memo || '')}"></div>
+      ${attachField((x?.receipts || []).length)}`,
     onOpen: (el) => {
       el.querySelector('#calcTax').onclick = (e) => { e.preventDefault(); const t = num(el.querySelector('#eam').value); const r = Number(s.gst_rate || 5); el.querySelector('#etx').value = num(t - t / (1 + r / 100)).toFixed(2); };
       el.querySelector('#ev').onchange = (e) => { const a = e.target.selectedOptions[0]?.dataset.acct; if (a) el.querySelector('#ea').value = a; };
     },
-    actions: [{ label: 'Cancel' }, { label: 'Save expense', cls: 'btn-primary', onClick: async (el) => {
+    actions: [{ label: 'Cancel' }, { label: x ? 'Save changes' : 'Save expense', cls: 'btn-primary', onClick: async (el) => {
       const v = (s2) => el.querySelector(s2).value;
       const vendorName = el.querySelector('#ev').selectedOptions[0]?.textContent;
-      await rpc('record_expense', { p: { date: v('#ed'), vendor_id: v('#ev') || null, payee: v('#ep') || (v('#ev') ? vendorName : null), account_id: v('#ea'),
-        payment_account_id: v('#epa'), amount: num(v('#eam')), tax: num(v('#etx')), memo: v('#em') || null, contact_id: v('#ec') || null, reference: v('#eref') || null } });
-      toast('Expense recorded'); changed();
+      const p = { date: v('#ed'), vendor_id: v('#ev') || null, payee: v('#ep') || (v('#ev') ? vendorName : null), account_id: v('#ea'),
+        payment_account_id: v('#epa'), amount: num(v('#eam')), tax: num(v('#etx')), memo: v('#em') || null, contact_id: v('#ec') || null, reference: v('#eref') || null };
+      const id = x ? (await rpc('update_expense', { p_expense: x.id, p }), x.id) : await rpc('record_expense', { p });
+      const files = [...el.querySelector('#rcf').files];
+      if (files.length) await attachReceipts(files, { expenseId: id });
+      toast(x ? 'Expense updated' : 'Expense recorded'); changed();
     } }],
   });
 }
 
-// ── Bill ──
-export async function newBill() {
+// ── Bill (new or edit) ──
+export const newBill = () => billForm();
+export async function billForm(b = null) {
   const [accs, vendors] = await Promise.all([accounts(), vendorsList()]);
   if (!vendors.length) { toast('Add a vendor first (Expenses → Vendors).', true); return; }
   const due = new Date(Date.now() + 30 * 86400000).toLocaleDateString('en-CA');
   modal({
-    title: 'New bill',
-    body: `<div class="row-2"><div class="field"><label>Vendor</label><select class="input" id="bv">${vendors.map((v) => `<option value="${v.id}" data-acct="${v.default_account_id || ''}">${esc(v.name)}</option>`).join('')}</select></div>
-      <div class="field"><label>Bill no.</label><input class="input" id="bn"></div></div>
-      <div class="row-2"><div class="field"><label>Bill date</label><input class="input" type="date" id="bd" value="${today()}"></div>
-      <div class="field"><label>Due date</label><input class="input" type="date" id="bdd" value="${due}"></div></div>
-      <div class="field"><label>Category</label><select class="input" id="ba">${acctOptions(accs, null, (a) => a.type === 'expense' || a.subtype === 'fixed_asset')}</select></div>
-      <div class="row-2"><div class="field"><label>Bill total (incl. tax)</label><input class="input" type="number" step="0.01" id="bam"></div>
-      <div class="field"><label>GST/HST included</label><input class="input" type="number" step="0.01" id="btx" value="0"></div></div>
-      <div class="field"><label>Memo</label><input class="input" id="bm"></div>`,
-    onOpen: (el) => { const s = el.querySelector('#bv'); const f = () => { const a = s.selectedOptions[0]?.dataset.acct; if (a) el.querySelector('#ba').value = a; }; s.onchange = f; f(); },
-    actions: [{ label: 'Cancel' }, { label: 'Save bill', cls: 'btn-primary', onClick: async (el) => {
+    title: b ? 'Edit bill' : 'New bill',
+    body: `${b && +b.amount_paid > 0 ? `<div class="alert info" style="font-size:13px">${money(b.amount_paid)} has already been paid on this bill. The total can't go below that.</div>` : ''}
+      <div class="row-2"><div class="field"><label>Vendor</label><select class="input" id="bv">${vendors.map((v) => `<option value="${v.id}" data-acct="${v.default_account_id || ''}" ${b?.vendor_id === v.id ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>Bill no.</label><input class="input" id="bn" value="${esc(b?.bill_number || '')}"></div></div>
+      <div class="row-2"><div class="field"><label>Bill date</label><input class="input" type="date" id="bd" value="${b?.bill_date || today()}"></div>
+      <div class="field"><label>Due date</label><input class="input" type="date" id="bdd" value="${b?.due_date || due}"></div></div>
+      <div class="field"><label>Category</label><select class="input" id="ba">${acctOptions(accs, b?.account_id || null, (a) => a.type === 'expense' || a.subtype === 'fixed_asset')}</select></div>
+      <div class="row-2"><div class="field"><label>Bill total (incl. tax)</label><input class="input" type="number" step="0.01" id="bam" value="${b?.amount ?? ''}"></div>
+      <div class="field"><label>GST/HST included</label><input class="input" type="number" step="0.01" id="btx" value="${b?.tax ?? 0}"></div></div>
+      <div class="field"><label>Memo</label><input class="input" id="bm" value="${esc(b?.memo || '')}"></div>
+      ${attachField((b?.receipts || []).length)}`,
+    onOpen: (el) => { const s = el.querySelector('#bv'); const f = () => { const a = s.selectedOptions[0]?.dataset.acct; if (a) el.querySelector('#ba').value = a; }; s.onchange = f; if (!b) f(); },
+    actions: [{ label: 'Cancel' }, { label: b ? 'Save changes' : 'Save bill', cls: 'btn-primary', onClick: async (el) => {
       const v = (s) => el.querySelector(s).value;
-      await rpc('record_bill', { p: { vendor_id: v('#bv'), bill_number: v('#bn') || null, bill_date: v('#bd'), due_date: v('#bdd'), account_id: v('#ba'), amount: num(v('#bam')), tax: num(v('#btx')), memo: v('#bm') || null } });
-      toast('Bill saved'); changed();
+      const p = { vendor_id: v('#bv'), bill_number: v('#bn') || null, bill_date: v('#bd'), due_date: v('#bdd'), account_id: v('#ba'), amount: num(v('#bam')), tax: num(v('#btx')), memo: v('#bm') || null };
+      const id = b ? (await rpc('update_bill', { p_bill: b.id, p }), b.id) : await rpc('record_bill', { p });
+      const files = [...el.querySelector('#rcf').files];
+      if (files.length) await attachReceipts(files, { billId: id });
+      toast(b ? 'Bill updated' : 'Bill saved'); changed();
     } }],
   });
 }
@@ -205,11 +267,12 @@ export async function newTransfer() {
   const accs = await accounts();
   modal({
     title: 'Transfer between accounts',
-    body: `<div class="row-2"><div class="field"><label>From</label><select class="input" id="tf">${acctOptions(accs, null, (a) => a.subtype === 'bank' || a.subtype === 'credit_card' || a.type === 'equity')}</select></div>
-      <div class="field"><label>To</label><select class="input" id="tt">${acctOptions(accs, null, (a) => a.subtype === 'bank' || a.subtype === 'credit_card' || a.type === 'equity')}</select></div></div>
+    body: `<div class="alert info" style="font-size:12.5px;margin-bottom:12px">Money you put into the business: <b>From</b> Shareholder Loan <b>To</b> Operating Bank Account. When the business pays you back, do the reverse.</div>
+      <div class="row-2"><div class="field"><label>From</label><select class="input" id="tf">${acctOptions(accs, null, (a) => a.subtype === 'bank' || a.subtype === 'credit_card' || a.subtype === 'shareholder_loan' || a.type === 'equity')}</select></div>
+      <div class="field"><label>To</label><select class="input" id="tt">${acctOptions(accs, null, (a) => a.subtype === 'bank' || a.subtype === 'credit_card' || a.subtype === 'shareholder_loan' || a.type === 'equity')}</select></div></div>
       <div class="row-2"><div class="field"><label>Date</label><input class="input" type="date" id="td" value="${today()}"></div>
       <div class="field"><label>Amount</label><input class="input" type="number" step="0.01" id="ta"></div></div>
-      <div class="field"><label>Memo</label><input class="input" id="tm" placeholder="e.g. Owner contribution, credit card payment"></div>`,
+      <div class="field"><label>Memo</label><input class="input" id="tm" placeholder="e.g. Funds advanced by shareholder, credit card payment"></div>`,
     actions: [{ label: 'Cancel' }, { label: 'Save transfer', cls: 'btn-primary', onClick: async (el) => {
       await rpc('record_transfer', { p_date: el.querySelector('#td').value, p_from: el.querySelector('#tf').value, p_to: el.querySelector('#tt').value,
         p_amount: num(el.querySelector('#ta').value), p_memo: el.querySelector('#tm').value || null });

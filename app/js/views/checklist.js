@@ -96,7 +96,7 @@ export async function render(el, [id], { setTitle }) {
       const fs = [...ev.target.files]; if (!fs.length) return;
       const lab = ev.target.closest('label');
       try {
-        for (const [n, f] of fs.entries()) await uploadFile(f, { contactId: client.id, category: it.stage === 'forms' ? 'forms' : 'documents', checklistItemId: iid },
+        for (const [n, f] of fs.entries()) await uploadFile(f, { contactId: client.id, category: it.stage === 'forms' ? 'forms' : 'documents', docType: it.label, checklistItemId: iid },
           (p) => { lab.textContent = `${fs.length > 1 ? `${n + 1}/${fs.length} ` : ''}${Math.round(p * 100)}%`; });
         if (it.status === 'todo') await db.from('case_checklist_items').update({ status: 'done' }).eq('id', iid);
         toast('Saved to the client folder'); reload();
