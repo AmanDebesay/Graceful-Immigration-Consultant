@@ -119,9 +119,19 @@ export async function render(el, [id], { setTitle }) {
     });
   });
   el.querySelector('#delBtn')?.addEventListener('click', async () => {
-    if (!(await confirmBox('Delete contact', `Delete ${c.full_name} and their notes, activities, deals, cases and assessments? Contacts with invoices cannot be deleted.`, 'Delete', true))) return;
+    // Say exactly what is in the way: sent/signed agreements and anything in the books must be kept; draft agreements go with the contact.
+    const n = async (t) => (await db.from(t).select('id', { count: 'exact', head: true }).eq('contact_id', id)).count || 0;
+    const [{ data: agr }, inv, pay, tr, docs] = await Promise.all([db.from('agreements').select('id, number, status').eq('contact_id', id),
+      n('invoices'), n('payments'), n('trust_transactions'), n('client_documents')]);
+    const kept = (agr || []).filter((a) => a.status !== 'draft'), drafts = (agr || []).filter((a) => a.status === 'draft');
+    const blocks = [kept.length && `${kept.length} sent or signed agreement${kept.length > 1 ? 's' : ''} (${kept.map((a) => a.number).join(', ')}), which must be kept in the client file (void instead)`,
+      inv && `${inv} invoice${inv > 1 ? 's' : ''}`, pay && `${pay} payment${pay > 1 ? 's' : ''}`, tr && `${tr} trust transaction${tr > 1 ? 's' : ''}`].filter(Boolean);
+    if (blocks.length) return fail(new Error(`${c.full_name} can't be deleted because they have ${blocks.join(', ')}.`));
+    const extra = [drafts.length && `${drafts.length} draft agreement${drafts.length > 1 ? 's' : ''}`, docs && `${docs} document record${docs > 1 ? 's' : ''} (the files stay in OneDrive)`].filter(Boolean);
+    if (!(await confirmBox('Delete contact', `Delete ${c.full_name} and their notes, activities, deals, cases, checklists and assessments${extra.length ? `, plus ${extra.join(' and ')}` : ''}? This can't be undone.`, 'Delete', true))) return;
+    if (drafts.length) { const { error: de } = await db.from('agreements').delete().in('id', drafts.map((a) => a.id)); if (de) return fail(de); }
     const { error: er } = await db.from('contacts').delete().eq('id', id);
-    if (er) return fail(new Error(/foreign key/i.test(er.message) ? 'This contact has invoices or payments in the books and cannot be deleted.' : er.message));
+    if (er) return fail(new Error(/foreign key/i.test(er.message) ? `${c.full_name} is still linked to records that must be kept, so they can't be deleted.` : er.message));
     toast('Contact deleted'); location.hash = '#/contacts';
   });
 
