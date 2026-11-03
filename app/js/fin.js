@@ -47,7 +47,8 @@ export const acctOptions = (list, selected, filter = () => true, blank) =>
 export const contactOptions = (list, selected, blank = 'Choose a client') =>
   `<option value="">${esc(blank)}</option>` + list.map((c) => `<option value="${c.id}" ${c.id === selected ? 'selected' : ''}>${esc(c.full_name)}${c.email ? ' · ' + esc(c.email) : ''}</option>`).join('');
 export const isBank = (a) => ['bank', 'trust_bank', 'credit_card'].includes(a.subtype);
-export const isPayFrom = (a) => ['bank', 'credit_card'].includes(a.subtype);
+// Expenses and bill payments can be paid by the business (bank, card) or by the owner personally (Shareholder Loan)
+export const isPayFrom = (a) => ['bank', 'credit_card', 'shareholder_loan'].includes(a.subtype);
 
 export function downloadCsv(name, rows) {
   const csv = rows.map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
