@@ -162,7 +162,7 @@ function buildShell() {
       <div class="sb-foot"><a class="sb-help" href="#/guide">${icon('book')}<span><b>Need help?</b><small>How the dashboard works</small></span>${icon('arrowr')}</a>
         <a class="sb-site" href="../public/index.html" target="_blank" rel="noopener">View website ↗</a></div>
     </aside>
-    <div class="main">
+    <div class="main themed">
       <header class="topbar">
         <button class="menu-btn btn btn-ghost btn-sm" id="menuBtn" aria-label="Menu">${icon('menu')}</button>
         <h1 id="pageTitle">Dashboard</h1>

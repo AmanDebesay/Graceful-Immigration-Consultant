@@ -1013,19 +1013,20 @@ table.t{width:100%;border-collapse:collapse}
 .countries li{grid-template-columns:24px minmax(70px,110px) 1fr 42px}
 .countries .cflag{width:auto;height:auto;border-radius:0;font-style:normal;font-size:18px;line-height:1;background:none}
 .cbar em{background:linear-gradient(90deg,#B8861F,#F2C462)}
-.main.home{position:relative;isolation:isolate;background:#081D3F linear-gradient(180deg,#061531 0%,#0A2550 40%,#0B2A5C 70%,#0A2350 100%)}
-.main.home::before{content:"";position:absolute;z-index:-1;top:0;right:0;width:min(64%,1150px);height:470px;pointer-events:none;
+.main.themed{position:relative;isolation:isolate;background:#081D3F linear-gradient(180deg,#061531 0%,#0A2550 40%,#0B2A5C 70%,#0A2350 100%)}
+.main.themed::before{content:"";position:absolute;z-index:-1;top:0;right:0;width:min(55%,950px);height:300px;pointer-events:none;opacity:.55;
   background:linear-gradient(180deg,rgba(6,21,49,.55),rgba(6,21,49,.08) 45%,rgba(10,37,80,.7)),url(../../public/img/why-lake.jpg) center 38%/cover;filter:saturate(1.15) brightness(.88);
   -webkit-mask-image:linear-gradient(to left,#000 45%,transparent 96%),linear-gradient(to bottom,#000 50%,transparent 100%);-webkit-mask-composite:source-in;
   mask-image:linear-gradient(to left,#000 45%,transparent 96%),linear-gradient(to bottom,#000 50%,transparent 100%);mask-composite:intersect}
-.main.home::after{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:0;height:170px;pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 170' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%23B8861F' stop-opacity='0'/%3E%3Cstop offset='.5' stop-color='%23F2C462'/%3E%3Cstop offset='1' stop-color='%23E2AE45'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 170 C 380 165 760 140 1030 100 S 1370 30 1440 6 V170 H0Z' fill='url(%23g)' opacity='.28'/%3E%3Cpath d='M0 166 C 420 162 790 134 1060 96 S 1390 26 1440 10' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Cpath d='M300 170 C 640 160 900 140 1120 112 S 1400 56 1440 40' fill='none' stroke='url(%23g)' stroke-width='1.5' opacity='.7'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
-.main.home .topbar{background:linear-gradient(180deg,rgba(6,21,49,.55),rgba(6,21,49,0));backdrop-filter:none}
-.main.home .topbar h1 .wb{color:#fff}.main.home .topbar h1 .wb em{color:#F2C462;font-style:italic}
-.main.home .topbar h1 small{color:rgba(255,255,255,.88)}
+.main.themed::after{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:0;height:170px;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 170' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%23B8861F' stop-opacity='0'/%3E%3Cstop offset='.5' stop-color='%23F2C462'/%3E%3Cstop offset='1' stop-color='%23E2AE45'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 170 C 380 165 760 140 1030 100 S 1370 30 1440 6 V170 H0Z' fill='%23051330' opacity='.9'/%3E%3Cpath d='M0 166 C 420 162 790 134 1060 96 S 1390 26 1440 10' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Cpath d='M300 170 C 640 160 900 140 1120 112 S 1400 56 1440 40' fill='none' stroke='url(%23g)' stroke-width='1.5' opacity='.7'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
+.main.themed .topbar{background:linear-gradient(180deg,rgba(6,21,49,.55),rgba(6,21,49,0));backdrop-filter:none}
+.main.themed .topbar h1,.main.themed .topbar h1 .wb{color:#fff}.main.themed .topbar h1 .wb em{color:#F2C462;font-style:italic}
+.main.themed .topbar h1 small{color:rgba(255,255,255,.88)}
 .main.home .topbar h1{padding-right:24px;border-right:1px solid rgba(255,255,255,.18)}
-.main.home .user-chip{border-left-color:rgba(255,255,255,.18)}.main.home .user-chip .meta b{color:#fff}.main.home .user-chip .meta span,.main.home .user-chip > svg{color:rgba(255,255,255,.75)}
-.main.home .menu-btn{color:#fff}
+.main.home::before{width:min(64%,1150px);height:470px;opacity:1}
+.main.themed .user-chip{border-left-color:rgba(255,255,255,.18)}.main.themed .user-chip .meta b{color:#fff}.main.themed .user-chip .meta span,.main.themed .user-chip > svg{color:rgba(255,255,255,.75)}
+.main.themed .menu-btn{color:#fff}
 .main.home .dk-kpi{position:relative;overflow:hidden;color:#fff;background:linear-gradient(180deg,rgba(18,48,98,.7),rgba(8,26,58,.82));border:1px solid rgba(242,196,98,.6);
   backdrop-filter:blur(8px);box-shadow:0 14px 34px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.1)}
 .main.home .dk-kpi::after{content:"";position:absolute;left:12%;right:12%;bottom:0;height:2px;background:linear-gradient(90deg,transparent,#F2C462,transparent);box-shadow:0 0 16px 3px rgba(242,196,98,.55)}
@@ -1044,3 +1045,14 @@ table.t{width:100%;border-collapse:collapse}
 @media (max-width:1380px){.dk-hero{grid-template-columns:repeat(2,minmax(0,1fr))}.dk-flagcell{display:none}.dk-queue{grid-column:1/-1}.dk-hero .dk-actions{grid-column:1/-1;grid-template-columns:1fr 1fr}
   .main.home::before{width:100%;height:360px;opacity:.75}}
 @media (max-width:640px){.dk-hero{grid-template-columns:1fr}.dk-hero .dk-actions{grid-template-columns:1fr}.dk-qlinks{border-left:0;padding-left:0}.main.home::before{height:280px}}
+
+/* Every staff page shares the home style: ivory cards on the night-sky navy */
+.main.themed .card,.main.themed .dk-card{background:linear-gradient(180deg,#FFFEFB 0%,#F8F2E7 100%);border-color:rgba(226,174,69,.42);box-shadow:0 14px 34px rgba(0,0,0,.26)}
+.main.themed .ol{box-shadow:0 18px 40px rgba(0,0,0,.35)}
+/* Text sitting on the navy background is light; anything with its own surface keeps dark text */
+.main.themed .content{color:#E9EEF6;--muted:#B4BFD2;--navy:#FFFFFF;--green:#7EE2A8;--red:#FDA29B}
+.main.themed .content :where(.card,.dk-card,.ol,.alert,.dropdown,.btn,.input,.seg,.tabs,.chip,.badge,.pill,table,.empty,.modal,.dk-nudge,.dk-act,.dk-kpi,label.chip,.col,.rc-mailbar,.rc-drop,.cl-flow-s,select,textarea,input){color:var(--ink);--muted:#667085;--navy:#0B2A5C;--green:#067647;--red:#B42318}
+.main.themed .content :is(.toolbar,.cal-bar) > .btn-ghost{color:#fff}
+.main.themed .res-head h2{color:#fff}.main.themed .res-head p{color:#C9D2E0}.main.themed .content .toolbar > .btn-ghost:hover{background:rgba(255,255,255,.12)}
+.main.themed .content .btn-primary{background:linear-gradient(135deg,#1F56AE,#0E3170);border-color:rgba(242,196,98,.75);color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.main.themed .content .btn-primary:hover{background:linear-gradient(135deg,#2563C4,#123A80)}
