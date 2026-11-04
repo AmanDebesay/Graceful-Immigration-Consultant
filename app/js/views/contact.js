@@ -59,7 +59,7 @@ export async function render(el, [id], { setTitle }) {
         </div></div>
       </div>
       <div class="card">
-        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments']] : [])]
+        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments']] : []), ['portal', 'Portal']]
           .map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
         <div class="card-b" id="tabBody"></div>
       </div>
@@ -149,7 +149,8 @@ export async function render(el, [id], { setTitle }) {
   async function showTab() {
     tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === tab));
     body.innerHTML = '<div class="loading" style="min-height:120px"><div class="spin"></div></div>';
-    ({ emails: emailsTab, documents: documentsTab, agreements: agreementsTab, activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab })[tab]();
+    ({ emails: emailsTab, documents: documentsTab, agreements: agreementsTab, activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab,
+      portal: async () => (await import('./portal-inbox.js')).portalPanel(body, c) })[tab]();
   }
 
   async function activityTab() {

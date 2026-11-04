@@ -39,7 +39,7 @@ export const canDeleteDocs = () => can('documents.delete');
 const size = (n) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 // OneDrive takes large files in pieces (multiples of 320 KB).
-async function putChunks(url, file, onProgress) {
+export async function putChunks(url, file, onProgress) {
   const CH = 320 * 1024 * 16;
   let start = 0, res;
   while (start < file.size) {

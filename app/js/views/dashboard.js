@@ -14,9 +14,15 @@ const CATEGORY = {
   'Visitor Visa (TRV)': 'Visitor & Super Visa', 'Super Visa': 'Visitor & Super Visa', 'Visitor Record': 'Visitor & Super Visa',
   'Refugee Claim': 'Refugee & Protection', 'PRRA / H&C': 'Refugee & Protection', Citizenship: 'Citizenship',
 };
+const FLAG = '<svg class="dk-flag" viewBox="0 0 220 210" aria-hidden="true"><defs><linearGradient id="pole" x1="0" x2="1"><stop offset="0" stop-color="#8A94A6"/><stop offset=".5" stop-color="#F4F6FA"/><stop offset="1" stop-color="#6B7385"/></linearGradient><linearGradient id="fshade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset=".35" stop-color="#fff" stop-opacity=".12"/><stop offset=".7" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/></linearGradient></defs><rect x="10" y="6" width="6" height="204" rx="3" fill="url(#pole)"/><circle cx="13" cy="6" r="6" fill="#E9C46A"/><g class="dk-flag-cloth"><svg x="16" y="16" width="190" height="95" viewBox="0 0 9600 4800" preserveAspectRatio="none"><path fill="#D52B1E" d="M0 0h2400v4800H0zM7200 0h2400v4800H7200z"/><path fill="#fff" d="M2400 0h4800v4800H2400z"/><path fill="#D52B1E" d="m4890 4430-45-863a95 95 0 0 1 111-98l859 151-116-320a65 65 0 0 1 20-73l941-762-212-99a65 65 0 0 1-34-79l186-572-542 115a65 65 0 0 1-73-38l-105-247-423 454a65 65 0 0 1-111-57l204-1052-327 189a65 65 0 0 1-91-27l-332-652-332 652a65 65 0 0 1-91 27l-327-189 204 1052a65 65 0 0 1-111 57l-423-454-105 247a65 65 0 0 1-73 38l-542-115 186 572a65 65 0 0 1-34 79l-212 99 941 762a65 65 0 0 1 20 73l-116 320 859-151a95 95 0 0 1 111 98l-45 863z"/></svg><rect x="16" y="16" width="190" height="95" fill="url(#fshade)"/></g></svg>';
 const STATUS_PILL = { open: 'p-blue', in_progress: 'p-gold', submitted: 'p-navy', decision_pending: 'p-amber', approved: 'p-green', refused: 'p-red', withdrawn: 'p-grey', closed: 'p-grey' };
 const STAGE_LABEL = { new: 'New lead', contacted: 'Contacted', consultation_booked: 'Consultation booked', assessed: 'Assessed', retained: 'Retained', closed_lost: 'Closed' };
 const monthKey = (d) => String(d).slice(0, 7);
+const ISO = { canada: 'CA', eritrea: 'ER', ethiopia: 'ET', sudan: 'SD', 'south sudan': 'SS', somalia: 'SO', kenya: 'KE', uganda: 'UG', nigeria: 'NG', ghana: 'GH', egypt: 'EG', morocco: 'MA',
+  india: 'IN', pakistan: 'PK', bangladesh: 'BD', 'sri lanka': 'LK', nepal: 'NP', philippines: 'PH', china: 'CN', vietnam: 'VN', 'south korea': 'KR', japan: 'JP', iran: 'IR', iraq: 'IQ', syria: 'SY',
+  afghanistan: 'AF', lebanon: 'LB', jordan: 'JO', turkey: 'TR', 'saudi arabia': 'SA', yemen: 'YE', ukraine: 'UA', russia: 'RU', 'united kingdom': 'GB', uk: 'GB', 'united states': 'US', usa: 'US',
+  mexico: 'MX', brazil: 'BR', colombia: 'CO', jamaica: 'JM', haiti: 'HT', france: 'FR', germany: 'DE', italy: 'IT', spain: 'ES', israel: 'IL', 'united arab emirates': 'AE', uae: 'AE', rwanda: 'RW', congo: 'CD', cameroon: 'CM' };
+const flagOf = (n) => { const c = ISO[String(n).trim().toLowerCase()]; return c ? String.fromCodePoint(...[...c].map((x) => 0x1F1E6 + x.charCodeAt(0) - 65)) : '🌐'; };
 const pct = (a, b) => (b ? Math.round(((a - b) / b) * 100) : null);
 
 export async function render(el, _params, ctx) {
@@ -55,6 +61,7 @@ export async function render(el, _params, ctx) {
   const pending = K.filter((k) => PENDING.includes(k.status)).length;
   const trend = (d, label, fallback) => d === null ? `<span class="kpi-sub">${fallback}</span>`
     : `<span class="kpi-delta ${d < 0 ? 'neg' : ''}">${icon(d < 0 ? 'down' : 'up')}${Math.abs(d)}%</span><span class="kpi-sub">${label}</span>`;
+  const H3 = (ico, t) => `<h3><span class="dk-hi">${icon(ico)}</span>${t}</h3>`;
   const kpi = (label, value, ico, tone, sub, href) => `<a class="dk-kpi" href="${href}"><span class="dk-kpi-ico ${tone}">${icon(ico)}</span>
     <span class="dk-kpi-body"><small>${label}</small><b>${value}</b><span class="dk-kpi-foot">${sub}</span></span></a>`;
 
@@ -62,8 +69,9 @@ export async function render(el, _params, ctx) {
   const typeCount = {};
   for (const k of K) { const cat = CATEGORY[k.application_type] || 'Other'; typeCount[cat] = (typeCount[cat] || 0) + 1; }
   const types = Object.entries(typeCount).sort((a, b) => b[1] - a[1]);
+  if (!types.length) [['Family Sponsorship', 0], ['Work Permit', 0], ['Study Permit', 0], ['Other', 0]].forEach((t) => types.push(t));
   let acc = 0;
-  const stops = types.map(([, n], i) => { const a = (acc / K.length) * 360; acc += n; return `${PALETTE[i % PALETTE.length]} ${a}deg ${(acc / K.length) * 360}deg`; }).join(',');
+  const stops = K.length ? types.map(([, n], i) => { const a = (acc / K.length) * 360; acc += n; return `${PALETTE[i % PALETTE.length]} ${a}deg ${(acc / K.length) * 360}deg`; }).join(',') : '#E3E1DC 0deg 360deg';
 
   // ── Monthly trends (this year) ──
   const opened = MONTHS.map((_, i) => K.filter((k) => monthKey(k.opened_on) === `${year}-${String(i + 1).padStart(2, '0')}`).length);
@@ -87,58 +95,58 @@ export async function render(el, _params, ctx) {
 
   el.innerHTML = `
     ${!p.avatar_url ? `<div class="dk-nudge">${icon('camera')}<span><b>Add your photo.</b> It appears on your profile in the top right and helps your team and clients recognise you.</span><a class="btn btn-sm btn-gold" href="#/account">Add photo</a></div>` : ''}
-    ${work || manage || drafter ? `<div class="dk-card dk-queue" style="margin-bottom:18px"><div class="dk-h"><h3>Your work queue</h3>
-        <div class="row" style="gap:8px">${work ? `<a class="btn btn-gold btn-sm" href="#/checklists">${icon('checksq')} My checklists${(myLists.data || []).length ? ` (${myLists.data.length})` : ''}</a>` : ''}<a class="dk-link" href="#/guide">${icon('book')} How it works</a></div></div>
+    <div class="dk-hero">
+      ${crm ? kpi('Total Clients', clients.length, 'users', 'navy', trend(pct(newThis, newLast), 'from last month', `${newThis} new this month`), '#/contacts') : ''}
+      ${crm ? kpi('Active Cases', K.filter((k) => ACTIVE.includes(k.status)).length, 'folder', 'navy', `<span class="kpi-sub">${openedThis} opened this month</span>`, '#/cases') : ''}
+      ${crm ? kpi('Cases Approved', approvedYear, 'checksq', 'gold', trend(pct(approvedYear, approvedPrev), 'vs last year', 'this year'), '#/cases') : ''}
+      ${crm ? kpi('Pending Cases', pending, 'clock', 'gold', '<span class="kpi-sub">awaiting IRCC decision</span>', '#/cases') : ''}
+      <div class="dk-flagcell">${FLAG}</div>
+    ${work || manage || drafter ? `<div class="dk-card dk-queue"><div class="dk-qhead"><span class="dk-qico">${icon('clipboard')}</span><div class="dk-qt"><h3>Your Work Queue</h3>
+        ${(myLists.data || []).length || (agrQ.data || []).length ? '' : '<p>Nothing waiting for you. Work handed to you appears here and in Tasks.</p>'}</div>
+        <div class="dk-qlinks">${work ? `<a class="dk-link" href="#/checklists">${icon('checksq')} My checklists${(myLists.data || []).length ? ` (${myLists.data.length})` : ''}</a>` : ''}<a class="dk-link" href="#/guide">${icon('book')} How it works</a></div></div>
       ${(myLists.data || []).length || (agrQ.data || []).length ? `<div class="dk-list">
         ${(agrQ.data || []).map((a) => `<a class="rc" href="#/agreements/${a.id}"><span class="rc-av">${icon('file')}</span><b>${manage ? 'Review & sign' : 'Draft'} ${esc(a.number)}</b>
           <span class="rc-type">${esc(a.contacts?.full_name || '')}${manage ? ` · from ${esc(staffName(a.review_requested_by))}` : ''}</span><span class="rc-date">${a.review_requested_at ? timeAgo(a.review_requested_at) : ''}</span>
           <span class="pill ${manage ? 'p-amber' : a.review_requested_at ? 'p-gold' : a.review_note ? 'p-red' : 'p-grey'}">${manage ? 'Needs your review' : a.review_requested_at ? 'With RCIC' : a.review_note ? 'Changes requested' : 'In progress'}</span></a>`).join('')}
         ${(myLists.data || []).map((c) => `<a class="rc" href="#/checklists/${c.id}"><span class="rc-av">${icon('checksq')}</span><b>${esc(c.cases?.contacts?.full_name || '')}</b>
-          <span class="rc-type">${esc(c.name)}</span><span class="rc-date">${timeAgo(c.updated_at)}</span>${clBadge(c.stage)}</a>`).join('')}</div>`
-        : `<div class="dk-empty">${icon('checksq')}<p>Nothing waiting for you. Work handed to you appears here and in Tasks.</p></div>`}</div>` : ''}
-    <div class="dk-kpis">
-      ${crm ? kpi('Total clients', clients.length, 'users', 'navy', trend(pct(newThis, newLast), 'from last month', `${newThis} new this month`), '#/contacts') : ''}
-      ${crm ? kpi('Active cases', K.filter((k) => ACTIVE.includes(k.status)).length, 'folder', 'navy', trend(pct(openedThis, openedLast), 'from last month', `${openedThis} opened this month`), '#/cases') : ''}
-      ${crm ? kpi('Cases approved', approvedYear, 'checksq', 'gold', trend(pct(approvedYear, approvedPrev), 'vs last year', 'this year'), '#/cases') : ''}
-      ${crm ? kpi('Pending cases', pending, 'clock', 'gold', '<span class="kpi-sub">awaiting IRCC decision</span>', '#/cases') : ''}
+          <span class="rc-type">${esc(c.name)}</span><span class="rc-date">${timeAgo(c.updated_at)}</span>${clBadge(c.stage)}</a>`).join('')}</div>` : ''}</div>` : '<div class="dk-queue dk-queue-none"></div>'}
       <div class="dk-actions">
-        ${can('crm.edit') ? `<a class="dk-act gold" href="#/contacts?new=1">${icon('plus')}<span>Add new client</span>${icon('arrowr')}</a>` : ''}
-        ${crm ? `<button class="dk-act" id="bookC">${icon('calendar')}<span>Book consultation</span>${icon('arrowr')}</button>` : ''}
+        ${can('crm.edit') ? `<a class="dk-act gold" href="#/contacts?new=1">${icon('plus')}<span>Add New Client</span>${icon('arrowr')}</a>` : ''}
+        ${crm ? `<button class="dk-act" id="bookC">${icon('calendar')}<span>Book Consultation</span>${icon('arrowr')}</button>` : ''}
       </div>
     </div>
 
     ${crm ? `<div class="dk-row r3">
-      <div class="dk-card"><div class="dk-h"><h3>Case Types</h3><small>All cases</small></div>
-        ${K.length ? `<div class="donut-wrap"><div class="donut" style="background:conic-gradient(${stops})"><div><b>${K.length}</b><span>Total cases</span></div></div>
-          <ul class="legend">${types.map(([t, n], i) => `<li><i style="background:${PALETTE[i % PALETTE.length]}"></i><span>${esc(t)}</span><b>${Math.round((n / K.length) * 100)}%</b></li>`).join('')}</ul></div>`
-          : `<div class="dk-empty">${icon('folder')}<p>No cases yet. Open a case from a client's page to see the mix of case types here.</p></div>`}
+      <div class="dk-card"><div class="dk-h">${H3('layers', 'Case Types')}<small>All cases</small></div>
+        <div class="donut-wrap"><div class="donut" style="background:conic-gradient(${stops})"><div><b>${K.length}</b><span>${K.length === 1 ? 'Case' : 'Cases'}</span></div></div>
+          <ul class="legend">${types.slice(0, 7).map(([t, n], i) => `<li><i style="background:${PALETTE[i % PALETTE.length]}"></i><span>${esc(t)}</span><b>${n}</b></li>`).join('')}</ul></div>
       </div>
-      <div class="dk-card"><div class="dk-h"><h3>Monthly Case Trends</h3><div class="dk-legend"><span><i class="navy"></i>New cases</span><span><i class="gold"></i>Approvals</span></div></div>
+      <div class="dk-card"><div class="dk-h">${H3('trend', 'Monthly Case Trends')}<div class="dk-legend"><span><i class="navy"></i>New cases</span><span><i class="gold"></i>Approvals</span></div></div>
         <div class="bars"><div class="bars-y">${[4, 3, 2, 1, 0].map((n) => `<span>${n * step}</span>`).join('')}</div>
           <div class="bars-plot">${MONTHS.map((m, i) => `<div class="bars-m" title="${m}: ${opened[i]} new, ${approved[i]} approved"><div class="bars-pair"><i class="navy" style="height:${(opened[i] / axis) * 100}%"></i><i class="gold" style="height:${(approved[i] / axis) * 100}%"></i></div><small>${m}</small></div>`).join('')}</div></div>
       </div>
-      <div class="dk-card"><div class="dk-h"><h3>Clients by Country</h3><small>Citizenship</small></div>
-        ${shown.length ? `<ul class="countries">${shown.map(([n, v], i) => `<li><i style="background:${PALETTE[i % PALETTE.length]}"></i><span>${esc(n)}</span><div class="cbar"><em style="width:${(v / clients.length) * 100}%;background:${PALETTE[i % PALETTE.length]}"></em></div><b>${Math.round((v / clients.length) * 100)}%</b></li>`).join('')}</ul>`
+      <div class="dk-card dk-country"><div class="dk-h">${H3('globe', 'Clients by Country')}<small>Citizenship</small></div>
+        ${shown.length ? `<ul class="countries">${shown.map(([n, v], i) => `<li><i class="cflag">${n === 'Not recorded' || n === 'Others' ? '🌐' : flagOf(n)}</i><span>${esc(n)}</span><div class="cbar"><em style="width:${(v / clients.length) * 100}%"></em></div><b>${Math.round((v / clients.length) * 100)}%</b></li>`).join('')}</ul>`
           : `<div class="dk-empty">${icon('globe')}<p>Add citizenship on client profiles to see where your clients come from.</p></div>`}
       </div>
     </div>
 
     <div class="dk-row r3">
-      <div class="dk-card"><div class="dk-h"><h3>Recent Clients</h3><a href="#/contacts">View all ${icon('arrowr')}</a></div>
+      <div class="dk-card"><div class="dk-h">${H3('users', 'Recent Clients')}<a href="#/contacts">View all ${icon('arrowr')}</a></div>
         ${recent.length ? `<div class="dk-list">${recent.map((c) => { const k = latestCase[c.id]; return `<a class="rc" href="#/contacts/${c.id}">
           <span class="rc-av">${esc(initials(c.full_name))}</span><b>${esc(c.full_name)}</b>
           <span class="rc-type">${esc(k?.application_type || (c.services || [])[0] || '—')}</span><span class="rc-date">${fmtDate(c.created_at)}</span>
           <span class="pill ${k ? STATUS_PILL[k.status] : 'p-grey'}">${esc(k ? CASE_LABEL[k.status] : STAGE_LABEL[c.stage] || c.stage)}</span></a>`; }).join('')}</div>`
           : `<div class="dk-empty">${icon('users')}<p>No clients yet.</p>${can('crm.edit') ? `<a class="btn btn-gold btn-sm" href="#/contacts?new=1">${icon('plus')} Add your first client</a>` : ''}</div>`}
       </div>
-      <div class="dk-card"><div class="dk-h"><h3>Upcoming Appointments</h3>${can('crm.edit') ? `<button class="dk-link" id="addAppt">${icon('plus')} Add</button>` : ''}</div>
+      <div class="dk-card"><div class="dk-h">${H3('calendar', 'Upcoming Appointments')}${can('crm.edit') ? `<button class="dk-link" id="addAppt">${icon('plus')} Add</button>` : ''}</div>
         ${(appts.data || []).length ? `<div class="dk-list">${appts.data.map((a) => { const d = new Date(a.starts_at); return `<button class="ap" data-ap="${a.id}">
           <span class="ap-date"><b>${d.getDate()}</b><small>${MONTHS[d.getMonth()].toUpperCase()}</small></span>
           <span class="ap-body"><b>${esc(APPT_LABEL[a.kind] || 'Appointment')}</b><span>${esc(a.title)}${a.contacts ? ' · ' + esc(a.contacts.full_name) : ''}</span><small>${time(a.starts_at)}${a.ends_at ? ' – ' + time(a.ends_at) : ''} · ${esc(a.location)}</small></span>
           ${a.meeting_link ? `<a class="ap-ico on" href="${esc(a.meeting_link)}" target="_blank" rel="noopener" title="Join meeting">${icon('video')}</a>` : `<span class="ap-ico">${icon(a.location === 'Phone' ? 'phone' : 'video')}</span>`}</button>`; }).join('')}</div>`
           : `<div class="dk-empty">${icon('calendar')}<p>No upcoming appointments.</p></div>`}
       </div>
-      <div class="dk-card"><div class="dk-h"><h3>Tasks &amp; Reminders</h3><a href="#/tasks">View all ${icon('arrowr')}</a></div>
+      <div class="dk-card"><div class="dk-h">${H3('checksq', 'Tasks &amp; Reminders')}<a href="#/tasks">View all ${icon('arrowr')}</a></div>
         ${(tasks.data || []).length ? `<div class="dk-list">${tasks.data.map((t) => `<label class="tk"><input type="checkbox" data-task="${t.id}"><span>${esc(t.title)}${t.contacts ? `<small>${esc(t.contacts.full_name)}</small>` : ''}</span>
           <em class="${t.due_date && t.due_date <= today() ? 'due' : ''}">${t.due_date ? (t.due_date === today() ? 'Today' : t.due_date < today() ? 'Overdue' : fmtDate(t.due_date, { month: 'short', day: 'numeric' })) : ''}</em></label>`).join('')}</div>`
           : `<div class="dk-empty">${icon('checksq')}<p>You're all caught up.</p></div>`}

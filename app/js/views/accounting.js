@@ -1,10 +1,11 @@
-import { esc, icon, rpc, can } from '../core.js';
+import { db, state, esc, icon, rpc, can, modal, toast, fmtDate } from '../core.js';
 import { money, monthLabel, newInvoice, receivePayment, newExpense, newBill, trustTxn } from '../fin.js';
 
 const PALETTE = ['#0B2A5C', '#D6A23A', '#2E6FBF', '#7A9CC6', '#E9C46A', '#5B6476', '#B8861F', '#9DB4D3'];
 
 export async function render(el) {
-  const d = await rpc('finance_dashboard');
+  const [d, { data: org }] = await Promise.all([rpc('finance_dashboard'), db.from('org_settings').select('books_closed_through').eq('id', 1).single()]);
+  const closed = org?.books_closed_through || null, owner = state.profile.role === 'owner';
   const months = [];
   for (let i = 11; i >= 0; i--) { const dt = new Date(); dt.setDate(1); dt.setMonth(dt.getMonth() - i); months.push(dt.toLocaleDateString('en-CA').slice(0, 7)); }
   const byM = Object.fromEntries((d.monthly || []).map((x) => [x.m, x]));
@@ -29,10 +30,12 @@ export async function render(el) {
 
   const manage = can('finance.manage');
   el.innerHTML = `
-    ${manage ? `<div class="toolbar"><div class="grow"></div>
+    <div class="toolbar"><span class="badge ${closed ? 'b-navy' : 'plain'}" title="Nothing dated on or before the closing date can be added, changed or deleted">${icon('lock')} ${closed ? `Books closed through ${fmtDate(closed)}` : 'Books open (no closing date)'}</span>
+      ${owner ? `<button class="btn btn-sm" data-act="close">${closed ? 'Change closing date' : 'Close the books'}</button>` : ''}<div class="grow"></div>
+    ${manage ? `
       <button class="btn" data-act="exp">${icon('dollar')} New expense</button>
       <button class="btn" data-act="pay">${icon('check')} Receive payment</button>
-      <button class="btn btn-gold" data-act="inv">${icon('plus')} New invoice</button></div>` : ''}
+      <button class="btn btn-gold" data-act="inv">${icon('plus')} New invoice</button>` : ''}</div>
 
     <div class="grid g-4" style="margin-bottom:18px">
       <a class="card kpi" href="#/reports?r=pl"><div class="kpi-ico green">${icon('trend')}</div><div><small>Income this year</small><b>${money(d.ytd_income)}</b></div></a>
@@ -83,6 +86,18 @@ export async function render(el) {
     </div>`;
 
   const acts = { inv: () => newInvoice(), pay: () => receivePayment(), exp: () => newExpense(), bill: () => newBill(), trust: () => trustTxn('deposit') };
+  // Closing date: lock a finished period (e.g. after filing GST or the year-end), like QuickBooks.
+  acts.close = () => {
+    const lastMonthEnd = (() => { const x = new Date(); x.setDate(0); return x.toLocaleDateString('en-CA'); })();
+    modal({ title: 'Closing date', body: `<p style="margin-bottom:12px">Close the books once a period is final, for example after you file GST or your accountant finishes the year-end. After that, nothing dated on or before the closing date can be added, changed or deleted, so filed numbers stay the same.</p>
+      <div class="field"><label>Closed through</label><input class="input" type="date" id="cd" value="${closed || lastMonthEnd}"></div>
+      <p class="dk-muted">To fix a mistake in a closed period, void it (a void is dated today) or move the closing date back. Every change to the closing date is recorded in the audit log.</p>`,
+      actions: [...(closed ? [{ label: 'Remove closing date', cls: 'btn-danger', onClick: async () => { await rpc('set_books_closing', { p_date: null }); toast('Closing date removed'); rerender(); } }] : []),
+        { label: 'Cancel' }, { label: 'Save', cls: 'btn-primary', onClick: async (m) => {
+          const v = m.querySelector('#cd').value; if (!v) throw new Error('Pick a date.');
+          await rpc('set_books_closing', { p_date: v }); toast(`Books closed through ${fmtDate(v)}`); rerender();
+        } }] });
+  };
   el.querySelectorAll('[data-act]').forEach((b) => (b.onclick = () => acts[b.dataset.act]()));
   const rerender = () => render(el);
   window.addEventListener('books-changed', rerender, { once: true });

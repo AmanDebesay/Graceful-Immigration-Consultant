@@ -22,6 +22,7 @@ const NAV = [
   { path: '/cases', label: 'Cases', icon: 'file', show: () => can('crm.view') },
   { path: '/documents', label: 'Documents', icon: 'folder', show: () => can('documents.view') },
   { path: '/checklists', label: 'Checklists', icon: 'checksq', show: () => can('checklists.work') || can('cases.approve') || can('crm.view'), count: 'my_checklists' },
+  { path: '/portal', label: 'Client Portal', icon: 'shield', show: () => can('crm.view'), count: 'portal_unread', red: true },
   { path: '/assessments', label: 'Assessments', icon: 'clipboard', show: () => can('intake.view'), count: 'new_assessments' },
   { path: '/pathways', label: 'Pathway Assessments', icon: 'route', show: () => can('pathway.view') },
   { path: '/tasks', label: 'Tasks', icon: 'checksq', show: () => isStaff(), count: 'tasks_overdue', red: true },
@@ -60,6 +61,7 @@ const ROUTES = [
   [/^\/assessments$/, 'assessments', 'Assessments'],
   [/^\/assessments\/new$/, 'assessment-new', 'New assessment'],
   [/^\/assessments\/([\w-]+)$/, 'assessment', 'Assessment'],
+  [/^\/portal$/, 'portal-inbox', 'Client Portal'],
   [/^\/pathways$/, 'pathways', 'Pathway Assessments'],
   [/^\/pathways\/([\w-]+)$/, 'pathway', 'Pathway assessment'],
   [/^\/pipeline$/, 'pipeline', 'Lead Pipeline'],
@@ -142,14 +144,9 @@ async function boot() {
   if (isStaff()) await loadStaff();
 
   if (!isStaff()) {
-    app.innerHTML = `<div class="auth"><div class="auth-form" style="grid-column:1/-1"><div class="auth-box" style="max-width:520px;text-align:center">
-      <img src="../public/img/logo-emblem.png" alt="" style="width:90px;margin:0 auto 14px">
-      <h1>Hello, ${esc(profile.full_name.split(' ')[0] || 'there')}</h1>
-      <p>Your client portal is being set up. Soon you'll see your agreements, invoices and messages here.
-      For anything urgent call <a href="tel:+14039154230">(403) 915-4230</a>.</p>
-      <button class="btn btn-primary" id="so">Sign out</button></div></div></div>`;
-    document.getElementById('so').onclick = async () => { await db.auth.signOut(); location.reload(); };
-    return;
+    // Clients get the client portal (their own file only)
+    document.title = 'Client portal · Graceful Immigration';
+    return (await import('./portal.js')).renderPortal(app);
   }
   buildShell();
   route();
@@ -291,10 +288,11 @@ function renderNav() {
 export async function refreshCounts() {
   try {
     const me = state.profile.id;
-    const [s, u, cl, ar] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread'),
+    const [s, u, cl, ar, pm] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread'),
       db.from('case_checklists').select('id', { count: 'exact', head: true }).eq('assigned_to', me).neq('stage', 'approved'),
-      can('agreements.manage') ? db.from('agreements').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('reviewer_id', me).not('review_requested_at', 'is', null) : { count: 0 }]);
-    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0), my_checklists: cl.count || 0, agr_review: ar.count || 0 };
+      can('agreements.manage') ? db.from('agreements').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('reviewer_id', me).not('review_requested_at', 'is', null) : { count: 0 },
+      can('crm.view') ? db.from('portal_messages').select('id', { count: 'exact', head: true }).eq('from_client', true).is('read_by_staff_at', null) : { count: 0 }]);
+    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0), my_checklists: cl.count || 0, agr_review: ar.count || 0, portal_unread: pm.count || 0 };
   } catch { counts = {}; }
   if (shellBuilt) {
     renderNav();
@@ -356,6 +354,7 @@ async function route() {
   const [m, mod, title] = match;
   document.getElementById('pageTitle').textContent = title;
   document.querySelector('.topbar').classList.toggle('tb-home', path === '/');
+  document.querySelector('.main').classList.toggle('home', path === '/');
   document.title = `${title} · Graceful Practice Hub`;
   renderNav();
   // Each visit renders into its own container, so a slow page that finishes after the user
