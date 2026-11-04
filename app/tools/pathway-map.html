@@ -7,28 +7,28 @@
 <title>Pathway map · Graceful Immigration Consultant Inc.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#EDF1EE; --panel:#FFFFFF; --panel2:#F5F8F6; --ink:#14262C; --muted:#52666C; --line:#D0DBD6;
-  --accent:#1B5470; --accent-ink:#FFFFFF; --focus:#1B5470;
+  --paper:#F8F5EF; --panel:#FFFFFF; --panel2:#FBF8F2; --ink:#1C2333; --muted:#667085; --line:#ECE6DA;
+  --accent:#0B2A5C; --accent-ink:#FFFFFF; --focus:#D6A23A; --gold:#D6A23A; --gold-d:#9A7420; --gold-l:#FBF1DC;
   --rec:#0A7A57; --rec-bg:#E0F2EB; --poss:#2A68AE; --poss-bg:#E3EDF8; --weak:#935D0F; --weak-bg:#F7EAD1; --block:#A5342C; --block-bg:#F8E2DF;
   --contour:rgba(20,70,80,.075);
-  --serif:"Newsreader","Iowan Old Style","Palatino Linotype",Georgia,serif;
-  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Playfair Display",Georgia,serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --paper:#0D191E; --panel:#14252B; --panel2:#101F25; --ink:#E5EEEB; --muted:#9BB0B2; --line:#27414A;
-    --accent:#7CC3DF; --accent-ink:#0D191E; --focus:#7CC3DF;
+    --paper:#081631; --panel:#0E2246; --panel2:#0B1C3B; --ink:#EEF1F6; --muted:#A9B4C6; --line:#1E3A66;
+    --accent:#E2B65A; --accent-ink:#081631; --focus:#E2B65A; --gold:#E2B65A; --gold-d:#E2B65A; --gold-l:#2A2A1E;
     --rec:#3CC594; --rec-bg:#12382D; --poss:#78AEE8; --poss-bg:#162E47; --weak:#E3AA48; --weak-bg:#3A2D12; --block:#EE8179; --block-bg:#41191A;
     --contour:rgba(150,210,225,.07); color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#0D191E; --panel:#14252B; --panel2:#101F25; --ink:#E5EEEB; --muted:#9BB0B2; --line:#27414A;
-  --accent:#7CC3DF; --accent-ink:#0D191E; --focus:#7CC3DF;
+  --paper:#081631; --panel:#0E2246; --panel2:#0B1C3B; --ink:#EEF1F6; --muted:#A9B4C6; --line:#1E3A66;
+  --accent:#E2B65A; --accent-ink:#081631; --focus:#E2B65A; --gold:#E2B65A; --gold-d:#E2B65A; --gold-l:#2A2A1E;
   --rec:#3CC594; --rec-bg:#12382D; --poss:#78AEE8; --poss-bg:#162E47; --weak:#E3AA48; --weak-bg:#3A2D12; --block:#EE8179; --block-bg:#41191A;
   --contour:rgba(150,210,225,.07); color-scheme:dark;
 }
@@ -45,9 +45,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 [hidden]{display:none!important}
 
 /* header */
-.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 28px;padding:18px 24px 0;border-bottom:1px solid var(--line);background:var(--panel)}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 28px;padding:18px 24px 0;border-top:4px solid var(--gold);border-bottom:1px solid var(--line);background:var(--panel)}
 .brand{display:flex;align-items:center;gap:12px;min-width:240px}
 .brand svg{flex:none}
+.brand .logo{width:52px;height:52px;object-fit:contain;flex:none}
+.brand h1{color:var(--accent)}
+.brand .cl{display:none;font-size:13px;font-weight:600;color:var(--accent);margin-top:2px}.brand .cl.on{display:block}.brand .cl span{color:var(--muted);font-weight:500}
 .brand h1{font-size:25px;line-height:1.1}
 .brand p{font-size:12.5px;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;padding-bottom:10px;margin-left:auto}
@@ -55,7 +58,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .meta input{border:1px solid var(--line);background:var(--panel2);border-radius:6px;padding:6px 9px;min-width:170px;font-size:14px}
 .tabs{display:flex;gap:2px;width:100%;order:3;margin-top:4px;overflow-x:auto}
 .tab{border:0;background:none;padding:10px 16px 11px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
-.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--gold)}
 .tab:hover{color:var(--ink)}
 .tools{display:flex;gap:8px;margin-left:auto;order:2;padding-bottom:10px;flex-wrap:wrap}
 .btn{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:7px 12px;font-weight:600;font-size:13.5px;cursor:pointer}
@@ -230,8 +233,8 @@ textarea.field{max-width:none;min-height:84px;resize:vertical}
 <a class="skip" href="#main">Skip to main content</a>
 <header class="top">
   <div class="brand">
-    <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true"><rect width="42" height="42" rx="9" fill="var(--accent)"/><circle cx="11" cy="21" r="4" fill="var(--accent-ink)"/><path d="M15 21C22 21 22 11 30 11M15 21C22 21 24 21 31 21M15 21C22 21 22 31 30 31" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round"/><circle cx="32" cy="11" r="2.2" fill="var(--accent-ink)"/><circle cx="33" cy="21" r="2.2" fill="var(--accent-ink)" opacity=".7"/><circle cx="32" cy="31" r="2.2" fill="var(--accent-ink)" opacity=".4"/></svg>
-    <div><h1>Pathway map</h1><p>Assessment tool for licensed consultants</p></div>
+    <img class="logo" src="../../public/img/logo-emblem.png" alt="Graceful Immigration Consultant Inc." width="52" height="52">
+    <div><h1>Pathway map</h1><p>Graceful Immigration Consultant Inc. · Assessment tool</p><div class="cl" id="clientLine"></div></div>
   </div>
   <div class="meta">
     <label>File reference (no client names)<input id="clientRef" autocomplete="off" placeholder="e.g. GI-26-0042" maxlength="40"></label>
@@ -941,7 +944,7 @@ function computeFlags(A){
 const $ = (s,r=document) => r.querySelector(s);
 const $$ = (s,r=document) => [...r.querySelectorAll(s)];
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const S = {A:{},checks:{},ref:"",assessor:"",open:{},sel:null,selUser:false,showBlocked:true,view:"assess",afilter:"all",aq:"",prevSig:""};
+const S = {A:{},checks:{},client:null,ref:"",assessor:"",open:{},sel:null,selUser:false,showBlocked:true,view:"assess",afilter:"all",aq:"",prevSig:""};
 let RES = {paths:[],flags:[]};
 const mqNarrow = window.matchMedia("(max-width:700px)");
 const isAns = (q,A) => {const v=A[q.id];return Array.isArray(v)?v.length>0:v!==undefined&&v!==""};
@@ -1140,7 +1143,7 @@ function renderSummary(){
   const el=$("#view-summary"),{facts,refs}=summaryData();
   const dt=fmtD(TODAY);
   let h=`<div class="sumbar"><button class="btn" id="sCopy" type="button">Copy as text</button><button class="btn" id="sSave" type="button">Save file</button><button class="btn primary" id="sPrint" type="button">Print or save as PDF</button></div><article class="card doc">
-  <h1>Pathway assessment</h1><p class="small">${esc(CONFIG.practice)} · ${esc(dt)} · File ${esc(S.ref||"not set")} · Assessed by ${esc(S.assessor||"not set")}</p>`;
+  <h1>Pathway assessment</h1><p class="small">${esc(CONFIG.practice)} · ${esc(dt)}${S.client?` · Client ${esc(S.client.name)}`:""} · File ${esc(S.ref||"not set")} · Assessed by ${esc(S.assessor||"not set")}</p>`;
   if(!facts.length)h+=`<p style="margin-top:14px">No answers yet.</p>`;
   else{
     h+=`<h2>Facts recorded</h2><table>${facts.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>`;
@@ -1157,7 +1160,7 @@ function renderSummary(){
 }
 function summaryText(){
   const {facts,refs}=summaryData();const L=[];
-  L.push("PATHWAY ASSESSMENT","File: "+(S.ref||"not set")+" | Assessed by: "+(S.assessor||"not set")+" | "+fmtD(TODAY),"");
+  L.push("PATHWAY ASSESSMENT",(S.client?"Client: "+S.client.name+" | ":"")+"File: "+(S.ref||"not set")+" | Assessed by: "+(S.assessor||"not set")+" | "+fmtD(TODAY),"");
   L.push("FACTS");facts.forEach(([k,v])=>L.push("- "+k+": "+v));L.push("");
   if(RES.flags.length){L.push("FLAGS AND DEADLINES");RES.flags.forEach(f=>L.push("- ["+SEVL[f.sev]+"] "+f.t+": "+f.why));L.push("")}
   L.push("ROUTES");TIERS.forEach(([t,lab])=>{const arr=RES.paths.filter(i=>i.tier===t);if(!arr.length)return;L.push(lab.toUpperCase());arr.forEach(i=>{L.push("- "+i.p.name+(t==="block"?" (blocked: "+i.r.blockMsg+")":" (fit "+i.score+")"));i.r.why.slice(0,2).forEach(x=>L.push("    + "+x));i.r.risks.slice(0,2).forEach(x=>L.push("    ! "+x));i.r.next.slice(0,2).forEach(x=>L.push("    > "+x))});L.push("")});
@@ -1190,6 +1193,9 @@ function setState(st){
     else if(q.t==="text")A[q.id]=String(v).slice(0,2000)});
   S.A=A;S.selUser=false;S.checks={};CHECKS.forEach(([k])=>{if(st.checks&&st.checks[k])S.checks[k]=true});
   S.ref=String(st.ref||"").slice(0,40);S.assessor=String(st.assessor||"").slice(0,60);
+  const c=st.client&&typeof st.client==="object"?st.client:null;
+  S.client=c?{name:String(c.name||"").slice(0,120),dob:String(c.dob||"").slice(0,10),file:String(c.file||"").slice(0,40),email:String(c.email||"").slice(0,120)}:null;
+  const cl=$("#clientLine");cl.classList.toggle("on",!!S.client);cl.innerHTML=S.client?esc(S.client.name)+(S.client.dob?` <span>· born ${esc(fmtD(pd(S.client.dob)))}</span>`:"")+(S.client.file?` <span>· file ${esc(S.client.file)}</span>`:""):"";
   $("#clientRef").value=S.ref;$("#assessor").value=S.assessor;
   prune();update({intake:true});
 }
@@ -1265,6 +1271,7 @@ function init(){
     t.addEventListener("keydown",e=>{const tabs=$$(".tab"),i=tabs.indexOf(t);let n=null;if(e.key==="ArrowRight")n=tabs[(i+1)%tabs.length];if(e.key==="ArrowLeft")n=tabs[(i-1+tabs.length)%tabs.length];if(n){n.focus();setView(n.dataset.view)}})});
   $("#clientRef").addEventListener("input",e=>{S.ref=e.target.value;notify()});
   $("#assessor").addEventListener("input",e=>{S.assessor=e.target.value;notify()});
+  if(EMBED)$("#clientRef").parentElement.firstChild.textContent="Assessment and file number";
   if(READONLY){intake.inert=true;["#btnLoad","#btnReset"].forEach(s=>$(s).hidden=true);$("#clientRef").readOnly=$("#assessor").readOnly=true}
   $("#btnSave").addEventListener("click",saveFile);
   $("#btnReset").addEventListener("click",resetAll);
@@ -1274,7 +1281,7 @@ function init(){
   update({intake:true});
 }
 window.addEventListener("beforeprint",()=>renderSummary());
-window.PathwayMap={getState,setState,getResult:()=>({ranked:RES.paths.map(o=>({id:o.p.id,name:o.p.name,tier:o.tier,score:o.score})),flags:RES.flags}),reset:resetAll};
+window.PathwayMap={getState,setState,getFacts:()=>summaryData().facts,getResult:()=>({ranked:RES.paths.map(o=>({id:o.p.id,name:o.p.name,group:GROUPS[o.p.group],tier:o.tier,score:o.score,blurb:o.p.blurb,why:o.r.why,risks:o.r.risks,need:o.r.need,next:o.r.next,watch:o.r.watch,block:o.r.blockMsg,refs:(o.p.refs||[]).filter(Boolean).map(r=>({short:r.short,title:r.title||r.short,cite:r.cite||"",url:r.url}))})),flags:RES.flags.map(f=>({sev:f.sev,t:f.t,why:f.why}))}),reset:resetAll};
 init();
 </script>
 </body>

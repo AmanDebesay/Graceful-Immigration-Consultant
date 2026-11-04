@@ -496,3 +496,72 @@ export function certificate(a, events = []) {
     ${events.length ? `<table><tr><th>Event</th><th>When</th><th>IP / device</th></tr>${events.map((v) => `<tr><td>${e(v.event)}</td><td>${f(v.created_at)}</td><td style="word-break:break-all">${e([v.ip, (v.user_agent || '').slice(0, 80)].filter(Boolean).join(' · '))}</td></tr>`).join('')}</table>` : ''}
   </div>`;
 }
+
+
+// ── Pathway assessment summary for the client (given with the signed agreement) ──
+// d: business details (as in defaults), number, assessment_date, agreement_number, file_number, first_name, last_name, dob, email,
+//    facts [[question, answer]], routes [{tier, name, group, blurb, why, risks, next, block}], dates [{t, why}], note, refs [{title, cite}], show_facts, show_blocked
+const PA_TIERS = [['rec', 'Recommended options', 'These routes fit your situation best, based on what you told us.', '#0A7A57', '#E6F4EE'],
+  ['poss', 'Possible options', 'These may work, but something needs to be confirmed or strengthened first.', '#2A68AE', '#E8F0FA'],
+  ['weak', 'Less likely options', 'These are open to you but face real obstacles at this time.', '#935D0F', '#F8EEDB'],
+  ['block', 'Not available at this time', 'A legal requirement is not met right now. This can change if your situation changes.', '#A5342C', '#F9E6E4']];
+const PSTYLE = `<style>
+.gi-agr .who{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid #E3DCCD;border-radius:10px;overflow:hidden;margin:0 0 18px;font-family:Arial,Helvetica,sans-serif}
+.gi-agr .who div{padding:10px 14px;border-right:1px solid #EFE6D2;border-bottom:1px solid #EFE6D2}.gi-agr .who div:nth-child(3n){border-right:0}
+.gi-agr .who span{display:block;font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#9A7420;margin-bottom:3px}
+.gi-agr .who b{font-family:Georgia,serif;font-size:15px;color:#0B2A5C;word-break:break-word}
+.gi-agr .tierh{display:flex;align-items:baseline;gap:10px;margin:20px 0 4px;font-family:Arial,Helvetica,sans-serif;page-break-after:avoid;break-after:avoid}
+.gi-agr .tierh b{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--c)}.gi-agr .tierh i{flex:1;height:1px;background:linear-gradient(90deg,var(--c),transparent);opacity:.5}
+.gi-agr .tierp{font-size:12px;color:#6B7385;font-family:Arial,Helvetica,sans-serif;margin:0 0 10px}
+.gi-agr .route{border:1px solid #E3DCCD;border-left:5px solid var(--c);border-radius:10px;padding:12px 16px 6px;margin:0 0 12px;background:#fff;page-break-inside:avoid;break-inside:avoid}
+.gi-agr .route h4{display:flex;align-items:center;gap:10px;margin:0 0 4px;font-size:16px;color:#0B2A5C}
+.gi-agr .route h4 .pill{margin-left:auto;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c);background:var(--bg);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.gi-agr .route .bl{font-size:13px;color:#3B4456;margin:0 0 8px;text-align:left}
+.gi-agr .route .cols{display:grid;grid-template-columns:1fr 1fr;gap:4px 22px;font-size:12.8px}
+.gi-agr .route .cols h5{font-family:Arial,Helvetica,sans-serif;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#9A7420;margin:6px 0 3px}
+.gi-agr .route ul{margin:0 0 8px 18px}.gi-agr .route li{margin-bottom:3px}
+.gi-agr .route .why-not{background:#FDF3F2;border-radius:6px;padding:7px 10px;color:#7A271A;font-size:12.8px;margin:2px 0 8px}
+.gi-agr .facts{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;font-size:12.5px;font-family:Arial,Helvetica,sans-serif;margin:0 0 6px}
+.gi-agr .facts div{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px dotted #E3DCCD}.gi-agr .facts span{color:#6B7385}.gi-agr .facts b{color:#1C2333;text-align:right;font-weight:600}
+.gi-agr .msg{border:1px solid #D9C48E;background:linear-gradient(180deg,#FFFBF2,#FFF7E6);border-radius:10px;padding:12px 16px;margin:6px 0 10px;white-space:pre-wrap;font-size:13.6px}
+.gi-agr .dates li b{color:#0B2A5C}
+@media (max-width:640px){.gi-agr .who{grid-template-columns:1fr 1fr}.gi-agr .route .cols,.gi-agr .facts{grid-template-columns:1fr}}
+</style>`;
+export function pathwaySummary(d) {
+  const full = [d.first_name, d.last_name].filter(Boolean).join(' ');
+  const li = (arr) => (arr || []).length ? `<ul>${arr.map((x) => `<li>${e(x)}</li>`).join('')}</ul>` : '';
+  const route = (r, [, , , c, bg]) => `<div class="route" style="--c:${c};--bg:${bg}"><h4>${e(r.name)}<span class="pill">${e(r.group || '')}</span></h4>
+    <p class="bl">${e(r.blurb)}</p>${r.block ? `<div class="why-not"><b>Why not now:</b> ${e(r.block)}</div>` : ''}
+    <div class="cols">${(r.why || []).length && !r.block ? `<div><h5>Why it may suit you</h5>${li(r.why.slice(0, 4))}</div>` : ''}
+      ${(r.risks || []).length ? `<div><h5>What to be aware of</h5>${li(r.risks.slice(0, 4))}</div>` : ''}
+      ${(r.next || []).length && !r.block ? `<div><h5>Next steps</h5>${li(r.next.slice(0, 4))}</div>` : ''}</div></div>`;
+  let n = 0;
+  const H2 = (t) => H(++n, t);
+  const tiers = PA_TIERS.filter(([k]) => k !== 'block' || d.show_blocked).map((t) => [t, (d.routes || []).filter((r) => r.tier === t[0])]).filter(([, l]) => l.length);
+  return `${STYLE}${PSTYLE}<div class="gi-agr">
+  <div class="lh"><img src="${LOGO}" alt="Graceful Immigration Consultant Inc.">
+    <div class="lh-name"><b>${e(d.business_name)}</b><span>${e(lhv(d, 'tagline'))}</span><small>${e(d.rcic_name)}, ${e(lhv(d, 'rcic_designation'))} · College ID ${e(d.rcic_id)}</small></div>
+    <div class="lh-contact">${e(d.business_address)}<br>${e(d.business_phone)}<br>${e(d.business_email)}<br>${e(lhv(d, 'website'))}</div></div>
+  <div class="title"><h1>IMMIGRATION PATHWAY ASSESSMENT</h1><div class="kind">Summary of your options</div><div class="orn"><i></i>✦<i></i></div></div>
+  <div class="meta"><span>Assessment no. <b>${e(d.number)}</b></span><span>Date <b>${longDate(d.assessment_date)}</b></span>${d.agreement_number ? `<span>Agreement no. <b>${e(d.agreement_number)}</b></span>` : ''}</div>
+  <div class="who"><div><span>First name</span><b>${e(d.first_name || '—')}</b></div><div><span>Last name</span><b>${e(d.last_name || '—')}</b></div><div><span>Date of birth</span><b>${d.dob ? longDate(d.dob) : '—'}</b></div>
+    <div><span>File number</span><b>${e(d.file_number || '—')}</b></div><div><span>Email</span><b style="font-size:13px">${e(d.email || '—')}</b></div><div><span>Prepared by</span><b style="font-size:13px">${e(d.rcic_name)}</b></div></div>
+  <p class="intro">Dear ${e(d.first_name || full || 'Client')}, thank you for your consultation with ${e(String(d.business_name || '').replace(/\.$/, ''))}. This summary sets out the immigration routes we reviewed for you, which ones we recommend, what to be aware of, and the next steps. It is based on the information you gave us${d.agreement_number ? ` under agreement ${e(d.agreement_number)}` : ''} and on the law and policy in force on ${longDate(d.assessment_date)}.</p>
+  ${d.note ? `${H2('A message from your consultant')}<div class="msg">${e(d.note)}</div>` : ''}
+  ${(d.dates || []).length ? `${H2('Important dates')}<ul class="dates">${d.dates.map((x) => `<li><b>${e(x.t)}.</b> ${e(x.why)}</li>`).join('')}</ul>` : ''}
+  ${H2('Your options')}
+  ${tiers.map(([t, list]) => `<div class="tierh" style="--c:${t[3]}"><b>${e(t[1])}</b><i></i></div><p class="tierp">${e(t[2])}</p>${list.map((r) => route(r, t)).join('')}`).join('') || '<p>No options were assessed.</p>'}
+  ${d.show_facts && (d.facts || []).length ? `${H2('What you told us')}<p class="note" style="margin-bottom:6px">Please tell us right away if anything here is wrong or changes. A change can affect your options.</p>
+    <div class="facts">${d.facts.map(([q, a]) => `<div><span>${e(q)}</span><b>${e(a)}</b></div>`).join('')}</div>` : ''}
+  ${H2('Please note')}
+  <ul><li>This summary is professional advice based on the facts you gave us. It is not a guarantee: Immigration, Refugees and Citizenship Canada (IRCC), the Immigration and Refugee Board and other decision-makers make the final decision.</li>
+    <li>Immigration law, policy, fees and processing times change often. We will confirm the requirements again before any application is filed.</li>
+    <li>Options marked “not available at this time” may become available if your circumstances change. Please keep us informed.</li>
+    <li>Work on an application starts only under a signed Retainer (Service) Agreement.</li></ul>
+  ${(d.refs || []).length ? `<p class="note"><b>Laws and policies considered:</b> ${d.refs.map((r) => e(r.title) + (r.cite ? ` (${e(r.cite)})` : '')).join('; ')}.</p>` : ''}
+  <div class="sigpage">${H2('Acknowledgement')}
+    <p>I, ${e(full || 'the Client')}, confirm that I received and read this summary of my immigration options.</p>
+    <div class="sigs"><div class="sig"><div class="gi-sig"></div><b>${e(full || 'Client')}</b><br>Client<br>Date: ________________</div>
+      <div class="sig"><div class="gi-sig"></div><b>${e(d.rcic_name)}</b><br>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>Date: ________________</div></div></div>
+  ${closing(d)}</div>`;
+}

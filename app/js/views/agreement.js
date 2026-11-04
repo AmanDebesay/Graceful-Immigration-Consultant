@@ -74,7 +74,7 @@ function jointShare(token, a, co) {
 }
 
 // Print one agreement on its own page (no dashboard around it); "Save as PDF" in the print window makes a PDF.
-function printDoc(html, title, banner = '') {
+export function printDoc(html, title, banner = '') {
   const w = window.open('', '_blank');
   if (!w) { toast('Allow pop-ups for this site to print'); return; }
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
