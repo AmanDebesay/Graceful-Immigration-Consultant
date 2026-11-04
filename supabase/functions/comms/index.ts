@@ -6,12 +6,15 @@
 import { adminClient, callerProfile, corsHeaders, escapeHtml, hasPerm, json } from "../_shared/common.ts";
 import { graphAttachment, graphCalendarView, graphConfigured, graphCreateEvent, graphDeleteEvent, graphFindMail, graphFolders, graphForward, graphGetMail, graphListMail,
   graphMark, graphMove, graphReply, graphSendMail, graphUpdateEvent, HUB, notifyTeams } from "../_shared/m365.ts";
+import * as MX from "../_shared/mailbox.ts";
 
 // Microsoft's "Access is denied" usually means a permission hasn't been granted to the app yet.
 const friendly = (e: unknown) => {
   const m = (e as Error)?.message ?? String(e);
   return /Access is denied|ErrorAccessDenied|Authorization_RequestDenied/i.test(m)
-    ? "Microsoft 365 hasn't allowed this yet. An administrator needs to add the Mail.ReadWrite and Calendars.ReadWrite permissions to the Graceful Practice Hub app and grant consent."
+    ? (/mailboxSettings|messageRules|masterCategories/i.test(m)
+      ? "Microsoft 365 hasn't allowed this yet. An administrator needs to add the MailboxSettings.ReadWrite permission to the Graceful Practice Hub app and grant consent."
+      : "Microsoft 365 hasn't allowed this yet. An administrator needs to add the Mail.ReadWrite and Calendars.ReadWrite permissions to the Graceful Practice Hub app and grant consent.")
     : /requested user .* is invalid|MailboxNotEnabled|ResourceNotFound/i.test(m) ? "This account doesn't have a Microsoft 365 mailbox yet." : m;
 };
 
@@ -32,8 +35,13 @@ Deno.serve(async (req) => {
   const mine = caller.email.toLowerCase();
 
   switch (body.action) {
-    case "status":
-      return json(req, { email: graphConfigured(), mailboxes: [...new Set([mine, shared])], teams: !!integ?.teams_webhook_url });
+    case "status": {
+      const { data: me } = await admin.from("profiles").select("full_name, job_title").eq("id", caller.id).single();
+      const { data: org } = await admin.from("org_settings").select("business_name, phone").eq("id", 1).single();
+      // Signature lines for the Mail page's editor (the page adds the From address).
+      const signature = [me?.full_name, me?.job_title, org?.business_name, org?.phone, "gracefulimmigration.ca"].filter(Boolean);
+      return json(req, { email: graphConfigured(), mailboxes: [...new Set([mine, shared])], teams: !!integ?.teams_webhook_url, signature });
+    }
 
     case "send": {
       if (!(await hasPerm(admin, caller.role, "crm.edit"))) return json(req, { error: "You don't have permission to email clients." }, 403);
@@ -138,6 +146,85 @@ Deno.serve(async (req) => {
         if (!to.length || !to.every((a) => EMAIL.test(a))) return json(req, { error: "Enter who to forward to." }, 400);
         await graphForward(box, id, to, `<p>${escapeHtml(String(body.body ?? "")).replace(/\n/g, "<br>")}</p>`);
         return json(req, { ok: true });
+      } catch (e) {
+        return json(req, { error: friendly(e) }, 502);
+      }
+    }
+
+    // ── Mail page (Outlook features): one action with an op ──
+    case "mx": {
+      if (!graphConfigured()) return json(req, { error: "Email isn't connected to Microsoft 365 yet." }, 503);
+      const useShared = body.mailbox === "shared";
+      if (useShared && !(await hasPerm(admin, caller.role, "crm.edit"))) return json(req, { error: "You don't have access to the shared mailbox." }, 403);
+      const box = useShared ? shared : mine, op = String(body.op ?? ""), s = (k: string, n = 300) => String(body[k] ?? "").trim().slice(0, n);
+      const ids = (Array.isArray(body.ids) ? body.ids : [body.id]).map(String).filter((x) => x && x !== "undefined").slice(0, 100);
+      try {
+        switch (op) {
+          case "folders": return json(req, { folders: await MX.folderTree(box) });
+          case "list": return json(req, { messages: await MX.listMail(box, s("folder", 400) || "inbox", { skip: Number(body.skip) || 0, search: s("search", 100) || undefined, filter: s("filter", 20), focus: s("focus", 10), order: s("order", 10) }) });
+          case "read": return json(req, { message: await MX.readMail(box, s("id", 400)) });
+          case "thread": return json(req, { messages: await MX.thread(box, s("conversationId", 400)) });
+          case "patch": return json(req, { failed: await MX.patchMany(box, ids, { isRead: body.isRead as boolean | undefined, flag: body.flag as string | undefined, categories: body.categories as string[] | undefined, importance: body.importance as string | undefined }) });
+          case "move": return json(req, { failed: await MX.moveMany(box, ids, s("destination", 400) || "archive") });
+          case "delete": return json(req, { failed: await MX.deleteMany(box, ids) });
+          case "sweep": return json(req, { moved: await MX.sweep(box, s("folder", 400) || "inbox", s("from", 200).toLowerCase()) });
+          case "empty": {
+            const f = s("folder", 400);
+            if (!["deleteditems", "junkemail"].includes(f)) return json(req, { error: "Only Deleted Items and Junk can be emptied." }, 400);
+            return json(req, { deleted: await MX.emptyFolder(box, f) });
+          }
+          case "folder_create": { const n = s("name", 120); if (!n) return json(req, { error: "Name the folder." }, 400); return json(req, { folder: await MX.folderCreate(box, n, s("parentId", 400) || undefined) }); }
+          case "folder_rename": { const n = s("name", 120); if (!n) return json(req, { error: "Name the folder." }, 400); await MX.folderRename(box, s("id", 400), n); return json(req, { ok: true }); }
+          case "folder_delete": await MX.folderDelete(box, s("id", 400)); return json(req, { ok: true });
+          case "categories": return json(req, { categories: await MX.categories(box) });
+          case "attachment": return json(req, { attachment: await graphAttachment(box, s("id", 400), s("attachmentId", 400)) });
+          case "compose": {
+            const to = list(body.to), cc = list(body.cc), bcc = list(body.bcc), mode = s("mode", 10) || "new", send = body.send === true;
+            if ([...to, ...cc, ...bcc].some((a) => !EMAIL.test(a)) || to.length > 50 || cc.length > 50 || bcc.length > 50) return json(req, { error: "Check the email addresses." }, 400);
+            if (send && !to.length && !cc.length && !bcc.length) return json(req, { error: "Add at least one recipient." }, 400);
+            const atts = (Array.isArray(body.attachments) ? body.attachments : []).slice(0, 20).map((a: any) => ({ id: a?.id ? String(a.id) : undefined, name: String(a?.name ?? "file").slice(0, 150),
+              contentType: String(a?.contentType ?? "application/octet-stream").slice(0, 100), contentBytes: a?.contentBytes ? String(a.contentBytes) : undefined }));
+            if (atts.reduce((n, a) => n + (a.contentBytes?.length ?? 0), 0) > 4_000_000) return json(req, { error: "Attachments are too large (about 3 MB in total). Share bigger files with a OneDrive link." }, 400);
+            const sendAt = s("sendAt", 40);
+            if (sendAt && !(new Date(sendAt).getTime() > Date.now() + 60_000)) return json(req, { error: "Pick a send time in the future." }, 400);
+            const html = MX.cleanHtml(body.html);
+            const r = await MX.compose(box, { mode, draftId: s("draftId", 400) || undefined, refId: s("refId", 400) || undefined, to, cc, bcc, subject: s("subject", 250), html,
+              importance: s("importance", 10), readReceipt: body.readReceipt === true, deliveryReceipt: body.deliveryReceipt === true, attachments: atts,
+              removeAttachments: (Array.isArray(body.removeAttachments) ? body.removeAttachments : []).map(String).slice(0, 20), send, sendAt: sendAt || undefined });
+            if (send && to.length + cc.length) {
+              // Log on each client's file
+              const { data: cs } = await admin.from("contacts").select("id, email").in("email", [...to, ...cc]);
+              const text = html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li|h\d)>/gi, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+                .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\n{3,}/g, "\n\n").trim().slice(0, 8000);
+              for (const c of cs ?? []) await admin.from("activities").insert({ type: "email", direction: "outbound", subject: s("subject", 250) || "(no subject)", contact_id: c.id, author_id: caller.id,
+                body: `From: ${box}\nTo: ${to.join(", ")}${cc.length ? `\nCc: ${cc.join(", ")}` : ""}${sendAt ? `\nScheduled for: ${sendAt}` : ""}${atts.length ? `\nAttachments: ${atts.map((a) => a.name).join(", ")}` : ""}\n\n${text}` });
+            }
+            return json(req, r);
+          }
+          case "autoreply_get": return json(req, { settings: await MX.autoReplies(box) });
+          case "autoreply_set": {
+            const st = s("status", 20), au = s("audience", 20);
+            if (!["disabled", "alwaysEnabled", "scheduled"].includes(st) || !["none", "contactsOnly", "all"].includes(au)) return json(req, { error: "Invalid settings." }, 400);
+            if (st === "scheduled" && !(s("start", 25) && s("end", 25) > s("start", 25))) return json(req, { error: "Check the start and end times." }, 400);
+            await MX.setAutoReplies(box, { status: st, audience: au, internal: MX.cleanHtml(body.internal).slice(0, 8000), external: MX.cleanHtml(body.external).slice(0, 8000), start: s("start", 25), end: s("end", 25) });
+            return json(req, { ok: true });
+          }
+          case "rules": return json(req, { rules: await MX.rules(box) });
+          case "rule_save": {
+            const r = (body.rule ?? {}) as Record<string, unknown>, words = (v: unknown) => String(v ?? "").split(",").map((x) => x.trim()).filter(Boolean).slice(0, 10);
+            if (!String(r.name ?? "").trim()) return json(req, { error: "Name the rule." }, 400);
+            const from = words(r.from), subject = words(r.subject), bodyW = words(r.body);
+            if (!from.length && !subject.length && !bodyW.length) return json(req, { error: "Add at least one condition." }, 400);
+            if (!r.moveTo && !r.markRead && !r.importance && !r.category && !r.del) return json(req, { error: "Choose what the rule should do." }, 400);
+            await MX.saveRule(box, { id: r.id ? String(r.id) : undefined, name: String(r.name).trim().slice(0, 100), enabled: r.enabled !== false, from, subject, body: bodyW,
+              moveTo: r.moveTo ? String(r.moveTo) : undefined, markRead: !!r.markRead, importance: ["low", "normal", "high"].includes(String(r.importance)) ? String(r.importance) : undefined,
+              category: r.category ? String(r.category).slice(0, 100) : undefined, del: !!r.del, stop: !!r.stop });
+            return json(req, { ok: true });
+          }
+          case "rule_toggle": await MX.toggleRule(box, s("id", 400), body.enabled === true); return json(req, { ok: true });
+          case "rule_delete": await MX.deleteRule(box, s("id", 400)); return json(req, { ok: true });
+        }
+        return json(req, { error: "Unknown mail action" }, 400);
       } catch (e) {
         return json(req, { error: friendly(e) }, 502);
       }

@@ -59,7 +59,7 @@ export async function render(el, [id], { setTitle }) {
         </div></div>
       </div>
       <div class="card">
-        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ['assessments', 'Assessments']]
+        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments']] : [])]
           .map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
         <div class="card-b" id="tabBody"></div>
       </div>
@@ -121,10 +121,12 @@ export async function render(el, [id], { setTitle }) {
   el.querySelector('#delBtn')?.addEventListener('click', async () => {
     // Say exactly what is in the way: sent/signed agreements and anything in the books must be kept; draft agreements go with the contact.
     const n = async (t) => (await db.from(t).select('id', { count: 'exact', head: true }).eq('contact_id', id)).count || 0;
-    const [{ data: agr }, inv, pay, tr, docs] = await Promise.all([db.from('agreements').select('id, number, status').eq('contact_id', id),
-      n('invoices'), n('payments'), n('trust_transactions'), n('client_documents')]);
+    const [{ data: agr }, inv, pay, tr, docs, { count: paFinal }] = await Promise.all([db.from('agreements').select('id, number, status').eq('contact_id', id),
+      n('invoices'), n('payments'), n('trust_transactions'), n('client_documents'),
+      db.from('pathway_assessments').select('id', { count: 'exact', head: true }).eq('contact_id', id).eq('status', 'final')]);
     const kept = (agr || []).filter((a) => a.status !== 'draft'), drafts = (agr || []).filter((a) => a.status === 'draft');
     const blocks = [kept.length && `${kept.length} sent or signed agreement${kept.length > 1 ? 's' : ''} (${kept.map((a) => a.number).join(', ')}), which must be kept in the client file (void instead)`,
+      paFinal && `${paFinal} final pathway assessment${paFinal > 1 ? 's' : ''}, which must be kept in the client file (reopen it first if it was a test)`,
       inv && `${inv} invoice${inv > 1 ? 's' : ''}`, pay && `${pay} payment${pay > 1 ? 's' : ''}`, tr && `${tr} trust transaction${tr > 1 ? 's' : ''}`].filter(Boolean);
     if (blocks.length) return fail(new Error(`${c.full_name} can't be deleted because they have ${blocks.join(', ')}.`));
     const extra = [drafts.length && `${drafts.length} draft agreement${drafts.length > 1 ? 's' : ''}`, docs && `${docs} document record${docs > 1 ? 's' : ''} (the files stay in OneDrive)`].filter(Boolean);
@@ -268,10 +270,17 @@ export async function render(el, [id], { setTitle }) {
     });
   }
   async function assessmentsTab() {
-    if (!can('intake.view')) { body.innerHTML = '<div class="empty">You do not have access to assessments.</div>'; return; }
-    const { data } = await db.from('intake_submissions').select('id, triage_level, status, created_at, source').eq('contact_id', id).order('created_at', { ascending: false });
-    body.innerHTML = (data || []).length ? `<table class="t"><tbody>${data.map((s) => `<tr class="click" onclick="location.hash='#/assessments/${s.id}'">
+    const pw = await import('./pathways.js');
+    const [{ data }, { data: pas }] = await Promise.all([
+      can('intake.view') ? db.from('intake_submissions').select('id, triage_level, status, created_at, source').eq('contact_id', id).order('created_at', { ascending: false }) : { data: null },
+      can('pathway.view') ? db.from('pathway_assessments').select('id, number, status, top_route, urgent_flags, updated_at, updated_by, created_by').eq('contact_id', id).order('created_at', { ascending: false }) : { data: null }]);
+    const pathHtml = pas ? `<div class="row" style="justify-content:space-between;margin-bottom:8px"><h4 style="margin:0">Pathway assessments</h4>
+        ${can('pathway.edit') ? `<button class="btn btn-sm btn-gold" id="newPa">${icon('plus')} New pathway assessment</button>` : ''}</div>
+      ${pas.length ? pw.pathwayRows(pas, false) : '<div class="empty" style="padding:14px">None yet. Start one once the Initial Consultation Agreement is signed.</div>'}` : '';
+    const intakeHtml = data ? `<h4 style="margin:${pas ? '22px' : '0'} 0 8px">Intake assessments</h4>${data.length ? `<table class="t"><tbody>${data.map((s) => `<tr class="click" onclick="location.hash='#/assessments/${s.id}'">
       <td>${triageBadge(s.triage_level)}</td><td>${fmtDateTime(s.created_at)}</td><td>${esc(s.status.replace('_', ' '))}</td><td>${s.source === 'staff' ? 'Staff' : 'Website'}</td></tr>`).join('')}</tbody></table>`
-      : `<div class="empty">No assessments yet. <a href="#/assessments/new">Start one</a></div>`;
+      : `<div class="empty">No intake assessments yet. <a href="#/assessments/new">Start one</a></div>`}` : '';
+    body.innerHTML = pathHtml + intakeHtml;
+    body.querySelector('#newPa')?.addEventListener('click', () => pw.startPathway({ contactId: id }).catch(fail));
   }
 }

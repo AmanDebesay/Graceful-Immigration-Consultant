@@ -82,10 +82,13 @@ async function business(el) {
       <small style="color:var(--muted)">Used on agreements, invoices and emails</small></div>
     <form class="card-b" id="f">${FIELDS.map(([k, l]) => `<div class="field"><label for="${k}">${l}</label>
       <input class="input" id="${k}" value="${esc(s[k] ?? '')}" ${k === 'gst_rate' ? 'type="number" step="0.01" min="0" max="20"' : ''}></div>`).join('')}
+      <label class="row" style="gap:8px;margin:4px 0 14px;cursor:pointer"><input type="checkbox" id="cao" ${s.client_account_open ? 'checked' : ''}>
+        <span><b>Client Account is open</b><br><small style="color:var(--muted)">The College-required account for client funds. Until it is ticked, pathway assessments warn against taking retainers or advance payments.</small></span></label>
       <div class="row" style="justify-content:flex-end"><button class="btn btn-primary" type="submit">Save changes</button></div></form></div>`;
   el.querySelector('#f').onsubmit = async (e) => {
     e.preventDefault();
     const patch = Object.fromEntries(FIELDS.map(([k]) => [k, el.querySelector('#' + k).value.trim() || null]));
+    patch.client_account_open = el.querySelector('#cao').checked;
     patch.gst_rate = Number(patch.gst_rate || 0);
     for (const k of ['business_name', 'rcic_name', 'licence_number', 'phone', 'email', 'address', 'notify_email']) if (!patch[k]) return fail(new Error('Fill in every field except GST number.'));
     const { error: er } = await db.from('org_settings').update(patch).eq('id', 1);

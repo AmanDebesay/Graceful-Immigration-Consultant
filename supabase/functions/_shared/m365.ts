@@ -25,7 +25,7 @@ export async function graphToken(): Promise<string> {
   return cached.token;
 }
 
-async function graph(path: string, init: RequestInit = {}) {
+export async function graph(path: string, init: RequestInit = {}) {
   const res = await fetch(`https://graph.microsoft.com/v1.0${path}`, {
     ...init, headers: { Authorization: `Bearer ${await graphToken()}`, "Content-Type": "application/json", ...(init.headers ?? {}) },
   });

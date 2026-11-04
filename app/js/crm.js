@@ -118,7 +118,7 @@ export async function editCase(c = {}, { contactId } = {}) {
 export { money };
 
 // ── Email a client from Microsoft 365 (my mailbox or the shared mailbox) ──
-const EMAIL_TEMPLATES = [
+export const EMAIL_TEMPLATES = [
   ['', 'Blank email', ''],
   ['Your consultation with Graceful Immigration', 'Consultation confirmation',
     'Hello {first},\n\nThank you for booking a consultation with Graceful Immigration Consultant Inc. Your consultation is confirmed for [date and time] by [Zoom / Microsoft Teams]. The meeting link will be sent before the call.\n\nPayment: please call (403) 915-4230 to pay the consultation fee before the meeting.\n\nPlease have your passport and any letters from IRCC nearby during the call.'],

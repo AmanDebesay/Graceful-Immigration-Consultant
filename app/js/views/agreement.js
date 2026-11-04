@@ -102,6 +102,7 @@ export async function render(el, [id], { setTitle }) {
   const paperWaiting = a.sign_method === 'paper' && ['sent', 'viewed'].includes(a.status);
   el.innerHTML = `<div class="toolbar no-print"><a class="btn btn-sm" href="#/agreements">← Agreements</a>${agrBadge(a.status)}<div class="grow"></div>
       <a class="btn" href="#/contacts/${a.contact_id}">${icon('user')} ${esc(a.contacts?.full_name || '')}</a>
+      ${a.status === 'signed' && ['consultation', 'retainer'].includes(a.type) && can('pathway.edit') ? `<button class="btn btn-gold" id="pathway">${icon('route')} Start pathway assessment</button>` : ''}
       ${a.status === 'signed' && a.paper_scan_path ? `<button class="btn" id="scan">${icon('file')} Signed paper copy</button>` : ''}
       <button class="btn" id="print">${icon('file')} ${paperWaiting ? 'Print for signing' : 'Print / PDF'}</button>
       ${manage && paperWaiting ? `<button class="btn btn-primary" id="upload">${icon('check')} Upload signed copy</button>` : ''}
@@ -127,6 +128,7 @@ export async function render(el, [id], { setTitle }) {
           ${a.contacts?.email && !(a.agreement_signers || []).length ? `<button class="btn btn-primary" id="sendCopy">${icon('mail')} Email signed copy to client</button>` : ''}` : ''}
       </div></div>`;
   el.querySelector('#share')?.addEventListener('click', () => shareModal(a.signing_token, a));
+  el.querySelector('#pathway')?.addEventListener('click', async () => (await import('./pathways.js')).startPathway({ contactId: a.contact_id, caseId: a.case_id, agreementId: a.id }).catch(fail));
   el.querySelector('#print').onclick = () => printDoc(doc + (a.status === 'signed' ? certificate(a, events || []) : ''), `${a.number} ${a.title}`);
   el.querySelector('#toDrive')?.addEventListener('click', async (ev) => {
     ev.target.disabled = true;

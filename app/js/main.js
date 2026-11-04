@@ -23,6 +23,7 @@ const NAV = [
   { path: '/documents', label: 'Documents', icon: 'folder', show: () => can('documents.view') },
   { path: '/checklists', label: 'Checklists', icon: 'checksq', show: () => can('checklists.work') || can('cases.approve') || can('crm.view'), count: 'my_checklists' },
   { path: '/assessments', label: 'Assessments', icon: 'clipboard', show: () => can('intake.view'), count: 'new_assessments' },
+  { path: '/pathways', label: 'Pathway Assessments', icon: 'route', show: () => can('pathway.view') },
   { path: '/tasks', label: 'Tasks', icon: 'checksq', show: () => isStaff(), count: 'tasks_overdue', red: true },
   { path: '/crm-reports', label: 'CRM Reports', icon: 'trend', show: () => can('crm.view') },
   { group: 'Accounting' },
@@ -59,6 +60,8 @@ const ROUTES = [
   [/^\/assessments$/, 'assessments', 'Assessments'],
   [/^\/assessments\/new$/, 'assessment-new', 'New assessment'],
   [/^\/assessments\/([\w-]+)$/, 'assessment', 'Assessment'],
+  [/^\/pathways$/, 'pathways', 'Pathway Assessments'],
+  [/^\/pathways\/([\w-]+)$/, 'pathway', 'Pathway assessment'],
   [/^\/pipeline$/, 'pipeline', 'Lead Pipeline'],
   [/^\/contacts$/, 'contacts', 'Contacts'],
   [/^\/contacts\/([\w-]+)$/, 'contact', 'Contact'],
@@ -251,7 +254,8 @@ async function setupNewMenu() {
   const fin = await import('./fin.js'), crm = await import('./crm.js');
   const groups = [
     ['Clients', [[can('crm.edit'), 'Client', () => (location.hash = '#/contacts?new=1')], [can('crm.edit'), 'Appointment', () => crm.editAppointment()], [can('crm.edit'), 'Document expiry date', () => crm.editKeyDate()], [can('crm.edit'), 'Deal', () => crm.editDeal()],
-      [can('crm.edit'), 'Case', () => crm.editCase()], [canDraftAgreements(), 'Agreement', async () => (await import('./views/agreements.js')).newAgreement()], [can('crm.edit'), 'Log activity', () => crm.logActivity()], [can('intake.view'), 'Assessment', () => (location.hash = '#/assessments/new')]]],
+      [can('crm.edit'), 'Case', () => crm.editCase()], [canDraftAgreements(), 'Agreement', async () => (await import('./views/agreements.js')).newAgreement()], [can('crm.edit'), 'Log activity', () => crm.logActivity()], [can('intake.view'), 'Assessment', () => (location.hash = '#/assessments/new')],
+      [can('pathway.edit'), 'Pathway assessment', async () => (await import('./views/pathways.js')).startPathway()]]],
     ['Money in', [[can('finance.manage'), 'Invoice', () => fin.newInvoice()], [can('finance.manage'), 'Receive payment', () => fin.receivePayment()],
       [can('finance.manage'), 'Retainer into trust', () => fin.trustTxn('deposit')]]],
     ['Money out', [[can('finance.manage'), 'Expense', () => fin.newExpense()], [can('finance.manage'), 'Bill', () => fin.newBill()]]],

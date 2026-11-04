@@ -1,0 +1,1281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pathway map · Graceful Immigration Consultant Inc.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDF1EE; --panel:#FFFFFF; --panel2:#F5F8F6; --ink:#14262C; --muted:#52666C; --line:#D0DBD6;
+  --accent:#1B5470; --accent-ink:#FFFFFF; --focus:#1B5470;
+  --rec:#0A7A57; --rec-bg:#E0F2EB; --poss:#2A68AE; --poss-bg:#E3EDF8; --weak:#935D0F; --weak-bg:#F7EAD1; --block:#A5342C; --block-bg:#F8E2DF;
+  --contour:rgba(20,70,80,.075);
+  --serif:"Newsreader","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0D191E; --panel:#14252B; --panel2:#101F25; --ink:#E5EEEB; --muted:#9BB0B2; --line:#27414A;
+    --accent:#7CC3DF; --accent-ink:#0D191E; --focus:#7CC3DF;
+    --rec:#3CC594; --rec-bg:#12382D; --poss:#78AEE8; --poss-bg:#162E47; --weak:#E3AA48; --weak-bg:#3A2D12; --block:#EE8179; --block-bg:#41191A;
+    --contour:rgba(150,210,225,.07); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0D191E; --panel:#14252B; --panel2:#101F25; --ink:#E5EEEB; --muted:#9BB0B2; --line:#27414A;
+  --accent:#7CC3DF; --accent-ink:#0D191E; --focus:#7CC3DF;
+  --rec:#3CC594; --rec-bg:#12382D; --poss:#78AEE8; --poss-bg:#162E47; --weak:#E3AA48; --weak-bg:#3A2D12; --block:#EE8179; --block-bg:#41191A;
+  --contour:rgba(150,210,225,.07); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;margin:0;letter-spacing:-.005em}
+p{margin:0}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--accent);color:var(--accent-ink);padding:8px 12px;border-radius:6px;z-index:50}
+.skip:focus{left:8px}
+[hidden]{display:none!important}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 28px;padding:18px 24px 0;border-bottom:1px solid var(--line);background:var(--panel)}
+.brand{display:flex;align-items:center;gap:12px;min-width:240px}
+.brand svg{flex:none}
+.brand h1{font-size:25px;line-height:1.1}
+.brand p{font-size:12.5px;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;padding-bottom:10px;margin-left:auto}
+.meta label{display:flex;flex-direction:column;font-size:11.5px;color:var(--muted);gap:3px}
+.meta input{border:1px solid var(--line);background:var(--panel2);border-radius:6px;padding:6px 9px;min-width:170px;font-size:14px}
+.tabs{display:flex;gap:2px;width:100%;order:3;margin-top:4px;overflow-x:auto}
+.tab{border:0;background:none;padding:10px 16px 11px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--ink)}
+.tools{display:flex;gap:8px;margin-left:auto;order:2;padding-bottom:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:7px 12px;font-weight:600;font-size:13.5px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--accent);padding:5px 8px}
+.btn.quiet:hover{background:var(--panel2)}
+.meta{order:1}
+
+/* layout */
+main{padding:22px 24px 40px;max-width:1500px;margin:0 auto}
+.grid{display:grid;grid-template-columns:minmax(340px,430px) minmax(0,1fr);gap:24px;align-items:start}
+.intake{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:6px;scrollbar-width:thin}
+@media (max-width:1020px){.grid{grid-template-columns:1fr}.intake{position:static;max-height:none;overflow:visible;padding-right:0}}
+
+/* intake */
+.prog{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px;color:var(--muted)}
+.prog .bar{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+details.sec{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin-bottom:10px}
+details.sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;font-family:var(--serif);font-size:18px;font-weight:600}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::before{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
+details.sec[open]>summary::before{transform:rotate(45deg)}
+details.sec>summary .cnt{margin-left:auto;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--muted)}
+details.sec>summary .cnt.done{color:var(--rec)}
+.secbody{padding:2px 14px 14px;display:flex;flex-direction:column;gap:16px}
+.sechint{font-size:12.5px;color:var(--muted);margin-top:-4px}
+fieldset.q{border:0;margin:0;padding:0;min-width:0}
+fieldset.q legend{padding:0;font-weight:600;font-size:14px;margin-bottom:2px}
+.help{font-size:12.5px;color:var(--muted);margin-bottom:7px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;width:100%;height:100%}
+.chip span{display:block;border:1px solid var(--line);background:var(--panel2);border-radius:6px;padding:6px 10px;font-size:13.5px;line-height:1.3;cursor:pointer}
+.chip input:hover+span{border-color:var(--accent)}
+.chip input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.chip input[type=checkbox]:checked+span::before{content:"✓ "}
+.chip input:focus-visible+span{outline:3px solid var(--focus);outline-offset:2px}
+.field{width:100%;max-width:260px;border:1px solid var(--line);background:var(--panel2);border-radius:6px;padding:7px 10px;font-size:14px}
+textarea.field{max-width:none;min-height:84px;resize:vertical}
+.clr{font-size:12px;margin-top:6px;background:none;border:0;color:var(--muted);cursor:pointer;text-decoration:underline;padding:0}
+
+/* results */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.mapcard{overflow:hidden}
+.maphead{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.maphead h2{font-size:21px}
+.maphead .sp{margin-left:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);padding:9px 16px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend svg{width:34px;height:10px}
+.mapwrap{position:relative;padding:10px 6px 4px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='320' viewBox='0 0 520 320'%3E%3Cg fill='none' stroke='%23467a85' stroke-opacity='.11' stroke-width='1.2'%3E%3Cpath d='M-10 60C60 20 120 110 200 70S340 10 400 60 500 90 540 50'/%3E%3Cpath d='M-10 92C60 56 126 142 204 104S338 46 398 94 498 124 540 86'/%3E%3Cpath d='M-10 124C62 92 130 176 208 140S336 84 396 130 496 158 540 122'/%3E%3Cpath d='M-10 210C70 170 140 260 230 220S350 170 420 214 500 240 540 206'/%3E%3Cpath d='M-10 246C72 208 144 292 232 254S352 206 422 248 500 274 540 240'/%3E%3Cpath d='M-10 282C74 246 148 326 236 288S354 244 424 282 502 308 540 276'/%3E%3C/g%3E%3C/svg%3E");background-size:520px 320px}
+:root[data-theme="dark"] .mapwrap{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='320' viewBox='0 0 520 320'%3E%3Cg fill='none' stroke='%2395d2e1' stroke-opacity='.09' stroke-width='1.2'%3E%3Cpath d='M-10 60C60 20 120 110 200 70S340 10 400 60 500 90 540 50'/%3E%3Cpath d='M-10 92C60 56 126 142 204 104S338 46 398 94 498 124 540 86'/%3E%3Cpath d='M-10 124C62 92 130 176 208 140S336 84 396 130 496 158 540 122'/%3E%3Cpath d='M-10 210C70 170 140 260 230 220S350 170 420 214 500 240 540 206'/%3E%3Cpath d='M-10 246C72 208 144 292 232 254S352 206 422 248 500 274 540 240'/%3E%3Cpath d='M-10 282C74 246 148 326 236 288S354 244 424 282 502 308 540 276'/%3E%3C/g%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mapwrap{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='320' viewBox='0 0 520 320'%3E%3Cg fill='none' stroke='%2395d2e1' stroke-opacity='.09' stroke-width='1.2'%3E%3Cpath d='M-10 60C60 20 120 110 200 70S340 10 400 60 500 90 540 50'/%3E%3Cpath d='M-10 92C60 56 126 142 204 104S338 46 398 94 498 124 540 86'/%3E%3Cpath d='M-10 124C62 92 130 176 208 140S336 84 396 130 496 158 540 122'/%3E%3Cpath d='M-10 210C70 170 140 260 230 220S350 170 420 214 500 240 540 206'/%3E%3Cpath d='M-10 246C72 208 144 292 232 254S352 206 422 248 500 274 540 240'/%3E%3Cpath d='M-10 282C74 246 148 326 236 288S354 244 424 282 502 308 540 276'/%3E%3C/g%3E%3C/svg%3E")}}
+#map{display:block;width:100%;height:auto;overflow:visible}
+#map text{font-family:var(--sans)}
+.empty{padding:40px 24px;text-align:center;color:var(--muted)}
+.empty h3{font-size:20px;color:var(--ink);margin-bottom:6px}
+.station{cursor:pointer}
+.station rect.card-bg{fill:var(--panel);stroke-width:1.5;transition:stroke-width .12s}
+.station:hover rect.card-bg,.station:focus-visible rect.card-bg{stroke-width:2.6}
+.station.sel rect.card-bg{stroke-width:3}
+.station:focus-visible{outline:none}
+.station:focus-visible rect.card-bg{stroke:var(--focus)!important;stroke-width:3.5}
+.st-name{font-size:14px;font-weight:600;fill:var(--ink)}
+.st-sub{font-size:12px;fill:var(--muted)}
+.st-fit{font-size:13px;font-weight:700}
+.route{fill:none;stroke-linecap:round}
+.route.drawn{animation:draw .7s ease-out both}
+@keyframes draw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+.band-label{font-size:12px;font-weight:700;fill:var(--muted)}
+.hub-t{font-size:12.5px;font-weight:700;fill:var(--accent-ink)}
+@media (prefers-reduced-motion:reduce){.route.drawn{animation:none}*{transition:none!important}}
+.mapfoot{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:8px 16px 12px;font-size:12.5px;color:var(--muted)}
+.mapfoot label{display:inline-flex;gap:7px;align-items:center;cursor:pointer}
+
+.cols{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+.flags{padding:14px 16px}
+.flags h2,.detail h2,.openq h2{font-size:19px;margin-bottom:8px}
+.flag{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.flag:first-of-type{border-top:0}
+.sev{font-size:11.5px;font-weight:700;border-radius:4px;padding:2px 6px;height:max-content;text-align:center;line-height:1.5}
+.sev.urgent{background:var(--block-bg);color:var(--block)}
+.sev.check{background:var(--weak-bg);color:var(--weak)}
+.sev.note{background:var(--poss-bg);color:var(--poss)}
+.flag b{font-weight:600}
+.flag .why{font-size:13.5px;color:var(--muted);margin-top:1px}
+.refs{display:flex;flex-wrap:wrap;gap:5px 8px;margin-top:6px}
+.ref{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--line);border-radius:5px;padding:2px 7px;text-decoration:none;background:var(--panel2);color:var(--ink)}
+.ref:hover{border-color:var(--accent)}
+.ref i{font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted)}
+.ref.act i,.ref.reg i{color:var(--accent)}
+.ref.pol i{color:var(--rec)}
+.ref.case i{color:var(--weak)}
+.detail{padding:16px 18px}
+.dhead{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin-bottom:6px}
+.dhead h2{margin:0}
+.tierchip{font-size:12px;font-weight:700;border-radius:4px;padding:2px 8px}
+.t-rec{background:var(--rec-bg);color:var(--rec)}.t-poss{background:var(--poss-bg);color:var(--poss)}.t-weak{background:var(--weak-bg);color:var(--weak)}.t-block{background:var(--block-bg);color:var(--block)}
+.blurb{color:var(--muted);font-size:14px;margin-bottom:10px}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 26px}
+.dgrid h3{font-size:15.5px;margin-bottom:4px;font-family:var(--sans);font-weight:700}
+.dgrid ul{margin:0;padding-left:18px;font-size:14px}
+.dgrid li{margin:3px 0}
+.dgrid li::marker{color:var(--muted)}
+.barrier{background:var(--block-bg);color:var(--block);border-radius:6px;padding:8px 11px;font-size:14px;margin:6px 0 10px;font-weight:600}
+.openq{padding:14px 16px}
+.openq ul{margin:0;padding-left:18px;font-size:14px}
+.pc{padding:14px 16px}
+.pc h2{font-size:19px;margin-bottom:6px}
+.pc label{display:flex;gap:9px;align-items:flex-start;padding:5px 0;font-size:14px;cursor:pointer}
+.pc input{margin-top:4px;accent-color:var(--accent)}
+.pc .warn{background:var(--weak-bg);color:var(--weak);border-radius:6px;padding:7px 10px;font-size:13.5px;font-weight:600;margin:6px 0}
+.note-sm{font-size:12.5px;color:var(--muted)}
+
+/* authorities */
+.authbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:14px}
+.authbar input[type=search]{flex:1;min-width:220px;border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:8px 11px}
+.finder{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;margin-bottom:16px}
+.finder select,.finder input{border:1px solid var(--line);background:var(--panel2);border-radius:6px;padding:7px 10px}
+.finder input{width:110px}
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.acard{padding:12px 14px;display:flex;flex-direction:column;gap:5px}
+.acard.used{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.acard h3{font-size:16px;line-height:1.25}
+.acard .cite{font-size:12.5px;color:var(--muted)}
+.acard .note{font-size:13.5px}
+.acard .foot{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:auto;padding-top:4px;font-size:12px;color:var(--muted)}
+.vbadge{font-weight:600}
+.vbadge.checked{color:var(--rec)}.vbadge.pattern{color:var(--poss)}.vbadge.landing{color:var(--weak)}
+
+/* summary */
+.doc{max-width:860px;margin:0 auto;padding:30px 36px}
+.doc h1{font-size:30px;margin-bottom:2px}
+.doc h2{font-size:21px;margin:22px 0 6px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.doc h3{font-size:16px;font-family:var(--sans);font-weight:700;margin:12px 0 2px}
+.doc table{width:100%;border-collapse:collapse;font-size:14px}
+.doc td,.doc th{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.doc th{font-weight:600;color:var(--muted);width:38%}
+.doc ul{margin:4px 0;padding-left:20px;font-size:14px}
+.doc .small{font-size:12.5px;color:var(--muted)}
+.sumbar{display:flex;gap:8px;justify-content:flex-end;max-width:860px;margin:0 auto 12px;flex-wrap:wrap}
+.disc{max-width:1500px;margin:0 auto;padding:0 24px 28px;font-size:12.5px;color:var(--muted)}
+.embed .top .brand p,.embed .disc{display:none}
+.embed .top{padding-top:10px}
+
+@media (max-width:640px){
+  .top{padding:14px 14px 0}.meta{margin-left:0;width:100%}.meta input{min-width:0;width:100%}.meta label{flex:1;min-width:140px}
+  .tools{margin-left:0}main{padding:16px 12px 30px}.doc{padding:20px 16px}
+}
+@media print{
+  body{background:#fff;color:#000}
+  .top,.disc,#view-assess,#view-auth,.sumbar,.skip{display:none!important}
+  main{padding:0}
+  #view-summary{display:block!important}
+  .doc{border:0;padding:0;max-width:none}
+  a{color:#000;text-decoration:none}
+}
+
+.jump{display:none;font-weight:600;font-size:13px}
+@media (max-width:1020px){.jump{display:inline}}
+.tierhead{font-size:12.5px;font-weight:700;margin:12px 4px 2px}
+.lst{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:6px;padding:9px 12px;margin:6px 0;cursor:pointer}
+.lst.rec{border-left-color:var(--rec)}.lst.poss{border-left-color:var(--poss)}.lst.weak{border-left-color:var(--weak)}.lst.block{border-left-color:var(--block);border-style:dashed;border-left-style:solid}
+.lst b{display:block;font-weight:600;font-size:14.5px;font-family:var(--sans)}
+.lst small{color:var(--muted);font-size:12.5px}
+.lst.sel{outline:2px solid var(--accent)}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="top">
+  <div class="brand">
+    <svg width="42" height="42" viewBox="0 0 42 42" aria-hidden="true"><rect width="42" height="42" rx="9" fill="var(--accent)"/><circle cx="11" cy="21" r="4" fill="var(--accent-ink)"/><path d="M15 21C22 21 22 11 30 11M15 21C22 21 24 21 31 21M15 21C22 21 22 31 30 31" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round"/><circle cx="32" cy="11" r="2.2" fill="var(--accent-ink)"/><circle cx="33" cy="21" r="2.2" fill="var(--accent-ink)" opacity=".7"/><circle cx="32" cy="31" r="2.2" fill="var(--accent-ink)" opacity=".4"/></svg>
+    <div><h1>Pathway map</h1><p>Assessment tool for licensed consultants</p></div>
+  </div>
+  <div class="meta">
+    <label>File reference (no client names)<input id="clientRef" autocomplete="off" placeholder="e.g. GI-26-0042" maxlength="40"></label>
+    <label>Assessed by<input id="assessor" autocomplete="off" placeholder="RCIC name" maxlength="60"></label>
+  </div>
+  <div class="tools">
+    <button class="btn" id="btnTheme" type="button" aria-label="Switch between light and dark">Theme</button>
+    <button class="btn" id="btnLoad" type="button">Open saved</button>
+    <button class="btn" id="btnSave" type="button">Save file</button>
+    <button class="btn" id="btnReset" type="button">Start over</button>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="tab-assess" aria-selected="true" aria-controls="view-assess" data-view="assess">Assess</button>
+    <button class="tab" role="tab" id="tab-auth" aria-selected="false" aria-controls="view-auth" data-view="auth">Law and policy library</button>
+    <button class="tab" role="tab" id="tab-summary" aria-selected="false" aria-controls="view-summary" data-view="summary">Summary</button>
+  </nav>
+</header>
+<input type="file" id="fileIn" accept="application/json,.json" hidden>
+<main id="main">
+  <section id="view-assess" role="tabpanel" aria-labelledby="tab-assess">
+    <div class="grid">
+      <aside class="intake" id="intake" aria-label="Questions"></aside>
+      <div id="results" aria-live="polite"></div>
+    </div>
+  </section>
+  <section id="view-auth" role="tabpanel" aria-labelledby="tab-auth" hidden></section>
+  <section id="view-summary" role="tabpanel" aria-labelledby="tab-summary" hidden></section>
+</main>
+<p class="disc" id="disc"></p>
+<script>
+/* ============================================================
+   CONFIG — edit these before embedding in your dashboard
+   ============================================================ */
+/* Inside the Practice Hub (?embed=1) the dashboard saves the answers to the client file, sets the
+   Client Account flag (?ca=1) and opens final assessments read-only (?ro=1). */
+const QS0 = new URLSearchParams(location.search);
+const EMBED = QS0.get("embed")==="1" && window.parent!==window;
+const READONLY = QS0.get("ro")==="1";
+const CONFIG = {
+  practice: "Graceful Immigration Consultant Inc.",
+  lawChecked: "2026-11-03",        // date the links and rules below were last checked
+  clientAccountOpen: QS0.get("ca")==="1", // set from Business Settings when embedded
+  parentOrigin: EMBED ? location.origin : "", // the dashboard is on the same site
+  sendLabelToParent: EMBED
+};
+
+/* ============================================================
+   AUTHORITY LIBRARY
+   v: "checked" = page found on the official site on lawChecked date
+      "pattern" = link built from the official site’s section URL pattern
+      "landing" = stable landing page, not re-opened; confirm on arrival
+   ============================================================ */
+const JL = "https://laws-lois.justice.gc.ca/eng/";
+const IRCCM = "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/operational-bulletins-manuals/";
+const AUTH = [
+  /* Acts */
+  {id:"irpa",k:"act",short:"IRPA",title:"Immigration and Refugee Protection Act",cite:"S.C. 2001, c. 27",note:"The main statute: admissibility (ss. 33–42), H&C (s. 25), refugee claims (ss. 95–108), appeals (ss. 62–71), enforcement and detention (ss. 44–58).",url:JL+"acts/i-2.5/index.html",v:"checked"},
+  {id:"cicc",k:"act",short:"CICC Act",title:"College of Immigration and Citizenship Consultants Act",cite:"S.C. 2019, c. 29, s. 292",note:"Creates the College and the licensing scheme for consultants.",url:JL+"acts/C-33.6/FullText.html",v:"checked"},
+  {id:"citact",k:"act",short:"Citizenship Act",title:"Citizenship Act",cite:"R.S.C. 1985, c. C-29",note:"Grant (s. 5), prohibitions (s. 22), revocation, resumption and renunciation.",url:JL+"acts/c-29/",v:"landing"},
+  {id:"privact",k:"act",short:"Privacy Act",title:"Privacy Act",cite:"R.S.C. 1985, c. P-21",note:"The basis for requesting a client’s own file (GCMS notes) with their consent.",url:JL+"acts/p-21/",v:"landing"},
+  {id:"charter",k:"act",short:"Charter",title:"Canadian Charter of Rights and Freedoms",cite:"Constitution Act, 1982",note:"Section 7 (life, liberty, security) and section 12 matter in detention and removal cases.",url:JL+"const/",v:"landing"},
+  /* Regulations and rules */
+  {id:"irpr",k:"reg",short:"IRPR",title:"Immigration and Refugee Protection Regulations",cite:"SOR/2002-227",note:"Classes and selection criteria. Opens at s. 1 (definitions); use the table of contents on the left. Family class starts at s. 116, SCLPC at s. 123.",url:JL+"regulations/sor-2002-227/section-1.html",v:"checked"},
+  {id:"irbrules",k:"rules",short:"IRB and Court rules",title:"IRB rules and Federal Courts immigration rules",cite:"RPD Rules, RAD Rules, ID Rules, IAD Rules 2022, Federal Courts Citizenship, Immigration and Refugee Protection Rules",note:"All are listed under “Regulations made under this Act” on the IRPA page. Check each for current time limits before filing.",url:JL+"acts/i-2.5/index.html",v:"checked"},
+  {id:"code",k:"college",short:"Code of Conduct",title:"Code of Professional Conduct for College Licensees",cite:"SOR/2022-128",note:"Conflicts and joint retainers, competence, confidentiality, quality of service, written agreements.",url:"https://gazette.gc.ca/rp-pr/p2/2022/2022-06-22/html/sor-dors128-eng.html",v:"checked"},
+  {id:"ciccregs",k:"college",short:"College regulations",title:"College of Immigration and Citizenship Consultants Regulations (proposed text)",cite:"Canada Gazette, Part I, Vol. 158, No. 51 (2024-12-21)",note:"Published as proposed regulations. Confirm the final version on the College site.",url:"https://gazette.gc.ca/rp-pr/p1/2024/2024-12-21/html/reg2-eng.html",v:"checked"},
+  {id:"college",k:"college",short:"College site",title:"College of Immigration and Citizenship Consultants",cite:"college-ic.ca",note:"Client Account Regulation, Client File Management Regulation, practice advisories and the licensee register.",url:"https://college-ic.ca",v:"landing"},
+  /* IRCC policy */
+  {id:"pdi_rel",k:"pol",short:"Assessing the relationship",title:"Assessing the relationship between spouses or common-law partners",cite:"IRCC program delivery instructions",note:"How officers apply R4 (bad faith) and test genuineness; SCLPC cohabitation requirement.",url:IRCCM+"permanent-residence/non-economic-classes/family-class-determining-spouse/assessing-relationship.html",v:"checked"},
+  {id:"pdi_excl",k:"pol",short:"Excluded family members",title:"Excluded family members",cite:"IRCC policy page",note:"Lifetime bar under R117(9)(d) and R125(1)(d) where a family member was not declared and examined at the sponsor’s landing.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/corporate/mandate/policies-operational-instructions-agreements/excluded.html",v:"checked"},
+  {id:"pdi_pilot",k:"pol",short:"R117(9)(d) pilot",title:"Pilot to exempt applicants from the R117(9)(d) / R125(1)(d) exclusion",cite:"IRCC program delivery instructions",note:"The public policy ended on 2026-09-10 per IRCC notices reported by several sources; applications received before then are still processed under it. H&C remains a discretionary option.",url:IRCCM+"permanent-residence/non-economic-classes/family-class-spouse/pilot-exempt-r117-r125.html",v:"checked"},
+  {id:"pdi_sclpc22",k:"pol",short:"SCLPC status exemption",title:"Spouse or common-law partner in Canada class: exemption from the temporary resident status requirement",cite:"Program delivery update, 2022",note:"Explains when the R124 status requirement is waived. Confirm the policy is still in force.",url:IRCCM+"updates/2022-spouse-common-law-canada-class.html",v:"checked"},
+  {id:"pdi_sowp",k:"pol",short:"Spousal open work permit policy",title:"Public policy for SCLPC and family class applicants to apply for a work permit in Canada [R205(a) – A74]",cite:"Program delivery update, 2025-11-20",note:"Open work permit for sponsored spouses and partners already in Canada. One secondary source says the policy runs to 2026-12-31; confirm the end date.",url:IRCCM+"updates/2025-sclpc-extentions.html",v:"checked"},
+  {id:"pdi_elig",k:"pol",short:"Who can sponsor",title:"Sponsor your spouse, partner or child: check if you’re eligible",cite:"IRCC service page",note:"Sponsor eligibility, income rules, and reasons a sponsor may be ineligible.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/spouse-partner-children/eligibility.html",v:"checked"},
+  {id:"pdi_who",k:"pol",short:"Who you can sponsor",title:"Who you can sponsor",cite:"IRCC service page",note:"Spouse, common-law, conjugal partner and dependent child definitions; child citizenship check.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/spouse-partner-children/who-you-can-sponsor.html",v:"checked"},
+  {id:"pdi_hc",k:"pol",short:"H&C assessment",title:"Humanitarian and compassionate considerations: assessment and processing",cite:"IRCC program delivery instructions",note:"Exceptional measure under IRPA s. 25; officers weigh all factors (Kanthasamy).",url:IRCCM+"permanent-residence/humanitarian-compassionate-consideration/processing.html",v:"checked"},
+  {id:"pdi_trp",k:"pol",short:"TRP eligibility",title:"Temporary resident permits: eligibility and assessment",cite:"IRCC program delivery instructions",note:"A TRP should not be issued to someone with valid status; it is exceptional and not for long-term status.",url:IRCCM+"temporary-residents/permits/eligibility-assessment.html",v:"checked"},
+  {id:"pdi_trp2",k:"pol",short:"When to issue a TRP",title:"Temporary resident permits: when to consider issuing a TRP",cite:"IRCC program delivery instructions",note:"Officer guidance on compelling reasons versus risk.",url:IRCCM+"temporary-residents/permits/when-to-consider-issuing.html",v:"checked"},
+  {id:"pdi_ee",k:"pol",short:"Express Entry overview",title:"Express Entry: overview",cite:"IRCC program delivery instructions",note:"How Express Entry manages FSW, FST, CEC and part of the PNP.",url:IRCCM+"permanent-residence/express-entry.html",v:"checked"},
+  {id:"pdi_cec",k:"pol",short:"CEC membership",title:"Canadian experience class: determining membership in the class",cite:"IRCC program delivery instructions",note:"Status must be maintained during the qualifying work experience.",url:IRCCM+"permanent-residence/economic-classes/experience/canadian-experience-class-determining-membership-class.html",v:"checked"},
+  {id:"pdi_refelig",k:"pol",short:"Eligibility for referral to IRB",title:"Eligibility for referral to the IRB",cite:"IRCC program delivery instructions",note:"Claims are screened for eligibility; merits are assessed later against each country of nationality.",url:IRCCM+"refugee-protection/canada/processing-eligibility-referral-claims.html",v:"checked"},
+  {id:"pdi_refgrounds",k:"pol",short:"Ineligible refugee claims",title:"In-Canada refugee claims: grounds for ineligibility",cite:"IRCC program delivery instructions",note:"Walks through each IRPA s. 101(1) ground, including A101(1)(f) claims that normally lead to a PRRA.",url:IRCCM+"refugee-protection/canada/processing-canada-refugee-claims-grounds-ineligibility.html",v:"checked"},
+  {id:"pdi_stca",k:"pol",short:"Safe Third Country Agreement",title:"Processing in-Canada claims: Safe Third Country Agreement",cite:"IRCC program delivery instructions",note:"Applies to claims made at land ports and, since 2023, across the land border within 14 days of an irregular crossing; exceptions apply.",url:IRCCM+"refugee-protection/canada/processing-claims-protection-safe-third-country-agreement.html",v:"checked"},
+  {id:"pdi_stca23",k:"pol",short:"STCA land border page",title:"Claiming refugee protection at the Canada–United States land border",cite:"IRCC service page",note:"Public explanation of the 2023 Additional Protocol and the exceptions.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/corporate/mandate/policies-operational-instructions-agreements/agreements/claiming-refugee-protection-border.html",v:"checked"},
+  {id:"pdi_manuals",k:"pol",short:"All IRCC manuals",title:"Operational bulletins and manuals",cite:"IRCC",note:"Index of program delivery instructions for every program. Use it to confirm any rule marked “verify”.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/operational-bulletins-manuals.html",v:"landing"},
+  {id:"ircc_ee",k:"pol",short:"Express Entry (public)",title:"Express Entry",cite:"IRCC service page",note:"Eligibility, CRS tool, rounds of invitations.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html",v:"landing"},
+  {id:"ircc_work",k:"pol",short:"Work in Canada",title:"Work in Canada",cite:"IRCC service page",note:"Work permits, LMIA exemptions, open work permits.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/work-canada.html",v:"landing"},
+  {id:"ircc_study",k:"pol",short:"Study in Canada",title:"Study in Canada",cite:"IRCC service page",note:"Study permit requirements, attestation letters and caps, proof of funds.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada.html",v:"landing"},
+  {id:"ircc_visit",k:"pol",short:"Visit Canada",title:"Visit Canada",cite:"IRCC service page",note:"eTA, visitor visas, visitor extensions.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada.html",v:"landing"},
+  {id:"ircc_ref",k:"pol",short:"Refugees and asylum",title:"Refugees and asylum",cite:"IRCC service page",note:"Claiming asylum in Canada, resettlement, sponsorship.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/refugees.html",v:"landing"},
+  {id:"ircc_cit",k:"pol",short:"Citizenship",title:"Canadian citizenship",cite:"IRCC service page",note:"Grant, proof, resuming, renouncing.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship.html",v:"landing"},
+  {id:"ircc_times",k:"pol",short:"Processing times",title:"Check processing times",cite:"IRCC tool",note:"Use this before telling a client how long anything takes.",url:"https://www.canada.ca/en/immigration-refugees-citizenship/services/application/check-processing-times.html",v:"landing"},
+  {id:"aaip",k:"pol",short:"AAIP",title:"Alberta Advantage Immigration Program",cite:"Government of Alberta",note:"Alberta’s nominee program. Check each stream’s occupation and work-permit rules before filing.",url:"https://www.alberta.ca/alberta-advantage-immigration-program",v:"checked"},
+  {id:"aaip2",k:"pol",short:"AAIP streams",title:"AAIP application streams",cite:"Government of Alberta",note:"Opportunity Stream, Express Entry stream, Rural Renewal, Tourism and Hospitality, entrepreneur streams.",url:"https://www.alberta.ca/aaip-application-streams",v:"checked"},
+  /* Cases */
+  {id:"baker",k:"case",short:"Baker",title:"Baker v. Canada (Minister of Citizenship and Immigration)",cite:"[1999] 2 SCR 817",note:"Procedural fairness duty factors; reasons for H&C decisions; best interests of the child.",url:"https://decisions.scc-csc.ca/scc-csc/en/nav.do",v:"landing"},
+  {id:"vavilov",k:"case",short:"Vavilov",title:"Canada (Minister of Citizenship and Immigration) v. Vavilov",cite:"2019 SCC 65",note:"Presumption of reasonableness review for judicial review of administrative decisions.",url:"https://decisions.scc-csc.ca/scc-csc/en/nav.do",v:"landing"},
+  {id:"kanthasamy",k:"case",short:"Kanthasamy",title:"Kanthasamy v. Canada (Minister of Citizenship and Immigration)",cite:"2015 SCC 61",note:"H&C relief is not limited to “unusual, undeserved or disproportionate” hardship; officers weigh all relevant factors. Cited in IRCC’s own H&C instructions.",url:"https://decisions.scc-csc.ca/scc-csc/en/nav.do",v:"landing"}
+];
+const AUTHBY = Object.fromEntries(AUTH.map(a=>[a.id,a]));
+const KIND = {act:"Act",reg:"Regulation",rules:"Rules",pol:"Policy",case:"Case",college:"College"};
+/* Section-level links built from the official Justice Laws URL pattern */
+const sA = n => ({k:"act",short:"IRPA s."+n,title:"IRPA section "+n,url:JL+"acts/I-2.5/section-"+n+".html",v:"pattern"});
+const sR = n => ({k:"reg",short:"IRPR s."+n,title:"IRPR section "+n,url:JL+"regulations/SOR-2002-227/section-"+n+".html",v:"pattern"});
+const sC = n => ({k:"act",short:"Citizenship Act s."+n,title:"Citizenship Act section "+n,url:JL+"acts/c-29/section-"+n+".html",v:"pattern"});
+const ref = id => AUTHBY[id];
+
+/* ============================================================
+   QUESTIONS
+   ============================================================ */
+const YN = [["yes","Yes"],["no","No"]];
+const SECS = [
+  {id:"snap",t:"Client today",h:"Where the client is and what status they hold."},
+  {id:"goal",t:"What the client wants",h:"Pick the main goal. The map still shows every route that applies."},
+  {id:"fam",t:"Family and sponsor",h:"Answer if a citizen or permanent resident relative is involved."},
+  {id:"eco",t:"Work, study and skills",h:"Used for Express Entry, Alberta nomination, work and study permits."},
+  {id:"prot",t:"Protection and humanitarian",h:"Fear of return, claim history and ties to Canada."},
+  {id:"inad",t:"Admissibility and history",h:"Anything that could make the client inadmissible or draw scrutiny."},
+  {id:"dec",t:"Decisions and deadlines",h:"Enter dates and the tool counts the days left."},
+  {id:"notes",t:"Notes",h:"Stays in this file only. Use file references, not names."}
+];
+const famOn = A => A.rel && A.rel!=="none";
+const spouseOn = A => ["married","commonlaw","conjugal"].includes(A.rel);
+const ecoOn = A => !A.goal || ["pr","work","stay","study"].includes(A.goal);
+const protOn = A => ["protect","fix","enforce","pr","stay"].includes(A.goal) || ["claimant","nostatus","removal","protected"].includes(A.status) || A.loc==="out";
+const Q = [
+  {id:"loc",sec:"snap",t:"choice",q:"Where is the client now?",o:[["in","In Canada"],["out","Outside Canada"]]},
+  {id:"status",sec:"snap",t:"choice",q:"Current status in Canada",h:"Pick the one that is true today.",show:A=>A.loc==="in",
+   o:[["citizen","Canadian citizen"],["pr","Permanent resident"],["visitor","Visitor with valid status"],["worker","Worker with valid permit"],["student","Student with valid permit"],["maintained","Extension filed, waiting (maintained status)"],["trp","Temporary resident permit holder"],["claimant","Refugee claimant (claim pending)"],["protected","Protected person or recognized refugee"],["nostatus","Status expired or lost"],["removal","Removal order issued"]]},
+  {id:"expiry",sec:"snap",t:"date",q:"Date the status ends or ended",h:"Used to count days left, or days since expiry.",show:A=>A.loc==="in"&&["visitor","worker","student","trp","maintained","nostatus"].includes(A.status)},
+  {id:"natl",sec:"snap",t:"choice",q:"Nationality",h:"A second nationality changes refugee claims and visa rules.",o:[["single","One nationality"],["dual","Two or more (for example a second passport)"],["stateless","Stateless or unclear"]]},
+  {id:"visaReq",sec:"snap",t:"choice",q:"Travel document for visiting Canada",show:A=>A.loc==="out",o:[["exempt","Visa-exempt (eTA)"],["visa","Visa required"],["unk","Not sure"]]},
+  {id:"age",sec:"snap",t:"number",q:"Age",min:14,max:99},
+  {id:"alberta",sec:"snap",t:"choice",q:"Lives or works in Alberta, or plans to?",o:YN},
+
+  {id:"goal",sec:"goal",t:"choice",q:"Main goal",o:[["pr","Permanent residence"],["stay","Stay longer or restore status"],["work","Work in Canada"],["study","Study in Canada"],["visit","Visit, or bring a visitor"],["protect","Protection from danger at home"],["fix","Respond to or challenge a decision"],["enforce","Removal or enforcement problem"],["citizen","Citizenship"]]},
+
+  {id:"rel",sec:"fam",t:"choice",q:"Relationship to a Canadian citizen or permanent resident",o:[["none","No family sponsor"],["married","Spouse (married)"],["commonlaw","Common-law partner (12+ months together)"],["conjugal","Conjugal partner (cannot live together or marry)"],["child","Dependent child of the sponsor"],["parent","Parent or grandparent of the sponsor"],["other","Other relative"]]},
+  {id:"spStatus",sec:"fam",t:"choice",q:"Sponsor’s status",show:famOn,o:[["citizen","Canadian citizen"],["pr","Permanent resident"]]},
+  {id:"spIn",sec:"fam",t:"choice",q:"Does the sponsor live in Canada?",show:famOn,o:YN},
+  {id:"cohab",sec:"fam",t:"choice",q:"Where does the couple live together?",show:spouseOn,o:[["incanada","Together in Canada"],["abroad","Together outside Canada"],["apart","Living apart"]]},
+  {id:"landing",sec:"fam",t:"choice",q:"Was this relative a family member when the sponsor became a PR?",h:"If the relationship existed and the person was not declared and examined, the person may be an excluded family member (R117(9)(d), R125(1)(d)).",show:A=>famOn(A)&&A.rel!=="other",
+   o:[["after","No, the relationship began after the sponsor’s landing"],["declared","Yes, declared and examined"],["undeclared","Yes, but not declared or not examined"],["na","Sponsor is Canadian-born"],["unk","Not sure yet"]]},
+  {id:"childAge",sec:"fam",t:"choice",q:"The child’s age and dependency",show:A=>A.rel==="child",o:[["u22","Under 22 and not married or partnered"],["dis","22 or older, financially dependent because of a medical condition since before 22"],["over","22 or older, otherwise"]]},
+  {id:"spFlags",sec:"fam",t:"multi",q:"Anything that could make the sponsor ineligible?",h:"Choose all that apply.",excl:"none",show:famOn,
+   o:[["default","Defaulted on a past sponsorship, support order or immigration loan"],["prev3","Sponsored a former spouse or partner who became a PR less than 3 years ago"],["sponsored5","Was sponsored as a spouse or partner and became a PR less than 5 years ago"],["sa","On social assistance (other than for disability)"],["bankrupt","Undischarged bankrupt"],["removal","Under a removal order"],["offence","Convicted of a violent or sexual offence"],["prison","In jail or prison"],["under18","Under 18"],["none","None of these"]]},
+  {id:"relRisk",sec:"fam",t:"multi",q:"Relationship risk factors",h:"Officers test genuineness (R4). Choose all that apply.",excl:"none",show:spouseOn,
+   o:[["sep5","Apart for 5 years or more"],["nocohab","Never lived together"],["prevmarriage","Earlier marriages or divorces on either side"],["short","Relationship under about a year"],["proxy","Proxy, customary or unregistered marriage"],["inconsistent","Inconsistent documents or accounts so far"],["nocomm","Little proof of ongoing contact"],["none","None of these"]]},
+
+  {id:"edu",sec:"eco",t:"choice",q:"Highest education",show:ecoOn,o:[["sec","High school or less"],["1y","One-year post-secondary"],["2y","Two-year or longer diploma"],["ba","Bachelor’s degree"],["ma","Master’s or professional degree"],["phd","Doctorate"]]},
+  {id:"caWork",sec:"eco",t:"choice",q:"Skilled work in Canada in the last 3 years (full-time equivalent)",h:"Status must have been maintained during that work.",show:ecoOn,o:[["none","Less than 1 year"],["1y","1 year or more"]]},
+  {id:"teer",sec:"eco",t:"choice",q:"Level of that Canadian job",show:A=>ecoOn(A)&&A.caWork==="1y",o:[["01","TEER 0 or 1"],["23","TEER 2 or 3"],["45","TEER 4 or 5"]]},
+  {id:"fwork",sec:"eco",t:"choice",q:"Skilled work experience outside Canada",show:ecoOn,o:[["0","None"],["1","1 year"],["3","2 to 3 years"],["5","4 to 5 years"],["6","6 years or more"]]},
+  {id:"clb",sec:"eco",t:"choice",q:"English or French test result",h:"Lowest of the four abilities.",show:ecoOn,o:[["low","Below CLB 5, or no test yet"],["5","CLB 5 to 6"],["7","CLB 7 to 8"],["9","CLB 9 or higher"]]},
+  {id:"trade",sec:"eco",t:"choice",q:"Two years of skilled trade experience in the last 5 years?",show:ecoOn,o:YN},
+  {id:"job",sec:"eco",t:"choice",q:"Job offer",show:ecoOn,o:[["none","No job offer"],["lmia","Offer with a positive LMIA"],["exempt","Offer that is LMIA-exempt"],["ab","Alberta employer offer, LMIA status unclear"]]},
+  {id:"pgwp",sec:"eco",t:"choice",q:"Finished a program at a designated learning institution (PGWP-eligible)?",show:A=>ecoOn(A)&&(A.status==="student"||A.goal==="work"),o:YN},
+  {id:"studyAccept",sec:"eco",t:"choice",q:"School acceptance",show:A=>A.goal==="study",o:[["yes","Has an acceptance letter"],["soon","Applying to schools"],["no","No plan yet"]]},
+
+  {id:"fear",sec:"prot",t:"choice",q:"Does the client fear persecution, torture or risk to life if returned?",show:protOn,o:YN},
+  {id:"refElse",sec:"prot",t:"choice",q:"Already recognized as a refugee in another country?",show:A=>protOn(A)&&A.fear==="yes",o:[["no","No"],["yes","Yes"],["unk","Not sure"]]},
+  {id:"arrival",sec:"prot",t:"choice",q:"Time in Canada since last arrival",show:A=>A.loc==="in"&&A.fear==="yes",o:[["lt1","Less than 1 year"],["ge1","1 year or more"]]},
+  {id:"entry",sec:"prot",t:"choice",q:"How did the client enter Canada?",show:A=>A.loc==="in"&&A.fear==="yes",o:[["air","Flew in"],["poe","Land port of entry from the United States"],["irregular","Crossed the land border between ports"],["other","Other"]]},
+  {id:"hcTies",sec:"prot",t:"multi",q:"Ties and hardship (for H&C)",h:"Choose all that apply.",excl:"none",show:A=>["pr","stay","protect","fix","enforce"].includes(A.goal)||["nostatus","removal","claimant"].includes(A.status)||A.landing==="undeclared",
+   o:[["years3","3 or more years in Canada"],["children","Children in Canada (best interests of the child)"],["job","Steady work or business here"],["medical","Serious medical need"],["conditions","Dangerous or hardship conditions in the home country"],["family","Close family in Canada"],["none","None of these"]]},
+
+  {id:"inad",sec:"inad",t:"multi",q:"Inadmissibility and history",h:"Choose all that apply.",excl:"none",
+   o:[["crim_ca","Criminal record in Canada"],["crim_abroad","Criminal record abroad"],["misrep","Past misrepresentation finding, or concern about one"],["medical","Medical condition that may raise excessive demand"],["security","Military, national service, government or group ties that raise security questions"],["prevremoval","Previously removed or deported from Canada"],["refusal","Earlier refusals"],["overstay","Overstayed, or worked or studied without authorization"],["none","None of these"]]},
+
+  {id:"decision",sec:"dec",t:"choice",q:"Latest decision or notice",o:[["none","Nothing yet"],["pending","Application pending, no decision"],["pfl","Procedural fairness letter received"],["refused_pr","Permanent residence or sponsorship refused"],["refused_temp","Visitor, work or study application refused"],["rpd_neg","Refugee claim rejected by the RPD"],["rad_neg","RAD appeal dismissed"],["removal","Removal order issued"]]},
+  {id:"decisionDate",sec:"dec",t:"date",q:"Date the client received it",h:"The date of receipt starts most time limits.",show:A=>A.decision&&!["none","pending"].includes(A.decision)},
+  {id:"decisionWhere",sec:"dec",t:"choice",q:"Was the decision made in Canada or outside?",h:"Changes the Federal Court time limit.",show:A=>["refused_pr","refused_temp","rad_neg"].includes(A.decision),o:[["in","In Canada"],["out","Outside Canada"]]},
+  {id:"daysCanada",sec:"dec",t:"number",q:"Days physically in Canada in the last 5 years",h:"For permanent residents: residency obligation and citizenship.",min:0,max:1826,show:A=>A.status==="pr"},
+
+  {id:"notes",sec:"notes",t:"text",q:"Case notes"}
+];
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const TODAY = (()=>{const d=new Date();d.setHours(0,0,0,0);return d})();
+const pd = s => s ? new Date(s+"T00:00:00") : null;
+const dd = (a,b) => Math.round((a-b)/864e5);
+const addD = (d,n) => {const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const fmtD = d => d.toLocaleDateString("en-CA",{year:"numeric",month:"short",day:"numeric"});
+const has = (a,v) => Array.isArray(a)&&a.includes(v);
+const anyOf = (a,...v) => v.some(x=>has(a,x));
+const clbN = {low:0,"5":5,"7":7,"9":9};
+const plural = (n,w) => n+" "+w+(Math.abs(n)===1?"":"s");
+function dl(A,n){const s=pd(A.decisionDate);if(!s)return null;const due=addD(s,n);return {due,left:dd(due,TODAY)}}
+function dlText(x){return x.left>=0?plural(x.left,"day")+" left (due "+fmtD(x.due)+")":"passed "+plural(-x.left,"day")+" ago ("+fmtD(x.due)+")"}
+
+class Res{
+  constructor(base=0){this.score=base;this.why=[];this.risks=[];this.need=[];this.next=[];this.watch=[];this.blockMsg=null;this.na=false}
+  w(t){this.why.push(t);return this}
+  r(t,pen=0){this.risks.push(t);this.score-=pen;return this}
+  n(t,pen=0){this.need.push(t);this.score-=pen;return this}
+  x(t){this.next.push(t);return this}
+  v(t){this.watch.push(t);return this}
+  b(t){if(!this.blockMsg)this.blockMsg=t;else this.risks.unshift(t);return this}
+}
+const NA = () => {const r=new Res();r.na=true;return r};
+
+const GROUPS = {family:"Family",economic:"Economic",temp:"Temporary status",protect:"Protection and humanitarian",review:"Decisions and appeals",enforce:"Enforcement",citizen:"Citizenship and PR status"};
+const PATHS = [];
+function P(id,group,name,blurb,refs,goals,fn){PATHS.push({id,group,name,blurb,refs,goals,fn})}
+
+/* shared checks */
+const SPMSG = {default:"Sponsor defaulted on a sponsorship undertaking, support order or immigration loan (R133).",prev3:"Sponsor sponsored a former spouse or partner who became a PR less than 3 years ago (R133).",sponsored5:"Sponsor was sponsored as a spouse or partner and became a PR less than 5 years ago (R130(3)).",sa:"Sponsor is on social assistance other than for disability (R133).",bankrupt:"Sponsor is an undischarged bankrupt (R133).",removal:"Sponsor is under a removal order (R133).",offence:"Sponsor was convicted of a violent or sexual offence (R133).",prison:"Sponsor is in jail or prison (R133).",under18:"Sponsor is under 18 (R130)."};
+const sponsorBlocks = A => (A.spFlags||[]).filter(f=>SPMSG[f]).map(f=>SPMSG[f]);
+function famCommon(A,r){
+  const sb=sponsorBlocks(A);
+  if(sb.length){r.b("Sponsor looks ineligible: "+sb[0]);sb.slice(1).forEach(m=>r.r(m))}
+  if(A.landing==="undeclared")r.b("Excluded family member (R117(9)(d), R125(1)(d)): the relationship existed but the person was not declared and examined at the sponsor’s landing. The exemption pilot ended on 2026-09-10, so H&C is the remaining option.");
+  else if(A.landing==="after")r.w("The relationship began after the sponsor’s landing, so the R117(9)(d) exclusion should not apply. Confirm the dates with documents.");
+  else if(A.landing==="declared")r.w("The person was declared and examined at the sponsor’s landing, so no exclusion problem.");
+  else if(A.landing==="na")r.w("Sponsor is Canadian-born, so the landing exclusion does not arise.");
+  else r.n("Confirm whether the relationship existed when the sponsor became a PR. If it did and the person was not declared and examined, the person is excluded.",6);
+  if(A.spStatus==="pr"&&A.spIn==="no")r.b("A permanent resident sponsor must live in Canada (R130).");
+  if(A.spStatus==="citizen"&&A.spIn==="no")r.r("Citizen sponsor lives abroad: must show a plan to live in Canada once the family member becomes a PR.");
+  if(!A.spStatus)r.n("Confirm the sponsor’s status.",4);
+}
+const RR = {sep5:["Long separation: prove the relationship stayed real across the years (visits, calls, money, shared plans).",6],nocohab:["Never lived together: weakens a genuineness finding (R4), and common-law needs 12 months together.",8],prevmarriage:["Earlier marriages or divorces: get the certificates and decrees for each.",4],short:["Short relationship: expect closer questions on how and why it formed.",8],proxy:["Proxy or customary marriage: it must be valid where it took place and under Canadian law (IRPR s. 2, “marriage”). Get registration or proof.",6],inconsistent:["Inconsistent documents or accounts: reconcile before filing. Contradictions invite a misrepresentation concern (IRPA s. 40).",12],nocomm:["Little proof of contact: gather chat logs, call records, transfers, travel and photos over time.",6]};
+const relRiskPen = (A,r) => (A.relRisk||[]).forEach(k=>{if(RR[k])r.r(RR[k][0],RR[k][1])});
+function inadPen(A,r,o={}){
+  const I=A.inad||[];
+  if(has(I,"security"))r.r("Security concern (IRPA s. 34): very hard to overcome, and it bars an H&C request.",o.sec??45);
+  if(has(I,"misrep"))r.r("Misrepresentation (IRPA s. 40): a finding means 5 years of inadmissibility. Review the file and any procedural fairness letter first.",o.mis??30);
+  if(anyOf(I,"crim_ca","crim_abroad"))r.r("Criminality (IRPA s. 36): work out the Canadian equivalent of the offence, then consider rehabilitation, a record suspension or a TRP.",o.crim??15);
+  if(has(I,"medical"))r.r("Medical inadmissibility (IRPA s. 38): check excessive demand. Spouses, partners and dependent children of a sponsor are exempt (s. 38(2)).",o.med??6);
+  if(has(I,"prevremoval"))r.r("Past removal: an authorization to return to Canada may be needed (IRPA s. 52).",o.rem??15);
+  if(has(I,"overstay"))r.r("Status violations: unauthorized work or study can bar some programs and lead to enforcement.",o.ov??8);
+  if(has(I,"refusal"))r.n("Get the earlier refusal reasons and GCMS notes (ATIP request) before filing again.",o.ref??3);
+}
+function eeCheck(A){
+  const clb=clbN[A.clb],hasL=A.clb!==undefined,fw=+A.fwork||0,caY=A.caWork==="1y";
+  const sk=Math.max(fw,caY?1:0);const elig=[],miss=[];
+  if(sk>=1&&clb>=7)elig.push("Federal Skilled Worker");
+  else{if(A.fwork!==undefined&&sk<1)miss.push("Federal Skilled Worker needs 1 year of skilled work.");if(hasL&&clb<7)miss.push("Federal Skilled Worker needs CLB 7 in all four abilities.")}
+  if(caY&&A.teer==="01"&&clb>=7)elig.push("Canadian Experience Class");
+  else if(caY&&A.teer==="23"&&clb>=5)elig.push("Canadian Experience Class");
+  else if(caY&&A.teer==="45")miss.push("Canadian Experience Class counts only TEER 0 to 3 work.");
+  else if(caY&&hasL&&A.teer)miss.push("Canadian Experience Class needs CLB 7 (TEER 0 or 1) or CLB 5 (TEER 2 or 3).");
+  if(A.trade==="yes"&&clb>=5)elig.push("Federal Skilled Trades (needs a valid job offer or certificate of qualification)");
+  else if(A.trade==="yes"&&hasL)miss.push("Federal Skilled Trades needs CLB 5 for speaking and listening, CLB 4 for reading and writing.");
+  return {elig,miss,clb,fw,caY};
+}
+
+/* ---------- FAMILY ---------- */
+P("sclpc","family","Sponsor a spouse or partner already in Canada","Inland sponsorship in the Spouse or Common-Law Partner in Canada class. The couple must live together in Canada.",
+  [sR(123),sR(124),sR(4),ref("pdi_rel"),ref("pdi_sclpc22"),ref("pdi_who"),ref("pdi_elig")],["pr"],A=>{
+  if(!["married","commonlaw","conjugal"].includes(A.rel)||A.loc!=="in")return NA();
+  const r=new Res(90);
+  if(A.rel==="conjugal"){r.b("Conjugal partners cannot be sponsored from inside Canada. Use the outside-Canada family class route.");return r}
+  if(A.cohab==="incanada")r.w("The couple live together in Canada, which the class requires (R124).");
+  else if(A.cohab)r.b("The class requires living together in Canada (R124). That is not met at the moment.");
+  else r.n("Confirm where the couple live together.",10);
+  if(A.spIn==="no")r.b("The sponsor must live in Canada for inland sponsorship.");
+  famCommon(A,r);
+  if(["visitor","worker","student","maintained","trp"].includes(A.status))r.w("The client holds temporary status, so a spousal open work permit may also be available.");
+  if(A.status==="nostatus")r.r("No temporary status. The R124 status requirement has been waived by public policy for some applicants; confirm the current policy. The client may not work or study.",10);
+  if(A.status==="removal")r.r("A removal order is in place. Sponsorship does not stop removal, so deal with enforcement first or in parallel.",20);
+  if(A.status==="claimant")r.r("A refugee claim is pending: confirm how the two processes interact before choosing.",8);
+  relRiskPen(A,r);inadPen(A,r,{med:0});
+  r.x("Build the genuineness file: proof of marriage or cohabitation, joint finances, shared address, photos over time, statements from family and friends.");
+  r.x("Prepare the sponsor and applicant forms from the current IRCC package and complete the checklist before submitting.");
+  r.x("If both spouses are your clients, sign a joint retainer with written conflict disclosure and consent.");
+  r.v("Check IRCC’s family sponsorship pages for intake changes and processing times before quoting a timeline.");
+  return r});
+
+P("fcout","family","Sponsor a spouse, partner or conjugal partner (family class)","The standard family class application, processed outside Canada. It is the only route for conjugal partners.",
+  [sR(116),sR(117),sR(4),ref("pdi_rel"),ref("pdi_who"),ref("pdi_elig")],["pr"],A=>{
+  if(!["married","commonlaw","conjugal"].includes(A.rel))return NA();
+  const r=new Res(A.loc==="out"?90:(A.rel==="conjugal"?80:62));
+  if(A.loc==="in"&&A.rel!=="conjugal"){r.w("Possible while the client is in Canada, but the inland route usually fits better when the couple already live together here.");r.v("Outside-Canada applicants who are in Canada may also apply for an open work permit under the A74 public policy. Confirm it is still in force.")}
+  if(A.rel==="conjugal"){r.w("Conjugal partners can only use this route. It needs a relationship of at least a year and a real barrier to marrying or living together.");r.x("Document the barrier (legal, immigration or cultural) with evidence, not only a statement.")}
+  if(A.cohab==="apart"&&A.rel==="commonlaw")r.b("Common-law status needs 12 continuous months of living together.");
+  famCommon(A,r);relRiskPen(A,r);inadPen(A,r,{med:0});
+  r.x("Check IRCC processing times and give the client the estimate in writing.");
+  r.x("If the sponsor is also your client, use a joint retainer with written conflict disclosure and consent.");
+  r.v("A refused application can be appealed by the sponsor to the IAD within 30 days. Keep that in the plan.");
+  return r});
+
+P("fcchild","family","Sponsor a dependent child","Family class application for a child under 22 who is not married or partnered, or a child with a lasting medical dependency.",
+  [sR(117),sR(2),ref("pdi_who")],["pr"],A=>{
+  if(A.rel!=="child")return NA();
+  const r=new Res(88);
+  if(A.childAge==="u22")r.w("Meets the age and status test for a dependent child (IRPR s. 2).");
+  else if(A.childAge==="dis")r.w("May still be a dependent child if financially dependent because of a medical condition that began before 22. Medical proof is needed.");
+  else if(A.childAge==="over")r.b("A child aged 22 or older who is not medically dependent is not a dependent child (IRPR s. 2).");
+  else r.n("Confirm the child’s age and dependency.",8);
+  famCommon(A,r);inadPen(A,r,{med:0});
+  r.x("Check whether the child is already a Canadian citizen by descent. A citizen cannot be sponsored.");
+  r.x("If the child is under 18, check custody and get the other parent’s consent where it applies.");
+  return r});
+
+P("pgp","family","Sponsor a parent or grandparent","Family class route with an income test. Intake is capped and may be by invitation.",
+  [sR(117),ref("pdi_who"),ref("pdi_elig"),sA(22),ref("ircc_visit")],["pr"],A=>{
+  if(A.rel!=="parent")return NA();
+  const r=new Res(52);
+  r.w("Parents and grandparents are in the family class, but intake is limited. Confirm whether IRCC is accepting applications and how.");
+  r.r("Sponsors must meet a minimum income test over several years. Confirm the current figures.");
+  famCommon(A,r);inadPen(A,r);
+  r.x("Check IRCC’s current intake method and cap before promising anything.");
+  r.x("In the meantime the parent may be able to visit on a long-stay visitor visa (super visa).");
+  r.v("IRPA s. 22(2): wanting to become a PR does not bar a visitor visa if the officer accepts the person will leave when required.");
+  return r});
+
+/* ---------- ECONOMIC ---------- */
+P("ee","economic","Express Entry (FSW, CEC or FST)","Federal skilled streams ranked by CRS score. Eligible profiles compete in rounds of invitations.",
+  [sR(75),sR(87),sR("87.1"),ref("pdi_ee"),ref("pdi_cec"),ref("ircc_ee")],["pr"],A=>{
+  if(A.goal&&!["pr","work","stay"].includes(A.goal))return NA();
+  if(["citizen","pr"].includes(A.status))return NA();
+  const r=new Res(0),e=eeCheck(A);
+  if(e.elig.length){
+    let s=56;const age=+A.age;
+    if(age){if(age>=20&&age<=29)s+=12;else if(age<=34)s+=8;else if(age<=39)s+=4;else if(age>=45)s-=8}else r.n("Add the client’s age. It drives CRS points.");
+    if(e.clb>=9)s+=10;else if(e.clb>=7)s+=4;
+    if(["ma","phd"].includes(A.edu))s+=10;else if(A.edu==="ba")s+=6;else if(A.edu==="2y")s+=3;
+    if(e.caY)s+=6;if(e.fw>=3)s+=3;
+    r.score=s;
+    r.w("Appears to meet the minimum criteria for: "+e.elig.join("; ")+".");
+    r.r("Meeting the minimum does not mean an invitation. Ranking depends on the CRS score against recent round cut-offs.");
+  }else{
+    r.score=16;
+    if(A.clb===undefined&&A.fwork===undefined&&A.caWork===undefined)r.n("Answer the work and language questions to test eligibility.");
+    else r.r("Does not yet meet the minimum criteria for any Express Entry program.");
+    e.miss.forEach(m=>r.r(m));
+  }
+  if(A.caWork==="1y"&&!A.teer)r.n("Enter the TEER level of the Canadian job.");
+  if(e.caY&&A.loc==="in")r.n("For the Canadian Experience Class, status must have been maintained during the qualifying work.");
+  inadPen(A,r);
+  r.x("Calculate the CRS score with IRCC’s official tool and compare it with recent rounds of invitations.");
+  r.x("Order an educational credential assessment for foreign education, and book an approved language test if the result is old or missing.");
+  r.x("Check the NOC and TEER of each job against the duties letter, not the job title.");
+  r.v("IRCC announced changes to Express Entry job-offer points from 2026-11-03 (reported as restored for some high-wage jobs only). Confirm the details on IRCC’s Express Entry page before advising.");
+  return r});
+
+P("aaip","economic","Alberta nomination (AAIP)","Provincial nomination for people living and working in Alberta, or selected from the Express Entry pool.",
+  [ref("aaip"),ref("aaip2")],["pr"],A=>{
+  if(A.alberta!=="yes")return NA();
+  if(A.goal&&!["pr","work","stay"].includes(A.goal))return NA();
+  if(["citizen","pr"].includes(A.status))return NA();
+  const r=new Res(26),e=eeCheck(A);
+  if(A.status==="worker"&&["ab","lmia","exempt"].includes(A.job)){r.score=74;r.w("Works in Alberta on a work permit with an Alberta job offer, so the Alberta Opportunity Stream may fit. It has occupation, work-permit type, language and work-history rules.")}
+  else if(e.elig.length){r.score=60;r.w("Eligible for Express Entry and based in Alberta, so the Alberta Express Entry stream could apply. A nomination adds 600 CRS points.")}
+  else r.r("No clear stream match yet. Alberta streams need an eligible occupation, work history or an Express Entry profile.");
+  if(A.loc==="out")r.r("Most worker streams expect the client to already be working in Alberta.",10);
+  inadPen(A,r);
+  r.x("Use Alberta’s eligibility tool to test each stream, then check the current occupation list.");
+  r.v("AAIP streams, eligible occupations and intake change often. Confirm on alberta.ca before advising.");
+  return r});
+
+/* ---------- TEMPORARY STATUS ---------- */
+P("extend","temp","Extend status before it ends","Apply to extend a visitor record, work permit or study permit before it expires, to keep maintained status.",
+  [sR(182),ref("ircc_visit"),ref("ircc_work"),ref("ircc_study")],["stay"],A=>{
+  if(A.loc!=="in"||!["visitor","worker","student","trp"].includes(A.status))return NA();
+  const e=pd(A.expiry),r=new Res(60);
+  if(!e){r.n("Enter the status expiry date.",5);return r}
+  const left=dd(e,TODAY);
+  if(left<0)return NA();
+  r.w(plural(left,"day")+" until status ends ("+fmtD(e)+").");
+  r.w("Filing before expiry keeps the client’s status and conditions while IRCC decides (maintained status).");
+  r.score=A.goal==="stay"?80:64;
+  if(left<=30){r.r("Under 30 days left. File right away, because processing may outlast the status.");r.score+=6}
+  if(A.status==="visitor")r.x("Visitor extension: show funds, ties and a plan to leave at the end of the stay.");
+  if(A.status==="worker")r.x("Work permit extension: confirm the employer, job and LMIA or exemption still apply, and ask whether a PR route would use the time better.");
+  if(A.status==="student")r.x("Study permit extension: proof of enrolment and progress.");
+  if(A.status==="trp")r.x("TRP extension: a fresh request with updated compelling reasons.");
+  return r});
+
+P("restore","temp","Restore expired status","A request to restore status within 90 days of expiry, with the extension and restoration fees.",
+  [sR(182),ref("ircc_visit")],["stay"],A=>{
+  if(A.loc!=="in")return NA();
+  const e=pd(A.expiry);
+  if(!(A.status==="nostatus"||(e&&dd(e,TODAY)<0&&["visitor","worker","student"].includes(A.status))))return NA();
+  const r=new Res(70);
+  if(!e){r.n("Enter the date status ended to check the 90-day window.",10);return r}
+  const since=-dd(e,TODAY),left=90-since;
+  if(left>=0){
+    r.w("Restoration window: "+plural(left,"day")+" left (status ended "+fmtD(e)+"; 90 days under IRPR s. 182).");
+    r.score=A.goal==="stay"?84:72;
+    if(left<=14)r.r("The window closes very soon. File now.");
+  }else r.b("More than 90 days have passed since status ended (IRPR s. 182). Restoration is no longer available. Look at a TRP, H&C or a new application.");
+  r.r("Until restored, the client has no status and may not work or study.");
+  if(has(A.inad,"overstay"))r.r("Unauthorized work or study can block restoration.",10);
+  r.x("Meet the original requirements for the permit, pay the fees, and explain the lapse in writing.");
+  return r});
+
+P("sowp","temp","Spousal open work permit","An open work permit for a sponsored spouse or partner who is already in Canada.",
+  [sR(205),ref("pdi_sowp"),ref("ircc_work")],["work"],A=>{
+  if(!["married","commonlaw"].includes(A.rel)||A.loc!=="in")return NA();
+  if(!["visitor","worker","student","maintained","trp","nostatus","removal"].includes(A.status))return NA();
+  const r=new Res(80);
+  if(["nostatus","removal"].includes(A.status))r.b("The client needs valid temporary status to apply. Restore status or confirm what the current policy allows first.");
+  else r.w("The client holds temporary status, a core requirement.");
+  if(sponsorBlocks(A).length||A.landing==="undeclared")r.b("The sponsorship is blocked (see the sponsorship routes), so this permit is not available.");
+  r.w("It applies to a spouse or partner included in a PR sponsorship application filed by a citizen or PR.");
+  r.r("The sponsorship application must be filed first, and usually acknowledged as complete (AOR), before applying. A short-expiry exception exists.");
+  r.r("Apply online, not at a port of entry. It is not available if the sponsorship is refused or withdrawn.");
+  r.v("IRCC extended this public policy on 2025-11-20. One secondary source says it ends 2026-12-31; confirm the end date and whether it is renewed.");
+  r.x("Apply as soon as the AOR arrives. If status ends within 2 weeks, apply earlier.");
+  r.x("Extend visitor or other status before it expires if the permit decision is still pending.");
+  return r});
+
+P("pgwp","temp","Post-graduation work permit","An open work permit for graduates of eligible programs at designated learning institutions.",
+  [sR(205),ref("ircc_work"),ref("ircc_study")],["work"],A=>{
+  if(!(A.status==="student"||A.goal==="work")||A.pgwp!=="yes")return NA();
+  const r=new Res(80);
+  r.w("The program was at a designated learning institution and is PGWP-eligible.");
+  r.r("There is a short deadline after the program ends, and field-of-study and language rules can apply. Confirm the current PGWP rules on IRCC.");
+  r.x("Apply before the study permit expires, with the completion letter.");
+  r.x("Plan the next step: Canadian work experience can lead to the Canadian Experience Class or Alberta nomination.");
+  return r});
+
+P("wp","temp","Employer-specific work permit (LMIA or exempt)","A work permit tied to an employer through an LMIA or an LMIA-exempt category.",
+  [sR(200),sR(203),sR(205),ref("ircc_work")],["work"],A=>{
+  if(A.goal&&!["work","stay","pr"].includes(A.goal))return NA();
+  if(["citizen","pr"].includes(A.status))return NA();
+  const r=new Res(24);
+  if(A.job==="lmia"){r.score=78;r.w("Has an offer with a positive LMIA. Apply for the permit with the LMIA and offer letter.")}
+  else if(A.job==="exempt"){r.score=72;r.w("Has an LMIA-exempt offer. Confirm the exemption code and its conditions.")}
+  else if(A.job==="ab"){r.score=52;r.n("Confirm whether the employer has, or needs, an LMIA.")}
+  else if(A.job==="none")r.r("No job offer yet. An employer usually must secure an LMIA or use an exemption first.");
+  else r.n("Record the job offer details.");
+  if(A.loc==="in"&&A.status==="visitor")r.r("Visitors generally cannot apply for a work permit from inside Canada. Check the IRPR s. 199 exceptions.",12);
+  if(A.loc==="in"&&A.status==="nostatus")r.r("No status in Canada: restore status first or apply from outside.",20);
+  r.r("The LMIA stream has been tightened. Check current caps, low-wage restrictions and processing times.");
+  inadPen(A,r);
+  r.x("Get the employer’s offer letter, LMIA or exemption proof, and job duties.");
+  return r});
+
+P("study","temp","Study permit","A new or extended study permit at a designated learning institution.",
+  [ref("ircc_study")],["study"],A=>{
+  if(A.goal!=="study"&&A.status!=="student")return NA();
+  const r=new Res(A.studyAccept==="yes"?78:A.studyAccept==="soon"?46:A.status==="student"?60:30);
+  if(A.studyAccept==="yes")r.w("Has an acceptance letter from a school.");
+  else r.r("No acceptance letter yet. It is the first requirement.");
+  r.r("Check whether the province’s attestation letter requirement and the national cap apply to this program.");
+  r.r("Proof of funds, a clear study plan and ties to the home country are what refusals often turn on.");
+  inadPen(A,r);
+  r.x("Confirm the school is a designated learning institution and the program is eligible.");
+  return r});
+
+P("visit","temp","Visitor visa or eTA","Entry as a visitor with a visa or an eTA.",
+  [sA(22),sR(179),ref("ircc_visit")],["visit"],A=>{
+  if(A.loc!=="out"||A.goal!=="visit")return NA();
+  const r=new Res(A.visaReq==="exempt"?80:A.visaReq==="visa"?66:55);
+  if(A.visaReq==="exempt")r.w("Visa-exempt travellers need an eTA if flying. Check the admissibility questions first.");
+  else if(A.visaReq==="visa")r.w("A visitor visa needs proof of funds, ties to home and a plan to leave.");
+  else r.n("Confirm whether the client needs a visa or an eTA.");
+  if(famOn(A))r.w("IRPA s. 22(2): a family link or a pending PR file does not bar a visitor visa if the officer is satisfied the person will leave.");
+  inadPen(A,r);
+  r.x("Prepare an invitation letter, travel history and proof of funds.");
+  return r});
+
+P("trp","temp","Temporary resident permit (inadmissibility)","A discretionary permit that lets an inadmissible person enter or stay for a compelling reason.",
+  [sA(24),ref("pdi_trp"),ref("pdi_trp2")],[],A=>{
+  const I=A.inad||[];
+  if(!anyOf(I,"crim_ca","crim_abroad","medical","overstay","misrep","prevremoval","security"))return NA();
+  const r=new Res(48);
+  if(A.loc==="in"&&["visitor","worker","student","maintained"].includes(A.status))r.b("The client already holds valid status. IRCC instructions say a TRP should not be issued to someone with valid status.");
+  r.w("Exceptional and discretionary: officers weigh the need to enter or stay against the risk.");
+  if(has(I,"security"))r.r("Security inadmissibility is the hardest category. A TRP is rarely appropriate.",25);
+  r.r("A TRP is not meant to give long-term status. Plan a lasting fix such as rehabilitation, a record suspension or an authorization to return.");
+  r.x("Document compelling reasons: family, work, medical and humanitarian.");
+  r.x("Check whether rehabilitation is the better fix before choosing a TRP.");
+  return r});
+
+/* ---------- PROTECTION AND HUMANITARIAN ---------- */
+P("claim","protect","Make a refugee claim in Canada","A claim to the Refugee Protection Division for someone who fears persecution, torture or risk to life.",
+  [sA(96),sA(97),sA(101),ref("pdi_refelig"),ref("pdi_refgrounds"),ref("pdi_stca"),ref("irbrules")],["protect"],A=>{
+  if(A.loc!=="in"||A.fear!=="yes")return NA();
+  if(["citizen","pr","protected","claimant"].includes(A.status))return NA();
+  const r=new Res(84);
+  r.w("The client fears serious harm if returned. The legal test is a well-founded fear of persecution, or a risk of torture or to life (IRPA ss. 96–97).");
+  if(A.refElse==="yes")r.b("Ineligible if recognized as a refugee in another country the client can return to (IRPA s. 101(1)(d)). Confirm whether return is possible.");
+  else if(A.refElse==="unk")r.n("Confirm any refugee or asylum status held in another country.",8);
+  if(A.natl==="dual")r.r("Two or more nationalities: the claim is assessed against each country of nationality, so a strong claim against only one will fail. Eligibility is screened first and merits later.",50);
+  if(A.entry==="poe")r.r("Entered at a land port from the United States: the Safe Third Country Agreement may make the claim ineligible unless an exception applies (family in Canada, unaccompanied minor, valid Canadian document, public interest).",42);
+  if(A.entry==="irregular")r.r("Crossed between ports: the STCA applies to claims made within 14 days of the crossing. Check how long ago the client crossed.",14);
+  if(A.arrival==="ge1")r.r("In Canada for a year or more: check whether the one-year ineligibility rule is in force. Your course notes list it as a proposed change under Bill C-12.",12);
+  if(has(A.inad,"security"))r.r("A claim becomes ineligible for security inadmissibility (IRPA s. 101(1)(f)) once it is determined; the client would usually go to a PRRA instead.",30);
+  r.x("File the claim through IRCC’s online refugee portal and book biometrics and the eligibility interview.");
+  r.x("Calendar the Basis of Claim deadline (set by the RPD Rules; verify the days) and start the narrative with dates, places and evidence.");
+  r.x("Collect identity papers, corroboration and country evidence. Use a trauma-informed interview style.");
+  r.v("Confirm which Bill C-12 ineligibility rules are in force before advising on timing.");
+  return r});
+
+P("prra","protect","Pre-removal risk assessment (PRRA)","A risk review before removal for people who cannot make or keep a refugee claim.",
+  [sA(112),sA(113),ref("pdi_refgrounds")],["protect"],A=>{
+  if(A.fear!=="yes")return NA();
+  if(!(A.status==="removal"||["removal","rpd_neg","rad_neg"].includes(A.decision)))return NA();
+  const r=new Res(66);
+  r.w("A PRRA reviews the risk of persecution, torture or death before removal and can lead to protection (IRPA s. 112).");
+  r.r("There are bars, for example for a short period after a rejected claim (IRPA s. 112(2)). Check which one applies and its length.");
+  r.r("Claims ineligible under the Safe Third Country Agreement are removed to the United States and do not get a PRRA.");
+  r.x("Wait for the CBSA notice, or ask CBSA when the client becomes eligible.");
+  r.x("Focus on new evidence: a PRRA is not a second appeal of the refused claim.");
+  return r});
+
+P("rad","review","Appeal to the Refugee Appeal Division","The RAD hears appeals from RPD refusals, on the record and any new evidence it admits.",
+  [sA(110),ref("irbrules")],["fix"],A=>{
+  if(A.decision!=="rpd_neg")return NA();
+  const r=new Res(88),d=dl(A,15);
+  r.w("A refused claimant may appeal to the RAD (IRPA s. 110), unless a bar applies.");
+  if(d){if(d.left<0)r.b("The 15-day period to file the notice of appeal appears to have passed: "+dlText(d)+". Extension is limited. Verify against the RAD Rules.");else r.w("Notice of appeal deadline: "+dlText(d)+". Verify against the RAD Rules, and note the later deadline for the full appeal record.")}
+  else r.n("Enter the date the client received the RPD reasons to count the days.",0);
+  r.x("Order the RPD hearing recording and identify errors of fact, law or credibility.");
+  r.x("If the RAD refuses, the next step is judicial review in the Federal Court (lawyer).");
+  return r});
+
+P("resettle","protect","Resettlement from outside Canada","Refugee resettlement through a UNHCR referral or private sponsorship. The person cannot apply directly from abroad.",
+  [sR(139),sR(145),ref("ircc_ref")],["protect"],A=>{
+  if(A.loc!=="out"||A.fear!=="yes")return NA();
+  const r=new Res(46);
+  r.w("A person outside their country who fears persecution may be resettled if recognized as a refugee abroad and referred by UNHCR or sponsored.");
+  r.r("Canada selects from referrals and sponsorships. The client cannot self-apply, and nothing is guaranteed.");
+  r.r("Private sponsorship by Groups of Five and community sponsors is reported paused until 2026-12-31. Sponsorship Agreement Holders have small yearly allocations. Confirm both on IRCC’s refugee sponsorship pages.");
+  r.x("Check whether the person is registered with UNHCR. Registration is the usual first step.");
+  r.x("Contact Sponsorship Agreement Holders (churches, community groups) about named sponsorship and remaining spaces.");
+  r.x("Gather identity papers, UNHCR registration and evidence of the fear now.");
+  r.x("Warn the family about anyone who charges money for a guaranteed place.");
+  return r});
+
+P("hc","protect","Humanitarian and compassionate request (H&C)","A discretionary request for permanent residence or an exemption, based on hardship, establishment and the best interests of any child.",
+  [sA(25),sA("25.1"),ref("pdi_hc"),ref("kanthasamy"),ref("baker")],["pr","stay"],A=>{
+  if(A.status==="citizen")return NA();
+  const undecl=A.landing==="undeclared";
+  const inScope=undecl||["pr","stay","protect","fix","enforce"].includes(A.goal)||["nostatus","removal","claimant"].includes(A.status);
+  if(!inScope||(A.status==="pr"&&!undecl))return NA();
+  const r=new Res(undecl?46:26),t=A.hcTies||[];
+  const add=(k,n,m)=>{if(has(t,k)){r.score+=n;r.w(m)}};
+  add("years3",12,"Years of settlement in Canada support establishment.");
+  add("children",16,"A child’s best interests carry real weight (IRPA s. 25(1), Kanthasamy).");
+  add("job",6,"Steady work or business adds to establishment.");
+  add("medical",10,"A serious medical need, and limited care abroad, can count.");
+  add("conditions",8,"Hardship from conditions in the home country is a recognized factor.");
+  add("family",10,"Close family ties in Canada support the request.");
+  if(!t.length)r.n("Record the client’s ties and hardship factors.");
+  if(has(A.inad,"security"))r.b("H&C cannot overcome inadmissibility on security, human or international rights, or organized crime grounds (IRPA s. 25(1)).");
+  if(undecl)r.w("For an excluded family member, IRCC’s own guidance points to H&C where there are compelling reasons the person was not declared.");
+  if(A.status==="claimant")r.r("IRPA s. 25(1.2) limits H&C while a refugee claim is pending and for a period after a claim is rejected, withdrawn or abandoned. Confirm how it applies.");
+  r.r("It is an exceptional measure, not another program. Refusal is common, and applying does not stop removal.");
+  inadPen(A,r,{sec:0});
+  r.x("Build the file in two parts: establishment and ties, then hardship if the client has to leave. Add evidence for each factor, not just statements.");
+  if(undecl)r.x("Document why the family member was not declared, with evidence (fear, bad advice, loss of contact). Avoid guesses.");
+  r.v("Processing is slow. One source reports IRCC told a parliamentary committee in March 2026 that most new H&C applicants could wait over 10 years. Check IRCC’s processing times.");
+  return r});
+
+/* ---------- DECISIONS AND APPEALS ---------- */
+P("pfl","review","Respond to the procedural fairness letter","A written chance to answer the officer’s concerns before a decision. The deadline is in the letter.",
+  [ref("baker"),sA(40)],["fix"],A=>{
+  if(A.decision!=="pfl")return NA();
+  const r=new Res(96);
+  r.w("Fairness requires IRCC to tell the client the concern and let them answer (Baker). A strong, evidence-backed response is the most important step.");
+  r.n("Put the deadline from the letter in the calendar, and ask for an extension in writing if you need one.");
+  r.r("If the concern is misrepresentation, a finding means 5 years of inadmissibility (IRPA s. 40(2)).");
+  r.x("Get the full file and any GCMS notes, then answer each concern with a declaration and documents.");
+  r.x("Check whether the client’s earlier statements and forms are consistent before drafting.");
+  return r});
+
+P("iad","review","Appeal the sponsorship refusal to the IAD","The sponsor can appeal a refused family class application. The IAD can also weigh H&C factors.",
+  [sA(63),sA(64),sA(65),sA(67),ref("irbrules")],["fix"],A=>{
+  if(A.decision!=="refused_pr"||!famOn(A))return NA();
+  const r=new Res(80),d=dl(A,30);
+  r.w("A sponsor has a right of appeal to the Immigration Appeal Division against a refused family class application (IRPA s. 63(1)).");
+  if(d){if(d.left<0)r.b("The 30-day appeal period appears to have passed: "+dlText(d)+". The IAD’s power to extend time is limited.");else r.w("Appeal deadline: "+dlText(d)+".")}
+  else r.n("Enter the date the sponsor received the refusal to count the 30 days.");
+  if(anyOf(A.inad,"security","crim_abroad","crim_ca"))r.r("IRPA s. 64 bars an appeal when the sponsored person is inadmissible for security, human or international rights violations, serious criminality or organized criminality. Check the exact ground of refusal.",25);
+  if(has(A.inad,"misrep"))r.w("A misrepresentation finding can be challenged on appeal.");
+  if(A.landing==="undeclared")r.r("An excluded family member is not a family class member, so the IAD cannot grant H&C relief (IRPA s. 65). Check the legal basis of the refusal first.",15);
+  r.x("Get the refusal letter and GCMS notes (ATIP) to see the reasons.");
+  r.x("File the notice of appeal, then prepare disclosure and witnesses.");
+  r.x("The sponsor is the appellant, so the sponsor must be your client or sign a joint retainer.");
+  return r});
+
+P("jr","review","Judicial review in the Federal Court","A court review of whether an immigration decision was reasonable and fair. Leave is required.",
+  [sA(72),ref("vavilov"),ref("baker"),ref("irbrules")],["fix"],A=>{
+  if(!["refused_pr","refused_temp","rad_neg"].includes(A.decision))return NA();
+  const days=A.decisionWhere==="out"?60:15,r=new Res(50),d=dl(A,days);
+  r.w("Review looks at legality, reasonableness and procedural fairness. The court rarely re-weighs the evidence (Vavilov).");
+  if(d){if(d.left<0)r.b("The "+days+"-day time limit appears to have passed: "+dlText(d)+". Only a motion to extend time remains, and it is discretionary.");else r.w("Leave application deadline: "+dlText(d)+(A.decisionWhere?"":" (15 days if the decision was made in Canada, 60 if outside)")+".")}
+  else r.n("Enter the decision date and where it was made. The limit is 15 days in Canada, 60 days outside (IRPA s. 72(2)(b)).");
+  r.r("Only a lawyer can represent a client in the Federal Court. An RCIC cannot appear there, so refer quickly.");
+  r.r("Success usually means a redetermination by a new officer, not an approval.");
+  r.x("Refer to a Federal Court immigration lawyer right away and send them the decision and GCMS notes.");
+  return r});
+
+P("reapply","review","Reapply with the problem fixed","A new application that answers the reasons for the refusal.",
+  [ref("pdi_manuals"),sA(40)],["fix"],A=>{
+  if(!["refused_pr","refused_temp"].includes(A.decision))return NA();
+  const r=new Res(64);
+  r.w("Often the fastest fix when the refusal reason can be cured: missing documents, weak funds or an unmet requirement.");
+  if(has(A.inad,"misrep"))r.b("A misrepresentation finding bars the client for 5 years (IRPA s. 40(2)). A new application would be refused until then.");
+  r.r("Repeating the same weaknesses brings the same result and builds a refusal history.");
+  r.x("Get the refusal reasons and GCMS notes (ATIP request), then fix each stated ground.");
+  r.x("Keep any appeal or court deadline running while you prepare the new file.");
+  return r});
+
+P("recon","review","Ask IRCC to reconsider","An informal request that the officer review the decision for an error.",
+  [ref("pdi_manuals")],["fix"],A=>{
+  if(!["refused_pr","refused_temp"].includes(A.decision))return NA();
+  const r=new Res(30);
+  r.w("Sometimes used for clear factual or processing errors.");
+  r.r("There is no legal right to reconsideration. IRCC decides whether to look again, and the request does not pause appeal or court deadlines.");
+  r.r("A weak request, such as one signed by a single person or missing forms, can waste time.");
+  r.x("Use it only for a clear error, and keep the appeal or court clock running in parallel.");
+  return r});
+
+/* ---------- ENFORCEMENT ---------- */
+P("enf","enforce","Respond to the removal order or enforcement action","Work out the order type, whether it is in force, appeal rights, and ways to stop or delay removal.",
+  [sA(44),sA(48),sA(49),sA(50),sA(52),sA(55),sA(57),sA(63),sA(64),sR(224),ref("charter"),ref("irbrules")],["enforce"],A=>{
+  if(!(A.status==="removal"||A.decision==="removal"||A.goal==="enforce"))return NA();
+  const r=new Res(92);
+  r.w("Removal cases are urgent. The order type decides what appeal and relief options exist.");
+  r.x("Identify the order: departure, exclusion or deportation, when it came into force, and whether it is conditional because of a pending claim.");
+  r.x("Check appeal rights: permanent residents and some others may appeal to the IAD within 30 days (IRPA s. 63), limited by s. 64.");
+  r.x("Consider a stay or deferral request to CBSA, PRRA eligibility, H&C, a TRP, or a Federal Court stay (lawyer required).");
+  r.x("If the client is detained, prepare for detention reviews: within 48 hours, then within 7 days, then every 30 days (IRPA s. 57).");
+  r.r("A departure order becomes a deportation order if the client does not leave within 30 days and confirm departure to CBSA (IRPR s. 224). Explain this clearly.");
+  r.r("Federal Court work needs a lawyer.");
+  return r});
+
+/* ---------- CITIZENSHIP AND PR STATUS ---------- */
+P("citizen","citizen","Apply for Canadian citizenship","A grant of citizenship for adult permanent residents who meet the physical presence, language, tax and prohibition rules.",
+  [sC(5),sC(22),ref("citact"),ref("ircc_cit")],["citizen"],A=>{
+  if(A.status!=="pr"||(A.goal&&A.goal!=="citizen"))return NA();
+  const r=new Res(70),d=A.daysCanada;
+  if(d===undefined||d==="")r.n("Enter the days in Canada in the last 5 years. The requirement is 1,095.");
+  else if(+d>=1095){r.score=92;r.w("Has "+d+" days in Canada in the last 5 years, at or above the 1,095-day requirement.")}
+  else{r.score=30;r.r("Short by "+(1095-d)+" days of the 1,095-day physical presence requirement (Citizenship Act s. 5(1)(c)). Confirm how time before becoming a PR counts.")}
+  r.r("Prohibitions (s. 22) block some applicants, for example certain charges or convictions, or an investigation for misrepresentation.");
+  r.x("Check income-tax filing, language evidence and the knowledge test for applicants aged 18 to 54.");
+  r.x("Count days from the travel history, not from memory.");
+  return r});
+
+P("prres","citizen","Protect PR status (residency obligation)","A PR must be in Canada 730 days in every 5-year period, or fit an exception, to keep status.",
+  [sA(28),sA(63),ref("irpa")],[],A=>{
+  if(A.status!=="pr"||A.daysCanada===undefined||A.daysCanada==="")return NA();
+  if(+A.daysCanada>=730)return NA();
+  const r=new Res(60);
+  r.r("Under 730 days in the last 5 years: status may be at risk if the client has been a PR for 5 years or more. If less, plan to reach 730 days before the 5-year point.");
+  r.w("Days outside Canada accompanying a citizen spouse or working full-time for a Canadian business abroad can count (IRPA s. 28(2)).");
+  r.x("Count days from passport stamps and travel history.");
+  r.x("If a report is issued, appeal to the IAD under s. 63(4). That deadline is longer than for other appeals (60 days; verify), and H&C factors can be argued.");
+  return r});
+
+/* ---------- EVALUATION ---------- */
+const TIERS = [["rec","Highly recommended"],["poss","Possible"],["weak","Less recommended"],["block","Blocked"]];
+const TIERN = Object.fromEntries(TIERS);
+function evaluate(A){
+  const out=[];
+  PATHS.forEach(p=>{
+    const r=p.fn(A);
+    if(r.na)return;
+    if(!r.blockMsg&&p.goals.includes(A.goal))r.score+=6;
+    out.push({p,r,score:0,tier:""});
+  });
+  const strong=out.some(o=>!o.r.blockMsg&&["family","economic"].includes(o.p.group)&&o.r.score>=70);
+  out.forEach(o=>{
+    if(o.p.id==="hc"&&!strong&&["pr","stay"].includes(A.goal))o.r.score+=14;
+    o.score=Math.max(0,Math.min(100,Math.round(o.r.score)));
+    o.tier=o.r.blockMsg?"block":o.score>=70?"rec":o.score>=45?"poss":"weak";
+  });
+  const order={rec:0,poss:1,weak:2,block:3};
+  out.sort((a,b)=>order[a.tier]-order[b.tier]||b.score-a.score);
+  return {paths:out,flags:computeFlags(A)};
+}
+
+function computeFlags(A){
+  const F=[];const f=(sev,t,why,refs)=>F.push({sev,t,why,refs:refs||[]});
+  const e=pd(A.expiry);
+  if(A.loc==="in"&&e&&["visitor","worker","student","trp","maintained","nostatus"].includes(A.status)){
+    const left=dd(e,TODAY);
+    if(left<0){const since=-left;
+      if(since<=90)f("urgent","Status ended "+plural(since,"day")+" ago","The 90-day restoration window closes in "+plural(90-since,"day")+". The client may not work or study until status is restored.",[sR(182)]);
+      else f("check","Status ended "+plural(since,"day")+" ago","Outside the 90-day restoration window. Consider a TRP, H&C or a new application, and explain work and study limits.",[sR(182),ref("pdi_trp")]);
+    }else if(left<=30)f("urgent",plural(left,"day")+" left on current status","File an extension now so status is maintained while IRCC decides.",[sR(182)]);
+    else if(left<=90)f("check",plural(left,"day")+" left on current status","Plan the extension or next application.",[]);
+  }
+  if(A.decision==="removal"||A.status==="removal")f("urgent","Removal order","Identify the type of order, whether it is in force, and the appeal and stay options today.",[sA(44),sA(48),sA(49),sA(63),sR(224)]);
+  const DR=(days,t,why,refs)=>{const d=dl(A,days);if(d)f(d.left<0?"check":d.left<=7?"urgent":"check",t+": "+dlText(d),why,refs);else f("check",t+" ("+days+" days)","Enter the date the client received the decision to count the days.",refs)};
+  if(A.decision==="refused_pr"&&famOn(A))DR(30,"Sponsor’s IAD appeal","30 days from receipt of the refusal.",[sA(63),ref("irbrules")]);
+  if(A.decision==="rpd_neg")DR(15,"RAD notice of appeal","15 days from receipt of the RPD reasons; verify against the RAD Rules.",[sA(110),ref("irbrules")]);
+  if(["refused_pr","refused_temp","rad_neg"].includes(A.decision))DR(A.decisionWhere==="out"?60:15,"Federal Court leave application","15 days if the decision was made in Canada, 60 days if outside (IRPA s. 72(2)(b)). Lawyer needed.",[sA(72)]);
+  if(A.decision==="pfl")f("urgent","Procedural fairness letter","Calendar the response date in the letter and answer every concern with evidence.",[ref("baker")]);
+  if(A.landing==="undeclared")f("urgent","Excluded family member","The family member was not declared or examined at the sponsor’s landing. The exemption pilot ended on 2026-09-10. Advise the sponsor privately about their own exposure before acting for both.",[sR(117),sR(125),ref("pdi_excl"),ref("pdi_pilot")]);
+  const sb=sponsorBlocks(A);
+  if(sb.length)f("check","Sponsor eligibility","Sponsor may be barred: "+sb.join(" "),[sR(130),sR(133),ref("pdi_elig")]);
+  if(has(A.inad,"security"))f("urgent","Security concern","Inadmissibility under IRPA s. 34 is very hard to overcome and bars an H&C request. Take care before any filing.",[sA(34),sA(25)]);
+  if(has(A.inad,"misrep"))f("check","Misrepresentation","A finding means 5 years of inadmissibility. Review the file and any procedural fairness letter before filing.",[sA(40)]);
+  if(anyOf(A.inad,"crim_ca","crim_abroad"))f("check","Criminality","Get court documents and find the Canadian equivalent. Rehabilitation, a record suspension or a TRP may help.",[sA(36)]);
+  if(A.fear==="yes"&&A.natl==="dual")f("check","More than one nationality","A refugee claim is assessed against each country of nationality.",[sA(96),ref("pdi_refelig")]);
+  if(A.refElse==="yes")f("urgent","Refugee status elsewhere","A claim is ineligible if the person is recognized in another country they can return to (IRPA s. 101(1)(d)).",[sA(101),ref("pdi_refgrounds")]);
+  if(A.fear==="yes"&&A.loc==="in"&&A.entry==="poe")f("check","Safe Third Country Agreement","A land-port arrival from the United States may make a claim ineligible unless an exception applies.",[sA(101),ref("pdi_stca"),ref("pdi_stca23")]);
+  if(A.status==="pr"&&A.daysCanada!==undefined&&A.daysCanada!==""&&+A.daysCanada<730)f("check","PR residency obligation","Under 730 days in the last 5 years.",[sA(28),sA(63)]);
+  if(["married","commonlaw","conjugal","child"].includes(A.rel))f("note","Joint retainer","When the sponsor and the applicant are both clients, give written conflict disclosure and get consent. Their interests can diverge, especially on undeclared family or genuineness.",[ref("code")]);
+  if(["refused_pr","refused_temp","rad_neg"].includes(A.decision))f("note","Federal Court is lawyer-only","An RCIC cannot appear in the Federal Court. Refer quickly if the client wants judicial review.",[sA(72)]);
+  if(!CONFIG.clientAccountOpen)f("note","No advance payments yet","The Client Account is not open. Do not take retainers or disbursement deposits until it is.",[ref("college")]);
+  const o={urgent:0,check:1,note:2};
+  F.sort((a,b)=>o[a.sev]-o[b.sev]);
+  return F;
+}
+/* ============================================================
+   UI
+   ============================================================ */
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const S = {A:{},checks:{},ref:"",assessor:"",open:{},sel:null,selUser:false,showBlocked:true,view:"assess",afilter:"all",aq:"",prevSig:""};
+let RES = {paths:[],flags:[]};
+const mqNarrow = window.matchMedia("(max-width:700px)");
+const isAns = (q,A) => {const v=A[q.id];return Array.isArray(v)?v.length>0:v!==undefined&&v!==""};
+const visQ = A => Q.filter(q=>!q.show||q.show(A));
+const visSig = () => visQ(S.A).map(q=>q.id).join(",");
+function prune(){let ch=true;while(ch){ch=false;Q.forEach(q=>{if(q.show&&!q.show(S.A)&&S.A[q.id]!==undefined){delete S.A[q.id];ch=true}})}}
+const optLabel = (q,v) => (q.o||[]).find(o=>o[0]===v)?.[1] ?? v;
+
+/* ---------- intake ---------- */
+function qHTML(q,A){
+  const v=A[q.id];let body="";
+  if(q.t==="choice"){
+    body=`<div class="chips" role="radiogroup" aria-label="${esc(q.q)}">`+q.o.map(([val,lab])=>`<label class="chip"><input type="radio" name="${q.id}" value="${val}" ${v===val?"checked":""}><span>${esc(lab)}</span></label>`).join("")+`</div>`+(v!==undefined?`<button type="button" class="clr" data-clear="${q.id}">Clear answer</button>`:"");
+  }else if(q.t==="multi"){
+    body=`<div class="chips">`+q.o.map(([val,lab])=>`<label class="chip"><input type="checkbox" name="${q.id}" value="${val}" ${has(v,val)?"checked":""}><span>${esc(lab)}</span></label>`).join("")+`</div>`;
+  }else if(q.t==="date"){
+    body=`<input class="field" type="date" data-q="${q.id}" value="${esc(v||"")}">`;
+  }else if(q.t==="number"){
+    body=`<input class="field" type="number" inputmode="numeric" data-q="${q.id}" min="${q.min??0}" max="${q.max??999}" value="${esc(v??"")}">`;
+  }else if(q.t==="text"){
+    body=`<textarea class="field" data-q="${q.id}" rows="4" maxlength="2000" placeholder="Facts, dates, what the client said. No names or ID numbers.">${esc(v||"")}</textarea>`;
+  }
+  return `<fieldset class="q" data-qid="${q.id}"><legend>${esc(q.q)}</legend>${q.h?`<div class="help">${esc(q.h)}</div>`:""}${body}</fieldset>`;
+}
+function renderIntake(){
+  const el=$("#intake"),A=S.A,vis=visQ(A);
+  $$("details.sec",el).forEach(d=>{S.open[d.dataset.sec]=d.open});
+  const ae=document.activeElement;let keep=null;
+  if(ae&&el.contains(ae))keep={name:ae.name,value:ae.value,type:ae.type,q:ae.dataset.q,tag:ae.tagName,clear:ae.dataset.clear};
+  const nt=vis.filter(q=>q.t!=="text"),done=nt.filter(q=>isAns(q,A)).length;
+  let h=`<div class="prog"><span>${done} of ${nt.length} answered</span><a class="jump" href="#results">See routes</a><div class="bar"><i style="width:${nt.length?Math.round(done/nt.length*100):0}%"></i></div></div>`;
+  SECS.forEach(sec=>{
+    const qs=vis.filter(q=>q.sec===sec.id);if(!qs.length)return;
+    const n=qs.filter(q=>q.t!=="text"),a=n.filter(q=>isAns(q,A)).length;
+    const open=S.open[sec.id]!==undefined?S.open[sec.id]:["snap","goal"].includes(sec.id);
+    h+=`<details class="sec" data-sec="${sec.id}" ${open?"open":""}><summary>${esc(sec.t)}${n.length?`<span class="cnt ${a===n.length?"done":""}">${a}/${n.length}</span>`:""}</summary><div class="secbody"><div class="sechint">${esc(sec.h)}</div>${qs.map(q=>qHTML(q,A)).join("")}</div></details>`;
+  });
+  el.innerHTML=h;
+  if(keep){
+    let node=null;
+    if(keep.q)node=$(`[data-q="${keep.q}"]`,el);
+    else if(keep.name&&keep.value)node=$(`input[name="${keep.name}"][value="${keep.value}"]`,el);
+    else if(keep.clear)node=$(`[data-clear="${keep.clear}"]`,el);
+    if(node){try{node.focus({preventScroll:true});if(keep.tag==="TEXTAREA")node.setSelectionRange(node.value.length,node.value.length)}catch(e){}}
+  }
+}
+function setAnswer(t){
+  const id=t.dataset.q||t.name;const q=Q.find(x=>x.id===id);if(!q)return;
+  if(q.t==="choice"){S.A[id]=t.value}
+  else if(q.t==="multi"){
+    let cur=Array.isArray(S.A[id])?[...S.A[id]]:[];
+    if(t.checked){if(q.excl&&t.value===q.excl)cur=[q.excl];else{cur=cur.filter(x=>x!==q.excl);if(!cur.includes(t.value))cur.push(t.value)}}
+    else cur=cur.filter(x=>x!==t.value);
+    if(cur.length)S.A[id]=cur;else delete S.A[id];
+  }else{if(t.value==="")delete S.A[id];else S.A[id]=t.value}
+}
+function onIntake(e){
+  const t=e.target;
+  if(t.matches("[data-clear]")){delete S.A[t.dataset.clear];update({intake:true});return}
+  if(!t.matches("input,textarea"))return;
+  const q=Q.find(x=>x.id===(t.dataset.q||t.name));if(!q)return;
+  const typed=["date","number","text"].includes(q.t);
+  if(typed&&e.type!=="input")return;
+  if(!typed&&e.type!=="change")return;
+  const before=visSig();setAnswer(t);
+  if(q.t==="text"){notify();return}
+  prune();
+  update({intake:!typed||before!==visSig()});
+}
+function refreshCounts(){
+  const A=S.A,vis=visQ(A),nt=vis.filter(q=>q.t!=="text"),done=nt.filter(q=>isAns(q,A)).length;
+  const pr=$(".prog span");if(pr)pr.textContent=done+" of "+nt.length+" answered";
+  const bar=$(".prog .bar i");if(bar)bar.style.width=(nt.length?Math.round(done/nt.length*100):0)+"%";
+  $$("details.sec").forEach(d=>{const qs=vis.filter(q=>q.sec===d.dataset.sec&&q.t!=="text"),a=qs.filter(q=>isAns(q,A)).length,c=$(".cnt",d);if(c){c.textContent=a+"/"+qs.length;c.classList.toggle("done",a===qs.length)}});
+}
+
+/* ---------- results ---------- */
+const TCOL = {rec:"var(--rec)",poss:"var(--poss)",weak:"var(--weak)",block:"var(--block)"};
+const SEVL = {urgent:"Urgent",check:"Check",note:"Note"};
+function refsHTML(list){
+  const seen=new Set();
+  return (list||[]).filter(r=>r&&!seen.has(r.url+r.short)&&seen.add(r.url+r.short)).map(r=>`<a class="ref ${r.k}" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" title="${esc(r.title||r.short)}${r.cite?" · "+esc(r.cite):""}"><i>${KIND[r.k]||""}</i>${esc(r.short)}</a>`).join("");
+}
+const trunc = (s,n) => s.length>n?s.slice(0,n-1)+"…":s;
+function subline(it){
+  if(it.r.blockMsg)return trunc(it.r.blockMsg,96);
+  const x=it.r.why[0]||it.r.risks[0]||it.p.blurb;return trunc(x,96);
+}
+function mapSVG(items){
+  const W=880,rowH=60,cardX=250,cardW=610;let y=14;const rows=[];
+  TIERS.forEach(([t,lab])=>{const arr=items.filter(i=>i.tier===t);if(!arr.length)return;rows.push({band:lab,t,y});y+=24;arr.forEach(i=>{rows.push({it:i,t,top:y});y+=rowH});y+=8});
+  const H=Math.max(y+4,170),hy=H/2;
+  let s=`<svg id="map" viewBox="0 0 ${W} ${H}" role="group" aria-label="Routes from the client to each pathway, ordered by recommendation">`;
+  rows.forEach(r=>{
+    if(r.band){s+=`<text class="band-label" x="${cardX}" y="${r.y+12}" fill="${TCOL[r.t]}" style="fill:${TCOL[r.t]}">${esc(r.band)}</text>`;return}
+    const cy=r.top+(rowH-10)/2,t=r.t,sw={rec:5,poss:3,weak:1.8,block:1.6}[t];
+    s+=`<path class="route" data-t="${t}" d="M96,${hy} C176,${hy} 176,${cy} ${cardX},${cy}" stroke="${TCOL[t]}" stroke-width="${sw}" ${t==="block"?'stroke-dasharray="5 6" opacity=".75"':""} ${t==="weak"?'opacity=".85"':""}/>`;
+    if(t==="block")s+=`<line x1="${cardX-26}" y1="${cy-9}" x2="${cardX-26}" y2="${cy+9}" stroke="${TCOL.block}" stroke-width="3.5" stroke-linecap="round"/>`;
+  });
+  s+=`<circle cx="62" cy="${hy}" r="34" fill="var(--accent)"/><text class="hub-t" x="62" y="${hy-2}" text-anchor="middle">Client</text><text class="hub-t" x="62" y="${hy+14}" text-anchor="middle" style="font-weight:500;font-size:11px">today</text>`;
+  rows.forEach(r=>{
+    if(!r.it)return;const it=r.it,t=r.t,sel=S.sel===it.p.id,h=rowH-10;
+    s+=`<g class="station ${sel?"sel":""}" role="button" tabindex="0" data-id="${it.p.id}" aria-pressed="${sel}" aria-label="${esc(it.p.name)}. ${TIERN[t]}. Fit ${it.score} of 100.">`+
+       `<title>${esc(it.p.name)}</title><rect class="card-bg" x="${cardX}" y="${r.top}" width="${cardW}" height="${h}" rx="6" stroke="${TCOL[t]}" ${t==="block"?'stroke-dasharray="5 4"':""}/>`+
+       `<rect x="${cardX}" y="${r.top}" width="7" height="${h}" rx="3" fill="${TCOL[t]}"/>`+
+       `<text class="st-name" x="${cardX+22}" y="${r.top+22}">${esc(trunc(it.p.name,62))}</text>`+
+       `<text class="st-sub" x="${cardX+22}" y="${r.top+40}">${esc(subline(it))}</text>`+
+       `<text class="st-fit" x="${cardX+cardW-14}" y="${r.top+22}" text-anchor="end" fill="${TCOL[t]}" style="fill:${TCOL[t]}">${t==="block"?"Blocked":"Fit "+it.score}</text>`+
+       `</g>`;
+  });
+  return s+`</svg>`;
+}
+function listHTML(items){
+  let h="";
+  TIERS.forEach(([t,lab])=>{const arr=items.filter(i=>i.tier===t);if(!arr.length)return;h+=`<div class="tierhead" style="color:${TCOL[t]}">${esc(lab)}</div>`;
+    arr.forEach(i=>{h+=`<button type="button" class="lst ${t} ${S.sel===i.p.id?"sel":""}" data-id="${i.p.id}"><b>${esc(i.p.name)}</b><small>${t==="block"?"Blocked":"Fit "+i.score} · ${esc(GROUPS[i.p.group])}</small></button>`})});
+  return h;
+}
+const li = (title,arr) => arr&&arr.length?`<div><h3>${esc(title)}</h3><ul>${arr.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:"";
+function detailHTML(it){
+  const {p,r}=it,tc={rec:"t-rec",poss:"t-poss",weak:"t-weak",block:"t-block"}[it.tier];
+  return `<div class="card detail" id="detail"><div class="dhead"><h2>${esc(p.name)}</h2><span class="tierchip ${tc}">${TIERN[it.tier]}</span><span class="note-sm">${it.tier==="block"?"":"Fit "+it.score+" of 100 · "}${esc(GROUPS[p.group])}</span></div>
+  <p class="blurb">${esc(p.blurb)}</p>${r.blockMsg?`<div class="barrier">${esc(r.blockMsg)}</div>`:""}
+  <div class="dgrid">${li("Why it fits",r.why)}${li("Risks and barriers",r.risks)}${li("Still needed",r.need)}${li("Next steps",r.next)}${li("Watch for changes",r.watch)}</div>
+  <h3 style="margin-top:16px;font-family:var(--sans);font-size:15.5px;font-weight:700">Law and policy</h3><div class="refs">${refsHTML(p.refs)}</div></div>`;
+}
+const CHECKS = [["conflict","Conflict check done (Code, conflicts of interest)"],["agreement","Signed service agreement on file before work starts"],["joint","Joint retainer disclosure and consent signed, if more than one client"],["rep","Representative form (IMM 5476) signed for each client who needs one"],["consent","ATIP consent (IMM 5744) signed for each adult, if requesting file notes"],["idv","Identity verified, interpreter arranged if needed"],["cal","All deadlines entered in the dashboard calendar"]];
+function openQs(items){
+  const out=[];items.filter(i=>i.tier!=="block").slice(0,4).forEach(i=>i.r.need.forEach(n=>{if(!out.includes(n))out.push(n)}));
+  return out.slice(0,6);
+}
+function renderResults(){
+  const el=$("#results"),A=S.A,all=RES.paths;
+  if(!A.loc&&!A.goal&&!A.rel&&!A.status&&!A.decision){
+    el.innerHTML=`<div class="card empty"><h3>Start with where the client is and what they want</h3><p>Answer the questions on the left. Routes appear here, ranked from highly recommended to blocked, with the law and policy behind each one.</p></div>`;return}
+  const items=S.showBlocked?all:all.filter(i=>i.tier!=="block");
+  let sel=(S.selUser&&items.find(i=>i.p.id===S.sel))||items.find(i=>i.tier!=="block")||items[0];S.sel=sel?sel.p.id:null;
+  const sig=items.map(i=>i.p.id+i.tier).join("|"),animate=sig!==S.prevSig;S.prevSig=sig;
+  const lg=(c,w,d)=>`<span><svg viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="${c}" stroke-width="${w}" stroke-linecap="round" ${d?'stroke-dasharray="4 5"':""}/></svg>`;
+  let h=`<div class="card mapcard"><div class="maphead"><h2>Routes for this client</h2><span class="sp note-sm">${plural(items.length,"route")} · a guide, not a prediction</span></div>
+  <div class="legend">${lg("var(--rec)",5)}Highly recommended</span>${lg("var(--poss)",3)}Possible</span>${lg("var(--weak)",1.8)}Less recommended</span>${lg("var(--block)",1.6,1)}Blocked</span></div>
+  <div class="mapwrap">${items.length?(mqNarrow.matches?`<div style="padding:4px 10px 10px">${listHTML(items)}</div>`:mapSVG(items)):`<div class="empty"><h3>No routes match yet</h3><p>Add the goal and status to see routes.</p></div>`}</div>
+  <div class="mapfoot"><label><input type="checkbox" id="showBlocked" ${S.showBlocked?"checked":""}> Show blocked routes</label><span>Order reflects how well the answers meet each route’s legal requirements, less risk factors.</span></div></div>`;
+  h+=`<div class="cols">`;
+  if(RES.flags.length)h+=`<div class="card flags"><h2>Flags and deadlines</h2>${RES.flags.map(f=>`<div class="flag"><span class="sev ${f.sev}">${SEVL[f.sev]}</span><div><b>${esc(f.t)}</b><div class="why">${esc(f.why)}</div>${f.refs.length?`<div class="refs">${refsHTML(f.refs)}</div>`:""}</div></div>`).join("")}</div>`;
+  const oq=openQs(items);if(oq.length)h+=`<div class="card openq"><h2>Answer these to sharpen the ranking</h2><ul>${oq.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`;
+  if(sel)h+=detailHTML(sel);
+  h+=`<div class="card pc"><h2>Practice checks before you act</h2>${CHECKS.map(([k,l])=>`<label><input type="checkbox" data-check="${k}" ${S.checks[k]?"checked":""} ${READONLY?"disabled":""}><span>${esc(l)}</span></label>`).join("")}${CONFIG.clientAccountOpen?"":`<div class="warn">Client Account not open: take no retainers or advance payments.</div>`}</div></div>`;
+  const keep=document.activeElement&&el.contains(document.activeElement)?(document.activeElement.dataset.id||document.activeElement.id||null):null;
+  el.innerHTML=h;
+  if(animate&&!matchMedia("(prefers-reduced-motion:reduce)").matches)$$("#map .route",el).forEach((p,i)=>{if(p.dataset.t==="block")return;try{const L=p.getTotalLength();p.style.setProperty("--len",L);p.style.strokeDasharray=L;p.style.animationDelay=(i*35)+"ms";p.classList.add("drawn")}catch(e){}});
+  if(keep){const n=$(`[data-id="${keep}"]`,el)||document.getElementById(keep);if(n)try{n.focus({preventScroll:true})}catch(e){}}
+}
+function onResults(e){
+  const st=e.target.closest("[data-id]");
+  if(st&&(e.type==="click"||(e.type==="keydown"&&(e.key==="Enter"||e.key===" ")))){
+    if(e.type==="keydown")e.preventDefault();S.sel=st.dataset.id;S.selUser=true;renderResults();const d=$("#detail");if(d&&mqNarrow.matches)d.scrollIntoView({behavior:"smooth",block:"start"});return}
+  if(e.type==="change"){
+    if(e.target.id==="showBlocked"){S.showBlocked=e.target.checked;renderResults()}
+    else if(e.target.dataset.check){S.checks[e.target.dataset.check]=e.target.checked;notify()}
+  }
+}
+
+/* ---------- library ---------- */
+function usedIds(){const s=new Set();RES.paths.filter(i=>i.tier!=="block").slice(0,8).forEach(i=>i.p.refs.forEach(r=>{if(r&&r.id)s.add(r.id)}));RES.flags.forEach(f=>f.refs.forEach(r=>r&&r.id&&s.add(r.id)));return s}
+function renderAuth(){
+  const el=$("#view-auth"),used=usedIds(),q=S.aq.trim().toLowerCase();
+  const kinds=[["all","All"],["act","Acts"],["reg","Regulations"],["rules","Rules"],["pol","IRCC and provincial policy"],["case","Cases"],["college","College"]];
+  const list=AUTH.filter(a=>(S.afilter==="all"||a.k===S.afilter)&&(!q||(a.title+a.cite+a.note+a.short).toLowerCase().includes(q)));
+  const vl={checked:"Checked "+CONFIG.lawChecked,pattern:"Official link pattern",landing:"Landing page, confirm on arrival"};
+  el.innerHTML=`<div class="authbar"><input type="search" id="aq" placeholder="Search law and policy" value="${esc(S.aq)}" aria-label="Search law and policy"><div class="chips">${kinds.map(([k,l])=>`<label class="chip"><input type="radio" name="af" value="${k}" ${S.afilter===k?"checked":""}><span>${l}</span></label>`).join("")}</div></div>
+  <div class="card finder"><b>Open a section</b><select id="fAct" aria-label="Statute or regulation"><option value="irpa">IRPA</option><option value="irpr">IRPR</option><option value="cit">Citizenship Act</option></select><input id="fSec" inputmode="decimal" placeholder="e.g. 25.1" aria-label="Section number"><button class="btn primary" type="button" id="fGo">Open on Justice Laws</button><span class="note-sm">Opens the official page for that section.</span></div>
+  <p class="note-sm" style="margin:0 0 12px">Highlighted cards are used in the current assessment. “Checked” means the page was found on the official site on ${esc(CONFIG.lawChecked)}. IRCC program delivery instructions change often, so confirm before relying on them.</p>
+  <div class="agrid">${list.map(a=>`<article class="card acard ${used.has(a.id)?"used":""}"><h3>${esc(a.title)}</h3><div class="cite">${KIND[a.k]} · ${esc(a.cite)}</div><div class="note">${esc(a.note)}</div><div class="foot"><span class="vbadge ${a.v}">${vl[a.v]}</span><a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">Open source</a></div></article>`).join("")||`<p class="note-sm">Nothing matches that search.</p>`}</div>`;
+}
+function onAuth(e){
+  if(e.target.id==="aq"){S.aq=e.target.value;const p=e.target.selectionStart;renderAuth();const n=$("#aq");n.focus();try{n.setSelectionRange(p,p)}catch(x){}}
+  else if(e.target.name==="af"){S.afilter=e.target.value;renderAuth();const n=$(`input[name="af"][value="${S.afilter}"]`);if(n)n.focus()}
+  else if(e.target.id==="fGo"||(e.type==="click"&&e.target.closest("#fGo"))){
+    const s=($("#fSec").value||"").trim().replace(/[^0-9.]/g,"");if(!s){$("#fSec").focus();return}
+    const k=$("#fAct").value,u=k==="irpa"?JL+"acts/I-2.5/section-"+s+".html":k==="irpr"?JL+"regulations/SOR-2002-227/section-"+s+".html":JL+"acts/c-29/section-"+s+".html";
+    window.open(u,"_blank","noopener,noreferrer");
+  }
+}
+
+/* ---------- summary ---------- */
+function summaryData(){
+  const A=S.A,vis=visQ(A).filter(q=>q.t!=="text"&&isAns(q,A));
+  const facts=vis.map(q=>{const v=A[q.id];const val=Array.isArray(v)?v.map(x=>optLabel(q,x)).join("; "):q.t==="choice"?optLabel(q,v):q.t==="date"?fmtD(pd(v)):v;return [q.q,val]});
+  const refs=[];const seen=new Set();
+  RES.paths.filter(i=>i.tier!=="block").slice(0,6).forEach(i=>i.p.refs.forEach(r=>{if(r&&!seen.has(r.url+r.short)){seen.add(r.url+r.short);refs.push(r)}}));
+  RES.flags.forEach(f=>f.refs.forEach(r=>{if(r&&!seen.has(r.url+r.short)){seen.add(r.url+r.short);refs.push(r)}}));
+  return {facts,refs};
+}
+function renderSummary(){
+  const el=$("#view-summary"),{facts,refs}=summaryData();
+  const dt=fmtD(TODAY);
+  let h=`<div class="sumbar"><button class="btn" id="sCopy" type="button">Copy as text</button><button class="btn" id="sSave" type="button">Save file</button><button class="btn primary" id="sPrint" type="button">Print or save as PDF</button></div><article class="card doc">
+  <h1>Pathway assessment</h1><p class="small">${esc(CONFIG.practice)} · ${esc(dt)} · File ${esc(S.ref||"not set")} · Assessed by ${esc(S.assessor||"not set")}</p>`;
+  if(!facts.length)h+=`<p style="margin-top:14px">No answers yet.</p>`;
+  else{
+    h+=`<h2>Facts recorded</h2><table>${facts.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>`;
+    if(RES.flags.length)h+=`<h2>Flags and deadlines</h2><ul>${RES.flags.map(f=>`<li><b>${SEVL[f.sev]}: ${esc(f.t)}.</b> ${esc(f.why)}</li>`).join("")}</ul>`;
+    h+=`<h2>Routes</h2>`;
+    TIERS.forEach(([t,lab])=>{const arr=RES.paths.filter(i=>i.tier===t);if(!arr.length)return;h+=`<h3>${esc(lab)}</h3>`+arr.map(i=>`<p style="margin:6px 0 2px"><b>${esc(i.p.name)}</b> ${t==="block"?"":`<span class="small">(fit ${i.score} of 100)</span>`}</p><ul>${t==="block"?`<li>${esc(i.r.blockMsg)}</li>`:i.r.why.slice(0,2).map(x=>`<li>${esc(x)}</li>`).join("")}${i.r.risks.slice(0,2).map(x=>`<li><i>Risk:</i> ${esc(x)}</li>`).join("")}${i.r.next.slice(0,2).map(x=>`<li><i>Next:</i> ${esc(x)}</li>`).join("")}</ul>`).join("")});
+    const done=CHECKS.filter(([k])=>S.checks[k]).map(c=>c[1]),todo=CHECKS.filter(([k])=>!S.checks[k]).map(c=>c[1]);
+    h+=`<h2>Practice checks</h2><p class="small">Done: ${done.length?esc(done.join("; ")):"none yet"}.</p><p class="small">Outstanding: ${todo.length?esc(todo.join("; ")):"none"}.</p>`;
+    if(S.A.notes)h+=`<h2>Notes</h2><p style="white-space:pre-wrap;font-size:14px">${esc(S.A.notes)}</p>`;
+    h+=`<h2>Law and policy used</h2><ul>${refs.map(r=>`<li>${esc(r.title||r.short)}${r.cite?` <span class="small">(${esc(r.cite)})</span>`:""} <span class="small">${esc(r.url)}</span></li>`).join("")}</ul>`;
+  }
+  h+=`<p class="small" style="margin-top:20px">Decision support for a licensed consultant. It is not legal advice and does not predict an outcome. Law and links were last checked on ${esc(CONFIG.lawChecked)}. Confirm every authority, time limit and policy on the official source before advising or filing.</p></article>`;
+  el.innerHTML=h;
+}
+function summaryText(){
+  const {facts,refs}=summaryData();const L=[];
+  L.push("PATHWAY ASSESSMENT","File: "+(S.ref||"not set")+" | Assessed by: "+(S.assessor||"not set")+" | "+fmtD(TODAY),"");
+  L.push("FACTS");facts.forEach(([k,v])=>L.push("- "+k+": "+v));L.push("");
+  if(RES.flags.length){L.push("FLAGS AND DEADLINES");RES.flags.forEach(f=>L.push("- ["+SEVL[f.sev]+"] "+f.t+": "+f.why));L.push("")}
+  L.push("ROUTES");TIERS.forEach(([t,lab])=>{const arr=RES.paths.filter(i=>i.tier===t);if(!arr.length)return;L.push(lab.toUpperCase());arr.forEach(i=>{L.push("- "+i.p.name+(t==="block"?" (blocked: "+i.r.blockMsg+")":" (fit "+i.score+")"));i.r.why.slice(0,2).forEach(x=>L.push("    + "+x));i.r.risks.slice(0,2).forEach(x=>L.push("    ! "+x));i.r.next.slice(0,2).forEach(x=>L.push("    > "+x))});L.push("")});
+  L.push("LAW AND POLICY");refs.forEach(r=>L.push("- "+(r.title||r.short)+(r.cite?" ("+r.cite+")":"")+" "+r.url));
+  if(S.A.notes){L.push("","NOTES",S.A.notes)}
+  L.push("","Decision support only. Not legal advice. Law and links last checked "+CONFIG.lawChecked+". Confirm on the official source before advising or filing.");
+  return L.join("\n");
+}
+async function copyText(t,btn){
+  try{await navigator.clipboard.writeText(t)}catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(x){}ta.remove()}
+  if(btn){const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=o,1400)}
+}
+function onSummary(e){
+  const b=e.target.closest("button");if(!b)return;
+  if(b.id==="sCopy")copyText(summaryText(),b);
+  else if(b.id==="sSave")saveFile();
+  else if(b.id==="sPrint")window.print();
+}
+
+/* ---------- save, load, reset ---------- */
+function getState(){return {tool:"pathway-map",v:1,saved:new Date().toISOString(),ref:S.ref,assessor:S.assessor,answers:S.A,checks:S.checks}}
+function setState(st){
+  if(!st||typeof st!=="object"||st.tool!=="pathway-map")throw new Error("That file is not a Pathway map save file.");
+  const A={};const a=st.answers||{};
+  Q.forEach(q=>{const v=a[q.id];if(v===undefined||v===null||v==="")return;
+    if(q.t==="multi"&&Array.isArray(v)){const ok=v.filter(x=>q.o.some(o=>o[0]===x));if(ok.length)A[q.id]=ok}
+    else if(q.t==="choice"){if(q.o.some(o=>o[0]===v))A[q.id]=v}
+    else if(q.t==="date"&&/^\d{4}-\d{2}-\d{2}$/.test(v))A[q.id]=v;
+    else if(q.t==="number"&&/^\d{1,4}$/.test(String(v)))A[q.id]=String(v);
+    else if(q.t==="text")A[q.id]=String(v).slice(0,2000)});
+  S.A=A;S.selUser=false;S.checks={};CHECKS.forEach(([k])=>{if(st.checks&&st.checks[k])S.checks[k]=true});
+  S.ref=String(st.ref||"").slice(0,40);S.assessor=String(st.assessor||"").slice(0,60);
+  $("#clientRef").value=S.ref;$("#assessor").value=S.assessor;
+  prune();update({intake:true});
+}
+function saveFile(){
+  const blob=new Blob([JSON.stringify(getState(),null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  const d=new Date().toISOString().slice(0,10);a.download="pathway-"+((S.ref||"assessment").replace(/[^\w.-]+/g,"_"))+"-"+d+".json";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function resetAll(){
+  if(Object.keys(S.A).length&&!confirm("Clear every answer and start over? Save a file first if you need this assessment."))return;
+  S.A={};S.checks={};S.sel=null;S.selUser=false;S.ref="";S.assessor="";$("#clientRef").value="";$("#assessor").value="";update({intake:true});
+}
+
+/* ---------- parent dashboard bridge ---------- */
+let nt=null;
+function notify(){
+  if(!CONFIG.parentOrigin||window.parent===window)return;
+  clearTimeout(nt);nt=setTimeout(()=>{
+    const msg={type:"pathwaymap:update",answers:S.A,checks:S.checks,ranked:RES.paths.map(o=>({id:o.p.id,tier:o.tier,score:o.score})),flags:RES.flags.map(f=>({sev:f.sev,title:f.t}))};
+    if(CONFIG.sendLabelToParent)msg.ref=S.ref;
+    window.parent.postMessage(msg,CONFIG.parentOrigin);
+  },300);
+}
+window.addEventListener("message",e=>{
+  if(!CONFIG.parentOrigin||e.origin!==CONFIG.parentOrigin)return;
+  const d=e.data||{};
+  try{if(d.type==="pathwaymap:load")setState(d.state);else if(d.type==="pathwaymap:reset")resetAll()}catch(x){}
+});
+
+/* ---------- views and wiring ---------- */
+function setView(v){
+  S.view=v;
+  $$(".tab").forEach(t=>t.setAttribute("aria-selected",String(t.dataset.view===v)));
+  ["assess","auth","summary"].forEach(n=>$("#view-"+n).hidden=n!==v);
+  if(v==="auth")renderAuth();
+  if(v==="summary")renderSummary();
+  window.scrollTo({top:0});
+}
+function update(o={}){
+  prune();RES=evaluate(S.A);
+  if(o.intake)renderIntake();else refreshCounts();
+  renderResults();
+  if(S.view==="summary")renderSummary();
+  if(S.view==="auth")renderAuth();
+  notify();
+}
+function applyTheme(t){
+  const r=document.documentElement;
+  if(t==="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",t);
+  $("#btnTheme").textContent=t==="auto"?"Theme: auto":"Theme: "+t;
+}
+function init(){
+  const qs=new URLSearchParams(location.search);
+  if(qs.get("embed")==="1")document.body.classList.add("embed");
+  let theme=["light","dark"].includes(qs.get("theme"))?qs.get("theme"):"auto";applyTheme(theme);
+  $("#btnTheme").addEventListener("click",()=>{theme=theme==="auto"?"light":theme==="light"?"dark":"auto";applyTheme(theme)});
+  $("#disc").textContent="Decision support for licensed consultants. It is not legal advice and does not predict an outcome. Law and links were last checked on "+CONFIG.lawChecked+". Confirm every authority, time limit and policy on the official source before advising or filing. Items marked “verify” change often.";
+  const intake=$("#intake");
+  intake.addEventListener("change",onIntake);
+  intake.addEventListener("input",onIntake);
+  intake.addEventListener("click",e=>{if(e.target.matches("[data-clear]"))onIntake(e)});
+  intake.addEventListener("toggle",e=>{if(e.target.matches&&e.target.matches("details.sec"))S.open[e.target.dataset.sec]=e.target.open},true);
+  const res=$("#results");
+  res.addEventListener("click",onResults);res.addEventListener("keydown",onResults);res.addEventListener("change",onResults);
+  const auth=$("#view-auth");
+  auth.addEventListener("input",e=>{if(e.target.id==="aq")onAuth(e)});
+  auth.addEventListener("change",e=>{if(e.target.name==="af")onAuth(e)});
+  auth.addEventListener("click",e=>{if(e.target.closest("#fGo"))onAuth(e)});
+  auth.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="fSec")onAuth({target:{id:"fGo"},type:"click"})});
+  $("#view-summary").addEventListener("click",onSummary);
+  $$(".tab").forEach(t=>{t.addEventListener("click",()=>setView(t.dataset.view));
+    t.addEventListener("keydown",e=>{const tabs=$$(".tab"),i=tabs.indexOf(t);let n=null;if(e.key==="ArrowRight")n=tabs[(i+1)%tabs.length];if(e.key==="ArrowLeft")n=tabs[(i-1+tabs.length)%tabs.length];if(n){n.focus();setView(n.dataset.view)}})});
+  $("#clientRef").addEventListener("input",e=>{S.ref=e.target.value;notify()});
+  $("#assessor").addEventListener("input",e=>{S.assessor=e.target.value;notify()});
+  if(READONLY){intake.inert=true;["#btnLoad","#btnReset"].forEach(s=>$(s).hidden=true);$("#clientRef").readOnly=$("#assessor").readOnly=true}
+  $("#btnSave").addEventListener("click",saveFile);
+  $("#btnReset").addEventListener("click",resetAll);
+  $("#btnLoad").addEventListener("click",()=>$("#fileIn").click());
+  $("#fileIn").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{setState(JSON.parse(rd.result))}catch(x){alert(x.message||"Could not open that file.")}};rd.readAsText(f);e.target.value=""});
+  mqNarrow.addEventListener("change",()=>renderResults());
+  update({intake:true});
+}
+window.addEventListener("beforeprint",()=>renderSummary());
+window.PathwayMap={getState,setState,getResult:()=>({ranked:RES.paths.map(o=>({id:o.p.id,name:o.p.name,tier:o.tier,score:o.score})),flags:RES.flags}),reset:resetAll};
+init();
+</script>
+</body>
+</html>
