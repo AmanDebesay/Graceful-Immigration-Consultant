@@ -625,3 +625,4 @@ h3{font-size:18px;font-weight:600}
 @keyframes wksheet{from{transform:translateY(40px);opacity:0}}
 @media (max-width:640px){.wk{margin:0 8px 8px}.wk-body{--gut:46px}.wk-tip{display:none}.wk-nav h3{font-size:16px}.wk-scroll{max-height:480px}}
 .bk-card>.wk-pop{position:absolute}.bk-card>.wk-pop.sheet{position:fixed}
+.wk-join{display:inline-block;margin:4px 0 2px;background:#4B53BC;color:#fff!important;font-weight:700;border-radius:9px;padding:9px 16px;text-decoration:none!important}.wk-join:hover{background:#3D44A6}.wk-small{font-size:12px!important;color:#667085!important}

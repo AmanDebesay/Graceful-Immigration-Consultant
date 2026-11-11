@@ -229,12 +229,13 @@
     err.textContent = ''; btn.disabled = true; btn.textContent = 'Booking…';
     var svc = serviceFor(plan);
     api({ action: 'book', serviceId: svc.id, start: t.toISOString(), name: v('name'), email: v('email'), phone: v('phone'), notes: v('notes'), website: f.elements.website.value, consent: true, tz: MY_TZ })
-      .then(function () {
+      .then(function (res) {
         var key = svc.id; slots[key] = (slots[key] || []).filter(function (d) { return +d !== +t; });
         booked.push({ t: t, name: v('name') }); sel = null;
         var email = v('email'); draw();
         pop = document.createElement('div'); pop.className = 'wk-pop wk-done' + (innerWidth < 640 ? ' sheet' : '');
-        pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button><div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>You are booked!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + PLANS[plan].label + '</p><p>A confirmation with your Microsoft Teams link is on its way to <b>' + esc(email) + '</b>. We will also email your consultation agreement and payment link.</p>';
+        pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button><div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>You are booked!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + PLANS[plan].label + '</p><p>A confirmation with your Microsoft Teams link is on its way to <b>' + esc(email) + '</b>. We will also email your consultation agreement and payment link.</p>' +
+          (res && res.joinUrl ? '<a class="wk-join" href="' + esc(res.joinUrl) + '" target="_blank" rel="noopener">Your Microsoft Teams link</a><p class="wk-small">Save this link. Use it to join at the time of your consultation.</p>' : '');
         $('calendar').appendChild(pop);
         var ev2 = body.querySelector('.wk-ev:last-of-type'); if (ev2 && innerWidth >= 640) place(ev2);
         pop.querySelector('.wk-x').onclick = closePop;
