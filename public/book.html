@@ -196,8 +196,8 @@
 
     <div class="section-head center" style="margin:72px auto 0">
       <span class="eyebrow">Step 2</span>
-      <h2>Pick a time &amp; tell us about you</h2>
-      <p>Choose a time, then share your name, date of birth and what you'd like help with.</p>
+      <h2>Pick a time in the calendar</h2>
+      <p>Click any open time, add your name and email, and you're booked, just like setting up a meeting in Outlook.</p>
     </div>
     <div class="book-layout" id="bookLayout">
       <aside class="book-profile">
@@ -218,17 +218,13 @@
           <div class="bk-clock"><span class="bk-k"><svg class="ca-flag" viewBox="0 0 40 20" role="img" aria-label="Canada"><rect width="40" height="20" fill="#fff"/><rect width="10" height="20" fill="#D52B1E"/><rect x="30" width="10" height="20" fill="#D52B1E"/><path fill="#D52B1E" transform="translate(13 3) scale(.14)" d="M50 2l8 16 8-4-3 20 13-12 4 8 14-2-6 16 8 4-22 16 4 8-24-4v30h-8V68l-24 4 4-8L4 48l8-4-6-16 14 2 4-8 13 12-3-20 8 4z"/></svg> Alberta time</span><b id="chMtTime">--:--</b><small id="chMtDate">&nbsp;</small></div>
           <div class="bk-wx" id="chWx" aria-live="polite"><span class="bk-muted">Loading weather…</span></div>
         </div>
-        <div class="bk-body">
-          <div class="bk-cal">
-            <div class="ch-mhead">
-              <button type="button" class="ch-nav" id="chPrev" aria-label="Previous month">&lsaquo;</button>
-              <h3 id="chMonth">&nbsp;</h3>
-              <button type="button" class="ch-nav" id="chNext" aria-label="Next month">&rsaquo;</button>
-            </div>
-            <div class="ch-grid" id="chGrid"></div>
-            <div class="bk-legend"><span><i class="lg-open"></i>Open times</span><span><i class="lg-today"></i>Today</span><span><i class="lg-hol"></i>Holiday</span></div>
+        <div class="wk">
+          <div class="wk-bar">
+            <div class="wk-len" role="group" aria-label="Consultation length"><button type="button" data-plan="30">30 min · $30</button><button type="button" data-plan="60">1 hour · $60</button></div>
+            <div class="wk-nav"><button type="button" id="wkToday">Today</button><button type="button" id="wkPrev" aria-label="Previous">&lsaquo;</button><button type="button" id="wkNext" aria-label="Next">&rsaquo;</button><h3 id="wkRange">&nbsp;</h3></div>
+            <span class="wk-tip"><i></i>Open time · click to book</span>
           </div>
-          <div class="bk-side" id="bkSide" aria-live="polite"></div>
+          <div class="wk-body" id="wkBody" aria-live="polite"></div>
         </div>
         <div class="bk-hols"><span class="bk-k">Upcoming holidays</span><ul id="chHols"></ul></div>
       </div>

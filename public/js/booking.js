@@ -1,5 +1,5 @@
-// Booking page: the blue calendar shows the time, weather and Canadian holidays, and books consultations
-// through Microsoft Bookings (the "booking" function returns open times and creates the appointment).
+// Booking page: the time, weather and Canadian holidays, and an Outlook-style week calendar where clients click an
+// open time and book it in place, through Microsoft Bookings (the "booking" function returns open times and creates the appointment).
 (function () {
   var API = 'https://bmzhcprthrocbqluxpwa.supabase.co/functions/v1/booking';
   var KEY = 'sb_publishable_ZcaXkELPK820lTD41ffw2Q_iMTta3uT';
@@ -104,144 +104,176 @@
   }
   loadWx(49.69, -112.84, 'Southern Alberta');
 
-  // ── Booking ──
+  // ── Booking: an Outlook-style week calendar. Open times sit in the calendar; click one to book it right there. ──
   var plan = '30', services = null, setupError = null;
-  var view = new Date(today.getFullYear(), today.getMonth(), 1);
-  var slotCache = {}, openDays = {}, selDay = null, selSlot = null, loadToken = 0;
-  var side = $('bkSide');
+  var slots = {}, covered = {}, booked = [], anchor = null, sel = null, loading = false, firstJump = true;
+  var body = $('wkBody'), pop = null;
+  var HOUR = 56;
 
   function serviceFor(p) {
     if (!services) return null;
-    var want = PLANS[p].minutes;
-    return services.filter(function (s) { return s.minutes === want; })[0] || null;
+    return services.filter(function (s) { return s.minutes === PLANS[p].minutes; })[0] || null;
   }
-  function fallback(msg) {
-    return '<div class="bk-hint"><svg><use href="#i-clock"/></svg>' + msg + '<br><br><a href="' + BOOKINGS_PAGE + '" target="_blank" rel="noopener">Open our booking page</a> or call <a href="tel:+14039154230">(403) 915-4230</a>.</div>';
+  var addDays = function (d, n) { var x = new Date(d); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; };
+  var perView = function () { return innerWidth < 640 ? 1 : innerWidth < 980 ? 3 : 7; };
+  function viewStart() {
+    var n = perView();
+    if (n === 7) { var s = addDays(anchor, 0); s.setDate(s.getDate() - s.getDay()); return s; }
+    return addDays(anchor, 0);
   }
-  function hint() {
-    var svc = serviceFor(plan);
-    if (setupError) { side.innerHTML = fallback(esc(setupError)); return; }
-    if (services && !svc) { side.innerHTML = fallback('Online booking for the <b>' + PLANS[plan].short + '</b> consultation opens soon.'); return; }
-    side.innerHTML = '<div class="bk-hint"><svg><use href="#i-clock"/></svg><b>' + PLANS[plan].label + '</b><br>Pick a day with a gold dot to see open times.' +
-      (sameTz ? '' : '<br><small>Times are shown in your time zone.</small>') + '</div>';
-  }
+  var hm = function (d) { return d.getHours() + d.getMinutes() / 60; };
 
-  function render() {
-    $('chMonth').textContent = view.toLocaleDateString([], { month: 'long', year: 'numeric' });
-    var html = '';
-    for (var i = 0; i < 7; i++) html += '<span class="ch-wd">' + new Date(2023, 0, 1 + i).toLocaleDateString([], { weekday: 'narrow' }) + '</span>';
-    var lead = view.getDay(), days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
-    for (i = 0; i < lead; i++) html += '<span></span>';
-    for (var d = 1; d <= days; d++) {
-      var dt = new Date(view.getFullYear(), view.getMonth(), d), k = dkey(dt), h = holidayOn(dt), open = !!openDays[k], cls = ['ch-d'];
-      if (open) cls.push('open');
-      if (+dt === +today) cls.push('today');
-      if (h) cls.push('hol');
-      if (selDay === k) cls.push('sel');
-      var label = fmtDay(dt) + (h ? ', ' + h : '') + (open ? ', open times' : '');
-      html += '<button type="button" class="' + cls.join(' ') + '" data-k="' + k + '"' + (h ? ' title="' + esc(h) + '"' : '') + ' aria-label="' + esc(label) + '"' + (open ? '' : ' aria-disabled="true"') + '>' + d + '</button>';
+  // Open times come in 42-day windows, cached per consultation length.
+  function ensure(from) {
+    var svc = serviceFor(plan); if (!svc) return Promise.resolve();
+    var key = svc.id, have = covered[key] || [];
+    var start = from < today ? today : from, end = addDays(start, perView());
+    if (have.some(function (w) { return w[0] <= start && w[1] >= end; })) return Promise.resolve();
+    loading = true; draw();
+    var winFrom = addDays(start, -1);
+    return api({ action: 'slots', serviceId: svc.id, from: dkey(winFrom), days: 42 }).then(function (j) {
+      slots[key] = (slots[key] || []).concat(j.slots.map(function (s) { return new Date(s); }))
+        .filter(function (d, i, a) { return a.findIndex(function (x) { return +x === +d; }) === i; }).sort(function (a, b) { return a - b; });
+      (covered[key] = have).push([start, addDays(winFrom, 41)]);
+    }).catch(function (e) { setupError = e.message; }).then(function () { loading = false; });
+  }
+  function slotsIn(a, b) { var svc = serviceFor(plan); return ((svc && slots[svc.id]) || []).filter(function (d) { return d >= a && d < b; }); }
+
+  function draw() {
+    closePop();
+    var n = perView(), s = viewStart(), e = addDays(s, n), list = slotsIn(s, e), svc = serviceFor(plan);
+    var mins = PLANS[plan].minutes;
+    var lo = 8, hi = 18;
+    list.concat(booked.map(function (b) { return b.t; })).forEach(function (d) { lo = Math.min(lo, Math.floor(hm(d))); hi = Math.max(hi, Math.ceil(hm(d) + mins / 60)); });
+    hi = Math.min(hi, 24);
+    var last = addDays(e, -1);
+    $('wkRange').textContent = n === 1 ? fmtDay(s) : s.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' – ' +
+      (last.getMonth() === s.getMonth() ? last.getDate() : last.toLocaleDateString([], { month: 'short', day: 'numeric' })) + ', ' + last.getFullYear();
+    $('wkPrev').disabled = s <= today;
+    document.querySelectorAll('.wk-len button').forEach(function (b) { b.classList.toggle('on', b.dataset.plan === plan); });
+
+    var head = '<div class="wk-corner">' + (sameTz ? '' : '<small>Your time</small>') + '</div>', cols = '', gut = '';
+    for (var h = lo; h < hi; h++) gut += '<div class="wk-hr" style="top:' + (h - lo) * HOUR + 'px">' + new Date(2026, 0, 1, h).toLocaleTimeString([], { hour: 'numeric' }) + '</div>';
+    for (var i = 0; i < n; i++) {
+      var d = addDays(s, i), k = dkey(d), hol = holidayOn(d), isToday = +d === +today, past = d < today;
+      head += '<div class="wk-dh' + (isToday ? ' today' : '') + '"><span>' + d.toLocaleDateString([], { weekday: 'short' }) + '</span><b>' + d.getDate() + '</b>' + (hol ? '<em title="' + esc(hol) + '">' + esc(hol) + '</em>' : '') + '</div>';
+      var blocks = list.filter(function (t) { return dkey(t) === k; }).map(function (t) {
+        var top = (hm(t) - lo) * HOUR, ht = Math.min(mins, 30) / 60 * HOUR - 4, isSel = sel && +sel === +t;
+        return '<button type="button" class="wk-slot' + (isSel ? ' sel' : '') + '" data-t="' + t.toISOString() + '" style="top:' + top + 'px;height:' + ht + 'px" aria-label="Book ' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '">' + fmtTime(t) + '</button>';
+      }).join('') + booked.filter(function (b) { return dkey(b.t) === k; }).map(function (b) {
+        return '<div class="wk-ev" style="top:' + (hm(b.t) - lo) * HOUR + 'px;height:' + (mins / 60 * HOUR - 4) + 'px"><b>✓ Booked</b><span>' + fmtTime(b.t) + ' · ' + esc(b.name) + '</span></div>';
+      }).join('');
+      cols += '<div class="wk-col' + (isToday ? ' today' : '') + (hol ? ' hol' : '') + (past ? ' past' : '') + '" data-k="' + k + '">' + blocks + '</div>';
     }
-    $('chGrid').innerHTML = html;
-    $('chPrev').disabled = view <= new Date(today.getFullYear(), today.getMonth(), 1);
-    $('chNext').disabled = view >= new Date(today.getFullYear(), today.getMonth() + 3, 1);
+    var nowLine = '';
+    var nowD = new Date(); if (nowD >= s && nowD < e && hm(nowD) >= lo && hm(nowD) < hi) {
+      var ci = Math.floor((addDays(nowD, 0) - s) / 864e5);
+      nowLine = '<div class="wk-now" style="top:' + (hm(nowD) - lo) * HOUR + 'px;left:calc(var(--gut) + (100% - var(--gut)) / ' + n + ' * ' + ci + ');width:calc((100% - var(--gut)) / ' + n + ')"></div>';
+    }
+    var msg = '';
+    if (setupError) msg = '<div class="wk-msg"><b>Online booking is paused for a moment.</b><span>' + esc(setupError) + '</span><span>Please call <a href="tel:+14039154230">(403) 915-4230</a>, email <a href="mailto:info@gracefulimmigration.ca">info@gracefulimmigration.ca</a>, or use <a href="' + BOOKINGS_PAGE + '" target="_blank" rel="noopener">our Microsoft booking page</a>.</span></div>';
+    else if (services && !svc) msg = '<div class="wk-msg"><b>Online booking for the ' + PLANS[plan].short + ' consultation opens soon.</b><span>Please call <a href="tel:+14039154230">(403) 915-4230</a>.</span></div>';
+    else if (loading) msg = '<div class="wk-msg soft"><span class="wk-spin"></span><span>Finding open times…</span></div>';
+    else if (!list.length) {
+      var next = slotsIn(e, addDays(e, 400))[0];
+      msg = '<div class="wk-msg soft"><b>No open times ' + (n === 1 ? 'on this day' : 'in these days') + '.</b>' + (next ? '<button type="button" class="wk-next" data-go="' + next.toISOString() + '">Next available: ' + esc(fmtDay(next) + ', ' + fmtTime(next)) + ' ›</button>' : '<span>Please check the following weeks.</span>') + '</div>';
+    }
+    body.style.setProperty('--n', n);
+    body.innerHTML = '<div class="wk-head">' + head + '</div><div class="wk-scroll"><div class="wk-grid" style="height:' + (hi - lo) * HOUR + 'px"><div class="wk-gut">' + gut + '</div>' + cols +
+      '<div class="wk-lines">' + Array.apply(null, Array(hi - lo)).map(function (_, j) { return '<i style="top:' + j * HOUR + 'px"></i><i class="half" style="top:' + (j * HOUR + HOUR / 2) + 'px"></i>'; }).join('') + '</div>' + nowLine + '</div></div>' + msg;
+    var sc = body.querySelector('.wk-scroll'), firstSlot = body.querySelector('.wk-slot');
+    if (firstSlot) sc.scrollTop = Math.max(0, firstSlot.offsetTop - 40);
   }
 
-  function loadMonth() {
-    render();
-    var svc = serviceFor(plan);
-    if (!svc) { hint(); return; }
-    var from = view < today ? today : view, key = svc.id + dkey(view), my = ++loadToken;
-    var monthEnd = new Date(view.getFullYear(), view.getMonth() + 1, 0);
-    var days = Math.round((monthEnd - from) / 864e5) + 2;
-    var done = function (slots) {
-      if (my !== loadToken) return;
-      openDays = {};
-      slots.forEach(function (iso) { var d = new Date(iso), k = dkey(d); (openDays[k] = openDays[k] || []).push(d); });
-      $('chGrid').classList.remove('loading'); render();
-      if (selDay && openDays[selDay]) showTimes(selDay); else { selDay = null; hint(); }
-    };
-    if (slotCache[key]) return done(slotCache[key]);
-    $('chGrid').classList.add('loading');
-    side.innerHTML = '<div class="bk-hint"><svg><use href="#i-clock"/></svg>Finding open times…</div>';
-    api({ action: 'slots', serviceId: svc.id, from: dkey(new Date(from.getTime() - 864e5)), days: Math.min(days, 42) })
-      .then(function (j) { slotCache[key] = j.slots; done(j.slots); })
-      .catch(function (e) { if (my !== loadToken) return; $('chGrid').classList.remove('loading'); side.innerHTML = fallback(esc(e.message)); });
-  }
+  function go(date) { anchor = addDays(date, 0); ensure(viewStart()).then(draw); draw(); }
 
-  function showTimes(k) {
-    selDay = k; selSlot = null; render();
-    var list = openDays[k] || [];
-    var p = k.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]), h = holidayOn(d);
-    side.innerHTML = '<h4>' + fmtDay(d) + '</h4><p class="bk-sub">' + PLANS[plan].label + (h ? ' · ' + esc(h) : '') + (sameTz ? '' : ' · your time (Alberta time below)') + '</p>' +
-      (list.length ? '<div class="bk-times">' + list.map(function (t, i) {
-        return '<button type="button" class="bk-time" data-i="' + i + '">' + fmtTime(t) + (sameTz ? '' : '<small>' + fmtTime(t, MT) + ' Alberta</small>') + '</button>';
-      }).join('') + '</div>' : '<div class="bk-hint">No open times on this day. Please choose another day.</div>');
-  }
-
-  function showForm(t) {
-    selSlot = t;
-    var when = fmtDay(t) + ' at ' + fmtTime(t) + (sameTz ? '' : ' (' + fmtTime(t, MT) + ' Alberta time)');
-    side.innerHTML = '<div class="bk-pick"><span><b>' + esc(when) + '</b><br>' + PLANS[plan].label + '</span><button type="button" class="bk-back" id="bkBack">Change</button></div>' +
-      '<form class="bk-form" id="bkForm" novalidate>' +
-      '<label>Full name<input name="name" autocomplete="name" required maxlength="120"></label>' +
-      '<label>Email<input name="email" type="email" autocomplete="email" required maxlength="200"></label>' +
-      '<label>Phone (optional)<input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>' +
-      '<label>What would you like help with?<textarea name="notes" maxlength="1500" placeholder="For example: spousal sponsorship, work permit, refugee claim…"></textarea></label>' +
+  // ── The booking card, like a new meeting in Outlook ──
+  function closePop() { if (pop) { pop.remove(); pop = null; } if (sel) { var b = body.querySelector('.wk-slot.sel'); if (b) b.classList.remove('sel'); } }
+  function openPop(btn) {
+    var t = new Date(btn.dataset.t), end = new Date(+t + PLANS[plan].minutes * 6e4);
+    closePop(); sel = t; btn.classList.add('sel');
+    pop = document.createElement('div'); pop.className = 'wk-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Book this time');
+    pop.innerHTML = '<div class="wk-pop-h"><span class="wk-pop-bar"></span><div><b>' + PLANS[plan].label + '</b><small>with Aman Debesay, RCIC-IRB</small></div><button type="button" class="wk-x" aria-label="Close">×</button></div>' +
+      '<div class="wk-pop-when"><svg><use href="#i-clock"/></svg><span><b>' + esc(t.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })) + '</b><br>' + esc(fmtTime(t) + ' – ' + fmtTime(end)) + (sameTz ? '' : ' your time · ' + esc(fmtTime(t, MT)) + ' Alberta') + '</span></div>' +
+      '<div class="wk-pop-when"><svg><use href="#i-phone"/></svg><span>Microsoft Teams video call · link sent by email</span></div>' +
+      '<form class="wk-form" novalidate>' +
+      '<input name="name" autocomplete="name" maxlength="120" placeholder="Your full name" required aria-label="Full name">' +
+      '<input name="email" type="email" autocomplete="email" maxlength="200" placeholder="Email address" required aria-label="Email">' +
+      '<input name="phone" type="tel" autocomplete="tel" maxlength="40" placeholder="Phone (optional)" aria-label="Phone">' +
+      '<textarea name="notes" maxlength="1500" rows="2" placeholder="What would you like help with? (optional)" aria-label="What would you like help with"></textarea>' +
       '<input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">' +
-      '<label class="bk-check"><input type="checkbox" name="consent">I understand this is a $' + PLANS[plan].price + ' CAD consultation. I will receive a written consultation agreement and a secure payment link by email, and my appointment is confirmed once both are complete.</label>' +
-      '<p class="bk-err" id="bkErr" role="alert"></p>' +
-      '<button class="bk-go" type="submit">Confirm booking</button></form>';
-    $('bkBack').addEventListener('click', function () { showTimes(selDay); });
-    $('bkForm').addEventListener('submit', submit);
-    side.querySelector('input[name=name]').focus();
+      '<label class="wk-check"><input type="checkbox" name="consent"><span>I understand this is a $' + PLANS[plan].price + ' CAD consultation. I will receive a consultation agreement and a secure payment link by email; my time is confirmed once both are done.</span></label>' +
+      '<p class="wk-err" role="alert"></p>' +
+      '<div class="wk-pop-f"><button type="button" class="wk-cancel">Cancel</button><button type="submit" class="wk-book">Book this time</button></div></form>';
+    $('calendar').appendChild(pop);
+    place(btn);
+    pop.querySelector('.wk-x').onclick = pop.querySelector('.wk-cancel').onclick = function () { closePop(); sel = null; };
+    pop.querySelector('form').onsubmit = function (ev) { submit(ev, t); };
+    setTimeout(function () { pop && pop.querySelector('input[name=name]').focus({ preventScroll: true }); }, 30);
+  }
+  function place(btn) {
+    if (innerWidth < 640) { pop.classList.add('sheet'); return; }
+    var card = $('calendar').getBoundingClientRect(), r = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    var left = r.right - card.left + 10; if (left + w > card.width - 10) left = r.left - card.left - w - 10;
+    var top = Math.min(Math.max(r.top - card.top - 20, 10), card.height - h - 10);
+    pop.style.left = Math.max(10, left) + 'px'; pop.style.top = Math.max(10, top) + 'px';
   }
 
-  function submit(e) {
-    e.preventDefault();
-    var f = e.target, err = $('bkErr'), btn = f.querySelector('.bk-go');
+  function submit(ev, t) {
+    ev.preventDefault();
+    var f = ev.target, err = f.querySelector('.wk-err'), btn = f.querySelector('.wk-book');
     var v = function (n) { return f.elements[n].value.trim(); };
     if (v('name').length < 2) { err.textContent = 'Please enter your full name.'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) { err.textContent = 'Please enter a valid email address.'; return; }
     if (!f.elements.consent.checked) { err.textContent = 'Please tick the box to confirm.'; return; }
     err.textContent = ''; btn.disabled = true; btn.textContent = 'Booking…';
-    var svc = serviceFor(plan), t = selSlot;
-    api({ action: 'book', serviceId: svc.id, start: t.toISOString(), name: v('name'), email: v('email'), phone: v('phone'), notes: v('notes'),
-          website: f.elements.website.value, consent: true, tz: MY_TZ })
+    var svc = serviceFor(plan);
+    api({ action: 'book', serviceId: svc.id, start: t.toISOString(), name: v('name'), email: v('email'), phone: v('phone'), notes: v('notes'), website: f.elements.website.value, consent: true, tz: MY_TZ })
       .then(function () {
-        slotCache = {};
-        side.innerHTML = '<div class="bk-done"><div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>You are booked!</h4>' +
-          '<p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + PLANS[plan].label + '</p>' +
-          '<p>A confirmation with your Microsoft Teams link is on its way to <b>' + esc(v('email')) + '</b>. We will also email your consultation agreement and payment link.</p></div>';
+        var key = svc.id; slots[key] = (slots[key] || []).filter(function (d) { return +d !== +t; });
+        booked.push({ t: t, name: v('name') }); sel = null;
+        var email = v('email'); draw();
+        pop = document.createElement('div'); pop.className = 'wk-pop wk-done' + (innerWidth < 640 ? ' sheet' : '');
+        pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button><div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>You are booked!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + PLANS[plan].label + '</p><p>A confirmation with your Microsoft Teams link is on its way to <b>' + esc(email) + '</b>. We will also email your consultation agreement and payment link.</p>';
+        $('calendar').appendChild(pop);
+        var ev2 = body.querySelector('.wk-ev:last-of-type'); if (ev2 && innerWidth >= 640) place(ev2);
+        pop.querySelector('.wk-x').onclick = closePop;
       })
       .catch(function (er) {
-        btn.disabled = false; btn.textContent = 'Confirm booking'; err.textContent = er.message;
-        if (er.data && er.data.taken) { slotCache = {}; setTimeout(loadMonth, 1800); }
+        btn.disabled = false; btn.textContent = 'Book this time'; err.textContent = er.message;
+        if (er.data && er.data.taken) { var key = svc.id; covered[key] = []; slots[key] = []; setTimeout(function () { go(anchor); }, 1500); }
       });
   }
 
-  $('chGrid').addEventListener('click', function (e) {
-    var b = e.target.closest('.ch-d'); if (!b) return;
-    if (openDays[b.dataset.k]) { showTimes(b.dataset.k); return; }
-    var p = b.dataset.k.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]), h = holidayOn(d);
-    if (h) side.innerHTML = '<div class="bk-hint"><b>' + fmtDay(d) + '</b><br>' + esc(h) + ' (statutory holiday)</div>';
+  body.addEventListener('click', function (e) {
+    var b = e.target.closest('.wk-slot'); if (b) return openPop(b);
+    var n = e.target.closest('.wk-next'); if (n) return go(new Date(n.dataset.go));
   });
-  side.addEventListener('click', function (e) {
-    var b = e.target.closest('.bk-time'); if (b) showForm(openDays[selDay][+b.dataset.i]);
-  });
-  $('chPrev').addEventListener('click', function () { view.setMonth(view.getMonth() - 1); selDay = null; loadMonth(); });
-  $('chNext').addEventListener('click', function () { view.setMonth(view.getMonth() + 1); selDay = null; loadMonth(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && pop) { closePop(); sel = null; } });
+  document.addEventListener('mousedown', function (e) { if (pop && !pop.contains(e.target) && !e.target.closest('.wk-slot')) { closePop(); sel = null; } });
+  $('wkPrev').onclick = function () { go(addDays(viewStart(), -perView())); };
+  $('wkNext').onclick = function () { go(addDays(viewStart(), perView())); };
+  $('wkToday').onclick = function () { go(today); };
+  var lastN = perView(); addEventListener('resize', function () { if (perView() !== lastN) { lastN = perView(); draw(); } else if (pop && !pop.classList.contains('sheet')) { var b = body.querySelector('.wk-slot.sel'); if (b) place(b); } });
 
   function choosePlan(p, scroll) {
-    plan = p; selDay = null;
+    plan = p; sel = null;
     document.querySelectorAll('.price-card').forEach(function (b) { b.classList.toggle('active', b.dataset.plan === p); });
     $('bookSelected').textContent = PLANS[p].label;
     $('bookLength').textContent = PLANS[p].short;
     if (scroll) $('bookLayout').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    loadMonth();
+    ensure(viewStart()).then(function () {
+      // First visit: jump to the week with the next open time
+      var all = slotsIn(today, addDays(today, 60));
+      if (firstJump && all.length && !slotsIn(viewStart(), addDays(viewStart(), perView())).length) { anchor = addDays(all[0], 0); firstJump = false; return ensure(viewStart()); }
+      firstJump = false;
+    }).then(draw);
+    draw();
   }
   document.querySelectorAll('.price-card').forEach(function (b) { b.addEventListener('click', function () { choosePlan(b.dataset.plan, true); }); });
+  document.querySelectorAll('.wk-len button').forEach(function (b) { b.addEventListener('click', function () { choosePlan(b.dataset.plan, false); }); });
 
-  render(); hint();
+  anchor = addDays(today, 0); draw();
   var pre = new URLSearchParams(location.search).get('length');
   api({ action: 'services' })
     .then(function (j) { services = j.services || []; })
