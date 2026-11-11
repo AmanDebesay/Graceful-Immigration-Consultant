@@ -1,6 +1,6 @@
 // One pathway assessment: the Pathway map tool in a frame, saving its answers to the client file as you work.
 import { db, state, can, esc, icon, fmtDateTime, staffName, confirmBox, toast, fail, modal } from '../core.js';
-import { PA_BADGE } from './pathways.js';
+import { PA_BADGE, draftSummary } from './pathways.js';
 
 export async function render(el, [id], { setTitle }) {
   const [{ data: a, error }, { data: org }] = await Promise.all([
@@ -20,8 +20,16 @@ export async function render(el, [id], { setTitle }) {
       ${editable && can('pathway.finalize') ? `<button class="btn btn-primary" id="fin">${icon('check')} Mark final</button>` : ''}
       ${final && can('pathway.finalize') ? `<button class="btn" id="reopen">Reopen</button>` : ''}
       ${editable ? `<button class="btn btn-danger" id="del" aria-label="Delete draft">${icon('trash')}</button>` : ''}</div>
-    ${a.agreements?.status === 'signed' ? '' : `<div class="alert err">${a.agreements ? `Agreement ${esc(a.agreements.number)} is not signed yet.` : 'Not linked to a signed agreement.'} Give advice only after the client signs the Initial Consultation Agreement.</div>`}
+    ${a.agreements?.status === 'signed' ? '' : `<div class="alert err">${a.agreements ? `Agreement ${esc(a.agreements.number)} is not signed yet.` : 'Not linked to a signed agreement.'} You can take the client's intake now; give advice only after the client signs the Initial Consultation Agreement.</div>`}
     ${editable && !can('pathway.finalize') ? '<div class="alert info">When you finish, ask the RCIC to review the assessment and mark it final.</div>' : ''}
+    <div class="card" id="sumBox" style="margin-bottom:12px"><div class="card-b" style="padding:14px 18px">
+      <div class="row" style="gap:10px;flex-wrap:wrap"><b style="font-family:var(--serif);font-size:17px;color:var(--navy)">${icon('award')} Recommended option</b>
+        <span id="sumTop" class="dk-muted">Answer the questions below and the summary drafts itself.</span><div class="grow"></div>
+        <button class="btn btn-sm" id="sumToggle" aria-expanded="false">Show summary</button>
+        <button class="btn btn-sm" id="sumCopy">${icon('file')} Copy</button>
+        <button class="btn btn-sm btn-gold" id="sumUse">Use in client summary</button></div>
+      <div id="sumBody" hidden style="margin-top:12px;white-space:pre-wrap;line-height:1.55;font-size:14px;max-height:340px;overflow:auto;border-top:1px solid var(--line,#E4E7EC);padding-top:12px"></div>
+      <small class="dk-muted" style="display:block;margin-top:8px">Drafted automatically from the results. Read it and edit it before giving it to the client.</small></div></div>
     <iframe id="pm" title="Pathway map" style="width:100%;height:calc(100vh - 190px);min-height:620px;border:1px solid var(--line,#E4E7EC);border-radius:12px;background:#fff"></iframe>
     <p style="color:var(--muted);font-size:12px;margin-top:8px">Decision support for the RCIC, not legal advice. Confirm every authority, time limit and policy on the official source before advising or filing.</p>`;
 
@@ -29,6 +37,16 @@ export async function render(el, [id], { setTitle }) {
   let tool = null, saved = '', timer = null, saving = null;
   let cs = a.result?.client_summary || {}; // what goes on the client's copy (names, message, sections)
   const fileNo = a.cases?.case_number || a.number;
+  const firstName = () => cs.first_name || (a.contacts?.full_name || '').trim().split(/\s+/)[0] || '';
+  let draft = a.result?.auto_summary || '', sumT = null;
+  const TIER = { rec: 'Highly recommended', poss: 'Possible' };
+  function refreshSum() {
+    if (!tool) return;
+    const r = tool.getResult(), top = r.ranked.find((x) => x.tier === 'rec') || r.ranked.find((x) => x.tier === 'poss');
+    draft = draftSummary(r, firstName(), tool.getFacts());
+    el.querySelector('#sumTop').innerHTML = !r.ranked.length ? 'Answer the questions below and the summary drafts itself.' : top ?`<b>${esc(top.name)}</b> · <span class="badge ${top.tier === 'rec' ? 'b-GREEN' : 'b-gold'}">${TIER[top.tier]}</span>` : 'No open option yet. Keep answering, or check the blocked routes.';
+    el.querySelector('#sumBody').textContent = draft;
+  }
   const sig = () => { const s = tool.getState(); return JSON.stringify([s.answers, s.checks, s.assessor]); };
 
   frame.onload = () => {
@@ -38,6 +56,7 @@ export async function render(el, [id], { setTitle }) {
       assessor: a.assessor || (editable ? state.profile.full_name : ''), answers: a.answers, checks: a.checks,
       client: { name: a.contacts?.full_name || '', dob: a.contacts?.date_of_birth || '', email: a.contacts?.email || '', file: fileNo } });
     saved = JSON.stringify([a.answers, a.checks, a.assessor || '']);
+    refreshSum();
     if (editable && sig() !== saved) schedule();
   };
   frame.src = `tools/pathway-map.html?embed=1&theme=light&ca=${org?.client_account_open ? 1 : 0}${editable ? '' : '&ro=1'}`;
@@ -49,7 +68,7 @@ export async function render(el, [id], { setTitle }) {
     const top = r.ranked.find((x) => x.tier !== 'block');
     stateEl.textContent = 'Saving…';
     const { error: e } = await db.from('pathway_assessments').update({ answers: s.answers, checks: s.checks, assessor: s.assessor || null,
-      result: { ranked: r.ranked, flags: r.flags.map((f) => ({ sev: f.sev, title: f.t, why: f.why })), facts: tool.getFacts(), client_summary: cs },
+      result: { ranked: r.ranked, flags: r.flags.map((f) => ({ sev: f.sev, title: f.t, why: f.why })), facts: tool.getFacts(), client_summary: cs, auto_summary: draft },
       top_route: top ? top.name : null, urgent_flags: r.flags.filter((f) => f.sev === 'urgent').length }).eq('id', id);
     if (e) { stateEl.textContent = 'Not saved'; return fail(e); }
     saved = now;
@@ -62,6 +81,7 @@ export async function render(el, [id], { setTitle }) {
   const onMsg = (e) => {
     if (!el.isConnected) { window.removeEventListener('message', onMsg); window.removeEventListener('hashchange', onLeave); return; }
     if (e.source !== frame.contentWindow || e.origin !== location.origin || e.data?.type !== 'pathwaymap:update') return;
+    clearTimeout(sumT); sumT = setTimeout(refreshSum, 300);
     if (editable && tool && sig() !== saved) schedule();
   };
   const onLeave = () => { if (timer) flush(); window.removeEventListener('message', onMsg); window.removeEventListener('hashchange', onLeave); };
@@ -74,6 +94,12 @@ export async function render(el, [id], { setTitle }) {
     frame.contentWindow.print(); // the tool prints its summary page
   };
   el.querySelector('#client').onclick = () => clientSummary().catch(fail);
+  el.querySelector('#sumToggle').onclick = (e) => {
+    const b = el.querySelector('#sumBody'); b.hidden = !b.hidden;
+    e.currentTarget.textContent = b.hidden ? 'Show summary' : 'Hide summary'; e.currentTarget.setAttribute('aria-expanded', String(!b.hidden));
+  };
+  el.querySelector('#sumCopy').onclick = async () => { refreshSum(); try { await navigator.clipboard.writeText(draft); toast('Summary copied'); } catch { fail(new Error('Copy did not work. Select the text and copy it.')); } };
+  el.querySelector('#sumUse').onclick = () => { refreshSum(); clientSummary(draft).catch(fail); };
   el.querySelector('#fin')?.addEventListener('click', async () => {
     if (!(await confirmBox('Mark final', 'Mark this assessment final? It becomes part of the client file and is locked. You can reopen it later if something changes.', 'Mark final'))) return;
     await (saving || flush());
@@ -87,8 +113,10 @@ export async function render(el, [id], { setTitle }) {
     toast('Assessment reopened'); render(el, [id], { setTitle });
   });
   // Client copy: company letterhead, the client's details from the file, the options in plain language, and an acknowledgement to sign.
-  async function clientSummary() {
+  async function clientSummary(useDraft) {
     if (!tool) return;
+    refreshSum();
+    const note = useDraft || cs.note || draft;
     const name = (a.contacts?.full_name || '').trim().split(/\s+/);
     const first = cs.first_name ?? name.slice(0, -1).join(' ') ?? '', last = cs.last_name ?? (name.length > 1 ? name[name.length - 1] : '');
     const lock = !editable;
@@ -99,9 +127,10 @@ export async function render(el, [id], { setTitle }) {
           <div class="field"><label>Email</label><input class="input" id="se" value="${esc(a.contacts?.email || '')}" disabled title="From the client's file"></div></div>
         <div class="row-2"><div class="field"><label>File number</label><input class="input" value="${esc(fileNo)}" disabled></div><div class="field"><label>Agreement</label><input class="input" value="${esc(a.agreements?.number || 'Not linked')}" disabled></div></div>
         <small class="dk-muted" style="display:block;margin:-4px 0 12px">Date of birth and email come from the <a href="#/contacts/${a.contact_id}">client's file</a>. Edit them there if they are missing or wrong.</small>
-        <div class="field"><label>Message to the client (optional)</label><textarea class="input" id="sn" rows="5" placeholder="e.g. Based on our consultation, I recommend we start with the spousal sponsorship. Please gather the documents listed under next steps and book a follow-up.">${esc(cs.note || '')}</textarea></div>
+        <div class="field"><div class="row" style="justify-content:space-between"><label>Message to the client <span class="dk-muted">(drafted from the results; edit freely)</span></label><button type="button" class="btn btn-sm" id="redraft">Redraft from results</button></div><textarea class="input" id="sn" rows="12" placeholder="e.g. Based on our consultation, I recommend we start with the spousal sponsorship. Please gather the documents listed under next steps and book a follow-up.">${esc(note)}</textarea></div>
         <label class="row" style="gap:8px;margin-bottom:6px"><input type="checkbox" id="sfa" ${cs.show_facts === false ? '' : 'checked'}> Include “What you told us” (the client's answers)</label>
         <label class="row" style="gap:8px"><input type="checkbox" id="sbl" ${cs.show_blocked === false ? '' : 'checked'}> Include options that are not available at this time</label>`,
+      onOpen: (m) => { m.querySelector('#redraft').onclick = () => { m.querySelector('#sn').value = draftSummary(tool.getResult(), m.querySelector('#sf').value.trim() || firstName(), tool.getFacts()); }; },
       actions: [{ label: 'Cancel' }, { label: 'Preview & print', cls: 'btn-gold', onClick: async (m) => {
         const v = (q) => m.querySelector(q).value.trim();
         const next = { first_name: v('#sf'), last_name: v('#sl'), note: v('#sn'), show_facts: m.querySelector('#sfa').checked, show_blocked: m.querySelector('#sbl').checked };

@@ -16,6 +16,7 @@ export async function render(el) {
       <div class="grow"></div>
       <button class="btn" id="dl">${icon('file')} Download</button>
       <a class="btn" href="../public/assessment.html" target="_blank" rel="noopener">${icon('external')} Public form</a>
+      ${can('pathway.view') ? `<a class="btn" href="#/pathways">${icon('route')} Pathway assessments</a>` : ''}
       ${can('intake.view') ? `<a class="btn btn-primary" href="#/assessments/new">${icon('plus')} New assessment</a>` : ''}
     </div>
     <div class="card"><div class="table-wrap" id="list"></div></div>`;
