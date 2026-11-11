@@ -2,14 +2,14 @@
 // Bookings adds the meeting to the Outlook calendar, creates the Teams link and emails the client.
 // Actions: services | slots { serviceId, from, days } | book { serviceId, start, name, email, phone, notes, tz, consent }.
 import { adminClient, corsHeaders, json, rateLimit, sha256 } from "../_shared/common.ts";
-import { bookings, HUB, notifyTeams } from "../_shared/m365.ts";
+import { bookings, graph, HUB, notifyTeams } from "../_shared/m365.ts";
 
 const TZ = "America/Edmonton";
 const DAY = 864e5;
 // Safety net: never offer times outside 7 am – 9 pm Alberta time, whatever Bookings reports.
 const EARLIEST_HOUR = 7, LATEST_END_HOUR = 21;
 const albertaHour = (t: number) => { const p = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(t)).split(":"); return +p[0] + +p[1] / 60; };
-const PROBE_HASH = "04ddbf5c9f6397165cd28bb526190a512983af86b8c13a3e58b780b2779bf847";
+const PROBE_HASH = "33d070785135b5738288d744102834b148d6e3a1dea92993f0d65330bffa05a0";
 
 /** ISO 8601 duration (PT30M, PT1H30M, P1D) in milliseconds. */
 function ms(iso?: string | null): number {
@@ -38,6 +38,58 @@ function dt(x: { dateTime: string; timeZone?: string }): number {
   const tz = x.timeZone ?? "UTC", s = x.dateTime.replace(/\.\d+$/, "");
   if (/^(utc|gmt)$|\(UTC\)|Coordinated Universal/i.test(tz) || /[zZ]|[+-]\d\d:\d\d$/.test(s)) return Date.parse(/[zZ]|[+-]\d\d:\d\d$/.test(s) ? s : s + "Z");
   try { return zoned(s.slice(0, 10), s.slice(11, 16), tz); } catch { return Date.parse(s + "Z"); }
+}
+
+// ── Outlook calendar booking: used when Microsoft Bookings refuses access. Open times are working hours in the
+// RCIC's Outlook calendar, minus anything marked busy; a booking is a Teams meeting in that calendar with the client invited.
+const CAL_USER = Deno.env.get("BOOKING_CALENDAR") ?? "aman.debesay@gracefulimmigration.ca";
+const HOURS: Record<number, [number, number]> = { 1: [9, 17], 2: [9, 17], 3: [9, 17], 4: [9, 17], 5: [9, 17] }; // Mon–Fri, Alberta time
+const LEAD = 12 * 36e5, AHEAD = 60 * DAY, STEP = 30, AFTER = 15 * 60000;
+const CAL_SERVICES = [30, 60].map((m) => ({ id: `cal-${m}`, name: m === 30 ? "30-Minute Consultation" : "1-Hour Consultation", minutes: m, price: m, description: "",
+  staff: [], pre: 0, post: AFTER, policy: null }));
+function statHolidays(y: number) {
+  const nthMon = (m: number, n: number) => { const d = new Date(Date.UTC(y, m, 1)); return 1 + (8 - d.getUTCDay()) % 7 + (n - 1) * 7; };
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3),
+    h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, mm = Math.floor((a + 11 * h + 22 * l) / 451);
+  const gf = new Date(Date.UTC(y, Math.floor((h + l - 7 * mm + 114) / 31) - 1, ((h + l - 7 * mm + 114) % 31) + 1) - 2 * DAY);
+  let vic = 24; while (new Date(Date.UTC(y, 4, vic)).getUTCDay() !== 1) vic--;
+  const p = (m: number, dd: number) => `${y}-${String(m + 1).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+  return new Set([p(0, 1), p(1, nthMon(1, 3)), gf.toISOString().slice(0, 10), p(4, vic), p(6, 1), p(7, nthMon(7, 1)), p(8, nthMon(8, 1)), p(8, 30), p(9, nthMon(9, 2)), p(10, 11), p(11, 25), p(11, 26)]);
+}
+async function calSlots(minutes: number, from: string, to: string) {
+  const now = Date.now(), startT = Math.max(zoned(from, "00:00"), now), endT = zoned(addDays(to, 1), "00:00");
+  if (endT <= startT) return [];
+  // Times are exchanged with Outlook in UTC only, so a time-zone name can never be read with different rules
+  // (Alberta now stays on UTC-6 all year; older systems still assume a November change).
+  const d = await graph(`/users/${encodeURIComponent(CAL_USER)}/calendarView?startDateTime=${encodeURIComponent(new Date(startT - DAY).toISOString())}&endDateTime=${encodeURIComponent(new Date(endT + DAY).toISOString())}&$top=500&$select=start,end,showAs,isCancelled,isAllDay`,
+    { headers: { Prefer: 'outlook.timezone="UTC"' } });
+  const utc = (x: any) => Date.parse(String(x.dateTime).replace(/\.\d+$/, "") + "Z");
+  const busy = ((d?.value ?? []) as any[]).filter((e) => !e.isCancelled && e.showAs !== "free")
+    .map((e) => e.isAllDay ? { s: zoned(String(e.start.dateTime).slice(0, 10), "00:00"), e: zoned(String(e.end.dateTime).slice(0, 10), "00:00") } : { s: utc(e.start), e: utc(e.end) });
+  const out: { t: number; staff: string }[] = [];
+  for (let day = from; day <= to; day = addDays(day, 1)) {
+    const hours = HOURS[new Date(day + "T12:00:00Z").getUTCDay()];
+    if (!hours || statHolidays(+day.slice(0, 4)).has(day)) continue;
+    for (let m = hours[0] * 60; m + minutes <= hours[1] * 60; m += STEP) {
+      const t = zoned(day, `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
+      if (t < now + LEAD || t > now + AHEAD || t < startT) continue;
+      const end = t + minutes * 60000;
+      if (!busy.some((x) => x.s < end + AFTER && t - AFTER < x.e)) out.push({ t, staff: CAL_USER });
+    }
+  }
+  return out;
+}
+// Bookings is tried first; if Microsoft refuses access, use the Outlook calendar for the next 10 minutes before trying again.
+let calendarUntil = 0;
+async function catalog(): Promise<{ list: Svc[]; cal: boolean }> {
+  if (Date.now() < calendarUntil) return { list: CAL_SERVICES, cal: true };
+  try { return { list: await publicServices(), cal: false }; }
+  catch (e) {
+    if (!/permission|Unauthorized|Forbidden|denied|: (401|403)$/i.test(String(e))) throw e;
+    console.warn("booking: Bookings refused access, using the Outlook calendar", String(e));
+    calendarUntil = Date.now() + 10 * 60000;
+    return { list: CAL_SERVICES, cal: true };
+  }
 }
 
 type Svc = { id: string; name: string; minutes: number; price: number | null; description: string; staff: string[]; pre: number; post: number; policy: any };
@@ -129,16 +181,18 @@ Deno.serve(async (req) => {
       return json(req, out);
     }
 
-    if (body.action === "services") return json(req, { services: (await publicServices()).map(({ id, name, minutes, price, description }) => ({ id, name, minutes, price, description })) });
+    const cat = await catalog();
+    if (body.action === "services") return json(req, { services: cat.list.map(({ id, name, minutes, price, description }) => ({ id, name, minutes, price, description })) });
 
-    const service = (await publicServices()).find((s) => s.id === String(body.serviceId ?? ""));
+    const service = cat.list.find((s) => s.id === String(body.serviceId ?? ""));
+    const open = (from: string, to: string) => cat.cal ? calSlots(service!.minutes, from, to) : openSlots(service!, from, to);
 
     if (body.action === "slots") {
       if (!service) return json(req, { error: "Unknown service" }, 400);
       if (!(await rateLimit(req, admin, "booking-slots", 120, 10)).allowed) return json(req, { error: "Too many requests. Please wait a moment." }, 429);
       const from = /^\d{4}-\d{2}-\d{2}$/.test(String(body.from)) ? String(body.from) : localDate(Date.now());
       const days = Math.min(Math.max(Number(body.days) || 31, 1), 42);
-      const slots = await openSlots(service, from, addDays(from, days - 1));
+      const slots = await open(from, addDays(from, days - 1));
       return json(req, { tz: TZ, minutes: service.minutes, slots: slots.map((s) => new Date(s.t).toISOString()) });
     }
 
@@ -157,19 +211,23 @@ Deno.serve(async (req) => {
       if (!rl.allowed) return json(req, { error: "Too many booking attempts. Please call (403) 915-4230." }, 429);
 
       const day = localDate(start);
-      const slot = (await openSlots(service, addDays(day, -1), addDays(day, 1))).find((s) => s.t === start);
+      const slot = (await open(addDays(day, -1), addDays(day, 1))).find((s) => s.t === start);
       if (!slot) return json(req, { error: "Sorry, that time was just taken. Please choose another time.", taken: true }, 409);
 
       const end = start + service.minutes * 60000;
       const when = (t: number) => ({ dateTime: new Date(t).toISOString().slice(0, 19), timeZone: "UTC" });
-      const appt = await bookings("/appointments", { method: "POST", body: JSON.stringify({
+      const appt = cat.cal ? await graph(`/users/${encodeURIComponent(CAL_USER)}/events`, { method: "POST", body: JSON.stringify({
+        subject: `${service.name}: ${name}`, start: when(start), end: when(end), showAs: "busy", isReminderOn: true, reminderMinutesBeforeStart: 15,
+        isOnlineMeeting: true, onlineMeetingProvider: "teamsForBusiness", attendees: [{ emailAddress: { address: email, name }, type: "required" }],
+        body: { contentType: "Text", content: `Booked on the website.\nClient: ${name}\nEmail: ${email}${phone ? `\nPhone: ${phone}` : ""}\nTime zone: ${tz}${notes ? `\n\nWhat they need help with:\n${notes}` : ""}` },
+      }) }).then((ev: any) => ({ joinUrl: ev?.onlineMeeting?.joinUrl ?? null })) }) : await bookings("/appointments", { method: "POST", body: JSON.stringify({
         "@odata.type": "#microsoft.graph.bookingAppointment",
         serviceId: service.id, serviceName: service.name, staffMemberIds: [slot.staff],
         startDateTime: when(start), endDateTime: when(end), isLocationOnline: true, optOutOfCustomerEmail: false,
         customerTimeZone: tz, serviceNotes: notes ? `Client note: ${notes}` : "",
         customers: [{ "@odata.type": "#microsoft.graph.bookingCustomerInformation", name, emailAddress: email, phone, notes, timeZone: tz }],
       }) });
-      const joinUrl = appt?.joinWebUrl ?? appt?.anonymousJoinWebUrl ?? null;
+      const joinUrl = appt?.joinUrl ?? appt?.joinWebUrl ?? appt?.anonymousJoinWebUrl ?? null;
 
       const label = new Date(start).toLocaleString("en-CA", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
       await admin.from("appointments").insert({
