@@ -45,6 +45,7 @@ const NAV = [
   { path: '/resources', label: 'Legal & Research', icon: 'book', show: () => isStaff() },
   { group: 'Administration' },
   { path: '/team', label: 'Team & Access', icon: 'shield', show: () => can('staff.manage') },
+  { path: '/staff-agreements', label: 'Staff Agreements', icon: 'file', show: () => can('staff.manage') },
   { path: '/settings', label: 'Business Settings', icon: 'settings', show: () => can('settings.manage') },
   { path: '/audit', label: 'Audit Log', icon: 'history', show: () => can('audit.view') },
 ];
@@ -63,6 +64,8 @@ const ROUTES = [
   [/^\/assessments\/([\w-]+)$/, 'assessment', 'Assessment'],
   [/^\/portal$/, 'portal-inbox', 'Client Portal'],
   [/^\/pathways$/, 'pathways', 'Pathway Assessments'],
+  [/^\/staff-agreements$/, 'staff-agreements', 'Staff Agreements'],
+  [/^\/staff-agreements\/([\w-]+)$/, 'staff-agreements', 'Staff agreement'],
   [/^\/pathways\/([\w-]+)$/, 'pathway', 'Pathway assessment'],
   [/^\/pipeline$/, 'pipeline', 'Lead Pipeline'],
   [/^\/contacts$/, 'contacts', 'Contacts'],
