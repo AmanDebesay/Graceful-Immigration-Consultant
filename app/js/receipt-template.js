@@ -113,31 +113,49 @@ export function receiptEmailHtml(m, text) {
   <tr><td style="padding:8px 0 0;font-size:12.5px;color:#4A5468">&#128206; Your official receipt <b>${e(m.number)}.pdf</b> is attached. Please keep it for your records.</td></tr></table>`;
 }
 
-let lib;
-/** Renders the receipt to a Letter-size PDF. Returns { base64, blob }. */
+const libs = {};
+const loadLib = (src, get) => (libs[src] = libs[src] || new Promise((res, rej) => {
+  if (get()) return res(get());
+  const s = document.createElement('script'); s.src = src;
+  s.onload = () => (get() ? res(get()) : rej(new Error('The PDF maker did not load.')));
+  s.onerror = () => { delete libs[src]; rej(new Error('Could not load the PDF maker. Check your connection and try again.')); };
+  document.head.appendChild(s);
+}));
+
+/** Renders the receipt to a Letter-size PDF. Returns { base64, blob }.
+ *  The receipt is drawn inside its own 816px-wide frame, so the screen size, zoom and scrolling of the app can't shift or cut it. */
 export async function receiptPdf(html) {
-  lib = lib || new Promise((res, rej) => {
-    if (window.html2pdf) return res(window.html2pdf);
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    s.onload = () => res(window.html2pdf); s.onerror = () => { lib = null; rej(new Error('Could not load the PDF maker. Check your connection and try again.')); };
-    document.head.appendChild(s);
-  });
-  const html2pdf = await lib;
-  const host = document.createElement('div');
-  host.style.cssText = 'position:fixed;left:-10000px;top:0;width:816px;background:#fff';
-  host.innerHTML = html;
-  document.body.appendChild(host);
+  const [h2c, { jsPDF }] = await Promise.all([
+    loadLib('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => window.html2canvas),
+    loadLib('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => window.jspdf),
+  ]);
+  const W = 816, H = 1056;                                   // US Letter at 96 px per inch
+  const f = document.createElement('iframe');
+  f.setAttribute('aria-hidden', 'true');
+  f.style.cssText = `position:fixed;left:0;top:0;width:${W}px;height:${H}px;border:0;opacity:0;pointer-events:none;z-index:-1`;
+  document.body.appendChild(f);
   try {
-    await Promise.all([...host.querySelectorAll('img')].map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
-    const src = host.querySelector('.gr') || host;
-    const pages = Math.max(1, Math.ceil((src.scrollHeight - 8) / 1056));  // a receipt a few px over one page stays on one page
-    const worker = html2pdf().set({ margin: 0, image: { type: 'jpeg', quality: 0.92 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 816, width: 816, x: 0, y: 0, scrollX: 0, scrollY: 0 },
-      jsPDF: { unit: 'px', format: [816, 1056], orientation: 'portrait', hotfixes: ['px_scaling'] }, pagebreak: { mode: ['css'] } }).from(src).toPdf();
-    const pdf = await worker.get('pdf');
-    while (pdf.getNumberOfPages() > pages) pdf.deletePage(pdf.getNumberOfPages());
+    const d = f.contentDocument;
+    d.open(); d.write(`<!doctype html><html><head><meta charset="utf-8"><base href="${location.href}"></head><body style="margin:0;background:#fff">${html}</body></html>`); d.close();
+    await Promise.all([...d.images].map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
+    await d.fonts?.ready;
+    const el = d.querySelector('.gr') || d.body;
+    const tall = Math.max(H, el.scrollHeight);
+    f.style.height = tall + 'px';
+    const canvas = await h2c(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff', width: W, height: tall, windowWidth: W, windowHeight: tall, scrollX: 0, scrollY: 0, x: 0, y: 0 });
+    const pdf = new jsPDF({ unit: 'pt', format: 'letter', orientation: 'portrait', compress: true });
+    const pw = 612, ph = 792, k = canvas.width / W;          // canvas px per CSS px
+    const pages = Math.max(1, Math.ceil((tall - 8) / H));      // a few px over one page stays on one page
+    for (let n = 0; n < pages; n++) {
+      const slice = document.createElement('canvas');
+      slice.width = canvas.width; slice.height = Math.round(H * k);
+      const c = slice.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, slice.width, slice.height);
+      c.drawImage(canvas, 0, -Math.round(n * H * k));
+      if (n) pdf.addPage('letter', 'portrait');
+      pdf.addImage(slice.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pw, ph);
+    }
     const blob = pdf.output('blob');
     const base64 = await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(',')[1]); fr.readAsDataURL(blob); });
     return { base64, blob };
-  } finally { host.remove(); }
+  } finally { f.remove(); }
 }
