@@ -1,5 +1,5 @@
 import { db, state, can, esc, icon, fmtDate, rpc, toast, fail, confirmBox, modal } from '../core.js';
-import { money, num, invoiceBadge, accounts, itemsList, contactsList, contactOptions, orgSettings, receivePayment, METHOD_LABEL, clearFinCache } from '../fin.js';
+import { money, num, invoiceBadge, accounts, itemsList, contactsList, contactOptions, orgSettings, receivePayment, METHOD_LABEL, clearFinCache, payerModal } from '../fin.js';
 
 export async function render(el, [id], { setTitle }) {
   const [{ data: inv, error }, accs, items, contacts, s] = await Promise.all([
@@ -8,7 +8,7 @@ export async function render(el, [id], { setTitle }) {
   ]);
   if (error) { el.innerHTML = '<div class="alert err">Invoice not found.</div>'; return; }
   const { data: lines } = await db.from('invoice_lines').select('*').eq('invoice_id', id).order('position');
-  const { data: pays } = await db.from('payment_applications').select('amount, payments(number, payment_date, method, voided)').eq('invoice_id', id);
+  const { data: pays } = await db.from('payment_applications').select('amount, payments(id, number, payment_date, method, voided)').eq('invoice_id', id);
   setTitle(`Invoice ${inv.number}`);
   const draft = inv.status === 'draft', manage = can('finance.manage');
   const editable = draft && manage;
@@ -16,6 +16,8 @@ export async function render(el, [id], { setTitle }) {
   const defaultIncome = accs.find((a) => a.system_key === 'service_income')?.id;
   const rate = s.gst_number ? Number(s.gst_rate || 5) : 0;
   const c = inv.contacts || {};
+  const payer = inv.bill_to?.name ? inv.bill_to : null;   // someone else pays for the client's services
+  const mailTo = payer ? payer.email || '' : c.email;
 
   const lineRow = (l = {}) => `<tr class="ln">
     <td><select class="input li-item"><option value="">— Product/service —</option>${items.map((it) => `<option value="${it.id}" ${it.id === l.item_id ? 'selected' : ''}>${esc(it.name)}</option>`).join('')}</select></td>
@@ -30,7 +32,8 @@ export async function render(el, [id], { setTitle }) {
   el.innerHTML = `
     <div class="toolbar"><a class="btn btn-sm" href="#/invoices">← Invoices</a><div class="grow"></div>
       <button class="btn" id="print">${icon('file')} Print / PDF</button>
-      ${c.email && !draft ? `<a class="btn" id="mail" href="#">${icon('mail')} Email</a>` : ''}
+      ${manage && inv.status !== 'void' ? `<button class="btn" id="payer" title="Bill the client, or someone who pays on their behalf">${icon('users')} ${payer ? 'Payer' : 'Bill someone else'}</button>` : ''}
+      ${!draft ? `<a class="btn" id="mail" href="#">${icon('mail')} Email${payer ? ' payer' : ''}</a>` : ''}
       ${editable ? `<button class="btn btn-danger" id="delDraft">${icon('trash')}</button><button class="btn" id="save">Save draft</button><button class="btn btn-gold" id="post">${icon('check')} Approve & post</button>` : ''}
       ${manage && ['open', 'partial'].includes(inv.status) ? `<button class="btn btn-primary" id="recv">${icon('dollar')} Receive payment</button>` : ''}
       ${manage && !draft && inv.status !== 'void' && Number(inv.amount_paid) === 0 ? `<button class="btn btn-danger" id="void">Void</button>` : ''}
@@ -43,7 +46,9 @@ export async function render(el, [id], { setTitle }) {
         <div style="text-align:right"><div class="inv-title">INVOICE</div><div style="font-size:18px;font-weight:700">${esc(inv.number)}</div><div style="margin-top:6px">${invoiceBadge(inv)}</div></div>
       </div>
       <div class="inv-meta">
-        <div><small>BILL TO</small>${editable ? `<select class="input" id="client" style="margin-top:6px;max-width:320px">${contactOptions(contacts, inv.contact_id)}</select>`
+        <div>${payer ? `<small>BILL TO</small><b>${esc(payer.name)}</b><div class="inv-muted">${[payer.address, payer.email, payer.phone].filter(Boolean).map(esc).join('<br>')}</div>
+            <small style="margin-top:12px;display:block">CLIENT — SERVICES PROVIDED TO</small>` : '<small>BILL TO</small>'}${editable ? `<select class="input" id="client" style="margin-top:6px;max-width:320px">${contactOptions(contacts, inv.contact_id)}</select>`
+          : payer ? `<b>${esc(c.full_name)}</b>${payer.relationship ? `<div class="inv-muted">Paid by ${esc(payer.relationship.toLowerCase())}</div>` : ''}`
           : `<b>${esc(c.full_name)}</b><div class="inv-muted">${esc([c.address, c.city, c.province, c.postal_code].filter(Boolean).join(', '))}${c.email ? '<br>' + esc(c.email) : ''}${c.phone ? '<br>' + esc(c.phone) : ''}</div>`}</div>
         <div class="inv-dates">
           <div><small>INVOICE DATE</small>${editable ? `<input class="input" type="date" id="idate" value="${inv.issue_date}">` : `<b>${fmtDate(inv.issue_date)}</b>`}</div>
@@ -69,17 +74,26 @@ export async function render(el, [id], { setTitle }) {
         </div>
       </div>
       ${(pays || []).length ? `<div class="no-print" style="margin-top:18px"><h4 style="color:var(--navy);margin-bottom:6px">Payments</h4>${pays.map((p) => `<div class="check" style="${p.payments.voided ? 'opacity:.5;text-decoration:line-through' : ''}">
-        <span style="flex:1">${esc(p.payments.number)} · ${fmtDate(p.payments.payment_date)} · ${esc(METHOD_LABEL[p.payments.method] || '')}</span><b>${money(p.amount)}</b></div>`).join('')}</div>` : ''}
+        <span style="flex:1">${esc(p.payments.number)} · ${fmtDate(p.payments.payment_date)} · ${esc(METHOD_LABEL[p.payments.method] || '')}</span>${p.payments.voided ? '' : `<a class="btn btn-sm" href="#/client-receipts/payment/${p.payments.id}" style="margin-right:10px">Receipt</a>`}<b>${money(p.amount)}</b></div>`).join('')}</div>` : ''}
       ${!rate && editable ? `<div class="alert info no-print" style="margin-top:14px">GST is not added because no GST/HST number is set. If you are registered, add it in <a href="#/settings">Business Settings</a>.</div>` : ''}
     </div>`;
 
   // ── Interactions ──
   el.querySelector('#print').onclick = () => window.print();
-  el.querySelector('#mail')?.addEventListener('click', (e) => {
+  el.querySelector('#mail')?.addEventListener('click', async (e) => {
     e.preventDefault();
-    const body = `Hello ${c.full_name.split(' ')[0]},\n\nPlease find invoice ${inv.number} for ${money(inv.total)}, due ${fmtDate(inv.due_date)}. The balance due is ${money(inv.balance)}.\n\nYou can pay by Interac e-Transfer to ${s.email}, or call ${s.phone}.\n\nThank you,\n${s.rcic_name}\n${s.business_name}`;
-    location.href = `mailto:${c.email}?subject=${encodeURIComponent(`Invoice ${inv.number} from ${s.business_name}`)}&body=${encodeURIComponent(body)}`;
-    toast('Tip: print the invoice to PDF and attach it to the email.');
+    const first = String((payer ? payer.name : c.full_name) || '').split(' ')[0] || 'there';
+    const body = `Hello ${first},\n\nPlease find invoice ${inv.number} for ${money(inv.total)}${payer ? `, for immigration services provided to ${c.full_name}` : ''}, due ${fmtDate(inv.due_date)}. The balance due is ${money(inv.balance)}.\n\nYou can pay by Interac e-Transfer to ${s.email}, or call ${s.phone}.\n\nThank you,\n${s.rcic_name}\n${s.business_name}`;
+    (await import('../crm.js')).composeEmail({ contact: { ...c, email: mailTo }, to: mailTo, subject: `Invoice ${inv.number} from ${s.business_name}`, body });
+    toast('Tip: print the invoice to PDF (Print / PDF) and attach it to the email.');
+  });
+  el.querySelector('#payer')?.addEventListener('click', async () => {
+    const v = await payerModal({ current: payer, contactId: inv.contact_id, clientName: c.full_name });
+    if (v === undefined) return;
+    if (editable) { try { await save(); } catch (er) { return fail(er); } }
+    const { error: pe } = await db.from('invoices').update({ bill_to: v }).eq('id', id);
+    if (pe) return fail(pe);
+    toast(v ? `Invoice billed to ${v.name}` : 'Invoice billed to the client'); render(el, [id], { setTitle });
   });
   el.querySelector('#recv')?.addEventListener('click', async () => { await receivePayment(inv.contact_id); window.addEventListener('books-changed', () => render(el, [id], { setTitle }), { once: true }); });
   el.querySelector('#void')?.addEventListener('click', () => modal({

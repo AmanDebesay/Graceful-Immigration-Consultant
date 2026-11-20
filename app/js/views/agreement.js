@@ -211,6 +211,7 @@ async function editor(el, a, setTitle) {
   const LH = ['business_name', 'tagline', 'rcic_name', 'rcic_designation', 'rcic_id', 'business_address', 'business_phone', 'business_email', 'website'];
   const SEC = Object.assign(Object.fromEntries(LH.map((k) => [k, ['lh', 'parties']])), { doc_title: ['title'], doc_subtitle: ['title'], agreement_date: ['title'],
     client_name: ['parties'], client_dob: ['parties'], client_address: ['parties'], client_phone: ['parties'], client_email: ['parties'], co: ['parties', 'glance', T === 'consultation' ? '1' : '2'] },
+    Object.fromEntries(['payer_other', 'payer_name', 'payer_relationship', 'payer_email', 'payer_phone', 'payer_address', 'payer_refund_to'].map((k) => [k, ['parties', 'glance', T === 'consultation' ? '4' : '9']])),
     T === 'consultation'
       ? { language: ['glance', '6'], gst_rate: ['glance', '4'], province: ['8'], fee_basis: ['glance', '4'], pro_bono_reason: ['4'], relationship: ['1'], pro_bono_note: ['4'], continuing_relationship: ['1'],
           purpose: ['glance', '1'], consult_date: ['glance', '1'], consult_length: ['glance', '1'], consult_method: ['glance', '1'], fee: ['glance', '4'], payment_method: ['4'] }
@@ -231,7 +232,19 @@ async function editor(el, a, setTitle) {
     <div class="field pb-only" ${free() ? '' : 'hidden'}><label>Why pro bono</label><select class="input" data-k="pro_bono_reason">
       ${Object.entries(PRO_BONO_REASON).map(([k, l]) => `<option value="${k}" ${(d.pro_bono_reason || 'family') === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>
     <div class="pb-only" ${free() ? '' : 'hidden'}><div class="row-2">${f('relationship', 'Relationship to you (family/friend, e.g. “cousin”, “friend for 10 years”)')}${f('pro_bono_note', 'Reason in your words (used for “Other reason”)')}</div>
-      <small style="color:var(--muted)">Family and friend files add a personal-relationship disclosure the client consents to. Government fees stay the client's responsibility.</small></div>`, true);
+      <small style="color:var(--muted)">Family and friend files add a personal-relationship disclosure the client consents to. Government fees stay the client's responsibility.</small></div>
+    <div class="paid-only" ${free() ? 'hidden' : ''}>
+      <label class="row" style="gap:8px;margin:12px 0 8px;align-items:flex-start"><input type="checkbox" data-k="payer_other" ${d.payer_other ? 'checked' : ''} style="margin-top:3px">
+        <span><b>Someone else pays the fees</b> ${tag('payer_other')}<br><small style="color:var(--muted)">For example a spouse, parent or employer. The client stays the client (the consultation and the file are theirs); invoices and receipts are addressed to the payer.</small></span></label>
+      <div id="payerBox" ${d.payer_other ? '' : 'hidden'} style="padding:12px;border:1px dashed var(--line);border-radius:10px;margin-bottom:6px">
+        <div class="field"><select class="input" id="payerPick" style="max-width:340px"><option value="">Fill in from Contacts…</option></select></div>
+        <div class="row-2">${f('payer_name', 'Payer full name')}${f('payer_relationship', 'Relationship to the client (e.g. spouse, father, employer)')}</div>
+        <div class="row-2">${f('payer_email', 'Payer email (invoices and receipts go here)', 'email')}${f('payer_phone', 'Payer phone')}</div>
+        ${f('payer_address', 'Payer address')}
+        <div class="field"><label>Refunds of unearned fees go to</label><select class="input" data-k="payer_refund_to">
+          <option value="payer" ${d.payer_refund_to !== 'client' ? 'selected' : ''}>The payer (who provided the money)</option><option value="client" ${d.payer_refund_to === 'client' ? 'selected' : ''}>The client</option></select></div>
+        <input type="hidden" data-k="payer_contact_id" value="${esc(d.payer_contact_id || '')}">
+        <small style="color:var(--muted)">The agreement adds a clause: the payer is not a client, gets billing information only, and the client stays responsible for unpaid fees.</small></div></div>`, true);
   const msRows = () => (d.milestones || []).map((m, i) => `<div class="ms-row" data-i="${i}"><input class="input" data-m="name" placeholder="Milestone" value="${esc(m.name)}">
     <input class="input" data-m="included" placeholder="What is included" value="${esc(m.included)}"><input class="input" data-m="fee" type="number" step="0.01" placeholder="Fee" value="${esc(m.fee)}" style="max-width:100px" title="Professional fee">
     <input class="input" data-m="disb" type="number" step="0.01" placeholder="Disb." value="${esc(m.disb ?? '')}" style="max-width:90px" title="Estimated disbursements for this milestone">
@@ -366,11 +379,13 @@ async function editor(el, a, setTitle) {
   let t; el.querySelector('.agr-form').addEventListener('input', () => { clearTimeout(t); t = setTimeout(preview, 250); });
   const syncFree = () => {
     el.querySelectorAll('.pb-only').forEach((x) => (x.hidden = !free()));
+    el.querySelectorAll('.paid-only').forEach((x) => (x.hidden = free()));
     const fs = el.querySelector('#feeSec'); if (fs) fs.hidden = free();
     el.querySelector('#pbb').innerHTML = proBonoBadge(d.fee_basis);
   };
   el.querySelector('.agr-form').addEventListener('change', (e) => {
     if (e.target.dataset.k === 'fee_basis') { read(); syncFree(); }
+    if (e.target.dataset.k === 'payer_other') { const pb = el.querySelector('#payerBox'); if (pb) pb.hidden = !e.target.checked; }
     if (e.target.dataset.k === 'billing') {
       const b = e.target.value;
       el.querySelector('#flatBox').hidden = ['hourly', 'daily'].includes(b); el.querySelector('#hourBox').hidden = b !== 'hourly';
@@ -389,6 +404,19 @@ async function editor(el, a, setTitle) {
   };
   el.querySelector('#coNew').onclick = () => { read(); d.co_clients.push({ name: '', relationship: '', dob: '', email: '', phone: '', address: '', contact_id: '' }); drawCo(); };
   import('../fin.js').then(({ contactsList }) => contactsList()).then((list) => {
+    const pp = el.querySelector('#payerPick');
+    if (pp) {
+      pp.innerHTML += (list || []).filter((c) => c.id !== a.contact_id).map((c) => `<option value="${c.id}">${esc(c.full_name)}${c.email ? ' · ' + esc(c.email) : ''}</option>`).join('');
+      pp.onchange = async () => {
+        if (!pp.value) return;
+        const { data: c } = await db.from('contacts').select('*').eq('id', pp.value).single();
+        pp.value = ''; if (!c) return;
+        const set = (k, v) => { const i = el.querySelector(`[data-k="${k}"]`); if (i) i.value = v || ''; };
+        set('payer_name', c.full_name); set('payer_email', c.email); set('payer_phone', c.phone); set('payer_contact_id', c.id);
+        set('payer_address', [c.address, c.city, c.province, c.postal_code, c.country].filter(Boolean).join(', '));
+        preview();
+      };
+    }
     const pick = el.querySelector('#coPick');
     pick.innerHTML += (list || []).filter((c) => c.id !== a.contact_id).map((c) => `<option value="${c.id}">${esc(c.full_name)}${c.email ? ' · ' + esc(c.email) : ''}</option>`).join('');
     pick.onchange = async () => {

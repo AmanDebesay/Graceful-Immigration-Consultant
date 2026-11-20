@@ -29,7 +29,7 @@ export async function render(el) {
         ${rows.map((p) => `<tr style="${p.voided ? 'opacity:.5;text-decoration:line-through' : ''}"><td>${fmtDate(p.payment_date)}</td><td>${esc(p.number)}</td><td>${esc(p.contacts?.full_name)}</td>
           <td>${esc(METHOD_LABEL[p.method] || p.method)}${p.reference ? `<br><small style="color:var(--muted)">${esc(p.reference)}</small>` : ''}</td>
           <td>${p.payment_applications.map((a) => `${esc(a.invoices?.number)} (${money(a.amount)})`).join(', ')}</td><td style="text-align:right"><b>${money(p.amount)}</b></td>
-          <td style="text-align:right">${manage && !p.voided ? `<button class="btn btn-sm btn-danger" data-void="${p.id}">Void</button>` : p.voided ? 'Void' : ''}</td></tr>`).join('')}</tbody></table>`
+          <td style="text-align:right;white-space:nowrap">${p.voided ? 'Void' : `<a class="btn btn-sm" href="#/client-receipts/payment/${p.id}">Receipt</a>${manage ? ` <button class="btn btn-sm btn-danger" data-void="${p.id}">Void</button>` : ''}`}</td></tr>`).join('')}</tbody></table>`
         : `<div class="empty">${icon('check')}<div>No payments yet.</div></div>`}</div></div>`;
       body.querySelectorAll('[data-void]').forEach((b) => (b.onclick = async () => {
         if (!(await confirmBox('Void payment', 'This reverses the payment in the books and reopens the invoices it paid.', 'Void payment', true))) return;
@@ -55,7 +55,7 @@ export async function render(el) {
       </div>
       <div class="toolbar"><div class="seg" id="flt">${[['all', 'All'], ['draft', 'Draft'], ['open', 'Open'], ['overdue', 'Overdue'], ['paid', 'Paid'], ['void', 'Void']].map(([k, l]) => `<button data-f="${k}" class="${filter === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       <div class="card"><div class="table-wrap">${rows.length ? `<table class="t"><thead><tr><th>Date</th><th>No.</th><th>Client</th><th>Due</th><th style="text-align:right">Total</th><th style="text-align:right">Balance</th><th>Status</th></tr></thead><tbody>
-        ${rows.map((i) => `<tr class="click" data-id="${i.id}"><td>${fmtDate(i.issue_date)}</td><td><b>${esc(i.number)}</b></td><td>${esc(i.contacts?.full_name)}</td>
+        ${rows.map((i) => `<tr class="click" data-id="${i.id}"><td>${fmtDate(i.issue_date)}</td><td><b>${esc(i.number)}</b></td><td>${esc(i.contacts?.full_name)}${i.bill_to?.name ? `<br><small style="color:var(--muted)">Billed to ${esc(i.bill_to.name)}</small>` : ''}</td>
           <td style="color:${isOver(i) ? 'var(--red)' : 'inherit'}">${fmtDate(i.due_date)}</td><td style="text-align:right">${money(i.total)}</td>
           <td style="text-align:right">${i.status === 'void' ? '—' : money(i.balance)}</td><td>${invoiceBadge(i)}</td></tr>`).join('')}</tbody></table>`
         : `<div class="empty">${icon('file')}<div>No invoices here.</div></div>`}</div></div>`;

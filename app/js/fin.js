@@ -101,15 +101,19 @@ export async function receivePayment(contactId) {
       <div class="field" id="depWrap"><label>Deposit to</label><select class="input" id="pa">${acctOptions(accs, accs.find((a) => a.system_key === 'operating_bank')?.id, (a) => a.subtype === 'bank')}</select></div></div>
       <div class="row-2"><div class="field"><label>Reference no.</label><input class="input" id="pr" placeholder="e-Transfer ref, cheque no."></div>
       <div class="field"><label>Memo</label><input class="input" id="pmemo"></div></div>
+      <div class="field"><label>Received from (shown on the receipt)</label><input class="input" id="pfrom" placeholder="Who paid — the client, or the fee payer"></div>
       <div id="trustInfo"></div>
       <h4 style="margin:10px 0 8px;color:var(--navy)">Outstanding invoices</h4><div id="openInv" class="table-wrap"><div class="empty" style="padding:18px">Choose a client.</div></div>
       <div class="row" style="justify-content:flex-end;margin-top:12px;font-size:16px">Amount received:&nbsp;<b id="ptotal">${money(0)}</b></div>`,
     actions: [{ label: 'Cancel' }, { label: 'Save payment', cls: 'btn-primary', onClick: async (el) => {
       const apps = [...el.querySelectorAll('[data-inv]')].map((i) => ({ invoice_id: i.dataset.inv, amount: num(i.value) })).filter((a) => a.amount > 0);
       if (!apps.length) throw new Error('Enter an amount against at least one invoice.');
-      await rpc('receive_payment', { p_contact: el.querySelector('#pc').value, p_date: el.querySelector('#pd').value, p_method: el.querySelector('#pm').value,
+      const pid = await rpc('receive_payment', { p_contact: el.querySelector('#pc').value, p_date: el.querySelector('#pd').value, p_method: el.querySelector('#pm').value,
         p_deposit_account: el.querySelector('#pa').value || null, p_reference: el.querySelector('#pr').value || null, p_memo: el.querySelector('#pmemo').value || null, p_applications: apps });
+      const from = el.querySelector('#pfrom').value.trim();
+      if (from && pid) await rpc('update_receipt', { p_kind: 'payment', p_id: pid, p_received_from: from }).catch(() => {});
       toast('Payment recorded'); changed();
+      if (pid) receiptPrompt('payment', pid);
     } }],
   });
   const el = m.el;
@@ -117,7 +121,9 @@ export async function receivePayment(contactId) {
   async function loadOpen() {
     const cid = el.querySelector('#pc').value, box = el.querySelector('#openInv');
     if (!cid) { box.innerHTML = '<div class="empty" style="padding:18px">Choose a client.</div>'; return; }
-    const { data } = await db.from('invoices').select('id, number, issue_date, due_date, total, balance, status').eq('contact_id', cid).in('status', ['open', 'partial']).order('due_date');
+    const { data } = await db.from('invoices').select('id, number, issue_date, due_date, total, balance, status, bill_to').eq('contact_id', cid).in('status', ['open', 'partial']).order('due_date');
+    const who = data?.find((i) => i.bill_to?.name)?.bill_to?.name || (await payerFor(cid))?.name || contacts.find((c) => c.id === cid)?.full_name || '';
+    el.querySelector('#pfrom').value = who;
     box.innerHTML = data?.length ? `<table class="t"><thead><tr><th>Invoice</th><th>Due</th><th style="text-align:right">Original</th><th style="text-align:right">Open balance</th><th style="text-align:right;width:160px">Payment</th></tr></thead><tbody>
       ${data.map((i) => `<tr><td>${esc(i.number)}</td><td>${fmtDate(i.due_date)}</td><td style="text-align:right">${money(i.total)}</td><td style="text-align:right">${money(i.balance)}</td>
         <td><input class="input" data-inv="${i.id}" data-max="${i.balance}" type="number" step="0.01" min="0" value="${i.balance}" style="text-align:right"></td></tr>`).join('')}</tbody></table>`
@@ -319,12 +325,20 @@ export async function trustTxn(type = 'deposit', contactId) {
       <div class="field"><label>Amount</label><input class="input" type="number" step="0.01" id="a"></div></div>
       <div class="row-2"><div class="field"><label>Method</label><select class="input" id="m">${METHODS.map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
       <div class="field"><label>Reference</label><input class="input" id="r"></div></div>
-      <div class="field"><label>Memo</label><input class="input" id="mm"></div>`,
+      <div class="field"><label>Memo</label><input class="input" id="mm"></div>
+      ${type === 'deposit' ? '<div class="field"><label>Received from (shown on the receipt)</label><input class="input" id="from" placeholder="Who paid — the client, or the fee payer"></div>' : ''}`,
+    onOpen: (el) => {
+      const from = el.querySelector('#from'); if (!from) return;
+      const fill = async () => { const cid = el.querySelector('#c').value; from.value = cid ? (await payerFor(cid))?.name || contacts.find((c) => c.id === cid)?.full_name || '' : ''; };
+      el.querySelector('#c').addEventListener('change', fill); fill();
+    },
     actions: [{ label: 'Cancel' }, { label: 'Save', cls: 'btn-primary', onClick: async (el) => {
-      const v = (s) => el.querySelector(s).value;
+      const v = (s) => el.querySelector(s)?.value || '';
       if (!v('#c')) throw new Error('Choose a client.');
-      await rpc('trust_transaction', { p_contact: v('#c'), p_date: v('#d'), p_type: type, p_amount: num(v('#a')), p_method: v('#m'), p_reference: v('#r') || null, p_memo: v('#mm') || null });
+      const id = await rpc('trust_transaction', { p_contact: v('#c'), p_date: v('#d'), p_type: type, p_amount: num(v('#a')), p_method: v('#m'), p_reference: v('#r') || null, p_memo: v('#mm') || null });
+      if (type === 'deposit' && id && v('#from').trim()) await rpc('update_receipt', { p_kind: 'trust', p_id: id, p_received_from: v('#from').trim() }).catch(() => {});
       toast(type === 'deposit' ? 'Retainer deposited to trust' : 'Trust refund recorded'); changed();
+      if (type === 'deposit' && id) receiptPrompt('trust', id);
     } }],
   });
 }
@@ -368,7 +382,7 @@ export async function newInvoice(contactId) {
     body: `<div class="field"><label>Client</label><select class="input" id="ic">${contactOptions(contacts, contactId)}</select></div>`,
     actions: [{ label: 'Cancel' }, { label: 'Create draft', cls: 'btn-primary', onClick: async (el) => {
       const cid = el.querySelector('#ic').value; if (!cid) throw new Error('Choose a client.');
-      const { data, error } = await db.from('invoices').insert({ contact_id: cid, created_by: state.profile.id }).select('id').single();
+      const { data, error } = await db.from('invoices').insert({ contact_id: cid, created_by: state.profile.id, bill_to: await payerFor(cid) }).select('id').single();
       if (error) throw error;
       location.hash = `#/invoices/${data.id}`;
     } }],
@@ -376,3 +390,114 @@ export async function newInvoice(contactId) {
 }
 
 export function canBooks() { return can('finance.manage'); }
+
+// ── Fee payer (someone other than the client pays) ──
+// The client stays on the books (receivables, trust); the payer is who invoices and receipts are addressed to.
+/** The fee payer from the client's most recent consultation or retainer agreement, or null if the client pays. */
+export async function payerFor(contactId) {
+  if (!contactId) return null;
+  const { data } = await db.from('agreements').select('data').eq('contact_id', contactId).in('type', ['consultation', 'retainer']).neq('status', 'void')
+    .order('created_at', { ascending: false }).limit(1);
+  const d = data?.[0]?.data;
+  if (!d?.payer_other || !String(d.payer_name || '').trim()) return null;
+  return { name: d.payer_name.trim(), relationship: d.payer_relationship || '', email: d.payer_email || '', phone: d.payer_phone || '', address: d.payer_address || '' };
+}
+
+/** Edit who an invoice is billed to. Resolves with the new bill_to (null = the client), or undefined if cancelled. */
+export function payerModal({ current = null, contactId, clientName = '' } = {}) {
+  return new Promise((resolve) => {
+    let done = false;
+    const b = current || {};
+    const fld = (k, l, t = 'text') => `<div class="field"><label>${l}</label><input class="input" type="${t}" data-b="${k}" value="${esc(b[k] || '')}"></div>`;
+    const mm = modal({
+      title: 'Who pays this invoice?',
+      body: `<label class="row" style="gap:8px;margin-bottom:10px"><input type="radio" name="who" value="client" ${current ? '' : 'checked'}> The client${clientName ? ` (${esc(clientName)})` : ''}</label>
+        <label class="row" style="gap:8px;margin-bottom:12px"><input type="radio" name="who" value="payer" ${current ? 'checked' : ''}> Someone else pays on the client's behalf</label>
+        <div id="pbx" ${current ? '' : 'hidden'}>
+          <div class="row" style="justify-content:flex-end;margin-bottom:6px"><button class="btn btn-sm" type="button" id="fromAgr">Use the payer from the client's agreement</button></div>
+          <div class="row-2">${fld('name', 'Payer full name')}${fld('relationship', 'Relationship to the client')}</div>
+          <div class="row-2">${fld('email', 'Email', 'email')}${fld('phone', 'Phone')}</div>${fld('address', 'Address')}
+          <small class="dk-muted">The invoice and receipts are addressed to the payer. The client's name stays on them as the person the services are for.</small></div>`,
+      onOpen: (el) => {
+        el.querySelectorAll('[name="who"]').forEach((r) => (r.onchange = () => { el.querySelector('#pbx').hidden = el.querySelector('[name="who"]:checked').value !== 'payer'; }));
+        el.querySelector('#fromAgr').onclick = async () => {
+          const p = await payerFor(contactId);
+          if (!p) return toast("The client's latest agreement doesn't name a fee payer.");
+          Object.entries(p).forEach(([k, v]) => { const i = el.querySelector(`[data-b="${k}"]`); if (i) i.value = v; });
+        };
+      },
+      actions: [{ label: 'Cancel', onClick: () => { done = true; resolve(undefined); } }, { label: 'Save', cls: 'btn-primary', onClick: async (el) => {
+        if (el.querySelector('[name="who"]:checked').value === 'client') { done = true; resolve(null); return; }
+        const v = Object.fromEntries([...el.querySelectorAll('[data-b]')].map((i) => [i.dataset.b, i.value.trim()]));
+        if (!v.name) throw new Error("Enter the payer's name.");
+        done = true; resolve(v);
+      } }],
+    });
+    // Closing the window without choosing counts as cancel.
+    const iv = setInterval(() => { if (done) return clearInterval(iv); if (!mm.el.isConnected) { clearInterval(iv); resolve(undefined); } }, 500);
+  });
+}
+
+/** After money comes in: offer to open the receipt for it. */
+export function receiptPrompt(kind, id) {
+  modal({
+    title: 'Payment recorded',
+    body: '<p>Issue a receipt now? You can print it, save it as a PDF or email it to whoever paid. It is always available later under <b>Client Receipts</b>.</p>',
+    actions: [{ label: 'Not now' }, { label: 'Open receipt', cls: 'btn-gold', onClick: () => { location.hash = `#/client-receipts/${kind}/${id}`; } }],
+  });
+}
+
+/** Payment that has no invoice yet (for example a consultation fee): one invoice line, posted and paid in one step. */
+export async function quickSale(contactId) {
+  const [contacts, accs, items, s] = await Promise.all([contactsList(), accounts(), itemsList(), orgSettings()]);
+  const rate = s.gst_number ? Number(s.gst_rate || 5) : 0;
+  const income = accs.find((a) => a.system_key === 'service_income')?.id;
+  const m = modal({
+    title: 'Payment without an invoice', wide: true,
+    body: `<div class="alert info" style="margin-bottom:10px">For money received before any invoice, such as a consultation fee. This creates the invoice, marks it paid and gives you the receipt. Money paid in advance for work not done yet goes into trust instead (<b>Retainer into trust</b>).</div>
+      <div class="row-2"><div class="field"><label>Client</label><select class="input" id="qc">${contactOptions(contacts, contactId)}</select></div>
+        <div class="field"><label>Received from (shown on the receipt)</label><input class="input" id="qfrom" placeholder="The client, or the fee payer"></div></div>
+      <div class="row-2"><div class="field"><label>Product / service</label><select class="input" id="qi"><option value="">— Choose —</option>${items.map((it) => `<option value="${it.id}">${esc(it.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>Description</label><input class="input" id="qd" placeholder="e.g. Initial consultation, 60 minutes"></div></div>
+      <div class="row-2"><div class="field"><label>Amount before GST (CAD)</label><input class="input" type="number" step="0.01" id="qa"></div>
+        <div class="field"><label>GST</label><label class="row" style="gap:8px;margin-top:8px"><input type="checkbox" id="qt" ${rate ? 'checked' : 'disabled'}> ${rate ? `Add GST ${rate}%` : 'Not registered for GST'}</label></div></div>
+      <div class="row-2"><div class="field"><label>Date received</label><input class="input" type="date" id="qdt" value="${today()}"></div>
+        <div class="field"><label>Payment method</label><select class="input" id="qm">${METHODS.map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div></div>
+      <div class="row-2"><div class="field"><label>Deposit to</label><select class="input" id="qacc">${acctOptions(accs, accs.find((a) => a.system_key === 'operating_bank')?.id, (a) => a.subtype === 'bank')}</select></div>
+        <div class="field"><label>Reference no.</label><input class="input" id="qr" placeholder="e-Transfer ref, cheque no."></div></div>
+      <div class="row" style="justify-content:flex-end;font-size:16px">Total received:&nbsp;<b id="qtot">${money(0)}</b></div>`,
+    actions: [{ label: 'Cancel' }, { label: 'Save & open receipt', cls: 'btn-gold', onClick: async (el) => {
+      const v = (q) => el.querySelector(q).value;
+      const cid = v('#qc'), amt = num(v('#qa')), desc = v('#qd').trim();
+      if (!cid) throw new Error('Choose a client.');
+      if (!desc) throw new Error('Add a description.');
+      if (amt <= 0) throw new Error('Enter the amount.');
+      const it = items.find((x) => x.id === v('#qi'));
+      const client = contacts.find((c) => c.id === cid);
+      const from = v('#qfrom').trim();
+      const payer = await payerFor(cid);
+      const billTo = payer && from === payer.name ? payer : from && from !== client?.full_name ? { name: from } : null;
+      const { data: inv, error } = await db.from('invoices').insert({ contact_id: cid, created_by: state.profile.id, issue_date: v('#qdt'), due_date: v('#qdt'), bill_to: billTo }).select('id').single();
+      if (error) throw error;
+      const { error: le } = await db.from('invoice_lines').insert({ invoice_id: inv.id, position: 0, item_id: it?.id || null, description: desc, quantity: 1, unit_price: amt,
+        taxable: el.querySelector('#qt').checked, tax_rate: rate, account_id: it?.income_account_id || income });
+      if (le) throw le;
+      await rpc('post_invoice', { p_invoice: inv.id });
+      const { data: posted } = await db.from('invoices').select('total').eq('id', inv.id).single();
+      const pid = await rpc('receive_payment', { p_contact: cid, p_date: v('#qdt'), p_method: v('#qm'), p_deposit_account: v('#qacc') || null, p_reference: v('#qr') || null,
+        p_memo: desc, p_applications: [{ invoice_id: inv.id, amount: Number(posted.total) }] });
+      if (from) await rpc('update_receipt', { p_kind: 'payment', p_id: pid, p_received_from: from }).catch(() => {});
+      clearFinCache(); toast('Payment recorded'); changed();
+      location.hash = `#/client-receipts/payment/${pid}`;
+    } }],
+  });
+  const el = m.el;
+  const tot = () => { const a = num(el.querySelector('#qa').value); el.querySelector('#qtot').textContent = money(a + (el.querySelector('#qt').checked ? num(a * rate / 100) : 0)); };
+  el.querySelector('#qi').onchange = (e) => {
+    const it = items.find((x) => x.id === e.target.value); if (!it) return;
+    el.querySelector('#qd').value = it.description || it.name; el.querySelector('#qa').value = it.unit_price; if (rate) el.querySelector('#qt').checked = !!it.taxable; tot();
+  };
+  el.addEventListener('input', tot); el.addEventListener('change', tot);
+  const fill = async () => { const cid = el.querySelector('#qc').value; el.querySelector('#qfrom').value = cid ? (await payerFor(cid))?.name || contacts.find((c) => c.id === cid)?.full_name || '' : ''; };
+  el.querySelector('#qc').addEventListener('change', fill); fill();
+}

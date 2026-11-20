@@ -29,6 +29,7 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
     business_address: settings.address || '', business_phone: settings.phone || '', business_email: settings.email || '',
     gst_rate: settings.gst_number ? Number(settings.gst_rate || 5) : 0, gst_number: settings.gst_number || '', province: 'Alberta',
     fee_basis: proBono ? 'pro_bono' : 'paid', pro_bono_reason: proBono || '', relationship: '', pro_bono_note: '',
+    payer_other: false, payer_name: '', payer_relationship: '', payer_email: '', payer_phone: '', payer_address: '', payer_contact_id: '', payer_refund_to: 'payer',
     co_clients: [], joint_instructions: 'Any of the Clients may give routine instructions; decisions that affect the application need the agreement of all the Clients.',
   };
   // Letters and amendments start from the agreement they relate to (parent), when there is one.
@@ -91,6 +92,21 @@ function relationshipClause(d) {
   return `<p class="callout"><b>Personal relationship disclosure.</b> The RCIC has disclosed that the Client is ${d.pro_bono_reason === 'family' ? 'a family member' : 'a personal friend'} of the RCIC${d.relationship ? ` (${e(d.relationship)})` : ''}. The RCIC confirms that this relationship will not affect their professional judgment, independence, confidentiality or the standard of care owed under the Code of Professional Conduct, and that the Client will be treated as any other client. The Client was told they are free to choose a different representative and to seek independent advice, and consents to the RCIC acting for them. If the relationship ever creates a conflict of interest, the RCIC will tell the Client and, where required, withdraw.</p>`;
 }
 
+// Fee payer: someone other than the client pays (spouse, parent, employer). The client stays the client;
+// invoices and receipts are addressed to the payer. Shared with the invoice and receipt pages.
+export const hasPayer = (d) => !!d.payer_other && !!String(d.payer_name || '').trim();
+const payerWho = (d) => `${e(d.payer_name)}${d.payer_relationship ? ` (${e(d.payer_relationship)})` : ''}`;
+function payerBox(d) {
+  if (!hasPayer(d)) return '';
+  const contact = [d.payer_address, [d.payer_phone, d.payer_email].filter(Boolean).join(' · ')].filter((x) => String(x || '').trim()).map(e).join('<br>');
+  return `<div class="payer" data-sec="parties"><span class="lbl">Fee payer — pays on the Client's behalf (not a client)</span><span class="nm">${e(d.payer_name)}</span>${d.payer_relationship ? `${e(d.payer_relationship)}<br>` : ''}${contact || 'Address: ________________'}</div>`;
+}
+function payerClause(d) {
+  if (!hasPayer(d)) return '';
+  const C = isJoint(d) ? 'the Clients' : 'the Client';
+  return `<p class="callout"><b>Fees paid by another person.</b> The fees under this Agreement will be paid on ${isJoint(d) ? "the Clients'" : "the Client's"} behalf by ${payerWho(d)} (the “Payer”), and ${C} consent${isJoint(d) ? '' : 's'} to this. Invoices and receipts will be addressed to the Payer${d.payer_email ? ` and sent to ${e(d.payer_email)}` : ''}. The Payer is not a client of the RCIC and is not a party to this Agreement: the RCIC's duties, including loyalty and confidentiality, are owed only to ${C}, and only ${C} give${isJoint(d) ? '' : 's'} instructions on the file. The RCIC will share with the Payer only what is needed for billing (invoices, receipts and amounts owing), unless ${C} authorize${isJoint(d) ? '' : 's'} more in writing. ${C.charAt(0).toUpperCase() + C.slice(1)} remain${isJoint(d) ? '' : 's'} responsible for any fees the Payer does not pay. Any refund of unearned fees will be paid to ${d.payer_refund_to === 'client' ? C : 'the Payer, who provided the funds'}.</p>`;
+}
+
 // Joint agreements: additional clients (data.co_clients) sign with their own links; the main client is client 1.
 export const coClients = (d) => (d.co_clients || []).filter((c) => String(c.name || '').trim());
 const isJoint = (d) => coClients(d).length > 0;
@@ -128,6 +144,9 @@ const STYLE = `<style>
 .gi-agr .parties{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #E3DCCD;border-radius:10px;overflow:hidden;margin:0 0 16px;font-size:13.2px}
 .gi-agr .parties > div{padding:14px 16px}.gi-agr .parties > div + div{border-left:1px solid #E3DCCD;background:#FCFAF5}
 .gi-agr .parties .lbl{display:block;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#9A7420;margin-bottom:6px}
+.gi-agr .payer{border:1px dashed #D9C79A;border-radius:10px;padding:10px 16px;margin:-6px 0 16px;font-size:13.2px;background:#FFFDF7}
+.gi-agr .payer .lbl{display:block;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#9A7420;margin-bottom:4px}
+.gi-agr .payer .nm{display:block;font-size:15px;color:#0B2A5C;font-weight:700}
 .gi-agr .parties .nm{display:block;font-size:16px;color:#0B2A5C;font-weight:700;margin-bottom:2px}
 .gi-agr .glance{border:1px solid #D9C48E;background:linear-gradient(180deg,#FFFBF2,#FFF7E6);border-radius:10px;padding:12px 16px;margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:12.5px}
 .gi-agr .glance h3{font-family:Georgia,serif;font-size:14px;color:#0B2A5C;margin:0 0 8px;letter-spacing:.06em;text-transform:uppercase}
@@ -176,7 +195,7 @@ function letterhead(d, title, kind, extra = '') {
   <div class="meta" data-sec="title">${d.number ? `<span>${e(d.number_label || 'Agreement no.')} <b>${e(d.number)}</b></span>` : ''}<span>Date <b>${longDate(d.agreement_date)}</b></span>${extra}<span>Written in <b>English</b></span></div>
   <div class="parties" data-sec="parties"><div><span class="lbl">Licensee (RCIC)</span><span class="nm">${e(d.rcic_name)}</span>${e(lhv(d, 'rcic_designation'))} · College ID ${e(d.rcic_id)}<br>${e(d.business_name)}<br>${e(d.business_address)}<br>${e(d.business_phone)} · ${e(d.business_email)}</div>
     <div><span class="lbl">${isJoint(d) ? 'Clients (joint)' : 'Client'}</span><span class="nm">${e(d.client_name)}</span>${d.client_dob ? `Date of birth: ${longDate(d.client_dob)}<br>` : ''}${e(d.client_address || 'Address: ________________')}<br>${e(d.client_phone || 'Phone: ________________')}${d.client_email ? ' · ' + e(d.client_email) : ''}
-      ${coClients(d).map((c) => `<span class="nm" style="margin-top:10px">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${c.dob ? `Date of birth: ${longDate(c.dob)}<br>` : ''}${c.address ? e(c.address) : `Address: same as ${e(d.client_name)}`}<br>${[c.phone, c.email].filter(Boolean).map(e).join(' · ')}`).join('')}</div></div>`;
+      ${coClients(d).map((c) => `<span class="nm" style="margin-top:10px">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${c.dob ? `Date of birth: ${longDate(c.dob)}<br>` : ''}${c.address ? e(c.address) : `Address: same as ${e(d.client_name)}`}<br>${[c.phone, c.email].filter(Boolean).map(e).join(' · ')}`).join('')}</div></div>${payerBox(d)}`;
 }
 // Printed page footer, drawn in the page's bottom margin so it can never overlap the text.
 function runningFooter(d, title) {
@@ -204,7 +223,7 @@ function consultation(d) {
   const T = isJoint(d) ? 'Joint Initial Consultation Agreement' : 'Initial Consultation Agreement';
   return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), 'Retainer Agreement Regulation, section 4.1')}
   <div class="glance" data-sec="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Consultation', `${longDate(d.consult_date)} · ${e(d.consult_length)} · ${e(d.consult_method)}`)}${glanceRow('Purpose', e(d.purpose))}
-    ${glanceRow('Fee', free ? '<b>No fee — pro bono</b>' : `${money(total)} CAD${d.gst_rate ? ` (incl. GST ${money(tax)})` : ' (GST not applicable)'}`)}${glanceRow('Language of service', e(d.language))}</dl></div>
+    ${glanceRow('Fee', free ? '<b>No fee — pro bono</b>' : `${money(total)} CAD${d.gst_rate ? ` (incl. GST ${money(tax)})` : ' (GST not applicable)'}`)}${!free && hasPayer(d) ? glanceRow('Fee paid by', payerWho(d)) : ''}${glanceRow('Language of service', e(d.language))}</dl></div>
   <p class="intro">This Initial Consultation Agreement (the “Agreement”) is made between the Regulated Canadian Immigration Consultant named above (the “RCIC”) and the Client, as required by section 4.1 of the Retainer Agreement Regulation of the College of Immigration and Citizenship Consultants${free ? '. Although no fee is charged, it records' : ' before advice is given for a fee. It records'} the purpose, the fee and the date of the consultation.</p>
   ${H(1, 'Purpose and scope of the consultation')}
   <p>This Agreement is for a one-time initial consultation only, specifically for: <b>${e(d.purpose)}</b></p>
@@ -221,7 +240,7 @@ function consultation(d) {
   ${free ? `<p>This consultation is provided <b>pro bono, free of charge</b>${pbWhy(d) ? ', ' + pbWhy(d) : ''}. No fee, tax or deposit is payable. Providing the consultation without charge does not lower the standard of professional care, confidentiality or any other duty the RCIC owes the Client.</p>` : `<table><thead><tr><th>Description</th><th class="r">Amount (CAD)</th></tr></thead><tbody><tr><td>Consultation fee</td><td class="r">${money(d.fee)}</td></tr>
     <tr><td>GST ${d.gst_rate ? `(${e(d.gst_rate)}%)` : ''}</td><td class="r">${d.gst_rate ? money(tax) : 'Not applicable'}</td></tr></tbody>
     <tfoot><tr><th>Total payable in advance</th><th class="r">${money(total)}</th></tr></tfoot></table>
-  <p>Payment method: ${e(d.payment_method)}. The fee is earned once the consultation has taken place and is non-refundable, unless otherwise required by law. If the RCIC cancels and the consultation is not rescheduled, the fee will be refunded in full.</p>`}
+  <p>Payment method: ${e(d.payment_method)}. The fee is earned once the consultation has taken place and is non-refundable, unless otherwise required by law. If the RCIC cancels and the consultation is not rescheduled, the fee will be refunded in full.</p>${payerClause(d)}`}
   ${H(5, 'Confidentiality and privacy')}
   <p>The RCIC must keep confidential all information about the Client acquired in the professional relationship, as required by the Code of Professional Conduct, unless disclosure is authorized by the Client or required by law. The Client consents to the collection, use and secure storage in Canada of personal information for this consultation, in accordance with PIPEDA and Alberta's Personal Information Protection Act, and accepts the risks of communication by email or other electronic means. The RCIC may use an artificial intelligence assistant (Anthropic Claude, processed in the United States) for research and drafting; the Client's name, contact details and identification numbers are removed before any information is sent, it is not used to train AI models, and the RCIC personally reviews all work and gives all advice.</p>
   ${H(6, 'Language')}<p>This Agreement is written in English. The consultation will be provided in ${e(d.language)}. The Client may bring or arrange an interpreter.</p>
@@ -262,7 +281,7 @@ function retainer(d) {
   return `${STYLE}<div class="gi-agr">${letterhead(d, T.toUpperCase(), 'Service Agreement for Immigration and Citizenship Services', d.file_number ? `<span>File no. <b>${e(d.file_number)}</b></span>` : '')}
   <div class="glance" data-sec="glance"><h3>Key terms at a glance</h3><dl>${isJoint(d) ? glanceRow('Clients (joint)', clientNames(d)) : ''}${glanceRow('Category and program', d.program ? e(d.program) : todo('category and program'))}${free ? glanceRow('Fee arrangement', '<b>Pro bono — no professional fees</b>') : glanceRow('Billing method', BILLING[billing])
     + glanceRow(billing === 'hourly' || billing === 'daily' ? 'Estimated professional fees' : 'Total professional fees', `${money(totalFees)} + ${rate ? `GST ${money(tax(totalFees))}` : 'GST not applicable'} = <b>${money(totalFees + tax(totalFees))}</b> CAD`)
-    + glanceRow('Retainer held in trust', Number(d.retainer) > 0 ? money(d.retainer) : 'None')}${glanceRow('Language of service', e(d.language))}
+    + glanceRow('Retainer held in trust', Number(d.retainer) > 0 ? money(d.retainer) : 'None') + (hasPayer(d) ? glanceRow('Fees paid by', payerWho(d)) : '')}${glanceRow('Language of service', e(d.language))}
     ${glanceRow('Preferred correspondence', e(d.comm_methods))}</dl></div>
   <p class="intro">This Retainer Agreement (the “Agreement”) sets out the exact duties of the Regulated Canadian Immigration Consultant named above (the “RCIC”) and of the Client, so that both parties have clear expectations about what will be provided, how it will be provided and at what cost. It is made in accordance with the College of Immigration and Citizenship Consultants Act, the Code of Professional Conduct and the Retainer Agreement Regulation. The RCIC is a Licensee of the College of Immigration and Citizenship Consultants (the “College”).</p>
 
@@ -305,7 +324,7 @@ function retainer(d) {
   <p>If disbursements will exceed these estimates, the RCIC will obtain the Client's written agreement first. Government fees (for example processing, biometrics and right of permanent residence fees) are the Client's responsibility, are paid directly to the government and may change without notice: https://www.cic.gc.ca/english/information/fees/fees.asp</p>
 
   ${H(9, 'Terms of payment')}
-  ${free ? `<p>No professional fees are invoiced. Disbursements, if any, are invoiced at cost with receipts and are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. No interest or administrative fee is charged.</p>` : `<p>Invoices are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. ${Number(d.interest) > 0 ? `Interest of ${e(d.interest)}% per month may be charged on overdue amounts.` : 'No interest is charged on overdue amounts.'} ${Number(d.admin_fee) > 0 ? `An administrative fee of ${money(d.admin_fee)} applies to processing a Client-initiated discharge of representation or early termination of this Agreement.` : 'No administrative fee is charged for a Client-initiated discharge or early termination.'}</p>`}
+  ${free ? `<p>No professional fees are invoiced. Disbursements, if any, are invoiced at cost with receipts and are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. No interest or administrative fee is charged.</p>` : `<p>Invoices are payable within ${e(d.payment_days)} days of issue by: ${e(d.payment_methods)}. ${Number(d.interest) > 0 ? `Interest of ${e(d.interest)}% per month may be charged on overdue amounts.` : 'No interest is charged on overdue amounts.'} ${Number(d.admin_fee) > 0 ? `An administrative fee of ${money(d.admin_fee)} applies to processing a Client-initiated discharge of representation or early termination of this Agreement.` : 'No administrative fee is charged for a Client-initiated discharge or early termination.'}</p>${payerClause(d)}`}
 
   ${H(10, 'Refund policy')}
   ${free ? `<p>No professional fees are paid under this Agreement, so no refund of professional fees arises, including if an application is refused. If the Agreement ends, the Client will receive an itemized account of any disbursements, and any amount the Client advanced for disbursements and that was not used will be returned.</p>` : `${d.cooling_off ? '<p>The Client may cancel this Agreement in writing within forty-eight (48) hours of signing it for a full refund of all amounts paid.</p>' : ''}
@@ -454,6 +473,10 @@ export function requiredMissing(type, d) {
     if (!String(c.name || '').trim()) miss.push(`Name of additional client ${i + 2}`);
     else if (!String(c.phone || '').trim()) miss.push(`Phone number for ${c.name}`);
   });
+  if (d.payer_other && !isProBono(d) && ['consultation', 'retainer'].includes(type)) {
+    if (!String(d.payer_name || '').trim()) miss.push('Fee payer name');
+    else if (!String(d.payer_email || '').trim() && !String(d.payer_address || '').trim()) miss.push(`Email or address for ${d.payer_name} (fee payer)`);
+  }
   if (free && ['family', 'friend'].includes(d.pro_bono_reason) && !String(d.relationship || '').trim()) miss.push('Relationship to the RCIC');
   if (free && d.pro_bono_reason === 'other' && !String(d.pro_bono_note || '').trim()) miss.push('Reason for pro bono');
   if (!['consultation', 'retainer'].includes(type)) return miss;

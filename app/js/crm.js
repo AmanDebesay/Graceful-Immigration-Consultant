@@ -131,7 +131,7 @@ export const EMAIL_TEMPLATES = [
 ];
 
 let commsStatus = null;
-export async function composeEmail({ contact = null, to = '', subject = '', body = '' } = {}) {
+export async function composeEmail({ contact = null, to = '', subject = '', body = '', onSent = null } = {}) {
   if (!commsStatus) commsStatus = await callFn('comms', { action: 'status' }).catch((e) => ({ error: e.message }));
   const st = commsStatus;
   const first = (contact?.full_name || '').split(' ')[0] || 'there';
@@ -172,7 +172,7 @@ export async function composeEmail({ contact = null, to = '', subject = '', body
       const r = await callFn('comms', { action: 'send', contact_id: contact?.id || null, from: m.querySelector('#fr').value,
         to: m.querySelector('#to').value, cc: m.querySelector('#cc').value, bcc: m.querySelector('#bcc').value, subject: m.querySelector('#su').value, body: text,
         attachments, importance: m.querySelector('#hi').checked ? 'high' : 'normal' });
-      toast(`Email sent from ${r.from}`); changed();
+      toast(`Email sent from ${r.from}`); changed(); onSent?.(r);
     } }],
   });
 }
