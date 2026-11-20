@@ -130,9 +130,13 @@ export async function receiptPdf(html) {
   document.body.appendChild(host);
   try {
     await Promise.all([...host.querySelectorAll('img')].map((i) => (i.complete ? null : new Promise((r) => { i.onload = i.onerror = r; }))));
-    const worker = html2pdf().set({ margin: 0, image: { type: 'jpeg', quality: 0.92 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 816 },
-      jsPDF: { unit: 'px', format: [816, 1056], orientation: 'portrait', hotfixes: ['px_scaling'] }, pagebreak: { mode: ['avoid-all'] } }).from(host.firstElementChild.nextElementSibling || host);
-    const blob = await worker.outputPdf('blob');
+    const src = host.querySelector('.gr') || host;
+    const pages = Math.max(1, Math.ceil((src.scrollHeight - 8) / 1056));  // a receipt a few px over one page stays on one page
+    const worker = html2pdf().set({ margin: 0, image: { type: 'jpeg', quality: 0.92 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 816, width: 816, x: 0, y: 0, scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: 'px', format: [816, 1056], orientation: 'portrait', hotfixes: ['px_scaling'] }, pagebreak: { mode: ['css'] } }).from(src).toPdf();
+    const pdf = await worker.get('pdf');
+    while (pdf.getNumberOfPages() > pages) pdf.deletePage(pdf.getNumberOfPages());
+    const blob = pdf.output('blob');
     const base64 = await new Promise((r) => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(',')[1]); fr.readAsDataURL(blob); });
     return { base64, blob };
   } finally { host.remove(); }
