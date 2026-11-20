@@ -131,7 +131,9 @@ export const EMAIL_TEMPLATES = [
 ];
 
 let commsStatus = null;
-export async function composeEmail({ contact = null, to = '', subject = '', body = '', onSent = null } = {}) {
+// html(text): builds a formatted message from the text typed in the box (e.g. a receipt). files: attachments already prepared
+// ({ name, contentType, contentBytes } base64), sent along with any the user adds.
+export async function composeEmail({ contact = null, to = '', subject = '', body = '', onSent = null, html = null, files: preset = [] } = {}) {
   if (!commsStatus) commsStatus = await callFn('comms', { action: 'status' }).catch((e) => ({ error: e.message }));
   const st = commsStatus;
   const first = (contact?.full_name || '').split(' ')[0] || 'there';
@@ -144,12 +146,14 @@ export async function composeEmail({ contact = null, to = '', subject = '', body
       <div class="row-2"><div class="field"><label>To</label><input class="input" id="to" value="${esc(to || contact?.email || '')}"></div>
         <div class="field"><label>Cc (optional)</label><input class="input" id="cc" placeholder="Separate addresses with commas"></div></div>
       <div class="row-2"><div class="field"><label>Bcc (optional)</label><input class="input" id="bcc"></div>
-        <div class="field"><label>Attachments (up to about 3 MB in total)</label><input class="input" type="file" id="af" multiple></div></div>
+        <div class="field"><label>Attachments (up to about 3 MB in total)</label><input class="input" type="file" id="af" multiple>
+          <div id="pre">${preset.map((f, i) => `<div class="row" data-pre="${i}" style="gap:6px;margin-top:6px;font-size:13px">${icon('file')} <b>${esc(f.name)}</b> <span class="dk-muted">attached · ${Math.max(1, Math.round(f.contentBytes.length * 0.75 / 1024))} KB</span><button type="button" class="btn btn-ghost btn-sm" data-unpre="${i}" aria-label="Remove attachment">${icon('x')}</button></div>`).join('')}</div></div></div>
       <div class="field"><label>Subject</label><input class="input" id="su" value="${esc(subject)}"></div>
       <label class="row" style="gap:6px;margin:-4px 0 10px"><input type="checkbox" id="hi"> Mark as high importance</label>
       <div class="field"><label>Message</label><textarea class="input" id="bo" rows="12">${esc(body)}</textarea>
-        <small class="dk-muted">Your name, title and the office phone are added as a signature. The email is saved in Outlook Sent Items${contact ? ' and on this client\'s file' : ''}.</small></div>`,
+        <small class="dk-muted">${html ? 'Sent in the Graceful letter format with the details below your message. ' : ''}Your email signature (set in My profile) is added. The email is saved in Outlook Sent Items${contact ? ' and on this client\'s file' : ''}.</small></div>`,
     onOpen: (m) => {
+      m.querySelectorAll('[data-unpre]').forEach((b) => (b.onclick = () => { preset[+b.dataset.unpre] = null; b.closest('[data-pre]').remove(); }));
       m.querySelector('#tp').onchange = (e) => {
         // A prepared message (e.g. a signing link) is only replaced after the user confirms.
         if (body && +e.target.value && !confirm('Replace the prepared message (and any link in it) with this template?')) { e.target.value = '0'; return; }
@@ -163,14 +167,17 @@ export async function composeEmail({ contact = null, to = '', subject = '', body
       const text = m.querySelector('#bo').value;
       if (/\[[^\]]+\]/.test(text) && !confirm('The message still has [placeholders] in square brackets. Send anyway?')) return false;
       const files = [...m.querySelector('#af').files];
-      if (files.reduce((n, f) => n + f.size, 0) > 3 * 1024 * 1024) throw new Error('Attachments are larger than 3 MB in total. Share big files another way.');
-      const attachments = await Promise.all(files.map((f) => new Promise((res, rej) => {
+      const ready = preset.filter(Boolean);
+      if (files.reduce((n, f) => n + f.size, 0) + ready.reduce((n, f) => n + f.contentBytes.length * 0.75, 0) > 3 * 1024 * 1024) throw new Error('Attachments are larger than 3 MB in total. Share big files another way.');
+      const added = await Promise.all(files.map((f) => new Promise((res, rej) => {
         const fr = new FileReader(); fr.onerror = () => rej(new Error(`Could not read ${f.name}`));
         fr.onload = () => res({ name: f.name, contentType: f.type || 'application/octet-stream', contentBytes: String(fr.result).split(',')[1] || '' });
         fr.readAsDataURL(f);
       })));
+      const attachments = [...ready, ...added];
       const r = await callFn('comms', { action: 'send', contact_id: contact?.id || null, from: m.querySelector('#fr').value,
         to: m.querySelector('#to').value, cc: m.querySelector('#cc').value, bcc: m.querySelector('#bcc').value, subject: m.querySelector('#su').value, body: text,
+        html: html ? html(text) : undefined,
         attachments, importance: m.querySelector('#hi').checked ? 'high' : 'normal' });
       toast(`Email sent from ${r.from}`); changed(); onSent?.(r);
     } }],

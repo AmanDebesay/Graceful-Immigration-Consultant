@@ -7,6 +7,7 @@ import { adminClient, callerProfile, corsHeaders, escapeHtml, hasPerm, json } fr
 import { graphAttachment, graphCalendarView, graphConfigured, graphCreateEvent, graphDeleteEvent, graphFindMail, graphFolders, graphForward, graphGetMail, graphListMail,
   graphMark, graphMove, graphReply, graphSendMail, graphUpdateEvent, HUB, notifyTeams } from "../_shared/m365.ts";
 import * as MX from "../_shared/mailbox.ts";
+import { signatureHtml } from "../_shared/signature.ts";
 
 // Microsoft's "Access is denied" usually means a permission hasn't been granted to the app yet.
 const friendly = (e: unknown) => {
@@ -36,11 +37,10 @@ Deno.serve(async (req) => {
 
   switch (body.action) {
     case "status": {
-      const { data: me } = await admin.from("profiles").select("full_name, job_title").eq("id", caller.id).single();
+      const { data: me } = await admin.from("profiles").select("full_name, job_title, phone, email_sig").eq("id", caller.id).single();
       const { data: org } = await admin.from("org_settings").select("business_name, phone").eq("id", 1).single();
-      // Signature lines for the Mail page's editor (the page adds the From address).
       const signature = [me?.full_name, me?.job_title, org?.business_name, org?.phone, "gracefulimmigration.ca"].filter(Boolean);
-      return json(req, { email: graphConfigured(), mailboxes: [...new Set([mine, shared])], teams: !!integ?.teams_webhook_url, signature });
+      return json(req, { email: graphConfigured(), mailboxes: [...new Set([mine, shared])], teams: !!integ?.teams_webhook_url, signature, signature_html: signatureHtml(me, org) });
     }
 
     case "send": {
@@ -58,13 +58,12 @@ Deno.serve(async (req) => {
       if (!subject || !text) return json(req, { error: "Add a subject and a message." }, 400);
       const contactId = typeof body.contact_id === "string" ? body.contact_id : null;
 
-      const { data: me } = await admin.from("profiles").select("full_name, job_title").eq("id", caller.id).single();
+      const { data: me } = await admin.from("profiles").select("full_name, job_title, phone, email_sig").eq("id", caller.id).single();
       const { data: org } = await admin.from("org_settings").select("business_name, phone").eq("id", 1).single();
-      const sig = [me?.full_name, me?.job_title, org?.business_name, `${org?.phone ?? ""} · ${from}`, "gracefulimmigration.ca"].filter(Boolean);
-      const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1C2333">
-        ${escapeHtml(text).split(/\n{2,}/).map((p) => `<p style="margin:0 0 12px">${p.replace(/\n/g, "<br>")}</p>`).join("")}
-        <p style="margin:18px 0 0;color:#5B6476;font-size:13px;border-top:1px solid #E7E2D6;padding-top:10px">${sig.map(escapeHtml).join("<br>")}</p>
-        <p style="color:#8A93A3;font-size:11px;margin-top:10px">This email and any attachments are confidential and intended only for the addressee.</p></div>`;
+      // A prepared, formatted message (for example a receipt) comes as html; otherwise the plain text becomes paragraphs.
+      const content = typeof body.html === "string" && body.html.trim() ? MX.cleanHtml(body.html)
+        : escapeHtml(text).split(/\n{2,}/).map((p) => `<p style="margin:0 0 12px">${p.replace(/\n/g, "<br>")}</p>`).join("");
+      const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1C2333">${content}${signatureHtml(me, org)}</div>`;
       try {
         await graphSendMail({ from, to, cc, bcc, subject, html, attachments: atts, importance: body.importance === "high" ? "high" : "normal" });
       } catch (e) {
@@ -108,10 +107,9 @@ Deno.serve(async (req) => {
         // reply
         const text = String(body.body ?? "").trim().slice(0, 20000);
         if (!text) return json(req, { error: "Write a reply first." }, 400);
-        const { data: me } = await admin.from("profiles").select("full_name, job_title").eq("id", caller.id).single();
+        const { data: me } = await admin.from("profiles").select("full_name, job_title, phone, email_sig").eq("id", caller.id).single();
         const { data: org } = await admin.from("org_settings").select("business_name, phone").eq("id", 1).single();
-        const sig = [me?.full_name, me?.job_title, org?.business_name, `${org?.phone ?? ""} · ${box}`].filter(Boolean);
-        const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6">${escapeHtml(text).split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("")}<p style="color:#5B6476;font-size:13px">${sig.map(escapeHtml).join("<br>")}</p></div>`;
+        const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6">${escapeHtml(text).split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("")}${signatureHtml(me, org)}</div>`;
         await graphReply(box, id, html, body.replyAll === true);
         // Log on the client's file when the other party is a client
         const orig = await graphGetMail(box, id);

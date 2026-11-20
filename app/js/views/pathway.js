@@ -1,6 +1,6 @@
 // One pathway assessment: the Pathway map tool in a frame, saving its answers to the client file as you work.
 import { db, state, can, esc, icon, fmtDateTime, staffName, confirmBox, toast, fail, modal } from '../core.js';
-import { PA_BADGE, draftSummary } from './pathways.js';
+import { PA_BADGE, draftSummary, canDeletePathway, deletePathway } from './pathways.js';
 
 export async function render(el, [id], { setTitle }) {
   const [{ data: a, error }, { data: org }] = await Promise.all([
@@ -19,7 +19,7 @@ export async function render(el, [id], { setTitle }) {
       <button class="btn btn-gold" id="client">${icon('award')} Client summary</button>
       ${editable && can('pathway.finalize') ? `<button class="btn btn-primary" id="fin">${icon('check')} Mark final</button>` : ''}
       ${final && can('pathway.finalize') ? `<button class="btn" id="reopen">Reopen</button>` : ''}
-      ${editable ? `<button class="btn btn-danger" id="del" aria-label="Delete draft">${icon('trash')}</button>` : ''}</div>
+      ${canDeletePathway(a) ? `<button class="btn btn-danger" id="del" aria-label="Delete assessment" title="Delete this assessment">${icon('trash')}</button>` : ''}</div>
     ${a.agreements?.status === 'signed' ? '' : `<div class="alert err">${a.agreements ? `Agreement ${esc(a.agreements.number)} is not signed yet.` : 'Not linked to a signed agreement.'} You can take the client's intake now; give advice only after the client signs the Initial Consultation Agreement.</div>`}
     ${editable && !can('pathway.finalize') ? '<div class="alert info">When you finish, ask the RCIC to review the assessment and mark it final.</div>' : ''}
     <div class="card" id="sumBox" style="margin-bottom:12px"><div class="card-b" style="padding:14px 18px">
@@ -154,10 +154,8 @@ export async function render(el, [id], { setTitle }) {
       } }] });
   }
   el.querySelector('#del')?.addEventListener('click', async () => {
-    if (!(await confirmBox('Delete draft', `Delete draft ${a.number}? This can't be undone.`, 'Delete', true))) return;
+    if (!(await deletePathway({ id, number: a.number, status: a.status, client: a.contacts?.full_name }))) return;
     clearTimeout(timer); timer = null;
-    const { error: e } = await db.from('pathway_assessments').delete().eq('id', id);
-    if (e) return fail(e);
-    toast('Draft deleted'); location.hash = '#/pathways';
+    location.hash = '#/pathways';
   });
 }

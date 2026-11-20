@@ -469,7 +469,8 @@ export async function render(el) {
   }
 
   // ── Composer ──
-  const sigHTML = (addr) => `<div class="gi-sig" style="color:#5B6476;font-size:13px;margin-top:18px">--<br>${(status.signature || []).map(esc).join('<br>')}<br>${esc(addr)}</div>`;
+  const sigHTML = (addr) => status.signature_html ? `<div class="gi-sig">${status.signature_html}</div>`
+    : `<div class="gi-sig" style="color:#5B6476;font-size:13px;margin-top:18px">--<br>${(status.signature || []).map(esc).join('<br>')}<br>${esc(addr)}</div>`;
   async function openComposer(o) {
     if (comp) await closeComposer({ save: true });
     let draft = null;
@@ -742,7 +743,7 @@ export async function render(el) {
     owa: () => window.open('https://outlook.office.com/mail/', '_blank', 'noopener'),
     autoreply: autoReplies, rules: rulesDialog,
     cats: async () => { if (!cats.length) cats = (await mx('categories')).categories; modal({ title: 'Categories', body: `<p class="dk-muted" style="margin-bottom:10px">Categories come from Outlook. Add or rename them in Outlook on the web (Settings → Mail → Categories).</p><div class="ol-catlist">${cats.map((c) => `<span class="ol-cat big" style="--c:${CAT[c.color] || '#8A94A6'}">${esc(c.name)}</span>`).join('')}</div>` }); },
-    signature: () => modal({ title: 'Signature', body: `<p class="dk-muted" style="margin-bottom:10px">Added to new emails and replies written here. It uses your name and job title from <a href="#/account">My profile</a> and the business details in Business Settings.</p><div class="ol-sigbox">${sigHTML(addrOf(box))}</div>` }),
+    signature: () => modal({ title: 'Signature', body: `<p class="dk-muted" style="margin-bottom:10px">Added to new emails and replies written here. It is set in <a href="#/account">My profile → Email signature</a>.</p><div class="ol-sigbox">${sigHTML(addrOf(box))}</div>` }),
     // composer
     'c:send': () => sendComposer(), 'c:sendMenu': (a) => scheduleMenu(a),
     'c:save': () => comp && saveDraft(comp),

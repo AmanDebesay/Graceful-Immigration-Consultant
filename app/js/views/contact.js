@@ -283,5 +283,6 @@ export async function render(el, [id], { setTitle }) {
       : `<div class="empty">No intake assessments yet. <a href="#/assessments/new">Start one</a></div>`}` : '';
     body.innerHTML = pathHtml + intakeHtml;
     body.querySelector('#newPa')?.addEventListener('click', () => pw.startPathway({ contactId: id }).catch(fail));
+    pw.wirePathwayDelete(body, assessmentsTab);
   }
 }

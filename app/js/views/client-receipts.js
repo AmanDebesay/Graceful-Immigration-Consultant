@@ -1,7 +1,8 @@
 // Client receipts: a receipt for every payment received (PMT-) and every retainer paid into trust (TRD-).
 // Receipts are addressed to whoever paid: the client, or the fee payer named in the agreement / on the invoice.
 // The client stays on the receipt as the person the services are for.
-import { db, can, esc, icon, fmtDate, toast, fail, rpc, modal } from '../core.js';
+import { db, state, can, esc, icon, fmtDate, toast, fail, rpc, modal, today } from '../core.js';
+import { receiptHtml, receiptEmailHtml, receiptPdf } from '../receipt-template.js';
 import { money, num, METHOD_LABEL, orgSettings, receivePayment, trustTxn, quickSale, payerFor, downloadCsv } from '../fin.js';
 
 export async function render(el, [kind, id] = [], ctx = {}) {
@@ -71,9 +72,12 @@ async function list(el) {
 }
 
 // ── One receipt ──
+// Issued by whoever prints or sends it: their name, title and saved handwritten signature go on the receipt.
 async function receipt(el, kind, id, { setTitle } = {}) {
   const manage = can('finance.manage');
-  const s = await orgSettings();
+  const [s, { data: mine }, { data: prof }] = await Promise.all([orgSettings(),
+    db.from('user_signatures').select('signature').eq('user_id', state.profile.id).maybeSingle(),
+    db.from('profiles').select('full_name, job_title, email_sig').eq('id', state.profile.id).single()]);
   let r, apps = [], payer = null;
   if (kind === 'payment') {
     const { data, error } = await db.from('payments').select('*, contacts(id, full_name, email, phone, address, city, province, postal_code), payment_applications(amount, invoices(id, number, issue_date, total, tax_total, balance, bill_to, status))').eq('id', id).single();
@@ -93,54 +97,48 @@ async function receipt(el, kind, id, { setTitle } = {}) {
   const fromClient = fromName === c.full_name;
   const email = byPayer ? payer.email : fromClient ? c.email : (payer?.email || c.email || '');
   const gst = apps.reduce((t, a) => t + (Number(a.invoices?.total) ? num(Number(a.amount) * Number(a.invoices.tax_total) / Number(a.invoices.total)) : 0), 0);
-  setTitle?.(`Receipt ${r.number}`);
+  const sg = prof?.email_sig || {};
+  const model = {
+    org: s, number: r.number || '', date: r.date, amount: r.amount, method: METHOD_LABEL[r.method] || r.method || '', reference: r.reference, kind, memo: r.memo, voided: r.voided,
+    from: { name: fromName, lines: byPayer ? [payer.address, payer.email, payer.phone] : fromClient ? [[c.address, c.city, c.province, c.postal_code].filter(Boolean).join(', '), c.email] : [] },
+    client: fromClient ? '' : c.full_name,
+    apps: apps.map((a) => ({ number: a.invoices?.number, date: a.invoices?.issue_date, total: a.invoices?.total, paid: a.amount, balance: a.invoices?.status === 'void' ? 0 : a.invoices?.balance })),
+    gst, issuer: { name: prof?.full_name || state.profile.full_name, credentials: sg.credentials || '', title: sg.title || prof?.job_title || '' },
+    signature: mine?.signature || '', issued: today(),
+  };
+  const html = receiptHtml(model);
+  const fileName = `Receipt ${model.number}.pdf`;
+  setTitle?.(`Receipt ${model.number}`);
 
   el.innerHTML = `
     <div class="toolbar"><a class="btn btn-sm" href="#/client-receipts">← Client Receipts</a><div class="grow"></div>
       ${r.receipt_sent_at ? `<span class="badge b-GREEN">Sent ${esc(fmtDate(r.receipt_sent_at))}</span>` : ''}
       ${manage && !r.voided ? `<button class="btn" id="from">${icon('users')} Received from</button>` : ''}
-      <button class="btn" id="print">${icon('file')} Print / PDF</button>
+      <button class="btn" id="print">${icon('file')} Print</button><button class="btn" id="pdf">${icon('file')} Download PDF</button>
       ${manage && !r.voided ? `${r.receipt_sent_at ? '' : '<button class="btn" id="given" title="You gave or sent it another way">Mark as sent</button>'}<button class="btn btn-gold" id="mail">${icon('mail')} Email receipt</button>` : ''}
     </div>
     ${r.voided ? '<div class="alert err">This payment was voided, so this receipt is no longer valid.</div>' : ''}
-    <div class="card inv-sheet" id="sheet" style="position:relative">
-      ${r.voided ? '<div style="position:absolute;top:40%;left:0;right:0;text-align:center;font-size:96px;font-weight:800;color:rgba(217,45,32,.18);transform:rotate(-18deg);pointer-events:none">VOID</div>' : ''}
-      <div class="inv-head">
-        <div><img src="../public/img/logo-emblem.png" alt="" style="width:70px"><h2 style="font-family:var(--serif);color:var(--navy);margin-top:6px">${esc(s.business_name)}</h2>
-          <div class="inv-muted">${esc(s.address)}<br>${esc(s.phone)} · ${esc(s.email)}${s.gst_number ? `<br>GST/HST No. ${esc(s.gst_number)}` : ''}<br>${esc(s.rcic_name)}, RCIC-IRB · College ID ${esc(s.licence_number)}</div></div>
-        <div style="text-align:right"><div class="inv-title">RECEIPT</div><div style="font-size:18px;font-weight:700">${esc(r.number || '')}</div>
-          <div class="inv-muted" style="margin-top:6px">Date received<br><b style="color:var(--ink)">${fmtDate(r.date)}</b></div></div>
-      </div>
-      <div class="inv-meta">
-        <div><small>RECEIVED FROM</small><b>${esc(fromName)}</b>
-          <div class="inv-muted">${byPayer ? [payer.address, payer.email, payer.phone].filter(Boolean).map(esc).join('<br>')
-            : fromClient ? esc([c.address, c.city, c.province, c.postal_code].filter(Boolean).join(', ')) + (c.email ? '<br>' + esc(c.email) : '') : ''}</div>
-          ${fromClient ? '' : `<small style="margin-top:12px;display:block">ON BEHALF OF CLIENT</small><b>${esc(c.full_name)}</b>`}</div>
-        <div style="text-align:right"><small>AMOUNT RECEIVED</small><div style="font-size:30px;font-weight:800;color:var(--navy)">${money(r.amount)}</div><div class="inv-muted">Canadian dollars</div></div>
-      </div>
-      <table class="t inv-lines"><tbody>
-        <tr><td style="width:220px">Payment method</td><td><b>${esc(METHOD_LABEL[r.method] || r.method || '—')}</b>${r.reference ? ` · Reference ${esc(r.reference)}` : ''}</td></tr>
-        ${kind === 'trust'
-          ? `<tr><td>For</td><td><b>Retainer paid in advance</b>, held in the RCIC's client (trust) account</td></tr>`
-          : `<tr><td>For</td><td>Immigration and citizenship services${!fromClient ? ` provided to ${esc(c.full_name)}` : ''}${r.memo ? ` — ${esc(r.memo)}` : ''}</td></tr>`}
-      </tbody></table>
-      ${apps.length ? `<table class="t inv-lines" style="margin-top:14px"><thead><tr><th>Applied to invoice</th><th>Invoice date</th><th style="text-align:right">Invoice total</th><th style="text-align:right">Paid now</th><th style="text-align:right">Balance remaining</th></tr></thead><tbody>
-        ${apps.map((a) => `<tr><td>${esc(a.invoices?.number || '')}</td><td>${fmtDate(a.invoices?.issue_date)}</td><td style="text-align:right">${money(a.invoices?.total)}</td>
-          <td style="text-align:right">${money(a.amount)}</td><td style="text-align:right">${money(a.invoices?.status === 'void' ? 0 : a.invoices?.balance)}</td></tr>`).join('')}</tbody></table>` : ''}
-      <div class="inv-foot">
-        <div style="flex:1">
-          ${kind === 'trust' ? '<p class="inv-muted">This money is held in trust and is not yet earned. It is used to pay invoices for services once they are provided, as set out in the service agreement, and any unearned amount is refunded.</p>' : ''}
-          ${!fromClient ? `<p class="inv-muted">Paid by ${esc(fromName)} on behalf of ${esc(c.full_name)}. The client remains the person the services are provided to.</p>` : ''}
-          <p class="inv-muted" style="margin-top:8px">Thank you. Please keep this receipt for your records.</p>
-          <p style="margin-top:28px">Received by: <b>${esc(s.rcic_name)}</b>, RCIC-IRB<br><span class="inv-muted">${esc(s.business_name)}</span></p></div>
-        <div class="inv-totals">
-          ${gst > 0 ? `<div><span>Fees</span><b>${money(Number(r.amount) - gst)}</b></div><div><span>GST included</span><b>${money(gst)}</b></div>` : ''}
-          <div class="grand"><span>Total received</span><b>${money(r.amount)}</b></div></div>
-      </div>
-    </div>`;
+    ${!mine?.signature && !r.voided ? `<div class="alert info">Your handwritten signature isn't saved yet, so your name is printed in script. <button class="btn btn-sm" id="addSig">Add my signature</button></div>` : ''}
+    <div class="card" style="padding:0;overflow:auto;max-width:818px"><div id="doc">${html}</div></div>`;
 
   const again = () => receipt(el, kind, id, { setTitle });
-  el.querySelector('#print').onclick = () => window.print();
+  el.querySelector('#print').onclick = async () => (await import('./agreement.js')).printDoc(html, fileName.replace(/\.pdf$/, ''));
+  el.querySelector('#pdf').onclick = async (ev) => {
+    const b = ev.currentTarget; b.disabled = true;
+    try { const { blob } = await receiptPdf(html); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+    catch (e) { fail(e); } finally { b.disabled = false; }
+  };
+  el.querySelector('#addSig')?.addEventListener('click', async () => {
+    const { signaturePad } = await import('./agreement.js');
+    let pad;
+    modal({ title: 'Your handwritten signature', body: '<p class="dk-muted" style="margin-bottom:10px">Saved to your profile and printed on the receipts you issue. Only you can use it.</p><div id="pad"></div>',
+      onOpen: async (m) => { pad = await signaturePad(m.querySelector('#pad')); },
+      actions: [{ label: 'Cancel' }, { label: 'Save signature', cls: 'btn-primary', onClick: async () => {
+        const sig = pad?.(); if (!sig) throw new Error('Draw or type your signature first.');
+        const { error } = await db.from('user_signatures').upsert({ user_id: state.profile.id, signature: sig, updated_at: new Date().toISOString() });
+        if (error) throw error; toast('Signature saved'); again();
+      } }] });
+  });
   el.querySelector('#given')?.addEventListener('click', async () => {
     try { await rpc('update_receipt', { p_kind: kind, p_id: id, p_sent: true }); toast('Marked as sent'); again(); } catch (e) { fail(e); }
   });
@@ -154,18 +152,15 @@ async function receipt(el, kind, id, { setTitle } = {}) {
       await rpc('update_receipt', { p_kind: kind, p_id: id, p_received_from: v }); toast('Saved'); again();
     } }],
   }));
-  el.querySelector('#mail')?.addEventListener('click', async () => {
+  el.querySelector('#mail')?.addEventListener('click', async (ev) => {
+    const b = ev.currentTarget; b.disabled = true; toast('Preparing the PDF receipt…');
+    let pdf;
+    try { pdf = await receiptPdf(html); } catch (e) { b.disabled = false; return fail(e); }
+    b.disabled = false;
     const first = String(fromName).split(' ')[0] || 'there';
-    const lines = [
-      `Receipt no.: ${r.number}`, `Date received: ${fmtDate(r.date)}`, `Amount received: ${money(r.amount)} CAD`,
-      `Payment method: ${METHOD_LABEL[r.method] || r.method || ''}${r.reference ? ` (reference ${r.reference})` : ''}`, `Received from: ${fromName}`,
-      ...(!fromClient ? [`On behalf of client: ${c.full_name}`] : []),
-      ...(kind === 'trust' ? ['For: retainer paid in advance, held in our client (trust) account until earned'] : apps.map((a) => `Applied to invoice ${a.invoices?.number}: ${money(a.amount)} (balance remaining ${money(a.invoices?.balance)})`)),
-      ...(gst > 0 ? [`GST included: ${money(gst)}${s.gst_number ? ` (GST/HST No. ${s.gst_number})` : ''}`] : []),
-    ];
-    const body = `Hello ${first},\n\nThank you for your payment. Here is your receipt:\n\n${lines.join('\n')}\n\nPlease keep this email for your records.\n\nThank you,\n${s.rcic_name}\n${s.business_name}`;
-    (await import('../crm.js')).composeEmail({ contact: { ...c, email }, to: email || '', subject: `Receipt ${r.number} from ${s.business_name}`, body,
+    const body = `Hello ${first},\n\nThank you for your payment of ${money(r.amount)} received on ${fmtDate(r.date, { year: 'numeric', month: 'long', day: 'numeric' })}${fromClient ? '' : ` on behalf of ${c.full_name}`}. Your official receipt is attached as a PDF, and the details are below.\n\nIf you have any questions, please reply to this email or call ${s.phone}.`;
+    (await import('../crm.js')).composeEmail({ contact: { ...c, email }, to: email || '', subject: `Official receipt ${model.number} · ${s.business_name}`, body,
+      html: (text) => receiptEmailHtml(model, text), files: [{ name: fileName, contentType: 'application/pdf', contentBytes: pdf.base64 }],
       onSent: async () => { await rpc('update_receipt', { p_kind: kind, p_id: id, p_sent: true }).catch(() => {}); again(); } });
-    toast('Tip: use Print / PDF to save the receipt as a PDF and attach it to the email.');
   });
 }

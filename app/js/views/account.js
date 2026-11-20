@@ -1,4 +1,4 @@
-import { db, state, esc, icon, toast, fail, modal, confirmBox, ROLE_LABEL, avatarHtml } from '../core.js';
+import { db, state, esc, icon, toast, fail, modal, confirmBox, ROLE_LABEL, avatarHtml, callFn } from '../core.js';
 
 export async function render(el) {
   const p = state.profile;
@@ -30,6 +30,8 @@ export async function render(el) {
         <div class="field"><label>Confirm new password</label><input class="input" type="password" id="p2" autocomplete="new-password"></div>
         <div class="row" style="justify-content:flex-end"><button class="btn" type="submit">Change password</button></div></form></div>
     </div></div>`;
+
+  signatureCards(el).catch(() => {});
 
   el.querySelector('#pf').onsubmit = async (e) => {
     e.preventDefault();
@@ -122,4 +124,47 @@ function squareJpeg(file, size) {
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('That file is not an image we can read.')); };
     img.src = url;
   });
+}
+
+// ── Email signature (same design as the Outlook signature) and handwritten signature ──
+async function signatureCards(el) {
+  const p = state.profile;
+  const { data: row } = await db.from('profiles').select('email_sig').eq('id', p.id).single();
+  const sg = row?.email_sig || {};
+  const f = (k, label, ph = '', type = 'input') => `<div class="field"><label>${label}</label>${type === 'textarea'
+    ? `<textarea class="input" data-s="${k}" rows="3" placeholder="${esc(ph)}">${esc(sg[k] || '')}</textarea>` : `<input class="input" data-s="${k}" value="${esc(sg[k] || '')}" placeholder="${esc(ph)}">`}</div>`;
+  el.insertAdjacentHTML('beforeend', `<div class="grid g-2" style="max-width:1000px;margin-top:18px">
+    <div class="card"><div class="card-h"><h3>Email signature</h3></div><form class="card-b" id="sigf">
+      <p class="dk-muted" style="margin-bottom:12px">Added to emails sent from the dashboard (receipts, invoices, signing links, the Email page), with the Graceful logo. Your name comes from your profile above.</p>
+      <div class="row-2">${f('credentials', 'Credentials after your name', 'e.g. RCIC-IRB')}${f('title', 'Title', 'e.g. Case Assistant')}</div>
+      <div class="row-2">${f('college_id', 'CICC College ID (RCICs only)', 'e.g. R1056136')}${f('phone', 'Phone', '403-915-4230')}</div>
+      ${f('location', 'Location line', 'Lethbridge, Alberta | Serving clients across Canada')}
+      ${f('footer', 'Land acknowledgement or note under the line (optional)', '', 'textarea')}
+      <div class="row" style="justify-content:flex-end"><button class="btn btn-primary" type="submit">Save signature</button></div></form></div>
+    <div class="grid">
+      <div class="card"><div class="card-h"><h3>Preview</h3></div><div class="card-b" id="sigPrev" style="background:#fff;overflow:auto"><span class="dk-muted">Loading…</span></div></div>
+      <div class="card"><div class="card-h"><h3>Handwritten signature</h3></div><div class="card-b">
+        <p class="dk-muted" style="margin-bottom:10px">Printed on the receipts you issue and offered when you sign agreements. Only you can see or use it.</p>
+        <div id="hsig"></div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn btn-primary" id="hsigSave" type="button">Save handwritten signature</button></div></div></div></div></div>`);
+  const prev = async () => {
+    const st = await callFn('comms', { action: 'status' }).catch(() => null);
+    el.querySelector('#sigPrev').innerHTML = st?.signature_html || '<span class="dk-muted">Preview is shown once email is connected.</span>';
+  };
+  prev();
+  el.querySelector('#sigf').onsubmit = async (e) => {
+    e.preventDefault();
+    const v = Object.fromEntries([...el.querySelectorAll('[data-s]')].map((i) => [i.dataset.s, i.value.trim()]).filter(([, x]) => x));
+    const { error } = await db.from('profiles').update({ email_sig: v }).eq('id', p.id);
+    if (error) return fail(error);
+    toast('Signature saved'); prev();
+  };
+  const { signaturePad } = await import('./agreement.js');
+  const pad = await signaturePad(el.querySelector('#hsig'), { reuse: true });
+  el.querySelector('#hsigSave').onclick = async () => {
+    const sig = pad();
+    if (!sig) return toast('Draw or type your signature first.');
+    const { error } = await db.from('user_signatures').upsert({ user_id: p.id, signature: sig, updated_at: new Date().toISOString() });
+    if (error) return fail(error);
+    toast('Handwritten signature saved');
+  };
 }

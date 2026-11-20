@@ -1,5 +1,5 @@
 // Pathway assessments: the RCIC's route assessment (Pathway map tool) for each client, saved to the client file.
-import { db, state, can, esc, icon, fmtDate, timeAgo, staffName, modal, fail } from '../core.js';
+import { db, state, can, esc, icon, fmtDate, timeAgo, staffName, modal, fail, rpc, toast } from '../core.js';
 import { contactsList, contactOptions, clearFinCache } from '../fin.js';
 
 export const PA_BADGE = (s) => s === 'final' ? '<span class="badge b-GREEN">Final</span>' : '<span class="badge b-gold">Draft</span>';
@@ -96,12 +96,41 @@ export function draftSummary(r, first = '', facts = []) {
   return out.join('\n');
 }
 
+// Who may delete: drafts with pathway.edit, final assessments only with pathway.finalize (the RCIC).
+export const canDeletePathway = (p) => (p.status === 'final' ? can('pathway.finalize') : can('pathway.edit'));
+/** Asks for confirmation (and a reason for a final assessment), deletes it, and resolves true when deleted. */
+export function deletePathway(p) {
+  const final = p.status === 'final';
+  return new Promise((resolve) => {
+    modal({
+      title: `Delete ${p.number}`,
+      body: `<p style="margin-bottom:10px">Delete pathway assessment <b>${esc(p.number)}</b>${p.client ? ` for <b>${esc(p.client)}</b>` : ''}? Its answers and summary are removed and this can't be undone. The client's contact file stays.</p>
+        ${final ? `<div class="alert warn" style="margin-bottom:10px">This assessment is <b>final</b> and part of the client file. The deletion and your reason are kept in the audit log.</div>` : ''}
+        <div class="field"><label>Reason${final ? '' : ' (optional)'}</label><input class="input" id="pdr" placeholder="e.g. Duplicate, entered for the wrong client, test"></div>`,
+      actions: [{ label: 'Cancel', onClick: () => resolve(false) }, { label: 'Delete', cls: 'btn-danger', onClick: async (m) => {
+        const reason = m.querySelector('#pdr').value.trim();
+        if (final && !reason) throw new Error('Give a reason for deleting a final assessment.');
+        await rpc('delete_pathway_assessment', { p_id: p.id, p_reason: reason || null });
+        toast(`${p.number} deleted`); resolve(true);
+      } }],
+    });
+  });
+}
+/** Wires the delete buttons in a table made by pathwayRows. */
+export function wirePathwayDelete(box, onDeleted) {
+  box.querySelectorAll('[data-padel]').forEach((b) => (b.onclick = async (e) => {
+    e.stopPropagation();
+    if (await deletePathway({ id: b.dataset.padel, number: b.dataset.num, status: b.dataset.st, client: b.dataset.client })) (onDeleted ? onDeleted() : b.closest('tr').remove());
+  }));
+}
+
 // Table rows shared with the contact page.
-export const pathwayRows = (list, withClient = true) => `<table class="t"><thead><tr><th>Number</th>${withClient ? '<th>Client</th>' : ''}<th>Top route</th><th>Urgent</th><th>Status</th><th>Updated</th><th>By</th></tr></thead><tbody>
-  ${list.map((p) => `<tr class="click" onclick="location.hash='#/pathways/${p.id}'"><td><b>${esc(p.number)}</b></td>
+export const pathwayRows = (list, withClient = true) => `<table class="t"><thead><tr><th>Number</th>${withClient ? '<th>Client</th>' : ''}<th>Top route</th><th>Urgent</th><th>Status</th><th>Updated</th><th>By</th><th></th></tr></thead><tbody>
+  ${list.map((p) => `<tr class="click" onclick="if(!event.target.closest('[data-padel]'))location.hash='#/pathways/${p.id}'"><td><b>${esc(p.number)}</b></td>
     ${withClient ? `<td>${esc(p.contacts?.full_name || '—')}</td>` : ''}<td style="max-width:300px">${esc(p.top_route || '—')}</td>
     <td>${p.urgent_flags ? `<span class="badge b-RED">${p.urgent_flags}</span>` : '—'}</td><td>${PA_BADGE(p.status)}</td>
-    <td title="${fmtDate(p.updated_at)}">${timeAgo(p.updated_at)}</td><td>${esc(staffName(p.updated_by || p.created_by))}</td></tr>`).join('')}</tbody></table>`;
+    <td title="${fmtDate(p.updated_at)}">${timeAgo(p.updated_at)}</td><td>${esc(staffName(p.updated_by || p.created_by))}</td>
+    <td style="text-align:right">${canDeletePathway(p) ? `<button class="btn btn-ghost btn-sm" data-padel="${p.id}" data-num="${esc(p.number)}" data-st="${p.status}" data-client="${esc(p.contacts?.full_name || '')}" title="Delete" aria-label="Delete ${esc(p.number)}">${icon('trash')}</button>` : ''}</td></tr>`).join('')}</tbody></table>`;
 
 export async function render(el) {
   let status = 'all';
@@ -122,6 +151,7 @@ export async function render(el) {
     const { data, error } = await q, box = el.querySelector('#list');
     if (error) { box.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
     box.innerHTML = data.length ? pathwayRows(data) : `<div class="empty">${icon('route')}<div>No pathway assessments yet.</div></div>`;
+    wirePathwayDelete(box, load);
   }
   load();
 }
