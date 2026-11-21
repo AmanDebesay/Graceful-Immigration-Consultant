@@ -4,7 +4,7 @@ import { db, state, can, esc, icon, fmtDate, fmtDateTime, modal, confirmBox, toa
 import { TYPES, COACH, DELIVERY, letterHtml, letterText, checkLetter } from '../letter-templates.js';
 import { letterBadge } from './letters.js';
 
-const P_LABEL = { applicant: 'Principal applicant', dob: 'Date of birth', uci: 'UCI', app_no: 'Application number', citizenship: 'Country of citizenship', residence: 'Country of residence', status: 'Current status in Canada', app_type: 'Application' };
+const P_LABEL = { applicant: 'Principal applicant', dob: 'Date of birth', passport: 'Passport number', our_file: 'Our file number', uci: 'UCI', app_no: 'Application number', citizenship: 'Country of citizenship', residence: 'Country of residence', status: 'Current status in Canada', app_type: 'Application' };
 const LOGO = () => new URL('../public/img/logo-full.png', location.href.split('#')[0]).href;
 const rowsFor = (s) => Math.min(28, Math.max(4, String(s || '').split('\n').reduce((n, l) => n + 1 + Math.floor(l.length / 70), 0) + 1));
 
@@ -57,12 +57,14 @@ export async function render(el, [id], { setTitle }) {
       <p style="margin:8px 0"><b>The test:</b> ${esc(t.test)}</p>
       <details class="sl-coach"><summary>Before you write</summary>${tips(COACH.before)}</details>
       <details class="sl-coach"><summary>While you write</summary>${tips(COACH.writing)}</details>
-      <details class="sl-coach"><summary>Before you file</summary>${tips(COACH.filing)}</details>`, true)}
+      <details class="sl-coach"><summary>Before you file</summary>${tips(COACH.filing)}</details>
+      <details class="sl-coach"><summary>Working with the client</summary>${tips(COACH.client)}</details>`, true)}
     ${sec('Letter details', `<div class="field"><label>Title (for your list)</label><input class="input" id="ttl" value="${esc(title)}" ${dis}></div>
       <div class="row-2"><div class="field"><label>Date</label><input class="input" type="date" data-k="date" value="${esc(d.date || '')}" ${dis}></div>
       <div class="field"><label>How it is sent</label><select class="input" data-k="delivery" ${dis}>${Object.entries(DELIVERY).map(([k, v]) => `<option value="${k}" ${d.delivery === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}<option value="" ${!d.delivery ? 'selected' : ''}>(don’t show)</option></select></div></div>
       <div class="field"><label>To (IRCC office and address)</label><textarea class="input" data-k="recipient" rows="3" ${dis}>${esc(d.recipient || '')}</textarea></div>
-      <div class="field"><label>Salutation</label><input class="input" data-k="salutation" value="${esc(d.salutation || '')}" ${dis}></div>
+      <div class="row-2"><div class="field"><label>Salutation</label><input class="input" data-k="salutation" value="${esc(d.salutation || '')}" placeholder="Dear Officer: / Dear Sir or Madam:" ${dis}></div>
+      <div class="field"><label>Fees</label><select class="input" data-k="fees" ${dis}>${[['online', 'Paid online — receipt enclosed'], ['included', 'Payment included'], ['exempt', 'No fee payable'], ['', '(don’t mention)']].map(([v, l]) => `<option value="${v}" ${(d.fees || '') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>
       ${(t.extraFields || []).map(([k, lab, , opts]) => `<div class="field"><label>${esc(lab)}</label><select class="input" data-x="${k}" ${dis}>${opts.map(([v, l]) => `<option value="${v}" ${d.extra[k] === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`).join('')}`)}
     ${sec('RE: block (file particulars)', `<p class="dk-muted" style="font-size:12.5px;margin-bottom:8px">Filled in from the client file and case. Empty lines are left out of the letter.</p>
       ${pList.map(([k, lab]) => `<div class="field"><label>${esc(lab)}</label><input class="input" ${['dob', 'decision_date'].includes(k) ? 'type="date"' : ''} data-p="${k}" value="${esc(d.particulars[k] || '')}" ${dis}></div>`).join('')}`)}
@@ -76,12 +78,14 @@ export async function render(el, [id], { setTitle }) {
       <textarea class="input sl-ta" data-k="conclusion" rows="${rowsFor(d.conclusion)}" ${dis}>${esc(d.conclusion || '')}</textarea><div class="row" style="justify-content:flex-end;margin-top:6px">${aiBtn('conclusion')}</div>`)}
     ${sec(`Enclosures (${d.enclosures.length} tabs)`, `<p class="dk-muted" style="font-size:12.5px;margin-bottom:8px">List every document in the order it is attached. Tab numbers follow this order.</p><div id="encl">${enclRows()}</div>
       ${locked ? '' : `<button class="btn btn-sm" type="button" id="addEncl">${icon('plus')} Add a document</button>`}`)}
-    ${sec('Sign-off', `<div class="field"><label>Closing</label><input class="input" data-k="closing" value="${esc(d.closing || '')}" ${dis}></div>
+    ${sec('Sign-off & client review', `<div class="row-2"><div class="field"><label>Closing</label><input class="input" data-k="closing" value="${esc(d.closing || '')}" ${dis}></div>
+      <div class="field"><label>Client reviewed the draft on</label><input class="input" type="date" data-k="client_reviewed" value="${esc(d.client_reviewed || '')}" ${dis}></div></div>
       <p class="dk-muted" style="font-size:12.5px">${L.status === 'final' ? `Signed by ${esc(d.signed?.name || '')} when finalized on ${fmtDateTime(L.finalized_at)}.` : canFinal ? `When you finalize, your name, College ID${mine?.signature ? ' and saved handwritten signature' : ''} go on the letter.${mine?.signature ? '' : ' Save a handwritten signature under My Account to have it printed.'}` : 'The RCIC signs the letter when they finalize it.'}</p>`)}`;
 
   el.innerHTML = `<div class="toolbar no-print"><a class="btn btn-sm" href="#/contacts/${L.contact_id}">← ${esc(L.contacts?.full_name || 'Client')}</a>${letterBadge(L.status)}
       <small class="dk-muted" style="margin-left:6px">${esc(L.number)} · ${esc(t.short)}${L.cases ? ` · <a href="#/cases/${L.cases.id}">${esc(L.cases.case_number)}</a>` : ''}</small><span id="saved" class="dk-muted" style="font-size:12px;margin-left:8px"></span><div class="grow"></div>
       ${can('letters.view') ? `<button class="btn" id="review">${icon('sparkle')} AI review</button>` : ''}
+      ${can('letters.view') ? `<button class="btn" id="explain">${icon('users')} Explain to client</button>` : ''}<button class="btn" id="files">${icon('folder')} Upload file names</button>
       <button class="btn" id="word">${icon('file')} Word</button><button class="btn" id="print">${icon('file')} Print / PDF</button>
       ${canFinal && L.status === 'draft' ? `<button class="btn btn-primary" id="final">${icon('check')} Finalize & sign</button>` : ''}
       ${canFinal && L.status === 'final' ? `<button class="btn" id="reopen">Reopen to edit</button>` : ''}
@@ -149,7 +153,7 @@ export async function render(el, [id], { setTitle }) {
     let s = String(text || '');
     const names = [d.particulars.applicant, d.particulars.sponsor].filter(Boolean).flatMap((n) => String(n).split(/\s+/)).filter((n) => n.length >= 2);
     for (const n of names) s = s.replace(new RegExp(`(^|[^\\p{L}])${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'giu'), '$1[name]');
-    for (const k of ['dob', 'uci', 'app_no', 'profile_no', 'lmia', 'pal']) { const v = String(d.particulars[k] || '').trim(); if (v.length >= 4) s = s.split(v).join('[removed]'); }
+    for (const k of ['dob', 'passport', 'uci', 'app_no', 'profile_no', 'lmia', 'pal', 'our_file']) { const v = String(d.particulars[k] || '').trim(); if (v.length >= 4) s = s.split(v).join('[removed]'); }
     return s;
   };
   const ask = async (prompt, box) => {
@@ -191,6 +195,31 @@ ${scrub(letterText(d, L.type))}`;
       },
       actions: [{ label: 'Close' }] });
   });
+
+  el.querySelector('#explain')?.addEventListener('click', () => {
+    modal({ title: 'Plain-language summary for the client', wide: true, body: `${PRIV}<div id="out" class="ai-out" style="max-height:60vh;overflow:auto"><div class="loading" style="min-height:80px"><div class="spin"></div>Writing…</div></div>`,
+      onOpen: async (m) => {
+        const box = m.querySelector('#out');
+        const prompt = `Below is a submission letter an immigration consultant prepared for IRCC on behalf of a client. Write a short, warm, plain-language explanation the consultant can send to the client with the draft so the client understands exactly what is being submitted for them.
+
+Include: what we are asking IRCC for; the main reasons we give, in everyday words; each law, form or case reference explained in one simple sentence (e.g. "IRPA s. 25(1) is the part of the immigration law that lets an officer make an exception for humanitarian reasons"); the documents we rely on; and a request that the client read the letter carefully and tell us about ANY fact, date or name that is wrong or missing before we file it — they know their life better than anyone.
+Use short sentences (grade 7 reading level), no legal jargon, Canadian English. Address the client as "you". Do not add facts or promise any outcome. Start with "Here is what your letter says".
+
+--- LETTER ---
+${scrub(letterText(d, L.type))}`;
+        try { await ask(prompt, box); } catch (err) { box.innerHTML = `<div class="alert err">${esc(err.message)}</div>`; }
+      },
+      actions: [{ label: 'Copy', onClick: (m) => { navigator.clipboard?.writeText(m.querySelector('#out').innerText.replace(/\[name\]/g, String(d.particulars.applicant || '').split(/\s+/)[0] || '')); toast('Copied'); return false; } }, { label: 'Close' }] });
+  });
+  el.querySelector('#files').onclick = () => {
+    const last = String(d.particulars.applicant || 'Client').trim().split(/\s+/).pop();
+    const clean = (x) => String(x).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+    const names = d.enclosures.filter((e) => String(e.desc || '').trim()).map((e, i) => `${String(i + 1).padStart(2, '0')}. ${last} - ${clean(e.desc)}.pdf`);
+    names.push(`${String(names.length + 1).padStart(2, '0')}. ${last} - Submission Letter.pdf`);
+    modal({ title: 'Upload file names (in enclosure order)', wide: true, body: `<p class="dk-muted" style="margin-bottom:8px">Name each PDF like this so the officer sees the documents in your Tab order. The submission letter goes last (online PR portal: “Documents related to the e-APR not captured in other fields”). Keep each file under 4 MB.</p>
+      <textarea class="input" id="fn" rows="${Math.min(22, names.length + 1)}" readonly style="font-family:Consolas,monospace;font-size:12.5px">${esc(names.join('\n'))}</textarea>`,
+      actions: [{ label: 'Copy list', cls: 'btn-primary', onClick: (m) => { navigator.clipboard?.writeText(m.querySelector('#fn').value); toast('Copied'); return false; } }, { label: 'Close' }] });
+  };
 
   function improve(target) {
     const isSec = target.startsWith('s');

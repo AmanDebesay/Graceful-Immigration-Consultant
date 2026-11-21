@@ -10,7 +10,7 @@ export const DELIVERY = { portal: 'Submitted via the IRCC online portal', webfor
 
 // Particulars shown in the RE: block. Common ones come first; each type adds its own.
 const P = {
-  applicant: ['Principal applicant', 'Full legal name'], dob: ['Date of birth', 'YYYY-MM-DD', 'date'], uci: ['UCI', 'Client ID'], app_no: ['Application number', 'e.g. W307…'],
+  applicant: ['Principal applicant', 'Full legal name'], dob: ['Date of birth', 'YYYY-MM-DD', 'date'], passport: ['Passport number', ''], our_file: ['Our file number', ''], uci: ['UCI', 'Client ID'], app_no: ['Application number', 'e.g. W307…'],
   citizenship: ['Country of citizenship', ''], residence: ['Country of residence', ''], status: ['Current status in Canada', 'e.g. worker, maintained status'],
   app_type: ['Application', ''],
 };
@@ -91,6 +91,8 @@ export const TYPES = {
       { key: 'legal', heading: 'Program requirements', help: ['Name the exact provision. If the program isn’t CEC, use a snippet below.'],
         starter: 'Under subsection 87.1(2) of the Immigration and Refugee Protection Regulations (IRPR), a foreign national is a member of the Canadian Experience Class if, within the three years before applying, they acquired at least one year of full-time work experience in Canada (or the equivalent in part-time work) in one or more occupations in TEER category 0, 1, 2 or 3 of the National Occupational Classification, performed the actions in the lead statement and a substantial number of the main duties of that occupation, and meet the language threshold for that occupation. Work experience gained while a full-time student or while self-employed is excluded (subsection 87.1(3)).',
         snippets: [['Federal Skilled Worker (s. 75)', 'Under section 75 of IRPR, a foreign national is a member of the federal skilled worker class if they have at least one year of continuous full-time (or equivalent) paid work experience in the last ten years in a TEER 0, 1, 2 or 3 occupation, meet the minimum language threshold, have the required education credential and assessment, obtain the minimum points under section 76, and have the settlement funds required under subsection 76(1)(b).'],
+          ['Substituted evaluation (FSW, s. 76(3))', 'Should it be determined that the Applicant does not obtain the minimum points, we respectfully request a substituted evaluation under subsection 76(3) of IRPR, because the points awarded are not a sufficient indicator of the Applicant’s ability to become economically established in Canada, for the reasons set out below.'],
+          ['Substituted evaluation (PNP, s. 87(3))', 'Should the officer have concerns that the provincial nomination is not a sufficient indicator of the Applicant’s ability to become economically established in Canada, we respectfully ask that the officer consider the evidence below before substituting their evaluation under subsection 87(3) of IRPR, which also requires the concurrence of a second officer (subsection 87(4)).'],
           ['Provincial Nominee (s. 87)', 'Under section 87 of IRPR, a foreign national is a member of the provincial nominee class if they have been nominated by a province under a provincial nomination agreement and intend to reside in the nominating province. A copy of the nomination certificate is enclosed (Tab [#]).']] },
       { key: 'work', heading: 'Qualifying Canadian work experience', help: ['One line per job: dates, employer, title, NOC/TEER, hours per week, and the Tab of the employment letter.', 'Letters must show duties, hours, salary and dates on company letterhead, signed.', 'Mention other experience only if it adds points, and say whether you rely on it.'],
         starter: '1. [Start] – [End/present]: [Job title], [Employer], NOC [code] (TEER [#]), [hours] hours/week (Tab [#])\n2. [Start] – [End]: [Job title], [Employer], NOC [code] (TEER [#]), [hours] hours/week (Tab [#])\n\nTotal qualifying experience: [months / hours] within the three years before this application.' },
@@ -177,13 +179,17 @@ export const TYPES = {
       starter: '[Sponsor] and [Applicant] met in [year] through [how] and married on [date] in [place]. [One sentence on the life they share — e.g. their daughter, the home they rent together, how they stay connected.]' },
     sections: [
       { key: 'legal', heading: 'Legal framework', help: ['Short. The two prongs of s. 4(1) are separate — your evidence must answer both.'],
+        snippets: [['Introduction (in-Canada class)', 'We have been retained with respect to an application for permanent residence in the Spouse or Common-law Partner in Canada class, made under subsection 12(1) of the Immigration and Refugee Protection Act (IRPA) and sections 123 to 125 of the Immigration and Refugee Protection Regulations (IRPR).'],
+          ['Introduction (family class, outside Canada)', 'We have been retained with respect to an application for permanent residence in the family class as the spouse of a Canadian sponsor, made under subsection 12(1) of the Immigration and Refugee Protection Act (IRPA) and paragraph 117(1)(a) of the Immigration and Refugee Protection Regulations (IRPR).']],
         starter: 'Under subsection 4(1) of the Immigration and Refugee Protection Regulations, a foreign national is not considered a spouse or common-law partner if the marriage or relationship was entered into primarily for the purpose of acquiring any status or privilege under the Act, or is not genuine. The evidence below addresses both elements.' },
       { key: 'history', heading: 'History of the relationship', help: ['Timeline with evidence: meeting, dating, engagement, wedding, living together, visits.', 'Consistency with the forms matters — check every date against IMM 5532.'], starter: '' },
       { key: 'genuine', heading: 'Evidence the relationship is genuine', help: ['Cohabitation, joint finances, communication, family knowledge/involvement, children, future plans.', 'Quality over quantity: a curated, labelled selection.'], starter: '' },
+      { key: 'sponsor', heading: 'Sponsor eligibility (IRPR s. 133)', help: ['Confirm each requirement of IRPR subsection 133(1) and point to the proof (status document, income where required).', 'Paraphrase the law; don’t paste whole sections.'],
+        starter: 'In accordance with subsection 133(1) of IRPR, the sponsor, [Sponsor]:\n- is a sponsor as described in section 130 (a Canadian citizen or permanent resident, at least 18 years old) (Tab [#]);\n- intends to fulfil the obligations in the sponsorship undertaking;\n- is not subject to a removal order;\n- is not detained in any penitentiary, jail, reformatory or prison;\n- has not been convicted of an offence referred to in paragraph 133(1)(e);\n- is not in default of any previous sponsorship undertaking or court-ordered support payments;\n- is not in default of the repayment of any debt referred to in subsection 145(1) of IRPA;\n- is not an undischarged bankrupt;\n- is not in receipt of social assistance for a reason other than disability; and\n- resides in [province].' },
       { key: 'concerns', heading: 'Addressing possible concerns', optional: true, help: ['Name the concern yourself and answer it with evidence. Don’t let the officer discover it first.'], starter: '' },
     ],
     conclusion: 'The relationship between [Sponsor] and [Applicant] is genuine and was not entered into primarily for immigration purposes. We respectfully request that the application be approved.',
-    enclosures: ['Marriage certificate', 'Relationship information and sponsorship evaluation (IMM 5532)', 'Photos with descriptions', 'Proof of cohabitation', 'Communication history', 'Joint financial documents', 'Letters from family and friends', 'Use of a Representative (IMM 5476)'],
+    enclosures: ['Document checklist (current IRCC form)', 'Generic Application Form for Canada (IMM 0008)', 'Additional Family Information (IMM 5406)', 'Schedule A – Background/Declaration (IMM 5669)', 'Relationship Information and Sponsorship Evaluation (IMM 5532)', 'Application to Sponsor, Sponsorship Agreement and Undertaking (IMM 1344)', 'Use of a Representative (IMM 5476) — applicant and sponsor', 'Proof of fee payment', 'Applicant’s passport', 'Applicant’s birth certificate with certified translation', 'Applicant’s police certificates', 'Proof of medical examination', 'Sponsor’s proof of status (PR card / citizenship certificate)', 'Marriage certificate with translation', 'Divorce certificate (if applicable)', 'Wedding and relationship photos with descriptions', 'Proof of cohabitation and joint finances', 'Communication history', 'Sponsor’s proof of income and employment', 'Open work permit application (IMM 5710), if in Canada'],
   },
 
   trp: {
@@ -220,11 +226,23 @@ export const TYPES = {
   },
 };
 
+// Every letter gets passport and our file number in the RE block, and an optional "special circumstances" section.
+const SPECIAL = { key: 'special', heading: 'Special circumstances', optional: true,
+  help: ['Address anything unusual before the officer finds it: “yes” answers to background questions, missing or confusing documents, inconsistent dates, gaps, a previous refusal.', 'Problem → facts → remedy. If it was resolved in an earlier application, say what the issue was and how it was resolved.', 'Explain what is missing and why, and when it will follow (with proof of the request).'],
+  starter: '[Issue — e.g. the employment dates on the reference letter differ from the IMM 5669.] [Explanation, with evidence.] (Tab [#]) [Remedy, or why it does not affect eligibility.]' };
+for (const t of Object.values(TYPES)) {
+  const keys = t.particulars.map((p) => (Array.isArray(p) ? p[0] : p));
+  if (!keys.includes('passport')) t.particulars.splice(Math.max(0, keys.indexOf('dob') + 1), 0, 'passport');
+  if (!keys.includes('our_file')) t.particulars.push('our_file');
+  if (!t.sections.some((x) => x.key === 'special')) t.sections.push(SPECIAL);
+}
+
 // Coaching shown beside every letter (from the course material).
 export const COACH = {
   before: ['Know the legal test before you type a word: Act → Regulations → program delivery instructions → case law.', 'Write your one-sentence theory of the case (the “elevator pitch”) — every section should support it.', 'Rank your facts: lead with the strongest, close with the second strongest, put weaker points in the middle.', 'Request documents in writing early, explain WHY you need each one, and diary follow-ups.'],
-  writing: ['Use the test’s elements as subheadings — you speak the officer’s language.', 'Plain language, short paragraphs, 12-point font. Don’t bold or underline everything.', 'Tie every fact to the test: “so what?” If you can’t answer, cut it.', 'Submissions are not evidence. Every factual statement needs a Tab (affidavit > letter > nothing).', 'Explain what is missing and why, not just what is there.', 'Don’t exaggerate — it weakens your strong points.', 'Precedents are for structure only. Old names and countries left in a letter are embarrassing.'],
-  filing: ['Read it out loud.', 'Have someone else read it — give them 2–3 days.', 'Send the draft to the client to check facts; keep the record.', 'Check the enclosure list matches the package exactly.', 'Keep a copy for a possible judicial review — the record is what the officer had.', 'If something important changes before a decision, tell IRCC by web form that an update is coming.'],
+  writing: ['It is a formal business letter: full sentences and paragraphs. Use bullet points sparingly.', 'Rules-based cases: IRPA/IRPR references are usually enough. Add policy or case law only when the client’s situation isn’t clear from the provisions.', 'Paraphrase the law accurately; quote only what you need.', 'Tell the facts, but also the story — a personal detail makes the case “sticky”. Never embellish.', 'Don’t hide problems: state the problem, the facts, then the remedy (or how it was already resolved).', 'Use the test’s elements as subheadings — you speak the officer’s language.', 'Plain language, short paragraphs, 12-point font. Don’t bold or underline everything.', 'Tie every fact to the test: “so what?” If you can’t answer, cut it.', 'Submissions are not evidence. Every factual statement needs a Tab (affidavit > letter > nothing).', 'Explain what is missing and why, not just what is there.', 'Don’t exaggerate — it weakens your strong points.', 'Precedents are for structure only. Old names and countries left in a letter are embarrassing.'],
+  filing: ['Read it out loud, several times. Check grammar, spelling, dates and names against the forms.', 'Make sure the forms are complete, signed and consistent with each other and with this letter.', 'Have someone else read it — give them 2–3 days.', 'Send the draft to the client to check facts; keep the record.', 'Check the enclosure list matches the package exactly.', 'Keep a copy for a possible judicial review — the record is what the officer had.', 'If something important changes before a decision, tell IRCC by web form that an update is coming.', 'Upload in the order of the enclosure list with numbered file names (use “Upload file names”). Online PR portal: the letter goes under “Documents related to the e-APR not captured in other fields”. Files must be under 4 MB.', 'Paper applications: number the pages discreetly, scan the whole package before sending, and use paper clips — never staples or binders.', 'Save the submission confirmation in the client file.'],
+  client: ['Send the draft to the client before filing: they know their lives better than you and catch errors you miss.', 'Explain the legal terms and references — use “Explain to client” for a plain-language summary.', 'This is the moment the client sees the value of your work.'],
 };
 
 // ── Building a new letter ──
@@ -233,7 +251,7 @@ export function newLetterData(type, { contact = {}, caseRow = null, org = {} } =
   const part = {};
   for (const p of t.particulars) {
     const k = Array.isArray(p) ? p[0] : p;
-    part[k] = ({ applicant: contact.full_name, dob: contact.date_of_birth, citizenship: contact.citizenship, uci: caseRow?.uci, app_no: caseRow?.ircc_file_number,
+    part[k] = ({ applicant: contact.full_name, dob: contact.date_of_birth, citizenship: contact.citizenship, uci: caseRow?.uci, app_no: caseRow?.ircc_file_number, our_file: caseRow?.case_number,
       residence: contact.location === 'in' ? 'Canada' : contact.country, status: contact.status_in_canada, app_type: t.app_type || caseRow?.application_type || '' })[k] || '';
   }
   const first = String(contact.full_name || '').trim();
@@ -241,7 +259,7 @@ export function newLetterData(type, { contact = {}, caseRow = null, org = {} } =
   return {
     date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Edmonton' }), delivery: 'portal',
     recipient: 'Immigration, Refugees and Citizenship Canada', salutation: 'Dear Officer:',
-    particulars: part, extra: { decided_where: contact.location === 'out' ? 'out' : 'in' },
+    particulars: part, extra: { decided_where: contact.location === 'out' ? 'out' : 'in' }, fees: 'online',
     opening: fill(t.opening.starter), rep_statement: true,
     sections: t.sections.map((s) => ({ key: s.key, heading: s.heading, text: fill(s.starter), on: !s.optional })),
     conclusion: fill(t.conclusion), enclosures: t.enclosures.map((d) => ({ desc: d })),
@@ -252,7 +270,7 @@ export function newLetterData(type, { contact = {}, caseRow = null, org = {} } =
 // ── Text → HTML (paragraphs, "- " bullets, "1. " lists, "> " quotes; Tab references in bold) ──
 export function textHtml(s) {
   const out = []; let list = null; let quote = [];
-  const inline = (x) => esc(x).replace(/\b(Tabs? \d+[\w–,\- ]*?)(?=[),.;:]|$)/g, '<b>$1</b>').replace(/\[(?!\d{4}\]|sic\]|[a-z]\]|\.\.\.\]|…\])[^\]]*\]/g, (m) => `<span class="ph">${m}</span>`);
+  const inline = (x) => esc(x).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/\b(Tabs? \d+[\w–,\- ]*?)(?=[),.;:]|$)/g, '<b>$1</b>').replace(/\[(?!\d{4}\]|sic\]|[a-z]\]|\.\.\.\]|…\])[^\]]*\]/g, (m) => `<span class="ph">${m}</span>`);
   const flushQ = () => { if (quote.length) { out.push(`<blockquote>${quote.map(inline).join('<br>')}</blockquote>`); quote = []; } };
   const flushL = () => { if (list) { out.push(`</${list}>`); list = null; } };
   for (const raw of String(s || '').split('\n')) {
@@ -298,7 +316,8 @@ export function letterHtml(L, type, ctx) {
   const secs = (d.sections || []).filter((x) => x.on && (String(x.text || '').trim() || String(x.heading || '').trim()));
   const encl = (d.enclosures || []).filter((e) => String(e.desc || '').trim());
   const name = d.particulars?.applicant || '';
-  const rep = d.rep_statement ? `<p>We have been retained by ${esc(name || 'the Applicant')} to represent them in this matter. A completed Use of a Representative form (IMM 5476) is enclosed. We ask that all correspondence be directed to our office.</p>` : '';
+  const fee = { online: 'The processing fees were paid online; the receipt is enclosed.', included: 'Payment of the processing fees is included with this application.', exempt: 'No processing fee is payable for this request.' }[d.fees] || '';
+  const rep = d.rep_statement ? `<p>We have been retained by ${esc(name || 'the Applicant')} to represent them in this matter. Enclosed is the Use of a Representative form (IMM 5476), which authorizes us under the <i>Privacy Act</i> to act and receive information on the Applicant’s behalf, together with the completed application forms and supporting documents. ${fee} We ask that all correspondence be directed to our office.</p>` : (fee ? `<p>${fee}</p>` : '');
   return `${STYLE}<div class="sl${ctx.clean ? ' print-clean' : ''}">
   <table class="lh" width="100%"><tr><td style="width:120px">${ctx.logo ? `<img src="${esc(ctx.logo)}" alt="">` : ''}</td>
     <td style="text-align:right"><div class="org">${esc(o.business_name || '')}</div>
@@ -313,7 +332,7 @@ export function letterHtml(L, type, ctx) {
   ${secs.map((x) => `${x.heading ? `<h2>${esc(x.heading)}</h2>` : ''}${textHtml(x.text)}`).join('')}
   ${d.conclusion ? `<h2>Conclusion</h2>${textHtml(d.conclusion)}` : ''}
   ${encl.length ? `<h2>Enclosures</h2><ol class="encl">${encl.map((e, i) => `<li>Tab ${i + 1} — ${esc(e.desc)}</li>`).join('')}</ol>` : ''}
-  <p>If you require anything further, please contact our office at ${esc(o.phone || '')}${o.email ? ' or ' + esc(o.email) : ''}.</p>
+  <p>Thank you for your time and consideration. If you require any further information, please contact ${esc(s.name || o.rcic_name || 'our office')} at ${esc(o.phone || '')}${o.email ? ' or by email at ' + esc(o.email) + ', which is the fastest way to reach us' : ''}.</p>
   <div class="sig"><p style="margin:0">${esc(d.closing || 'Respectfully submitted,')}</p>
     ${ctx.signature ? `<img src="${esc(ctx.signature)}" alt="Signature">` : `<div class="typed">${esc(s.name || o.rcic_name || '')}</div>`}
     <div style="border-top:1px solid #0B2A5C;width:260px;margin:2px 0 6px"></div>
@@ -400,6 +419,18 @@ export function checkLetter(L, type, ctx = {}) {
   for (const [bad, good] of Object.entries(MISSPELL)) if (all.toLowerCase().includes(bad)) add('warn', 'Spelling', `“${bad.trim()}” → “${good.trim()}”.`);
   const dup = all.match(/\b(\w{2,})\s+\1\b/i); if (dup) add('warn', 'Spelling', `Repeated word: “${dup[0]}”.`);
 
+  // Style (course notes)
+  const bodyLines = secs.flatMap((x) => String(x.text || '').split('\n').filter((l) => l.trim()));
+  const bullets = bodyLines.filter((l) => /^\s*([-•]|\d+[.)])\s+/.test(l)).length;
+  if (bodyLines.length >= 8 && bullets / bodyLines.length > 0.6) add('warn', 'Style', 'Most of the letter is bullet points. A submission is a formal business letter — write in full sentences and use bullets sparingly.');
+  const legalese = all.match(/\b(whereof|hereunto|hereinafter|herein|hereby|aforementioned|aforesaid|heretofore|witnesseth)\b/gi);
+  if (legalese) add('warn', 'Style', `Plain language: avoid “${[...new Set(legalese.map((w) => w.toLowerCase()))].join('”, “')}”.`);
+  if (t.kind === 'rules' && / v\. [A-Z]/.test(all)) add('info', 'Law', 'Rules-based letter cites case law. IRPA/IRPR references are usually enough — keep case law only if the client’s situation isn’t clear from the provisions.');
+  const bolds = (all.match(/\*\*[^*]+\*\*/g) || []).length;
+  if (bolds > 6) add('info', 'Style', `${bolds} bolded phrases. If everything is emphasized, nothing is.`);
+  if (!d.fees) add('info', 'Fees', 'Say how the processing fees were paid (Letter details → Fees).');
+  if (!d.client_reviewed) add('info', 'Client review', 'Send the draft to the client to check before filing, then record the date under Sign-off.');
+
   // Length and readability
   if (t.kind === 'rules' && words > 1100) add('info', 'Length', `${words} words. Rules-based letters should be concise — the officer wants to tick the boxes quickly.`);
   if (t.kind === 'persuasive' && type === 'hc' && words < 900) add('warn', 'Length', `${words} words. A short H&C submission rarely persuades; develop each factor with evidence.`);
@@ -408,6 +439,6 @@ export function checkLetter(L, type, ctx = {}) {
   const caps = (all.match(/\b[A-Z]{5,}\b/g) || []).filter((w) => !/^(IRPA|IRPR|IMM|LMIA|GCMS|ITA|UCI|TEER|IELTS|CELPIP|CICC|IRCC|RCIC|PRRA)$/.test(w));
   if (caps.length > 4) add('info', 'Readability', 'Lots of words in capitals. Emphasize only what matters most.');
 
-  const score = Math.max(0, 100 - out.reduce((s, i) => s + (i.level === 'error' ? 14 : i.level === 'warn' ? 6 : i.where === 'Deadline' ? 0 : 2), 0));
+  const score = Math.max(0, 100 - out.reduce((s, i) => s + (i.level === 'error' ? 14 : i.level === 'warn' ? 6 : ['Deadline', 'Client review', 'Fees'].includes(i.where) ? 0 : 2), 0));
   return { issues: out, score, words };
 }
