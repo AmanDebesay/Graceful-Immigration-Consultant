@@ -1056,3 +1056,20 @@ table.t{width:100%;border-collapse:collapse}
 .main.themed .res-head h2{color:#fff}.main.themed .res-head p{color:#C9D2E0}.main.themed .content .toolbar > .btn-ghost:hover{background:rgba(255,255,255,.12)}
 .main.themed .content .btn-primary{background:linear-gradient(135deg,#1F56AE,#0E3170);border-color:rgba(242,196,98,.75);color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.25)}
 .main.themed .content .btn-primary:hover{background:linear-gradient(135deg,#2563C4,#123A80)}
+
+/* ── Submission letters ── */
+.sl-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.sl-type{display:flex;flex-direction:column;gap:6px;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font:inherit;color:inherit}
+.sl-type b{color:var(--navy);font-size:13.5px}.sl-type small{color:var(--muted);font-size:12px;line-height:1.4}.sl-type .badge{align-self:flex-start}
+.sl-type:hover{border-color:#C9A24A}.sl-type.on{border-color:var(--navy);box-shadow:0 0 0 2px rgba(11,42,92,.15);background:#F7F9FD}
+.sl-sec{padding:10px 0 14px;border-top:1px dashed var(--line)}.sl-sec:first-child{border-top:0}.sl-sec.off .sl-ta,.sl-sec.off .sl-coach{opacity:.45}
+.sl-ta{font-size:13.5px;line-height:1.5;resize:vertical}
+.sl-coach{margin:2px 0 8px;font-size:12.5px}.sl-coach summary{cursor:pointer;color:#7A5B00;font-weight:600;list-style:none}.sl-coach summary::-webkit-details-marker{display:none}
+.sl-tips{margin:6px 0 4px 18px;color:#475467}.sl-tips li{margin:0 0 4px}
+.sl-test{padding:10px 12px;border-radius:10px;background:#F7F4EC;border:1px solid #EADFC4;font-size:13px}
+.sl-tab{flex:none;width:52px;font-size:12px;font-weight:700;color:var(--navy)}
+.sl-ready{margin-bottom:14px}.sl-issues{margin-top:10px}.sl-issues summary{cursor:pointer;font-weight:600;color:var(--navy)}
+.sl-issues ul{margin:8px 0 0;padding:0;list-style:none}.sl-issues li{padding:6px 0;border-top:1px solid var(--line);font-size:13px;line-height:1.45}
+.sl-score{flex:none;width:64px;height:64px;border-radius:50%;border:5px solid var(--c);display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1}
+.sl-score b{font-size:20px;color:var(--c)}.sl-score small{font-size:10px;color:var(--muted)}
+.ai-out h4{margin:12px 0 6px;color:var(--navy)}.ai-out p{margin:0 0 8px}.ai-out ul,.ai-out ol{margin:0 0 8px 18px}

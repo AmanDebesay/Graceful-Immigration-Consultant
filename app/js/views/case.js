@@ -20,6 +20,7 @@ export async function render(el, [id], { setTitle }) {
   const label = Object.fromEntries(CASE_STATUS);
 
   el.innerHTML = `<div class="toolbar"><a class="btn btn-sm" href="#/cases">← Cases</a><div class="grow"></div>
+      ${can('letters.edit') ? `<button class="btn" id="letter">${icon('note')} Submission letter</button>` : ''}
       ${canDraftAgreements() ? `<button class="btn" id="agr">${icon('file')} Retainer agreement</button>` : ''}
       ${can('finance.manage') ? `<button class="btn" id="inv">${icon('dollar')} Invoice this case</button>` : ''}
       ${can('crm.edit') ? `<button class="btn btn-primary" id="ed">Update case</button>` : ''}</div>
@@ -50,6 +51,7 @@ export async function render(el, [id], { setTitle }) {
   el.querySelector('#ed')?.addEventListener('click', () => editCase(c));
   if (el.querySelector('#docs')) import('../files.js').then(({ documentsPanel }) => documentsPanel(el.querySelector('#docs'), { contactId: c.contact_id, caseId: id }));
   el.querySelector('#startCl')?.addEventListener('click', () => startChecklist({ id, case_number: c.case_number, title: c.title, application_type: c.application_type, contacts: c.contacts }));
+  el.querySelector('#letter')?.addEventListener('click', async () => (await import('./letters.js')).newLetter({ contactId: c.contact_id, caseId: c.id }));
   el.querySelector('#agr')?.addEventListener('click', async () => (await import('./agreements.js')).newAgreement({ contactId: c.contact_id, caseId: id, type: 'retainer' }));
   el.querySelector('#inv')?.addEventListener('click', async () => {
     const { data, error: e } = await db.from('invoices').insert({ contact_id: c.contact_id, case_id: id }).select('id').single();

@@ -35,7 +35,9 @@ Deno.serve(async (req) => {
 
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return json(req, { error: "Invalid request" }, 400); }
-  const raw = cleanMessages(body.messages, 40, 12000);
+  // Letter reviews send a whole submission letter in one message, so they get a larger limit.
+  const isLetter = body.task === "letter";
+  const raw = cleanMessages(body.messages, 40, isLetter ? 60000 : 12000);
   if (!raw) return json(req, { error: "Send a question." }, 400);
   let names: string[] = [];
 
@@ -70,7 +72,7 @@ ${lines.join("\n")}`;
 
 Privacy: client names, emails, phone and ID numbers are removed before messages reach you and appear as [name], [email removed], [number removed] or [ID removed]. Do not ask for them; refer to "the client".`;
   return streamClaude(req, admin, {
-    kind: "staff", userId: caller.id, system, messages, maxTokens: 4000,
+    kind: "staff", userId: caller.id, system, messages, maxTokens: isLetter ? 8000 : 4000,
     model: Deno.env.get("AI_STAFF_MODEL") ?? "claude-opus-5-5",
   });
 });

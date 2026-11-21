@@ -23,6 +23,7 @@ export async function render(el, [id], { setTitle }) {
       ${c.email && edit ? `<button class="btn" id="emailBtn">${icon('mail')} Email</button>` : ''}
       <a class="btn" href="#/chat?contact=${c.id}">${icon('chat')} Team chat</a>
       ${edit ? `<button class="btn" id="logAct">${icon('note')} Log activity</button>` : ''}
+      ${can('letters.edit') ? `<button class="btn" id="genLetter">${icon('note')} Submission letter</button>` : ''}
       ${canDraftAgreements() ? `<button class="btn btn-gold" id="genAgr">${icon('file')} Generate agreement</button>` : ''}
       <div style="position:relative"><button class="btn btn-primary" id="moreNew">${icon('plus')} New ▾</button></div>
       ${edit ? `<button class="btn" id="editBtn">Edit</button>` : ''}
@@ -59,13 +60,14 @@ export async function render(el, [id], { setTitle }) {
         </div></div>
       </div>
       <div class="card">
-        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments']] : []), ['portal', 'Portal']]
+        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(can('letters.view') ? [['letters', 'Letters']] : []), ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments']] : []), ['portal', 'Portal']]
           .map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
         <div class="card-b" id="tabBody"></div>
       </div>
     </div>`;
 
   // Header actions
+  el.querySelector('#genLetter')?.addEventListener('click', async () => (await import('./letters.js')).newLetter({ contactId: id }));
   el.querySelector('#logAct')?.addEventListener('click', () => logActivity({ contactId: id, companyId: c.company_id }));
   el.querySelector('#emailBtn')?.addEventListener('click', () => composeEmail({ contact: c }));
   el.querySelector('#genAgr')?.addEventListener('click', async () => (await import('./agreements.js')).newAgreement({ contactId: id }));
@@ -149,7 +151,7 @@ export async function render(el, [id], { setTitle }) {
   async function showTab() {
     tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === tab));
     body.innerHTML = '<div class="loading" style="min-height:120px"><div class="spin"></div></div>';
-    ({ emails: emailsTab, documents: documentsTab, agreements: agreementsTab, activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab,
+    ({ emails: emailsTab, documents: documentsTab, agreements: agreementsTab, letters: async () => (await import('./letters.js')).lettersPanel(body, id), activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab,
       portal: async () => (await import('./portal-inbox.js')).portalPanel(body, c) })[tab]();
   }
 
