@@ -371,7 +371,10 @@ async function route() {
   const match = ROUTES.map(([re, mod, title]) => [path.match(re), mod, title]).find(([m]) => m);
   if (!match) { location.hash = '#/'; return; }
   const [m, mod, title] = match;
-  document.getElementById('pageTitle').textContent = title;
+  { // Page title with the page's own menu icon (e.g. Contacts → people), in gold.
+    const nav = NAV.filter((n) => n.path && n.path !== '/' && (path === n.path || path.startsWith(n.path + '/'))).sort((x, y) => y.path.length - x.path.length)[0];
+    document.getElementById('pageTitle').innerHTML = nav ? `<span class="pt-title">${icon(nav.icon)}<span>${esc(title)}</span></span>` : esc(title);
+  }
   document.querySelector('.topbar').classList.toggle('tb-home', path === '/');
   document.querySelector('.main').classList.toggle('home', path === '/');
   document.title = `${title} · Graceful Practice Hub`;

@@ -8,7 +8,7 @@ export async function render(el) {
       <select class="input" id="stage" style="max-width:220px"><option value="all">All stages</option>${STAGES.map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
       <div class="grow"></div>
       <button class="btn" id="csv">${icon('file')} Export CSV</button>
-      ${can('crm.edit') ? `<button class="btn" id="imp">${icon('plus')} Import CSV</button>` : ''}
+      ${can('crm.edit') ? `<button class="btn" id="imp">${icon('upload')} Import CSV</button>` : ''}
       ${can('crm.edit') ? `<button class="btn btn-primary" id="add">${icon('plus')} New client</button>` : ''}
     </div><div class="card"><div class="table-wrap" id="list"></div></div>`;
 
@@ -22,12 +22,26 @@ export async function render(el) {
     if (error) { box.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
     rows = data;
     if (!data.length) { box.innerHTML = `<div class="empty">${icon('users')}<div>No contacts found.</div></div>`; return; }
-    box.innerHTML = `<table class="t"><thead><tr><th>Name</th><th>Phone</th><th>Stage</th><th>Priority</th><th>Owner</th><th>Last contacted</th><th>Added</th></tr></thead><tbody>
+    const th = (ic, l) => `<th><span class="th-i">${icon(ic)}${l}</span></th>`;
+    const when = (d) => `<span class="td-i">${icon('calendar')}${d}</span>`;
+    box.innerHTML = `<table class="t t-rich"><thead><tr>${th('users', 'Name')}${th('phone', 'Phone')}${th('layers', 'Stage')}${th('award', 'Priority')}${th('user', 'Owner')}${th('calendar', 'Last contacted')}${th('calendar', 'Added')}<th></th></tr></thead><tbody>
       ${data.map((c) => `<tr class="click" data-id="${c.id}">
-        <td><div class="cell-name">${clientAvatar(c, 'avatar sm')}<div><b>${esc(c.full_name)}</b><span>${esc(c.email || '')}</span></div></div></td>
-        <td>${esc(c.phone || '—')}</td><td>${stageBadge(c.stage)}</td><td>${triageBadge(c.priority)}</td>
-        <td>${c.assigned_to ? esc(staffName(c.assigned_to)) : '<span style="color:var(--muted)">Unassigned</span>'}</td>
-        <td>${c.last_activity_at ? timeAgo(c.last_activity_at) : '<span style="color:var(--muted)">Never</span>'}</td><td>${timeAgo(c.created_at)}</td></tr>`).join('')}</tbody></table>`;
+        <td><div class="cell-name">${clientAvatar(c, 'avatar')}<div><b>${esc(c.full_name)}</b><span>${esc(c.email || '')}</span></div></div></td>
+        <td class="td-strong">${esc(c.phone || '—')}</td><td>${stageBadge(c.stage)}</td><td>${c.priority ? triageBadge(c.priority) : '<span class="badge plain">—</span>'}</td>
+        <td><span class="td-i">${icon('user')}${c.assigned_to ? esc(staffName(c.assigned_to)) : 'Unassigned'}</span></td>
+        <td>${when(c.last_activity_at ? timeAgo(c.last_activity_at) : 'Never')}</td><td>${when(timeAgo(c.created_at))}</td>
+        <td><button class="row-more" data-more="${c.id}" aria-label="More">⋯</button></td></tr>`).join('')}</tbody></table>`;
+    box.querySelectorAll('[data-more]').forEach((b) => (b.onclick = (e) => {
+      e.stopPropagation();
+      document.querySelector('.dropdown')?.remove();
+      const c = data.find((x) => x.id === b.dataset.more), d = document.createElement('div'); d.className = 'dropdown';
+      d.innerHTML = `<button data-a="open">${icon('user')} Open client</button>${c.email ? `<button data-a="mail">${icon('mail')} Email</button>` : ''}${c.phone ? `<button data-a="call">${icon('phone')} Call</button>` : ''}`;
+      const r = b.getBoundingClientRect(); Object.assign(d.style, { position: 'fixed', top: `${r.bottom + 6}px`, left: `${Math.max(8, r.right - 190)}px`, right: 'auto', zIndex: 50 });
+      document.body.appendChild(d);
+      d.onclick = (ev) => { const a = ev.target.closest('[data-a]')?.dataset.a; d.remove();
+        if (a === 'open') location.hash = `#/contacts/${c.id}`; if (a === 'mail') location.href = `mailto:${c.email}`; if (a === 'call') location.href = `tel:${c.phone}`; };
+      setTimeout(() => document.addEventListener('click', () => d.remove(), { once: true }));
+    }));
     box.querySelectorAll('tr[data-id]').forEach((tr) => (tr.onclick = () => (location.hash = `#/contacts/${tr.dataset.id}`)));
   }
 

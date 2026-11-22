@@ -1165,3 +1165,66 @@ table.t{width:100%;border-collapse:collapse}
 .fm-title{font-family:var(--serif);font-size:16px;color:#0B2A5C;line-height:1.25}
 .fm-note,.fm-es{display:flex;gap:6px;font-size:12.5px;color:#7A4B07;background:#FFF6E0;border-radius:8px;padding:6px 8px}.fm-es{color:#0B3D2E;background:#E8F6EF}.fm-note svg,.fm-es svg{width:15px;height:15px;flex:none;margin-top:1px}
 .fm-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}.fm-meta{color:#667085;font-size:11.5px}
+
+/* ════════ House style for every page (matches the Contacts design): pill toolbars, rich tables, soft status pills, icon notices ════════ */
+.pt-title{display:inline-flex;align-items:center;gap:12px}.pt-title>svg{width:34px;height:34px;color:#E9B653;filter:drop-shadow(0 2px 6px rgba(242,196,98,.35))}
+.main.themed .topbar h1{font-family:var(--serif)}
+/* Toolbars: white pill search and filters, pill buttons with depth */
+.main.themed .content .toolbar{gap:12px;margin-bottom:18px}
+.main.themed .content .toolbar>.input,.main.themed .content .toolbar>select.input,.main.themed .content .toolbar>input{height:46px;border-radius:12px;border:1px solid #E4DAC6;background-color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.22);font-weight:500;color:#1C2333}
+.main.themed .content input.input[placeholder^="Search"],.main.themed .content input.input[placeholder^="search"]{padding-left:42px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B2A5C' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") 14px 50%/18px no-repeat}
+.main.themed .content .btn{border-radius:12px;padding:10px 18px;border:1px solid #E4DAC6;background:linear-gradient(180deg,#FFFFFF,#F4EEE3);color:#0B2A5C;box-shadow:0 4px 12px rgba(0,0,0,.16);transition:box-shadow .15s,transform .15s}
+.main.themed .content .btn:hover{box-shadow:0 8px 20px rgba(0,0,0,.24),0 0 0 1px #E2AE45;transform:translateY(-1px)}
+.main.themed .content .btn svg{width:18px;height:18px}
+.main.themed .content .btn-sm{padding:7px 13px;border-radius:10px;font-size:13px}.main.themed .content .btn-sm svg{width:16px;height:16px}
+.main.themed .content .btn-primary{background:linear-gradient(180deg,#2F64C4,#103580);border:1.5px solid #E2AE45;color:#fff}
+.main.themed .content .btn-gold{background:linear-gradient(180deg,#F7D47F,#E2AE45);border-color:#C99634;color:#2A1C04}
+.main.themed .content .btn-danger{background:linear-gradient(180deg,#FFF5F4,#FDE4E1);border-color:#F4B4AC;color:#B42318}
+.main.themed .content .btn-ghost{background:transparent;border-color:transparent;box-shadow:none}
+.main.themed .content .toolbar>.btn-ghost{color:#fff}
+.main.themed .content .toolbar>small,.main.themed .content .toolbar>.dk-muted{color:rgba(255,255,255,.8)}
+/* Segmented filters */
+.main.themed .content .seg{border-radius:12px;padding:4px;background:#fff;border:1px solid #E4DAC6;box-shadow:0 6px 16px rgba(0,0,0,.22)}
+.main.themed .content .seg button{padding:8px 14px;border-radius:9px;font-size:13.5px;color:#344054}
+.main.themed .content .seg button.on{background:linear-gradient(180deg,#123B7A,#0B2A5C);color:#F2C462;box-shadow:inset 0 -2px 0 #E2AE45}
+/* Cards and tables */
+.main.themed .content .card{border-radius:20px;background:linear-gradient(180deg,#FFFFFF 0%,#FAF7F1 100%);border:1px solid rgba(226,174,69,.4);box-shadow:0 16px 36px rgba(0,0,0,.28)}
+.main.themed .content .card>.table-wrap{border-radius:20px}.main.themed .content .card>.card-h:first-child{border-radius:20px 20px 0 0}
+.main.themed .content .card-h{padding:16px 22px;border-bottom:1px solid #EEE5D3;background:linear-gradient(180deg,#FFFFFF,#FBF8F2)}
+.main.themed .content .card-h h2,.main.themed .content .card-h h3{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:700;color:#0B2A5C}
+.main.themed .content .card-h h3 svg,.main.themed .content .card-h h2 svg{width:21px;height:21px;color:#0B2A5C}
+.main.themed .content .t th{background:linear-gradient(180deg,#F5F8FD,#EDF2FA);color:#0B2A5C;font-size:13.5px;font-weight:700;padding:15px 18px;border-bottom:1px solid #E2E8F2}
+.main.themed .content .t td{padding:14px 18px;border-bottom:1px solid #EFE8DA;font-size:14.5px;color:#1C2333}
+.main.themed .content .t tbody tr:nth-child(even) td{background:rgba(250,246,238,.55)}
+.main.themed .content .t tbody tr.click:hover td,.main.themed .content .t tbody tr:hover td{background:#FBF4E4}
+.main.themed .content .cell-name{gap:14px}.main.themed .content .cell-name b{font-size:15.5px;color:#0B1F44}.main.themed .content .cell-name span{font-size:13px;color:#4A5873}
+.main.themed .content .avatar{box-shadow:0 0 0 2px #fff,0 0 0 3.5px #E9B653,0 4px 10px rgba(0,0,0,.2)}
+.th-i,.td-i{display:inline-flex;align-items:center;gap:8px}.th-i svg{width:18px;height:18px;color:#0B2A5C}.td-i svg{width:17px;height:17px;color:#0B2A5C;flex:none}
+.td-strong{font-weight:600;color:#0B1F44}
+.row-more{width:40px;height:34px;border-radius:12px;border:1px solid #E4DAC6;background:linear-gradient(180deg,#fff,#F4EEE3);color:#0B2A5C;font-size:18px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.row-more:hover{box-shadow:0 0 0 1px #E2AE45,0 6px 14px rgba(0,0,0,.18)}
+/* Status pills: soft colour, dot, a little depth */
+.main.themed .content .badge{padding:5px 13px;font-size:12.5px;font-weight:700;border-radius:999px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.main.themed .content .badge.plain{background:#F1EDE4;color:#475467}
+/* Notices with icons */
+.main.themed .content .alert{position:relative;border-radius:14px;padding:13px 16px 13px 46px;font-size:14px;line-height:1.5;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.main.themed .content .alert::before{content:"";position:absolute;left:15px;top:13px;width:20px;height:20px;background:currentColor;-webkit-mask:var(--ai) center/contain no-repeat;mask:var(--ai) center/contain no-repeat}
+.main.themed .content .alert.info{--ai:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-5M12 8h.01'/%3E%3C/svg%3E");background:linear-gradient(180deg,#F4F8FF,#E4EDFB);border:1px solid #C3D6F3;color:#163E86}
+.main.themed .content .alert.warn{--ai:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E");background:linear-gradient(180deg,#FFFBF0,#F9EBC8);border:1px solid #E7CD8C;color:#6E4A06}
+.main.themed .content .alert.err{--ai:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M15 9l-6 6M9 9l6 6'/%3E%3C/svg%3E");background:linear-gradient(180deg,#FFF6F5,#FDE3E0);border:1px solid #F4B4AC;color:#9A2214}
+.main.themed .content .alert.ok{--ai:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m8 12 3 3 5-6'/%3E%3C/svg%3E");background:linear-gradient(180deg,#F2FBF6,#DDF3E7);border:1px solid #A6DDBE;color:#05603A}
+.main.themed .content .alert .btn{box-shadow:none}
+/* Empty states */
+.main.themed .content .empty{margin:16px;border:1.5px dashed #E2C67E;border-radius:16px;background:linear-gradient(180deg,#FFFDF7,#FBF3E1);color:#5B4A1E;font-weight:500}
+.main.themed .content .empty svg{width:46px;height:46px;color:#C9932E}
+/* Fields, lists, timelines and KPI tiles */
+.main.themed .content .card .input{border-radius:11px;border-color:#DCD3C0;background-color:#fff}
+.main.themed .content .card .input:focus{border-color:#1F56AE;box-shadow:0 0 0 3px rgba(31,86,174,.15)}
+.main.themed .content .field label{color:#1C2333;font-weight:600}
+.main.themed .content .kpi b{color:#0B2A5C}
+.main.themed .content .tl-dot{background:linear-gradient(180deg,#123B7A,#0B2A5C);color:#F2C462;box-shadow:0 0 0 2px #E9B653}
+.main.themed .content .check{border-radius:12px}
+/* Client page and the dashboard keep their own designs */
+.main.themed .content .cx-main #tabBody .t th{background:#F3ECDD}
+.cell-name .cav,.main.themed .content .cell-name .cav{color:#fff;font-size:14px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+.main.themed .content .t-rich .avatar{width:46px;height:46px}
