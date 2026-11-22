@@ -13,6 +13,7 @@ const NAV = [
   { path: '/chat', label: 'Team Chat', icon: 'chat', show: () => isStaff(), count: 'chat_unread' },
   { group: 'IRCC' },
   { path: '/ircc', label: 'IRCC Portal', icon: 'globe', show: () => can('crm.view') },
+  { path: '/deadlines', label: 'Deadlines', icon: 'clock', show: () => can('crm.view'), count: 'deadlines_due', red: true },
   { group: 'CRM' },
   { path: '/contacts', label: 'Contacts', icon: 'users', show: () => can('crm.view') },
   { path: '/companies', label: 'Companies', icon: 'briefcase', show: () => can('crm.view') },
@@ -28,6 +29,7 @@ const NAV = [
   { path: '/pathways', label: 'Pathway Assessments', icon: 'route', show: () => can('pathway.view') },
   { path: '/tasks', label: 'Tasks', icon: 'checksq', show: () => isStaff(), count: 'tasks_overdue', red: true },
   { path: '/crm-reports', label: 'CRM Reports', icon: 'trend', show: () => can('crm.view') },
+  { path: '/weekly', label: 'Weekly Report', icon: 'calendar', show: () => can('crm.view') },
   { group: 'Accounting' },
   { path: '/accounting', label: 'Overview', icon: 'dollar', show: () => can('finance.view') },
   { path: '/invoices', label: 'Sales & Invoices', icon: 'file', show: () => can('finance.view') },
@@ -45,6 +47,7 @@ const NAV = [
   { path: '/agreements', label: 'Agreements', icon: 'file', show: () => canDraftAgreements() || can('crm.view'), count: 'agr_review' },
   { group: 'Resources' },
   { path: '/resources', label: 'Legal & Research', icon: 'book', show: () => isStaff() },
+  { path: '/file-prep', label: 'File Prep (Upload Limits)', icon: 'layers', show: () => isStaff() },
   { group: 'Administration' },
   { path: '/team', label: 'Team & Access', icon: 'shield', show: () => can('staff.manage') },
   { path: '/staff-agreements', label: 'Staff Agreements', icon: 'file', show: () => can('staff.manage') },
@@ -88,6 +91,9 @@ const ROUTES = [
   [/^\/guide$/, 'guide', 'How the dashboard works'],
   [/^\/crm-reports$/, 'crm-reports', 'CRM Reports'],
   [/^\/tasks$/, 'tasks', 'Tasks'],
+  [/^\/deadlines$/, 'deadlines', 'Deadlines'],
+  [/^\/weekly$/, 'weekly', 'Weekly Report'],
+  [/^\/file-prep$/, 'file-prep', 'File Prep for Portal Upload Limits'],
   [/^\/accounting$/, 'accounting', 'Accounting'],
   [/^\/invoices$/, 'invoices', 'Sales & Invoices'],
   [/^\/invoices\/([\w-]+)$/, 'invoice', 'Invoice'],
@@ -297,15 +303,17 @@ function renderNav() {
 export async function refreshCounts() {
   try {
     const me = state.profile.id;
-    const [s, u, cl, ar, pm] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread'),
+    const soon = new Date(Date.now() + 2 * 86400000).toLocaleDateString('en-CA');
+    const [s, u, cl, ar, pm, dl] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread'),
       db.from('case_checklists').select('id', { count: 'exact', head: true }).eq('assigned_to', me).neq('stage', 'approved'),
       can('agreements.manage') ? db.from('agreements').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('reviewer_id', me).not('review_requested_at', 'is', null) : { count: 0 },
-      can('crm.view') ? db.from('portal_messages').select('id', { count: 'exact', head: true }).eq('from_client', true).is('read_by_staff_at', null) : { count: 0 }]);
-    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0), my_checklists: cl.count || 0, agr_review: ar.count || 0, portal_unread: pm.count || 0 };
+      can('crm.view') ? db.from('portal_messages').select('id', { count: 'exact', head: true }).eq('from_client', true).is('read_by_staff_at', null) : { count: 0 },
+      can('crm.view') ? db.from('deadlines').select('id', { count: 'exact', head: true }).eq('done', false).lte('due_on', soon) : { count: 0 }]);
+    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0), my_checklists: cl.count || 0, agr_review: ar.count || 0, portal_unread: pm.count || 0, deadlines_due: dl.count || 0 };
   } catch { counts = {}; }
   if (shellBuilt) {
     renderNav();
-    const n = (counts.new_assessments || 0) + (counts.tasks_overdue || 0), b = document.getElementById('bellN');
+    const n = (counts.new_assessments || 0) + (counts.tasks_overdue || 0) + (counts.deadlines_due || 0), b = document.getElementById('bellN');
     if (b) { b.textContent = n > 9 ? '9+' : n; b.hidden = !n; }
   }
 }

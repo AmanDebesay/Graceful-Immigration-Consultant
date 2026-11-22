@@ -207,6 +207,7 @@ async function shareModal(token, a) {
 async function editor(el, a, setTitle) {
   const d = { ...a.data };
   const T = a.type;
+  const EXTRA = ['limited_scope', 'doc_review', 'payer', 'conflict', 'monitoring', 'consent_share'];
   // Where each field shows up in the document: 'lh' letterhead, 'title', 'parties', 'glance' (key terms) or a section number.
   const LH = ['business_name', 'tagline', 'rcic_name', 'rcic_designation', 'rcic_id', 'business_address', 'business_phone', 'business_email', 'website'];
   const SEC = Object.assign(Object.fromEntries(LH.map((k) => [k, ['lh', 'parties']])), { doc_title: ['title'], doc_subtitle: ['title'], agreement_date: ['title'],
@@ -273,18 +274,40 @@ async function editor(el, a, setTitle) {
     <div class="row-2">${f('client_name', 'Client full legal name')}${f('client_dob', 'Client date of birth', 'date')}</div>
     ${f('client_address', 'Client home address')}<div class="row-2">${f('client_phone', 'Client phone')}${f('client_email', 'Client email')}</div>
     <div class="row-2">${f('gst_rate', 'GST rate % (0 = not applicable)', 'number', 'step="0.01"')}${f('province', 'Governing law (province)')}</div>
-    <div class="co-wrap"><label style="font-size:12.5px;font-weight:600;display:block;margin:14px 0 6px">Additional clients — joint ${T === 'consultation' ? 'consultation' : 'retainer'} (e.g. spouse, dependent adult child) ${tag('co')}</label>
+    <div class="co-wrap"><label style="font-size:12.5px;font-weight:600;display:block;margin:14px 0 6px">${{ payer: 'The payer — signs this agreement with their own link (set “Relationship” to e.g. “Fee payer — father”)', conflict: 'Other people who consent (e.g. the sponsor) — each signs with their own link', consent_share: 'Other clients giving this consent (optional)' }[T] || `Additional clients — joint ${T === 'consultation' ? 'consultation' : 'retainer'} (e.g. spouse, dependent adult child)`} ${tag('co')}</label>
       <div id="co">${coRows()}</div>
       <div class="row" style="gap:8px;margin-bottom:12px"><select class="input" id="coPick" style="max-width:320px"><option value="">Add a client from Contacts…</option></select>
         <button class="btn btn-sm" type="button" id="coNew">${icon('plus')} Add a person not in Contacts</button></div>
-      <div id="coInstr" ${(d.co_clients || []).length ? '' : 'hidden'}>${T === 'retainer' ? f('joint_instructions', 'How instructions are given by the clients') : ''}
+      <div id="coInstr" ${(d.co_clients || []).length && !EXTRA.includes(T) ? '' : 'hidden'}>${T === 'retainer' ? f('joint_instructions', 'How instructions are given by the clients') : ''}
         ${f('continuing_relationship', 'Continuing relationship to disclose (RA 6.2) — only if you already act regularly for one of these clients, e.g. “The RCIC has represented the main client on other files since 2025.”')}
         <div class="alert info" style="font-size:12.5px">RA 6.3: avoid a joint agreement if a dispute between these clients is likely, or their interests may split as the file progresses (for example a separating couple).</div></div></div>`, true);
   const opts = (k, map, def) => `<div class="field"><label>${{ reason_kind: 'Why you are not taking the matter', close_kind: 'Type of letter' }[k]}</label><select class="input" data-k="${k}">
     ${Object.entries(map).map(([v, l]) => `<option value="${v}" ${(d[k] || def) === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`;
   const chk = (k, label) => `<label class="row" style="gap:8px;margin-bottom:10px"><input type="checkbox" data-k="${k}" ${d[k] ? 'checked' : ''}> ${label}</label>`;
   const ref = `<div class="row-2">${f('parent_number', 'Agreement no. this relates to')}${f('parent_date', 'Date of that agreement', 'date')}</div>`;
+  const tasks = (label) => `<label style="font-size:12.5px;font-weight:600">${label}: name, what is included, fee</label><div id="ms">${msRows()}</div><button class="btn btn-sm" id="addMs" type="button">${icon('plus')} Add line</button>
+      <div class="row-2" style="margin-top:12px">${f('payment_days', 'Invoices payable within (days)', 'number')}${f('payment_methods', 'Payment methods')}</div>`;
   const LETTER = {
+    limited_scope: () => feeArr + sec('Limited-scope services', `${f('program', 'Program or matter (optional)')}${tasks('Named services (only these are included)')}
+      ${f('excluded', 'Excluded — one per line (everything not named is excluded anyway)', 'textarea', 'rows="3"')}
+      <div class="row-2">${f('end_date', 'End date (optional)', 'date')}${f('end_trigger', 'Or ends when…')}</div>
+      <div class="row-2">${f('forward_days', 'Client forwards all correspondence within (business days)', 'number')}${chk('needs_5476', 'A named service needs communication with IRCC (IMM 5476 in ink)')}</div>`, true),
+    doc_review: () => feeArr + sec('Document review', `${f('prepared_by', 'Who prepared the documents (the Client, a family member, another adviser…)')}${f('program', 'Application or program')}
+      ${f('documents_list', 'Documents reviewed — one per line', 'textarea', 'rows="5"')}${f('deliverable', 'What the client receives (leave empty for the standard wording)', 'textarea', 'rows="2"')}
+      ${f('review_days', 'Review returned within (business days)', 'number')}${tasks('Fee')}`, true),
+    payer: () => sec('Third-party payer', `${f('agreement_ref', 'Client agreement this relates to (number)')}<div class="row-2">${f('payer_amount', 'Amount the payer will pay (CAD, empty = the invoices issued)', 'number', 'step="0.01"')}${f('payment_days', 'Payable within (days)', 'number')}</div>
+      ${f('payment_methods', 'Payment methods')}<div class="field"><label>Refunds of unearned money go to</label><select class="input" data-k="payer_refund_to"><option value="payer" ${d.payer_refund_to !== 'client' ? 'selected' : ''}>The payer</option><option value="client" ${d.payer_refund_to === 'client' ? 'selected' : ''}>The client</option></select></div>
+      ${f('consent_more', 'Anything more the payer may receive, with the client’s consent (leave empty = billing and status only)', 'textarea', 'rows="2"')}
+      <div class="alert info" style="font-size:12.5px">Add the payer under “Other signers” above. The payer is not a client, gets billing information only, and cannot give instructions.</div>`, true),
+    conflict: () => sec('Conflict of interest', `<div class="field"><label>Type</label><select class="input" data-k="conflict_kind"><option value="general" ${d.conflict_kind !== 'separate' ? 'selected' : ''}>Conflict consent — a possible conflict exists but acting is reasonable</option><option value="separate" ${d.conflict_kind === 'separate' ? 'selected' : ''}>Separate retainers — sponsor and applicant, two files</option></select></div>
+      ${f('conflict_desc', 'Plain description of the conflict', 'textarea', 'rows="3"')}${f('manage', 'Why you can still act / safeguards — one per line (conflict consent)', 'textarea', 'rows="3"')}
+      ${f('shared_info', 'Information that IS shared between the parties — one per line (separate retainers)', 'textarea', 'rows="2"')}`, true),
+    monitoring: () => feeArr + sec('Monitoring plan', `${f('start_date', 'Start date', 'date')}${f('monitored', 'Applications or files monitored — one per line, with numbers', 'textarea', 'rows="3"')}
+      ${f('monitor_tasks', 'What you do each month — one per line', 'textarea', 'rows="3"')}<div class="row-2">${f('report_frequency', 'Report to the client')}${f('response_time', 'Respond to questions within')}</div>
+      ${f('excluded', 'Not included — one per line', 'textarea', 'rows="3"')}<div class="row-2">${f('monthly_fee', 'Monthly fee before GST (CAD)', 'number', 'step="0.01"')}${f('cancel_days', 'Cancellation notice (days)', 'number')}</div>`, true),
+    consent_share: () => sec('Consent to share information', `<div class="row-2">${f('share_name', 'Person who may receive information')}${f('share_relationship', 'Relationship (payer, sponsor, parent…)')}</div>${f('share_contact', 'Their email or phone')}
+      ${f('share_what', 'Exactly what may be shared — one per line', 'textarea', 'rows="3"')}${f('share_not', 'Never shared — one per line (empty = standard list)', 'textarea', 'rows="2"')}
+      <div class="row-2">${f('share_until', 'Valid until (empty = end of services)', 'date')}${f('share_how', 'How it is shared')}</div>`, true),
     amendment: () => sec('Amendment', `${ref}${f('reason', 'Reason for the amendment', 'textarea')}${f('changes', 'What changes — one per line (scope, services, timelines…)', 'textarea', 'rows="5"')}
       ${f('fee_change', 'Fee changes — one per line (leave empty if the fees stay the same)', 'textarea', 'rows="3"')}${f('effective_date', 'Effective date', 'date')}
       <div class="alert info" style="font-size:12.5px">Everyone who signed the original agreement signs the amendment. Changing fees or scope without a signed amendment is not allowed.</div>`, true),
@@ -399,7 +422,7 @@ async function editor(el, a, setTitle) {
   const drawCo = () => {
     el.querySelector('#co').innerHTML = coRows();
     el.querySelectorAll('[data-delc]').forEach((b) => (b.onclick = () => { read(); d.co_clients.splice(Number(b.dataset.delc), 1); drawCo(); }));
-    const ci = el.querySelector('#coInstr'); if (ci) ci.hidden = !d.co_clients.length;
+    const ci = el.querySelector('#coInstr'); if (ci) ci.hidden = !d.co_clients.length || EXTRA.includes(T);
     preview();
   };
   el.querySelector('#coNew').onclick = () => { read(); d.co_clients.push({ name: '', relationship: '', dob: '', email: '', phone: '', address: '', contact_id: '' }); drawCo(); };

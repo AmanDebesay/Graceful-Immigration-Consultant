@@ -1,4 +1,4 @@
-import { db, esc, toast, fail, icon, modal, callFn, confirmBox } from '../core.js';
+import { db, state, esc, toast, fail, icon, modal, callFn, confirmBox } from '../core.js';
 import { APP_TYPES } from '../crm.js';
 
 const FIELDS = [
@@ -10,13 +10,14 @@ const money = (n) => Number(n || 0).toLocaleString('en-CA', { style: 'currency',
 const total = (p) => (p.milestones || []).reduce((s, m) => s + Number(m.fee || 0), 0);
 
 export async function render(el) {
-  const tab = (location.hash.match(/tab=(fees|checklists|ai|integrations|reviews)/) || [])[1] || 'business';
-  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="checklists">Checklists</button><button data-t="ai">AI assistant</button><button data-t="integrations">Integrations</button><button data-t="reviews">Website reviews</button></div></div><div id="pane"></div>`;
+  const tab = (location.hash.match(/tab=(fees|pricing|checklists|ai|integrations|reviews|backup)/) || [])[1] || 'business';
+  el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs"><button data-t="business">Business details</button><button data-t="fees">Fee schedule</button><button data-t="pricing">Pricing &amp; rules</button><button data-t="checklists">Checklists</button><button data-t="ai">AI assistant</button><button data-t="integrations">Integrations</button><button data-t="reviews">Website reviews</button>${state.profile?.role === 'owner' ? '<button data-t="backup">Backup &amp; export</button>' : ''}</div></div><div id="pane"></div>`;
   el.querySelectorAll('#tabs button').forEach((b) => {
     b.classList.toggle('on', b.dataset.t === tab);
     b.onclick = () => { location.hash = b.dataset.t === 'business' ? '#/settings' : `#/settings?tab=${b.dataset.t}`; };
   });
   const pane = el.querySelector('#pane');
+  if (tab === 'pricing' || tab === 'backup') return (await import('./settings-practice.js'))[tab](pane);
   ({ fees, checklists, ai, business, integrations, reviews }[tab])(pane);
 }
 

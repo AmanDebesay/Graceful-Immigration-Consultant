@@ -60,7 +60,7 @@ export async function render(el, [id], { setTitle }) {
         </div></div>
       </div>
       <div class="card">
-        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(can('letters.view') ? [['letters', 'Letters']] : []), ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments']] : []), ['portal', 'Portal']]
+        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['file', 'File'], ['deadlines', 'Deadlines & IRCC'], ['forms', 'Forms'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(can('letters.view') ? [['letters', 'Letters']] : []), ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments']] : []), ['portal', 'Portal']]
           .map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
         <div class="card-b" id="tabBody"></div>
       </div>
@@ -76,13 +76,16 @@ export async function render(el, [id], { setTitle }) {
     const old = document.querySelector('.dropdown'); if (old) return old.remove();
     const d = document.createElement('div'); d.className = 'dropdown'; d.style.left = '0'; d.style.right = 'auto';
     const items = [[can('crm.edit'), 'deal', 'trend', 'Deal'], [can('crm.edit'), 'case', 'briefcase', 'Case'], [canDraftAgreements(), 'agr', 'file', 'Agreement'], [can('finance.manage'), 'inv', 'file', 'Invoice'],
-      [can('finance.manage'), 'pay', 'check', 'Payment received'], [can('finance.manage'), 'trust', 'lock', 'Retainer into trust'], [true, 'task', 'checksq', 'Task']].filter((x) => x[0]);
+      [can('finance.manage'), 'pay', 'check', 'Payment received'], [can('finance.manage'), 'trust', 'lock', 'Retainer into trust'], [can('finance.manage'), 'quote', 'dollar', 'Quote'], [can('crm.edit'), 'corr', 'mail', 'IRCC letter / correspondence'], [can('crm.edit'), 'dl', 'clock', 'Deadline'], [true, 'task', 'checksq', 'Task']].filter((x) => x[0]);
     d.innerHTML = items.map(([, k, ic, l]) => `<button data-n="${k}">${icon(ic)} ${l}</button>`).join('');
     e.currentTarget.parentElement.appendChild(d);
     d.onclick = (ev) => {
       const k = ev.target.closest('[data-n]')?.dataset.n; d.remove();
       ({ agr: async () => (await import('./agreements.js')).newAgreement({ contactId: id }), deal: () => editDeal({}, { contactId: id }), case: () => editCase({}, { contactId: id }), inv: () => newInvoice(id), pay: () => receivePayment(id),
-        trust: () => trustTxn('deposit', id), task: () => addTask() })[k]?.();
+        trust: () => trustTxn('deposit', id), task: () => addTask(),
+        quote: async () => (await import('../practice.js')).quoteEditor({ contactId: id }).then(() => tab === 'billing' && showTab()),
+        corr: async () => { const f = await import('./file.js'); const { data: ks } = await db.from('cases').select('id, case_number, title').eq('contact_id', id); f.logCorrespondence({ contact: c, cases: ks || [], done: () => tab === 'deadlines' && showTab() }); },
+        dl: async () => { const f = await import('./file.js'); const { data: ks } = await db.from('cases').select('id, case_number, title').eq('contact_id', id); f.deadlineModal({ contactId: id, cases: ks || [], done: () => tab === 'deadlines' && showTab() }); } })[k]?.();
     };
     setTimeout(() => document.addEventListener('click', () => d.remove(), { once: true }));
   };
@@ -151,7 +154,8 @@ export async function render(el, [id], { setTitle }) {
   async function showTab() {
     tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === tab));
     body.innerHTML = '<div class="loading" style="min-height:120px"><div class="spin"></div></div>';
-    ({ emails: emailsTab, documents: documentsTab, agreements: agreementsTab, letters: async () => (await import('./letters.js')).lettersPanel(body, id), activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab,
+    ({ file: async () => (await import('./file.js')).filePanel(body, c), deadlines: async () => (await import('./file.js')).deadlinesPanel(body, c), forms: async () => (await import('./file.js')).formsPanel(body, c),
+      emails: emailsTab, documents: documentsTab, agreements: agreementsTab, letters: async () => (await import('./letters.js')).lettersPanel(body, id), activity: activityTab, deals: dealsTab, cases: casesTab, billing: billingTab, tasks: tasksTab, assessments: assessmentsTab,
       portal: async () => (await import('./portal-inbox.js')).portalPanel(body, c) })[tab]();
   }
 
@@ -234,11 +238,13 @@ export async function render(el, [id], { setTitle }) {
     body.innerHTML = `${mg ? `<div class="row" style="justify-content:flex-end;margin-bottom:10px">
         <button class="btn btn-sm" id="tdep">${icon('lock')} Retainer into trust</button><button class="btn btn-sm" id="rp">${icon('check')} Receive payment</button>
         <button class="btn btn-primary btn-sm" id="ni">${icon('plus')} New invoice</button></div>` : ''}
-      <h4 style="color:var(--navy);margin:4px 0 8px">Invoices</h4>
+      <div id="quotesBox"></div>
+      <h4 style="color:var(--navy);margin:18px 0 8px">Invoices</h4>
       ${(iv || []).length ? `<table class="t"><tbody>${iv.map((i) => `<tr class="click" onclick="location.hash='#/invoices/${i.id}'"><td><b>${esc(i.number)}</b><br><small style="color:var(--muted)">${fmtDate(i.issue_date)}</small></td>
         <td>${invoiceBadge(i)}</td><td style="text-align:right">${money(i.total)}</td><td style="text-align:right">${i.status === 'void' ? '' : 'Bal ' + money(i.balance)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty" style="padding:16px">No invoices.</div>'}
       <h4 style="color:var(--navy);margin:18px 0 8px">Trust transactions</h4>
       ${(tr || []).length ? `<table class="t"><tbody>${tr.map((t) => `<tr><td>${fmtDate(t.txn_date)}</td><td>${t.type === 'deposit' ? 'Retainer deposited' : 'Refund'}</td><td style="text-align:right">${money(t.amount)}</td></tr>`).join('')}</tbody></table>` : '<div class="empty" style="padding:16px">No trust activity. Payments from trust appear in Payments.</div>'}`;
+    (await import('../practice.js')).quotesPanel(body.querySelector('#quotesBox'), id);
     body.querySelector('#ni')?.addEventListener('click', () => newInvoice(id));
     body.querySelector('#rp')?.addEventListener('click', () => receivePayment(id));
     body.querySelector('#tdep')?.addEventListener('click', () => trustTxn('deposit', id));

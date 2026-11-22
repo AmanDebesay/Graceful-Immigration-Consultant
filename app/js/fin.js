@@ -1,5 +1,5 @@
 // Shared accounting helpers and the "+ New" transaction forms (invoice, payment, expense, bill, transfer, trust, journal).
-import { db, state, can, esc, icon, modal, toast, fail, rpc, callFn, today, fmtDate } from './core.js';
+import { db, state, can, esc, icon, modal, toast, fail, rpc, callFn, today, fmtDate, confirmBox } from './core.js';
 
 export const money = (n, { sign = false } = {}) => {
   const v = Number(n || 0);
@@ -326,8 +326,16 @@ export async function trustTxn(type = 'deposit', contactId) {
       <div class="row-2"><div class="field"><label>Method</label><select class="input" id="m">${METHODS.map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></div>
       <div class="field"><label>Reference</label><input class="input" id="r"></div></div>
       <div class="field"><label>Memo</label><input class="input" id="mm"></div>
-      ${type === 'deposit' ? '<div class="field"><label>Received from (shown on the receipt)</label><input class="input" id="from" placeholder="Who paid — the client, or the fee payer"></div>' : ''}`,
+      ${type === 'deposit' ? '<div class="field"><label>Received from (shown on the receipt)</label><input class="input" id="from" placeholder="Who paid — the client, or the fee payer"></div>'
+        : '<div class="field"><label>Refund paid to</label><input class="input" id="to"><small class="dk-muted" id="toHelp">Refunds go to the payer who provided the money, unless agreed otherwise in writing.</small></div>'}`,
     onOpen: (el) => {
+      const to = el.querySelector('#to');
+      if (to) {
+        const fillTo = async () => { const cid = el.querySelector('#c').value; const p = cid ? await payerFor(cid) : null; const cn = contacts.find((c) => c.id === cid)?.full_name || '';
+          to.value = p && p.refund_to !== 'client' ? p.name : cn; to.dataset.def = to.value;
+          el.querySelector('#toHelp').textContent = p ? `Default from the agreement: refunds go to ${p.refund_to === 'client' ? 'the client' : `the payer (${p.name})`}.` : 'The client paid, so the refund goes to the client.'; };
+        el.querySelector('#c').addEventListener('change', fillTo); fillTo();
+      }
       const from = el.querySelector('#from'); if (!from) return;
       const fill = async () => { const cid = el.querySelector('#c').value; from.value = cid ? (await payerFor(cid))?.name || contacts.find((c) => c.id === cid)?.full_name || '' : ''; };
       el.querySelector('#c').addEventListener('change', fill); fill();
@@ -335,7 +343,14 @@ export async function trustTxn(type = 'deposit', contactId) {
     actions: [{ label: 'Cancel' }, { label: 'Save', cls: 'btn-primary', onClick: async (el) => {
       const v = (s) => el.querySelector(s)?.value || '';
       if (!v('#c')) throw new Error('Choose a client.');
-      const id = await rpc('trust_transaction', { p_contact: v('#c'), p_date: v('#d'), p_type: type, p_amount: num(v('#a')), p_method: v('#m'), p_reference: v('#r') || null, p_memo: v('#mm') || null });
+      let memo = v('#mm') || null;
+      if (type === 'refund') {
+        const to = el.querySelector('#to'), who = to.value.trim();
+        if (!who) throw new Error('Who is the refund paid to?');
+        if (who !== to.dataset.def && !(await confirmBox('Refund to someone else?', `The agreement says refunds go to ${to.dataset.def}. Pay this refund to ${who} instead? Keep the written instruction on file.`, 'Yes, pay ' + who))) return false;
+        memo = `Refund to ${who}${memo ? ' — ' + memo : ''}`;
+      }
+      const id = await rpc('trust_transaction', { p_contact: v('#c'), p_date: v('#d'), p_type: type, p_amount: num(v('#a')), p_method: v('#m'), p_reference: v('#r') || null, p_memo: memo });
       if (type === 'deposit' && id && v('#from').trim()) await rpc('update_receipt', { p_kind: 'trust', p_id: id, p_received_from: v('#from').trim() }).catch(() => {});
       toast(type === 'deposit' ? 'Retainer deposited to trust' : 'Trust refund recorded'); changed();
       if (type === 'deposit' && id) receiptPrompt('trust', id);
@@ -399,8 +414,13 @@ export async function payerFor(contactId) {
   const { data } = await db.from('agreements').select('data').eq('contact_id', contactId).in('type', ['consultation', 'retainer']).neq('status', 'void')
     .order('created_at', { ascending: false }).limit(1);
   const d = data?.[0]?.data;
-  if (!d?.payer_other || !String(d.payer_name || '').trim()) return null;
-  return { name: d.payer_name.trim(), relationship: d.payer_relationship || '', email: d.payer_email || '', phone: d.payer_phone || '', address: d.payer_address || '' };
+  if (d?.payer_other && String(d.payer_name || '').trim())
+    return { name: d.payer_name.trim(), relationship: d.payer_relationship || '', email: d.payer_email || '', phone: d.payer_phone || '', address: d.payer_address || '', refund_to: d.payer_refund_to || 'payer' };
+  // Otherwise the payer recorded on the client file (File tab).
+  const { data: f } = await db.from('client_files').select('payer_contact_id').eq('contact_id', contactId).maybeSingle();
+  if (!f?.payer_contact_id) return null;
+  const { data: p } = await db.from('contacts').select('full_name, email, phone, address, city, province, postal_code, country').eq('id', f.payer_contact_id).single();
+  return p ? { name: p.full_name, relationship: 'Fee payer', email: p.email || '', phone: p.phone || '', address: [p.address, p.city, p.province, p.postal_code, p.country].filter(Boolean).join(', '), refund_to: 'payer' } : null;
 }
 
 /** Edit who an invoice is billed to. Resolves with the new bill_to (null = the client), or undefined if cancelled. */

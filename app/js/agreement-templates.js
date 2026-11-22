@@ -36,6 +36,7 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
   const pd = parent?.data || {};
   const fromParent = parent ? { parent_number: parent.number, parent_date: pd.agreement_date || String(parent.created_at || '').slice(0, 10), co_clients: pd.co_clients || [],
     client_name: pd.client_name || base.client_name, client_address: pd.client_address || base.client_address, client_phone: pd.client_phone || base.client_phone, client_email: pd.client_email || base.client_email } : {};
+  if (EXTRA_TYPES.includes(type)) return extraDefaults(type, base, { caseRow, parent, pkg });
   if (type === 'amendment') return { ...base, ...fromParent, reason: '', changes: '', fee_change: '', effective_date: today };
   if (type === 'non_engagement') return { ...base, contact_date: today, matter: '', reason_kind: 'scope', reason_note: '', advice_given: false, deadlines: '',
     documents: 'No original documents were received from you. Copies of anything you sent us are kept confidentially in our records.', fees_note: 'No fees are owing.' };
@@ -448,11 +449,169 @@ function termination(d) {
   ${ackSig(d, T, 7)}${closing(d)}${runningFooter(d, T)}</div>`;
 }
 
-export function render(type, d) { return ({ consultation, retainer, amendment, non_engagement: nonEngagement, termination }[type] || retainer)(d); }
+
+// ── More agreement types (Practice Operating System, section 3) ──
+// limited_scope (LS), doc_review (DR), payer (PA), conflict (CC), monitoring (MP), consent_share (CS).
+// Other signers (the payer, the sponsor, other parties) are stored in data.co_clients so each signs with their own link.
+export const EXTRA_TYPES = ['limited_scope', 'doc_review', 'payer', 'conflict', 'monitoring', 'consent_share'];
+const others = (d) => coClients(d);
+const solo = (d) => ({ ...d, co_clients: [] });   // letterhead shows only the client; other parties get their own box
+function otherBox(d, label) {
+  if (!others(d).length) return '';
+  return `<div class="payer" data-sec="parties"><span class="lbl">${e(label)}</span>${others(d).map((c) => `<span class="nm">${e(c.name)}</span>${c.relationship ? `${e(c.relationship)}<br>` : ''}${[c.address, [c.phone, c.email].filter(Boolean).join(' · ')].filter((x) => String(x || '').trim()).map(e).join('<br>')}`).join('<div style="height:8px"></div>')}</div>`;
+}
+function sigBlock(d, title, n, otherLabel = 'Party') {
+  return `<div class="sigpage">${H(n, 'Signatures')}
+  <p>Each person below has read this ${e(title)} and signs it personally on the date written beside their name. Where the parties are not together, signatures are given electronically, a method everyone agrees to.</p>
+  <div class="sigs"><div class="sig"><div class="gi-sig" data-sig="client"></div><b>${e(d.client_name)}</b><br>Client<br>Date: <span data-sig-date="client">________________</span></div>
+    ${others(d).map((c, i) => `<div class="sig"><div class="gi-sig" data-sig="client-${i + 2}"></div><b>${e(c.name)}</b><br>${e(c.relationship || otherLabel)}<br>Date: <span data-sig-date="client-${i + 2}">________________</span></div>`).join('')}
+    <div class="sig"><div class="gi-sig" data-sig="rcic"></div><b>${e(d.rcic_name)}</b><br>Regulated Canadian Immigration Consultant · College ID ${e(d.rcic_id)}<br>Date: <span data-sig-date="rcic">________________</span></div></div>
+  <p class="note" style="margin-top:14px">Electronic signatures are legally recognized under PIPEDA, Alberta's Electronic Transactions Act and CICC By-law 2021-2, s.1.1(aa). The signed document is fingerprinted (SHA-256) so any later change can be detected.</p></div>`;
+}
+function taskFees(d, what = 'Task') {
+  if (isProBono(d)) return `<p>These services are provided <b>pro bono</b>${pbWhy(d) ? ', ' + pbWhy(d) : ''}. <b>No professional fees</b> are charged, and this does not lower the standard of care, confidentiality or any other duty the RCIC owes the Client.</p>`;
+  const rate = Number(d.gst_rate || 0), tax = (v) => Math.round(Number(v || 0) * rate) / 100;
+  const ms = (d.milestones || []).filter((m) => m.name), tot = ms.reduce((s, m) => s + Number(m.fee || 0), 0);
+  return `<table><thead><tr><th>#</th><th>${e(what)}</th><th>What is included</th><th class="r">Professional fee</th><th class="r">GST</th></tr></thead>
+    <tbody>${ms.map((m, i) => `<tr><td>${i + 1}</td><td>${e(m.name)}</td><td>${e(m.included)}</td><td class="r">${money(m.fee)}</td><td class="r">${rate ? money(tax(m.fee)) : 'N/A'}</td></tr>`).join('') || `<tr><td colspan="5">${todo('each task and its fee')}</td></tr>`}</tbody>
+    <tfoot><tr><th colspan="3">Total</th><th class="r">${money(tot)}</th><th class="r">${rate ? money(tax(tot)) : 'N/A'}</th></tr><tr><th colspan="4">Total including GST</th><th class="r">${money(tot + tax(tot))}</th></tr></tfoot></table>
+    <p>The fee for each task is earned when that task is completed and invoiced then. Invoices are payable within ${e(d.payment_days || 14)} days by: ${e(d.payment_methods || 'Interac e-Transfer')}. All amounts are in Canadian dollars. Fees are not contingent on the outcome of any application. Disbursements (for example courier or translation) are charged at cost with receipts, only with the Client's approval. Government fees are paid by the Client directly to the government.</p>${payerClause(d)}`;
+}
+const commonTail = (d, n) => `${H(n, 'Confidentiality')}<p>The RCIC keeps confidential all information about the Client, as required by the Code of Professional Conduct, PIPEDA and Alberta's Personal Information Protection Act, unless the Client authorizes disclosure in writing or the law requires it. Files are stored in an encrypted, access-controlled system hosted in Canada.</p>
+  ${H(n + 1, 'Regulator, complaints and governing law')}${regulator}<p>Concerns should first be raised in writing with the RCIC, who will respond within ${e(d.dispute_days || 30)} business days. Complaints may be made to the College: ${CICC.complaints}. This document is governed by the laws of the Province of ${e(d.province)} and the federal laws of Canada applicable therein.</p>`;
+
+function limitedScope(d) {
+  const T = 'Limited-Scope Retainer Agreement';
+  return `${STYLE}<div class="gi-agr">${letterhead(solo(d), T.toUpperCase(), 'Named services only')}${otherBox(d, 'Also a client under this agreement')}
+  <div class="glance" data-sec="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Services', (d.milestones || []).filter((m) => m.name).map((m) => e(m.name)).join('; ') || todo('the named tasks'))}${glanceRow('Ends', d.end_date ? longDate(d.end_date) : e(d.end_trigger || 'when the named tasks are completed'))}${hasPayer(d) ? glanceRow('Fees paid by', payerWho(d)) : ''}</dl></div>
+  <p class="intro">This Agreement is for the specific services named below only. It is made under the College of Immigration and Citizenship Consultants Act, the Code of Professional Conduct and the Retainer Agreement Regulation.</p>
+  ${H(1, 'Services provided (and nothing else)')}<p>The RCIC will provide only these services${d.program ? `, relating to <b>${e(d.program)}</b>` : ''}:</p><ul>${(d.milestones || []).filter((m) => m.name).map((m) => `<li><b>${e(m.name)}</b>${m.included ? ` — ${e(m.included)}` : ''}</li>`).join('') || `<li>${todo('each named task')}</li>`}</ul>
+  ${relationshipClause(d)}
+  ${H(2, 'Services not included')}<p>Everything not listed in section 1 is excluded, including${lines(d.excluded).length ? ':' : ' preparing or submitting any application, responding to further IRCC requests, and appeals or judicial review.'}</p>${bullets(d.excluded)}
+  <p>If the Client wants more help, a signed addendum or a new agreement is needed before that work starts.</p>
+  ${H(3, 'Representation and correspondence')}<p>${d.needs_5476 === false ? 'The RCIC will not communicate with IRCC on the Client\'s behalf, so no Use of a Representative form (IMM 5476) is needed.' : 'Where a named service requires the RCIC to communicate with Immigration, Refugees and Citizenship Canada (IRCC) for the Client, the Client will sign a Use of a Representative form (IMM 5476) in ink. The RCIC acts only for the named services and will withdraw it (Section D) when they end.'}</p>
+  <p class="callout"><b>Forward all correspondence.</b> The Client will forward every letter, email or message from IRCC or any other authority to the RCIC within ${e(d.forward_days || 2)} business days of receiving it. Unless a matter is within the named services, the RCIC is not monitoring the file or its deadlines; deadlines in other correspondence remain the Client's responsibility.</p>
+  ${H(4, 'Fees')}${taskFees(d)}
+  ${H(5, 'End of this agreement')}<p>This Agreement ends ${d.end_date ? `on ${longDate(d.end_date)}` : e(d.end_trigger || 'when the named services are completed')}, or earlier if either party ends it in writing. The Client then pays only for completed services; any money paid for services not completed is refunded${hasPayer(d) && d.payer_refund_to !== 'client' ? ' to the Payer' : ''}. The RCIC will confirm the end of services in writing.</p>
+  ${commonTail(d, 6)}${iniBox(solo(d))}${sigBlock(d, T, 8, 'Client')}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+function docReview(d) {
+  const T = 'Document Review Agreement';
+  return `${STYLE}<div class="gi-agr">${letterhead(solo(d), T.toUpperCase(), 'Review of documents prepared by the Client or another person')}
+  <p class="intro">The Client (or another person) prepared an application or documents. The RCIC will review only what is provided and give the Client written comments. The RCIC does not prepare, sign or submit the application and is not the Client's representative before any authority under this Agreement.</p>
+  ${H(1, 'Documents reviewed')}<p>Prepared by: <b>${e(d.prepared_by || 'the Client')}</b>${d.program ? `, for <b>${e(d.program)}</b>` : ''}. The RCIC will review only these documents:</p>${bullets(d.documents_list, `<p>${todo('list of documents to be reviewed')}</p>`)}
+  ${H(2, 'What the Client receives')}<p>${e(d.deliverable || 'A written list of errors, omissions, inconsistencies and risks found in the documents, with suggested corrections')}, within ${e(d.review_days || 5)} business days of receiving all the documents.</p>
+  ${H(3, 'Limits of the review')}<ul><li>The review is based only on the documents and information provided. The RCIC is not responsible for facts that were not disclosed, documents not provided, or changes made after the review.</li>
+    <li>The Client decides whether to make the suggested corrections and submits the application personally. The Client remains responsible for the truth and completeness of everything submitted.</li>
+    <li>No Use of a Representative form (IMM 5476) is filed, and the RCIC will not monitor the application, its deadlines or IRCC correspondence.</li>
+    <li>The RCIC gives no guarantee of any outcome; decisions are made by government authorities.</li></ul>
+  ${H(4, 'Fees')}${taskFees(d, 'Review')}
+  ${commonTail(d, 5)}${iniBox(solo(d))}${sigBlock(d, T, 7)}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+function payerAgreement(d) {
+  const T = 'Third-Party Payer Agreement';
+  const p = others(d)[0] || {};
+  return `${STYLE}<div class="gi-agr">${letterhead(solo(d), T.toUpperCase(), 'Someone other than the Client pays the fees')}${otherBox(d, 'Payer — pays on the Client’s behalf (not a client)')}
+  <p class="intro">${e(p.name || 'The Payer')} (the “Payer”) has offered to pay fees for services the RCIC provides to ${e(d.client_name)} (the “Client”)${d.agreement_ref ? ` under agreement no. ${e(d.agreement_ref)}` : ''}. The Client and the Payer both agree to the following.</p>
+  ${H(1, 'The Payer is not a client')}<ul><li>The RCIC's duties — loyalty, confidentiality and acting on instructions — are owed <b>only to the Client</b>.</li>
+    <li>The Payer cannot give instructions on the file, cannot change the scope of the services and has no access to the Client's file or documents.</li>
+    <li>Paying the fees does not entitle the Payer to any information about the application or its outcome.</li></ul>
+  ${H(2, 'Information the Payer receives')}<p>The Payer receives only: invoices, receipts, amounts owing and a general “in progress” or “completed” status. ${d.consent_more ? `In addition, with the Client's written consent: ${e(d.consent_more)}.` : 'Anything more requires the Client\'s separate written consent (a Consent to Share Information), which the Client may withdraw at any time.'} Sensitive information (for example detention, military history, health, criminal matters or IRCC notes) is never shared with the Payer.</p>
+  ${H(3, 'Payment and refunds')}<p>The Payer will pay ${d.payer_amount ? `<b>${money(d.payer_amount)}</b>` : 'the invoices issued under the Client\'s agreement'} within ${e(d.payment_days || 14)} days of each invoice, by ${e(d.payment_methods || 'Interac e-Transfer')}. Money paid before the work is done is held in the RCIC's client (trust) account until earned. Any refund of unearned money will be paid to <b>${d.payer_refund_to === 'client' ? 'the Client' : 'the Payer'}</b>. The Client remains responsible for any fees the Payer does not pay.</p>
+  ${H(4, 'If interests conflict')}<p>If the Payer's wishes and the Client's interests come into conflict, the RCIC will follow the Client's instructions and may stop accepting payment from the Payer, or stop acting, as the Code of Professional Conduct requires. The Payer may stop paying at any time by written notice; fees already earned remain payable.</p>
+  ${commonTail(d, 5)}${sigBlock(d, T, 7, 'Payer')}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+function conflictConsent(d) {
+  const sep = d.conflict_kind === 'separate';
+  const T = sep ? 'Separate Representation and Conflict Statement' : 'Conflict of Interest Disclosure and Consent';
+  return `${STYLE}<div class="gi-agr">${letterhead(solo(d), T.toUpperCase(), 'Code of Professional Conduct — informed written consent')}${otherBox(d, sep ? 'Other party (separate retainer)' : 'Other person(s) affected')}
+  ${H(1, 'The situation')}${lines(d.conflict_desc).length ? para(d.conflict_desc) : `<p>${todo('plain description of the possible conflict')}</p>`}
+  ${sep ? `${H(2, 'Two files, two retainers')}<p>The RCIC acts for ${e(d.client_name)} and for ${others(d).map((c) => e(c.name)).join(' and ') || todo('the other party')} under <b>separate retainer agreements</b>, with separate files and separate scopes, because their interests in this matter may differ (for example a sponsor and the person sponsored).</p>
+    <ul><li>Information each person gives the RCIC is kept confidential from the other${lines(d.shared_info).length ? ', except:' : ' unless that person consents in writing.'}</li>${bullets(d.shared_info)}
+    <li>The RCIC will not advise one person against the other's interests.</li></ul>`
+  : `${H(2, 'Why the RCIC can still act')}${lines(d.manage).length ? bullets(d.manage) : '<p>The RCIC believes it is reasonable to act because the parties\' interests are aligned on the matter and the safeguards below are in place.</p>'}`}
+  ${H(3, 'What each person agrees to')}<ul><li>Each person has had the conflict explained in plain language and had the chance to ask questions.</li>
+    <li>Each person may get <b>independent advice</b> (another licensed representative or a lawyer) before signing.</li>
+    <li>If the conflict becomes serious — for example a separation, a dispute about the application, or one person asking the RCIC to act against the other — the RCIC will tell everyone and may have to stop acting for one or all of them.</li>
+    <li>Each person may withdraw this consent in writing at any time.</li></ul>
+  ${commonTail(d, 4)}${sigBlock(d, T, 6, 'Consents')}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+function monitoring(d) {
+  const T = 'Ongoing Monitoring Plan';
+  const rate = Number(d.gst_rate || 0), fee = Number(d.monthly_fee || 0), tax = Math.round(fee * rate) / 100;
+  return `${STYLE}<div class="gi-agr">${letterhead(solo(d), T.toUpperCase(), 'Monthly monitoring of an application or file')}
+  <div class="glance" data-sec="glance"><h3>Key terms at a glance</h3><dl>${glanceRow('Starts', longDate(d.start_date))}${glanceRow('Monthly fee', isProBono(d) ? 'No fee — pro bono' : `${money(fee)} + ${rate ? `GST ${money(tax)}` : 'no GST'} = <b>${money(fee + tax)}</b>`)}${glanceRow('Cancellation', `${e(d.cancel_days || 30)} days' written notice`)}${hasPayer(d) ? glanceRow('Fees paid by', payerWho(d)) : ''}</dl></div>
+  ${H(1, 'What is monitored')}${bullets(d.monitored, `<p>${todo('each application or file monitored, with its number')}</p>`)}
+  ${H(2, 'What the RCIC does each month')}${bullets(d.monitor_tasks || 'Check the application status in the IRCC account or with IRCC\nReport the status to the Client in writing\nTell the Client about any request or deadline found, within 2 business days')}
+  ${H(3, 'Response times')}<p>The RCIC reports at least ${e(d.report_frequency || 'once a month')} and responds to the Client's questions within ${e(d.response_time || '2 business days')}.</p>
+  ${H(4, 'Not included')}${bullets(d.excluded || 'Responding to IRCC requests, procedural fairness letters or refusals\nPreparing or submitting any application\nAppeals and judicial review')}<p>Any of these needs a signed addendum or a new agreement before the work starts.</p>
+  ${H(5, 'Fees and cancellation')}${isProBono(d) ? taskFees(d) : `<p>The monthly fee is earned at the end of each month of monitoring and invoiced then. Invoices are payable within ${e(d.payment_days || 14)} days. Fees are not contingent on any outcome.</p>${payerClause(d)}`}
+  <p>Either party may cancel with ${e(d.cancel_days || 30)} days' written notice. The Client pays only for months (or part months) of monitoring provided.</p>
+  ${commonTail(d, 6)}${iniBox(solo(d))}${sigBlock(d, T, 8)}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+function consentShare(d) {
+  const T = 'Consent to Share Information';
+  return `${STYLE}<div class="gi-agr">${letterhead(solo(d), T.toUpperCase(), 'Authorization by the Client')}
+  <p class="intro">I, ${e(d.client_name)}, authorize ${e(d.business_name)} and ${e(d.rcic_name)} (RCIC, College ID ${e(d.rcic_id)}) to share information about my immigration matter with the person named below, only as set out here.</p>
+  ${H(1, 'Person who may receive information')}<p><b>${e(d.share_name) || todo('name')}</b>${d.share_relationship ? ` — ${e(d.share_relationship)}` : ''}${d.share_contact ? `<br>${e(d.share_contact)}` : ''}</p>
+  <p>This person is not my representative and cannot give instructions on my file.</p>
+  ${H(2, 'Information that may be shared')}${bullets(d.share_what, `<p>${todo('exactly what may be shared')}</p>`)}
+  ${H(3, 'Information that will NOT be shared')}${bullets(d.share_not || 'GCMS notes, IRCC letters and decisions, unless listed above\nHealth, criminal, detention, military or security information\nIdentity documents and copies of forms')}
+  ${H(4, 'Duration and withdrawal')}<p>This consent is valid ${d.share_until ? `until ${longDate(d.share_until)}` : 'until the end of the services'}, unless I withdraw it earlier. I may withdraw it at any time by telling the RCIC in writing; withdrawal does not affect information already shared.</p>
+  ${H(5, 'How it is shared')}<p>${e(d.share_how || 'By email or telephone. Documents are shared only through a secure link, never as email attachments.')}</p>
+  ${sigBlock(d, T, 6, 'Client')}${closing(d)}${runningFooter(d, T)}</div>`;
+}
+
+export function extraDefaults(type, base, { caseRow = null, parent = null, pkg = null } = {}) {
+  const common = { program: caseRow?.application_type || pkg?.program || '', payment_days: 14, payment_methods: 'Interac e-Transfer to the business email, or by phone', dispute_days: 30,
+    milestones: [], excluded: '', agreement_ref: parent?.number || '' };
+  if (type === 'limited_scope') return { ...base, ...common, milestones: [{ name: 'Application status check and report', included: 'Check the status with IRCC and report in writing', fee: 0 }],
+    end_trigger: 'when the named services are completed', end_date: '', forward_days: 2, needs_5476: true,
+    excluded: 'Preparing or submitting any application\nResponding to procedural fairness letters or further IRCC requests\nAppeals and judicial review (lawyers only)' };
+  if (type === 'doc_review') return { ...base, ...common, milestones: [{ name: 'Review of the application package', included: 'Written list of errors, omissions and risks with suggested corrections', fee: 0 }],
+    prepared_by: 'the Client', documents_list: '', deliverable: '', review_days: 5 };
+  if (type === 'payer') return { ...base, ...common, payer_refund_to: 'payer', payer_amount: '', consent_more: '' };
+  if (type === 'conflict') return { ...base, conflict_kind: 'general', conflict_desc: '', manage: '', shared_info: '' };
+  if (type === 'monitoring') return { ...base, ...common, start_date: base.agreement_date, monthly_fee: 0, cancel_days: 30, monitored: '', report_frequency: 'once a month', response_time: '2 business days',
+    monitor_tasks: 'Check the application status in the IRCC account or with IRCC\nReport the status to the Client in writing\nTell the Client about any request or deadline found, within 2 business days',
+    excluded: 'Responding to IRCC requests, procedural fairness letters or refusals\nPreparing or submitting any application\nAppeals and judicial review' };
+  if (type === 'consent_share') return { ...base, share_name: '', share_relationship: '', share_contact: '', share_what: 'Invoices, receipts and amounts owing\nA general status: “in progress” or “completed”',
+    share_not: '', share_until: '', share_how: '' };
+  return base;
+}
+export const EXTRA_TITLES = {
+  limited_scope: ['LIMITED-SCOPE RETAINER AGREEMENT', 'Named services only'], doc_review: ['DOCUMENT REVIEW AGREEMENT', 'Review of documents prepared by the Client or another person'],
+  payer: ['THIRD-PARTY PAYER AGREEMENT', 'Someone other than the Client pays the fees'], monitoring: ['ONGOING MONITORING PLAN', 'Monthly monitoring of an application or file'],
+  consent_share: ['CONSENT TO SHARE INFORMATION', 'Authorization by the Client'],
+};
+function extraMissing(type, d) {
+  const miss = [];
+  const tasks = (d.milestones || []).filter((m) => m.name);
+  if (['limited_scope', 'doc_review'].includes(type)) {
+    if (!tasks.length) miss.push(type === 'doc_review' ? 'What is reviewed (at least one line)' : 'At least one named service');
+    if (!isProBono(d) && !tasks.some((m) => Number(m.fee) > 0)) miss.push('A fee for at least one service');
+  }
+  if (type === 'doc_review' && !lines(d.documents_list).length) miss.push('List of documents reviewed');
+  if (type === 'payer' && !others(d).length) miss.push('The payer (add them in Parties & date, at the bottom)');
+  if (type === 'conflict') { if (!lines(d.conflict_desc).length) miss.push('Description of the conflict'); if (!others(d).length) miss.push('The other person(s) who consent'); }
+  if (type === 'monitoring') { if (!lines(d.monitored).length) miss.push('What is monitored'); if (!isProBono(d) && !(Number(d.monthly_fee) > 0)) miss.push('Monthly fee'); }
+  if (type === 'consent_share') { if (!String(d.share_name || '').trim()) miss.push('Person who may receive information'); if (!lines(d.share_what).length) miss.push('What may be shared'); }
+  return miss;
+}
+
+export function render(type, d) { return ({ consultation, retainer, amendment, non_engagement: nonEngagement, termination, limited_scope: limitedScope, doc_review: docReview,
+  payer: payerAgreement, conflict: conflictConsent, monitoring, consent_share: consentShare }[type] || retainer)(d); }
 export function defaultTitles(type, d) {
   const j = isJoint(d);
   if (type === 'amendment') return [j ? 'AMENDMENT TO JOINT RETAINER AGREEMENT' : 'AMENDMENT TO RETAINER AGREEMENT', 'Written amendment signed by all parties'];
   if (type === 'non_engagement') return ['NON-ENGAGEMENT LETTER', 'We are not acting for you'];
+  if (type === 'conflict') return d.conflict_kind === 'separate' ? ['SEPARATE REPRESENTATION AND CONFLICT STATEMENT', 'Code of Professional Conduct — informed written consent'] : ['CONFLICT OF INTEREST DISCLOSURE AND CONSENT', 'Code of Professional Conduct — informed written consent'];
+  if (EXTRA_TITLES[type]) return EXTRA_TITLES[type];
   if (type === 'termination') return ({ completed: ['FILE CLOSING LETTER', 'Completion of services'], client: ['TERMINATION OF SERVICES', 'At the Client’s request'], rcic: ['WITHDRAWAL OF REPRESENTATION', 'Written notice under the Code of Professional Conduct'] })[d.close_kind || 'completed'];
   return type === 'consultation'
     ? [j ? 'JOINT INITIAL CONSULTATION AGREEMENT' : 'INITIAL CONSULTATION AGREEMENT', 'Retainer Agreement Regulation, section 4.1']
@@ -467,7 +626,7 @@ export function requiredMissing(type, d) {
   else if (type === 'non_engagement') { need.splice(1, 1); need.push(['matter', 'What the person asked about'], ['contact_date', 'Date they contacted you']); if (d.reason_kind === 'other') need.push(['reason_note', 'Reason']); }
   else if (type === 'termination') { need.push(['parent_number', 'Agreement'], ['effective_date', 'Effective date'], ['file_status', 'Status of the file'], ['final_account', 'Final account']); if (d.close_kind === 'rcic') need.push(['reason', 'Reason for withdrawing']); if (d.close_kind !== 'completed') need.push(['deadlines', 'Upcoming deadlines (or “None”)']); }
   else if (type === 'consultation') need.push(['purpose', 'Purpose of consultation'], ...(free ? [] : [['fee', 'Consultation fee']]));
-  else need.push(['program', 'Category and program'], ['scope', 'Scope of services'], ['preliminary_advice', 'Summary of preliminary advice']);
+  else if (type === 'retainer') need.push(['program', 'Category and program'], ['scope', 'Scope of services'], ['preliminary_advice', 'Summary of preliminary advice']);
   const miss = need.filter(([k]) => !String(d[k] ?? '').trim()).map(([, l]) => l);
   (d.co_clients || []).forEach((c, i) => {
     if (!String(c.name || '').trim()) miss.push(`Name of additional client ${i + 2}`);
@@ -479,6 +638,7 @@ export function requiredMissing(type, d) {
   }
   if (free && ['family', 'friend'].includes(d.pro_bono_reason) && !String(d.relationship || '').trim()) miss.push('Relationship to the RCIC');
   if (free && d.pro_bono_reason === 'other' && !String(d.pro_bono_note || '').trim()) miss.push('Reason for pro bono');
+  if (EXTRA_TYPES.includes(type)) miss.push(...extraMissing(type, d));
   if (!['consultation', 'retainer'].includes(type)) return miss;
   if (type === 'retainer' && free) { if (!String(d.comm_methods || '').trim()) miss.push('Preferred method of correspondence'); }
   else if (type === 'retainer') {

@@ -5,7 +5,10 @@ import { defaults } from '../agreement-templates.js';
 export const AGR_STATUS = { draft: ['Draft', ''], sent: ['Sent', 'b-blue'], viewed: ['Viewed by client', 'b-gold'], signed: ['Signed', 'b-GREEN'], void: ['Void', ''] };
 export const agrBadge = (s) => `<span class="badge ${AGR_STATUS[s]?.[1] || ''}">${AGR_STATUS[s]?.[0] || s}</span>`;
 export const AGR_TYPE = { consultation: 'Initial Consultation Agreement', retainer: 'Retainer (Service) Agreement', amendment: 'Amendment to Retainer Agreement',
-  non_engagement: 'Non-Engagement Letter', termination: 'Closing / Termination Letter' };
+  non_engagement: 'Non-Engagement Letter', termination: 'Closing / Termination Letter', limited_scope: 'Limited-Scope Retainer', doc_review: 'Document Review Agreement',
+  payer: 'Third-Party Payer Agreement', conflict: 'Conflict Consent / Separate Retainers', monitoring: 'Ongoing Monitoring Plan', consent_share: 'Consent to Share Information' };
+// Agreements that carry professional fees (fee arrangement, pro bono, payer clause).
+const FEE_TYPES = ['retainer', 'consultation', 'limited_scope', 'doc_review', 'monitoring'];
 export const isLetter = (t) => ['non_engagement', 'termination'].includes(t);
 export const PRO_BONO_REASON = { family: 'Family member of the RCIC', friend: 'Personal friend of the RCIC', hardship: 'Financial hardship / client needs help', community: 'Community or charitable service', other: 'Other reason' };
 export const reviewBadge = (a) => a.status === 'draft' && a.review_requested_at ? ' <span class="badge b-gold">Waiting for RCIC review</span>' : '';
@@ -27,7 +30,14 @@ export async function newAgreement({ contactId, caseId, type = 'retainer' } = {}
         <option value="retainer" ${type === 'retainer' ? 'selected' : ''}>Retainer / Service Agreement — representation (RA 5.1)</option>
         <option value="amendment" ${type === 'amendment' ? 'selected' : ''}>Amendment — change the scope, fees or terms of a retainer (AM)</option>
         <option value="non_engagement" ${type === 'non_engagement' ? 'selected' : ''}>Non-engagement letter — you are declining the matter (NE)</option>
-        <option value="termination" ${type === 'termination' ? 'selected' : ''}>Closing / termination letter — file completed, ended or withdrawn (TL)</option></select></div>
+        <option value="termination" ${type === 'termination' ? 'selected' : ''}>Closing / termination letter — file completed, ended or withdrawn (TL)</option>
+        <optgroup label="More agreements">
+        <option value="limited_scope" ${type === 'limited_scope' ? 'selected' : ''}>Limited-scope retainer — named tasks only: status check, ATIP, one email (LS)</option>
+        <option value="doc_review" ${type === 'doc_review' ? 'selected' : ''}>Document / application review — someone else prepared the forms (DR)</option>
+        <option value="payer" ${type === 'payer' ? 'selected' : ''}>Third-party payer agreement — signed by the client and the payer (PA)</option>
+        <option value="conflict" ${type === 'conflict' ? 'selected' : ''}>Conflict consent, or separate sponsor / applicant retainers (CC)</option>
+        <option value="monitoring" ${type === 'monitoring' ? 'selected' : ''}>Ongoing monitoring plan — monthly watching of a file (MP)</option>
+        <option value="consent_share" ${type === 'consent_share' ? 'selected' : ''}>Consent to share information — payer, sponsor or relative (CS)</option></optgroup></select></div>
       <div class="field" id="paw" hidden><label>Agreement this relates to</label><select class="input" id="pa"></select><small style="color:var(--muted)" id="pahelp"></small></div>
       <div class="field" id="fbw"><label>Fee arrangement</label><select class="input" id="fb">
         <option value="paid">Paying client — professional fees apply</option><option value="pro_bono">Pro bono — no professional fees</option></select></div>
@@ -53,9 +63,9 @@ export async function newAgreement({ contactId, caseId, type = 'retainer' } = {}
         m.querySelector('#pa').innerHTML = parents.map((x) => `<option value="${x.id}">${esc(x.number)} · ${esc(AGR_TYPE[x.type])} · ${esc(AGR_STATUS[x.status]?.[0] || x.status)}</option>`).join('') + '<option value="">Not linked to an agreement in the dashboard</option>';
       };
       const sync = () => {
-        const t = m.querySelector('#t').value, retainer = t === 'retainer', main = ['retainer', 'consultation'].includes(t), free = main && m.querySelector('#fb').value === 'pro_bono';
+        const t = m.querySelector('#t').value, retainer = t === 'retainer', main = FEE_TYPES.includes(t), free = main && m.querySelector('#fb').value === 'pro_bono';
         m.querySelector('#pw').hidden = !retainer; m.querySelector('#cw').hidden = t === 'consultation'; m.querySelector('#lw').hidden = t !== 'consultation'; m.querySelector('#rw').hidden = !free;
-        m.querySelector('#fbw').hidden = !main; m.querySelector('#paw').hidden = !['amendment', 'termination'].includes(t);
+        m.querySelector('#fbw').hidden = !main; m.querySelector('#paw').hidden = !['amendment', 'termination', 'payer'].includes(t);
         m.querySelector('#pahelp').textContent = t === 'amendment' ? 'The amendment refers to this agreement and copies its clients. Everyone who signed it signs the amendment.'
           : 'The letter refers to this agreement. Use it when the file is completed, when the client ends the services, or when you withdraw.';
         const pk = (pkgs || []).find((x) => x.id === m.querySelector('#p').value);
@@ -75,10 +85,22 @@ export async function newAgreement({ contactId, caseId, type = 'retainer' } = {}
       const [{ data: contact }, { data: caseRow }] = await Promise.all([
         db.from('contacts').select('*').eq('id', cid).single(),
         kid ? db.from('cases').select('*').eq('id', kid).single() : { data: null }]);
-      const main = ['retainer', 'consultation'].includes(t), free = main && m.querySelector('#fb').value === 'pro_bono';
-      const parent = ['amendment', 'termination'].includes(t) ? m.getParents().find((x) => x.id === m.querySelector('#pa').value) || null : null;
+      const main = FEE_TYPES.includes(t), free = main && m.querySelector('#fb').value === 'pro_bono';
+      const parent = ['amendment', 'termination', 'payer'].includes(t) ? m.getParents().find((x) => x.id === m.querySelector('#pa').value) || null : null;
       const fee = minutes === 30 ? settings.consult_fee_30 ?? 30 : settings.consult_fee_60 ?? 60;
       const data = defaults(t, { contact, settings, caseRow, pkg, consult: { minutes, fee }, proBono: free ? m.querySelector('#r').value : null, parent });
+      // Prefill the other signer from the client file (payer, sponsor) or the parent agreement's payer.
+      if (['payer', 'conflict', 'consent_share'].includes(t)) {
+        const { data: cf } = await db.from('client_files').select('payer_contact_id, sponsor_contact_id').eq('contact_id', cid).maybeSingle();
+        const pid = t === 'conflict' ? cf?.sponsor_contact_id : cf?.payer_contact_id;
+        const { data: pc } = pid ? await db.from('contacts').select('*').eq('id', pid).single() : { data: null };
+        const pd = parent?.data || {};
+        const who = pc ? { contact_id: pc.id, name: pc.full_name, email: pc.email || '', phone: pc.phone || '', dob: '', address: [pc.address, pc.city, pc.province, pc.postal_code, pc.country].filter(Boolean).join(', ') }
+          : pd.payer_other && pd.payer_name ? { contact_id: pd.payer_contact_id || '', name: pd.payer_name, email: pd.payer_email || '', phone: pd.payer_phone || '', dob: '', address: pd.payer_address || '' } : null;
+        if (who && t === 'consent_share') Object.assign(data, { share_name: who.name, share_relationship: t === 'consent_share' ? (pd.payer_relationship || 'Fee payer') : '', share_contact: [who.email, who.phone].filter(Boolean).join(' · ') });
+        else if (who) data.co_clients = [{ ...who, relationship: t === 'payer' ? `Fee payer${pd.payer_relationship ? ' — ' + pd.payer_relationship : ''}` : 'Sponsor' }];
+        if (t === 'payer' && pd.payer_refund_to) data.payer_refund_to = pd.payer_refund_to;
+      }
       const title = (t === 'consultation' ? 'Initial Consultation Agreement' : t === 'retainer' ? `Service Agreement${pkg ? ' (' + pkg.name + ')' : ''}` : AGR_TYPE[t] + (parent ? ` (${parent.number})` : '')) + (free ? ' — pro bono' : '');
       const { data: row, error } = await db.from('agreements').insert({ type: t, title: `${title} — ${contact.full_name}`,
         contact_id: cid, case_id: kid || parent?.case_id || null, parent_id: parent?.id || null, data, created_by: state.profile.id }).select('id').single();

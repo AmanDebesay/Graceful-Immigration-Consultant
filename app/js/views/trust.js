@@ -30,5 +30,7 @@ export async function render(el) {
   el.querySelector('#use')?.addEventListener('click', () => receivePayment());
   el.querySelector('#csv').onclick = () => downloadCsv('trust-ledger.csv', [['Date', 'Client', 'Description', 'In', 'Out'],
     ...rows.map((r) => [r.journal_entries.entry_date, r.contacts?.full_name, r.description || r.journal_entries.memo, r.credit, r.debit])]);
+  el.insertAdjacentHTML('beforeend', '<div class="card" style="margin-top:16px" id="mc"></div>');
+  (await import('./weekly.js')).monthClose(el.querySelector('#mc'));
   window.addEventListener('books-changed', () => render(el), { once: true });
 }

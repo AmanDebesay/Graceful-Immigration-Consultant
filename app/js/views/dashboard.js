@@ -47,6 +47,15 @@ export async function render(el, _params, ctx) {
       : drafter ? db.from('agreements').select('id, number, review_requested_at, review_note, reviewer_id, contacts(full_name)').eq('status', 'draft').eq('created_by', p.id).order('created_at', { ascending: false }).limit(8) : none,
   ]);
   const { clBadge } = work ? await import('./checklists.js') : {};
+  // Deadlines: overdue in red at the top; due within 7 days in amber. Last month's reconciliation reminder.
+  const soon7 = new Date(Date.now() + 7 * 86400000).toLocaleDateString('en-CA');
+  const [dueQ, mcQ] = await Promise.all([crm ? db.from('deadlines').select('id, contact_id, title, due_on, contacts(full_name)').eq('done', false).lte('due_on', soon7).order('due_on').limit(12) : none,
+    can('finance.view') ? db.from('month_closes').select('month').eq('month', (() => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); return d.toLocaleDateString('en-CA').slice(0, 8) + '01'; })()).maybeSingle() : { data: true }]);
+  const overdue = (dueQ.data || []).filter((d) => d.due_on < today()), dueSoon = (dueQ.data || []).filter((d) => d.due_on >= today());
+  const dlRow = (d) => `<a href="#/contacts/${d.contact_id}" style="color:inherit"><b>${esc(d.contacts?.full_name || '')}</b> — ${esc(d.title)} (${d.due_on})</a>`;
+  const deadlineBanner = (overdue.length ? `<div class="alert err" style="margin-bottom:12px">${icon('alert')} <b>${overdue.length} overdue deadline${overdue.length > 1 ? 's' : ''}:</b> ${overdue.slice(0, 4).map(dlRow).join(' · ')} <a href="#/deadlines">Open deadlines →</a></div>` : '')
+    + (dueSoon.length ? `<div class="alert warn" style="margin-bottom:12px">${icon('clock')} <b>Due within 7 days:</b> ${dueSoon.slice(0, 4).map(dlRow).join(' · ')}${dueSoon.length > 4 ? ` and ${dueSoon.length - 4} more` : ''} <a href="#/deadlines">Open deadlines →</a></div>` : '')
+    + (!mcQ.data && new Date().getDate() >= 5 ? `<div class="alert info" style="margin-bottom:12px">Last month's reconciliation is still open. <a href="#/weekly">Sign it off →</a></div>` : '');
   const C = contacts.data || [], K = cases.data || [];
 
   // ── KPIs ──
@@ -94,6 +103,7 @@ export async function render(el, _params, ctx) {
   const time = (d) => new Date(d).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' }).toUpperCase();
 
   el.innerHTML = `
+    ${deadlineBanner}
     ${!p.avatar_url ? `<div class="dk-nudge">${icon('camera')}<span><b>Add your photo.</b> It appears on your profile in the top right and helps your team and clients recognise you.</span><a class="btn btn-sm btn-gold" href="#/account">Add photo</a></div>` : ''}
     <div class="dk-hero">
       ${crm ? kpi('Total Clients', clients.length, 'users', 'navy', trend(pct(newThis, newLast), 'from last month', `${newThis} new this month`), '#/contacts') : ''}

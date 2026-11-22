@@ -98,11 +98,15 @@ export async function editCase(c = {}, { contactId } = {}) {
       <div class="field"><label>Decision on</label><input class="input" type="date" id="do" value="${c.decision_on || ''}"></div></div>
       <div class="row-2"><div class="field"><label>IRCC application / file no.</label><input class="input" id="fn" value="${esc(c.ircc_file_number || '')}"></div>
       <div class="field"><label>UCI</label><input class="input" id="uci" value="${esc(c.uci || '')}"></div></div>
+      <div class="row-2"><div class="field"><label>Visa office / processing office</label><input class="input" id="vo" value="${esc(c.visa_office || '')}" placeholder="e.g. IRCC Ottawa, Nairobi, CPC-Edmonton"></div>
+      <div class="field"><label>Next action due</label><input class="input" type="date" id="nad" value="${c.next_action_on || ''}"></div></div>
+      <div class="field"><label>Next action</label><input class="input" id="na" value="${esc(c.next_action || '')}" placeholder="e.g. Send biometrics instruction letter to client"></div>
       <div class="field"><label>Notes</label><textarea class="input" id="ds">${esc(c.description || '')}</textarea></div>`,
     actions: [{ label: 'Cancel' }, { label: c.id ? 'Save case' : 'Open case', cls: 'btn-primary', onClick: async (m) => {
       const v = (s) => m.querySelector(s).value;
       const row = { title: v('#ti').trim() || v('#ty'), application_type: v('#ty'), status: v('#st'), priority: v('#pr'), assigned_to: v('#as') || null,
-        deadline: v('#dl') || null, submitted_on: v('#so') || null, decision_on: v('#do') || null, ircc_file_number: v('#fn') || null, uci: v('#uci') || null, description: v('#ds') || null };
+        deadline: v('#dl') || null, submitted_on: v('#so') || null, decision_on: v('#do') || null, ircc_file_number: v('#fn') || null, uci: v('#uci') || null, description: v('#ds') || null,
+        visa_office: v('#vo').trim() || null, next_action: v('#na').trim() || null, next_action_on: v('#nad') || null };
       if (!c.id && !v('#cl')) throw new Error('Choose a client.');
       if (row.status === 'submitted' && !row.submitted_on) row.submitted_on = today();
       const { data, error } = c.id ? await db.from('cases').update(row).eq('id', c.id).select('id').single()

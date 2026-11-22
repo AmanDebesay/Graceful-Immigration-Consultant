@@ -4,7 +4,8 @@ import { db, esc, icon, fmtDate, fmtDateTime, toast, fail, callFn, modal } from 
 
 const money = (n) => Number(n || 0).toLocaleString('en-CA', { style: 'currency', currency: 'CAD' });
 const CASE_STEPS = [['open', 'File opened'], ['in_progress', 'Preparing'], ['submitted', 'Submitted'], ['decision_pending', 'Waiting for decision'], ['done', 'Decision']];
-const AGR_KIND = { consultation: 'Initial Consultation Agreement', retainer: 'Service Agreement', amendment: 'Amendment', non_engagement: 'Letter', termination: 'Letter' };
+const AGR_KIND = { consultation: 'Initial Consultation Agreement', retainer: 'Service Agreement', amendment: 'Amendment', non_engagement: 'Letter', termination: 'Letter',
+  limited_scope: 'Service Agreement', doc_review: 'Document Review Agreement', payer: 'Payer Agreement', conflict: 'Consent', monitoring: 'Monitoring Plan', consent_share: 'Consent to Share' };
 const call = (action, p = {}) => callFn('portal', { action, ...p });
 
 export async function renderPortal(app) {

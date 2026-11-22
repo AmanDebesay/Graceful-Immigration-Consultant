@@ -211,6 +211,48 @@ export const TYPES = {
     enclosures: ['Court records and proof of sentence completion', 'Police certificates', 'Evidence of the need to enter/remain', 'Reference letters', 'Personal statement', 'Use of a Representative (IMM 5476)'],
   },
 
+  extension: {
+    label: 'Request for an extension of time', short: 'Extension request', kind: 'rules',
+    blurb: 'Ask IRCC for more time to answer a procedural fairness letter or a request for documents. Send it before the deadline.',
+    particulars: ['applicant', 'dob', 'uci', 'app_no', 'citizenship', T('app_type', 'Application'), T('decision_date', 'Date of IRCC letter'), T('deadline', 'Current deadline')],
+    test: 'There is no automatic right to more time; the officer decides. Send the request before the deadline, explain the specific reason the response cannot be completed in time, show what has already been done (with proof), and propose a realistic date. Meanwhile, send whatever is ready.',
+    opening: { help: ['One sentence: what you are asking for and until when.', 'Send it through the same channel IRCC asked you to use (portal or web form), before the deadline.'],
+      starter: 'We respectfully request an extension of time until [proposed date] to respond to your letter dated [date], which asks for [documents / response] by [deadline].' },
+    sections: [
+      { key: 'reasons', heading: 'Why more time is needed', help: ['Specific and verifiable: a government office has not issued a document yet, a medical appointment date, a police certificate processing time.', 'Attach proof of the request and the date it was made.'],
+        starter: 'On [date], [Client] requested [document] from [authority] (proof of request at Tab [#]). [Authority] advises that it takes [time] to issue. The document cannot be obtained before [deadline] despite [Client]’s diligent efforts.' },
+      { key: 'done', heading: 'What is being submitted now', help: ['Send everything that is ready with this request — it shows good faith.'], starter: 'With this letter we submit [documents ready now] (Tabs [#]). The remaining document will be submitted as soon as it is received, and no later than [proposed date].' },
+    ],
+    conclusion: 'For these reasons, we respectfully request an extension until [proposed date] to submit [documents / the response]. Thank you for considering this request.',
+    enclosures: ['Proof that the documents were requested (receipt, email or letter)', 'Documents available now', 'Use of a Representative (IMM 5476), if not already on file'],
+  },
+  status: {
+    label: 'Status inquiry (case-specific enquiry)', short: 'Status inquiry', kind: 'rules',
+    blurb: 'Ask IRCC about an application that is outside the normal processing time, or report a change. Usually sent through the IRCC web form.',
+    particulars: ['applicant', 'dob', 'uci', 'app_no', 'citizenship', T('app_type', 'Application'), T('decision_date', 'Date submitted (AOR date)')],
+    test: 'Check the current processing time first: an enquiry is useful once the application is outside it, or when something changed (new passport, address, a deadline such as an expiring status or job offer). Keep it short and factual; one enquiry per issue.',
+    opening: { help: ['Identify the application and say exactly what you are asking.'], starter: 'We are writing about the [application type] submitted on [date] (application number [number]), which is now [number] months beyond the published processing time of [time].' },
+    sections: [
+      { key: 'request', heading: 'Request', help: ['What you need: an update, confirmation that a document was received, or recording a change.', 'If there is a real urgency (expiring status, job start date, medical issue), state it with proof.'],
+        starter: 'We would be grateful for an update on the status of this application and confirmation of whether anything further is required from [Client].' },
+    ],
+    conclusion: 'Thank you for your assistance. Please contact the undersigned with any questions.',
+    enclosures: ['Use of a Representative (IMM 5476), if not already on file'],
+  },
+  atip: {
+    label: 'ATIP request text (GCMS notes)', short: 'ATIP request', kind: 'rules',
+    blurb: 'Text for an Access to Information and Privacy (ATIP) request for the client’s IRCC records, including GCMS notes. Filed through the ATIP online request service with the client’s signed consent.',
+    particulars: ['applicant', 'dob', 'uci', 'app_no', 'citizenship', T('app_type', 'Application(s) concerned')],
+    test: 'Privacy Act requests (no fee) are for Canadian citizens, permanent residents and people present in Canada; others may request under the Access to Information Act (application fee applies — check the current amount). The requester’s signed consent (IMM 5744) must be enclosed when you request on their behalf. Be specific about the records and the period.',
+    opening: { help: ['Name the person, the records and the period.'], starter: 'On behalf of [Client] (date of birth [date], UCI [UCI]), and with their enclosed written consent, we request a copy of all records held by Immigration, Refugees and Citizenship Canada about them.' },
+    sections: [
+      { key: 'records', heading: 'Records requested', help: ['List exactly what you need. GCMS notes show the officer’s real reasons.'],
+        starter: '- Complete Global Case Management System (GCMS) notes, including officer notes and decision notes\n- All documents and correspondence on file for application [number]\n- Any records of interviews, risk assessments or referrals\nPeriod: from [date] to the date of this request.' },
+      { key: 'delivery', heading: 'Delivery', help: ['Ask for electronic copies.'], starter: 'Please provide the records electronically through the ATIP online service.' },
+    ],
+    conclusion: 'Thank you for processing this request.',
+    enclosures: ['Consent form (IMM 5744), signed in ink by the client', 'Copy of the client’s identity document'],
+  },
   general: {
     label: 'Other / custom letter', short: 'Submission letter', kind: 'persuasive',
     blurb: 'Blank structure for anything else (PRRA, restoration, IRB submissions, procedural fairness responses).',
