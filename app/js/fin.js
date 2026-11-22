@@ -418,7 +418,7 @@ export async function payerFor(contactId) {
     return { name: d.payer_name.trim(), relationship: d.payer_relationship || '', email: d.payer_email || '', phone: d.payer_phone || '', address: d.payer_address || '', refund_to: d.payer_refund_to || 'payer' };
   // Otherwise the payer recorded on the client file (File tab).
   const { data: f } = await db.from('client_files').select('payer_contact_id').eq('contact_id', contactId).maybeSingle();
-  if (!f?.payer_contact_id) return null;
+  if (!f?.payer_contact_id || f.payer_contact_id === contactId) return null;   // same person as the client
   const { data: p } = await db.from('contacts').select('full_name, email, phone, address, city, province, postal_code, country').eq('id', f.payer_contact_id).single();
   return p ? { name: p.full_name, relationship: 'Fee payer', email: p.email || '', phone: p.phone || '', address: [p.address, p.city, p.province, p.postal_code, p.country].filter(Boolean).join(', '), refund_to: 'payer' } : null;
 }

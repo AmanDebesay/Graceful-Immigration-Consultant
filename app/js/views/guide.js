@@ -11,9 +11,33 @@ const FLOW = [
   ['Submit & track', 'Submit, mark the case “Submitted”, add the file number, track it on the IRCC Portal page.', 'Case manager / RCIC'],
 ];
 
-const card = (title, body) => `<div class="card gd-card"><div class="card-b"><h4>${title}</h4>${body}</div></div>`;
-const steps = (list) => `<ol class="gd-steps">${list.map((s) => `<li>${s}</li>`).join('')}</ol>`;
-const ul = (list, cls = '') => `<ul class="${cls}">${list.map((s) => `<li>${s}</li>`).join('')}</ul>`;
+// Illustrations for the guide cards (navy and gold, drawn inline so they print and scale cleanly).
+const G = `<defs><linearGradient id="gn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A64C0"/><stop offset="1" stop-color="#0B2A5C"/></linearGradient>
+  <linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7D47F"/><stop offset="1" stop-color="#C9932E"/></linearGradient></defs>`;
+const rep = (n, f) => [...Array(n).keys()].map(f).join('');
+const ART = {
+  clipboard: `${G}<rect x="22" y="14" width="56" height="74" rx="7" fill="url(#gn)"/><rect x="28" y="22" width="44" height="60" rx="3" fill="#fff"/><rect x="38" y="9" width="24" height="12" rx="4" fill="url(#gg)"/>
+    ${[34, 48, 62].map((y) => `<rect x="33" y="${y - 4}" width="8" height="8" rx="1.5" fill="none" stroke="#0B2A5C" stroke-width="1.8"/><path d="M34.5 ${y}l2 2 3.5-4" stroke="#0B2A5C" stroke-width="1.8" fill="none"/><rect x="45" y="${y - 2}" width="20" height="3.5" rx="1.7" fill="#0B2A5C" opacity=".75"/>`).join('')}
+    <path d="M70 70 L88 34 L94 37 L76 73 Z" fill="url(#gg)"/><path d="M70 70 l6 3 -7 5z" fill="#0B2A5C"/>`,
+  team: `${G}<circle cx="34" cy="34" r="10" fill="url(#gn)"/><path d="M16 70c0-12 8-20 18-20s18 8 18 20z" fill="url(#gn)"/><circle cx="58" cy="28" r="12" fill="url(#gn)"/><path d="M36 72c0-14 10-24 22-24s22 10 22 24z" fill="url(#gn)"/>
+    <circle cx="72" cy="70" r="13" fill="url(#gg)"/>${rep(8, (i) => `<rect x="70" y="53" width="4" height="7" rx="1" fill="url(#gg)" transform="rotate(${i * 45} 72 70)"/>`)}<circle cx="72" cy="70" r="5" fill="#fff"/>`,
+  shield: `${G}<path d="M40 12l24 9v18c0 17-11 28-24 33-13-5-24-16-24-33V21z" fill="url(#gg)"/><path d="M40 19l18 7v13c0 13-8 22-18 26-10-4-18-13-18-26V26z" fill="url(#gn)"/><path d="M31 41l7 7 13-14" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="56" y="52" width="34" height="32" rx="4" fill="#fff" stroke="#0B2A5C" stroke-width="2"/><rect x="56" y="52" width="34" height="9" rx="3" fill="url(#gg)"/>${rep(3, (r) => rep(4, (c) => `<rect x="${60 + c * 7.5}" y="${65 + r * 6}" width="5" height="4" rx="1" fill="#0B2A5C" opacity=".7"/>`))}`,
+  sun: `${G}<circle cx="50" cy="48" r="16" fill="url(#gg)"/>${rep(8, (i) => `<rect x="48" y="14" width="4" height="12" rx="2" fill="url(#gg)" transform="rotate(${i * 45} 50 48)"/>`)}<path d="M10 86h80" stroke="url(#gn)" stroke-width="6" stroke-linecap="round"/>`,
+  folder: `${G}<path d="M12 28a5 5 0 0 1 5-5h22l7 8h37a5 5 0 0 1 5 5v42a5 5 0 0 1-5 5H17a5 5 0 0 1-5-5z" fill="url(#gn)"/><rect x="22" y="38" width="56" height="34" rx="3" fill="#fff"/><path d="M30 48h40M30 56h32M30 64h24" stroke="#0B2A5C" stroke-width="3" stroke-linecap="round" opacity=".7"/><circle cx="74" cy="70" r="12" fill="url(#gg)"/><path d="M69 70l4 4 7-8" stroke="#fff" stroke-width="3" fill="none"/>`,
+  pen: `${G}<rect x="18" y="12" width="50" height="68" rx="5" fill="#fff" stroke="#0B2A5C" stroke-width="2.5"/><path d="M27 28h32M27 37h32M27 46h22" stroke="#0B2A5C" stroke-width="3" stroke-linecap="round" opacity=".6"/><path d="M27 66c6-6 9 4 14-2s8 2 12-2" stroke="#0B2A5C" stroke-width="2.5" fill="none"/>
+    <path d="M60 78 L86 30 L93 34 L67 82 Z" fill="url(#gg)"/><path d="M60 78l7 4-8 5z" fill="#0B2A5C"/>`,
+  route: `${G}<circle cx="20" cy="76" r="10" fill="url(#gg)"/><circle cx="80" cy="22" r="10" fill="url(#gn)"/><path d="M28 72 C 60 70 30 40 50 40 S 70 30 72 28" stroke="#0B2A5C" stroke-width="4" stroke-dasharray="7 6" fill="none"/>`,
+  coins: `${G}${rep(3, (i) => `<ellipse cx="38" cy="${72 - i * 12}" rx="22" ry="8" fill="url(#gg)" stroke="#9A6B12" stroke-width="1.5"/>`)}<rect x="56" y="22" width="34" height="56" rx="5" fill="url(#gn)"/><rect x="61" y="28" width="24" height="10" rx="2" fill="#fff"/>${rep(3, (r) => rep(3, (c) => `<rect x="${61 + c * 8.5}" y="${43 + r * 10}" width="6" height="6" rx="1.5" fill="#fff" opacity=".85"/>`))}`,
+  map: `${G}<path d="M12 24l24-8 28 10 24-8v58l-24 8-28-10-24 8z" fill="url(#gn)"/><path d="M36 16v58M64 26v58" stroke="#fff" stroke-width="2" opacity=".5"/><path d="M50 30c-8 0-13 6-13 12 0 10 13 22 13 22s13-12 13-22c0-6-5-12-13-12z" fill="url(#gg)"/><circle cx="50" cy="42" r="4.5" fill="#fff"/>`,
+};
+const H_ICON = { clipboard: 'layers', team: 'users', shield: 'shield', sun: 'clock', folder: 'folder', pen: 'pen', route: 'route', coins: 'coins', map: 'globe' };
+const pickArt = (t) => /morning|day to day|habit/i.test(t) ? 'sun' : /team/i.test(t) ? 'team' : /complian|privacy|can and/i.test(t) ? 'shield'
+  : /agreement/i.test(t) ? 'pen' : /opening/i.test(t) ? 'folder' : /hand-off|first contact/i.test(t) ? 'route' : /where/i.test(t) ? 'map' : 'clipboard';
+const card = (title, body, art = pickArt(title)) => `<div class="gd2"><div class="gd2-art"><svg viewBox="0 0 100 100" aria-hidden="true">${ART[art]}</svg></div>
+  <div class="gd2-h">${icon(H_ICON[art] || 'layers')}<h4>${title}</h4></div><div class="gd2-b">${body}</div></div>`;
+const steps = (list) => `<ol class="gd-steps gd2-steps">${list.map((s) => `<li>${s}</li>`).join('')}</ol>`;
+const ul = (list, cls = '') => `<ul class="gd2-ul ${cls}">${list.map((s) => `<li>${s}</li>`).join('')}</ul>`;
 
 const ROLES = {
   assistant: {
@@ -103,15 +127,15 @@ export async function render(el) {
   let tab = (location.hash.match(/[?&]role=(\w+)/) || [])[1] || (ROLES[mine] ? (mine === 'owner' ? 'rcic' : mine) : 'flow');
   const { data: perms } = await db.from('permissions').select('key, label, category').order('category');
   const yours = (perms || []).filter((p) => can(p.key));
-  const TABS = [['flow', 'How a file moves'], ['assistant', 'Assistant'], ['case_manager', 'Case Manager'], ['rcic', 'RCIC & Owner'], ['bookkeeper', 'Bookkeeper']];
+  const TABS = [['flow', 'How a file moves', 'file'], ['assistant', 'Assistant', 'users'], ['case_manager', 'Case Manager', 'briefcase'], ['rcic', 'RCIC & Owner', 'user'], ['bookkeeper', 'Bookkeeper', 'coins']];
   const draw = () => {
-    el.innerHTML = `<div class="toolbar"><div class="seg" id="tabs">${TABS.map(([k, l]) => `<button data-k="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('')}</div></div>
-      <div class="alert info">You are signed in as <b>${esc(ROLE_LABEL[mine] || mine)}</b>. Your access: ${mine === 'owner' ? 'everything' : yours.map((p) => esc(p.label)).join(' · ') || 'basic access'}. Ask the owner to change it on Team &amp; Access.</div>
+    el.innerHTML = `<div class="gd2-tabs" id="tabs">${TABS.map(([k, l, ic]) => `<button data-k="${k}" class="${k === tab ? 'on' : ''}">${icon(ic)}${l}</button>`).join('')}</div>
+      <div class="gd2-info">${icon('alert')}<span>You are signed in as <b>${esc(ROLE_LABEL[mine] || mine)}</b>. Your access: ${mine === 'owner' ? 'everything' : yours.map((p) => esc(p.label)).join(' · ') || 'basic access'}. Ask the owner to change it on Team &amp; Access.</span></div>
       ${tab === 'flow' ? `<div class="gd-role">${card('From first contact to decision', `<div class="cl-flow" style="margin-top:6px">${FLOW.map(([t, d, who]) => `<div class="cl-flow-s"><b>${t}</b><small>${d}</small><small style="margin-top:4px"><span class="badge b-navy">${who}</span></small></div>`).join(`<span class="cl-flow-a">${icon('arrowr')}</span>`)}</div>`)}
         ${card('How a hand-off works', ul(['Each checklist step has one person responsible, shown as <b>Assigned to</b>.', 'Handing off moves the file to the next step and gives the next person a task with your note; your own task closes automatically.', 'Nobody can skip a step: every required line must be ticked or marked N/A with a note.', 'Only the RCIC can approve. The RCIC can return a file to forms or documents with a note saying what to fix.', 'Everything is kept in the checklist’s <b>History</b>: who did what, when, and why.']))}
         ${card('Where things are', ul(['<b>Dashboard</b>: your work queue, appointments, tasks and alerts.', '<b>Checklists</b>: every file and the step it is at.', '<b>Cases</b>: each application, its status and deadlines.', '<b>Agreements</b>: drafts, sent, signed.', '<b>Tasks</b>: everything assigned to you, with an <b>Open</b> button.', '<b>Team Chat</b>: quick questions to the team.', '<b>Legal &amp; Research</b>: IRCC, CICC and IRB references.']))}</div>`
-        : `<div class="card" style="margin-bottom:16px"><div class="card-b"><p style="font-size:15px">${ROLES[tab].intro}</p></div></div><div class="gd-role">${ROLES[tab].parts.join('')}</div>`}`;
-    el.querySelector('#tabs').onclick = (e) => { if (e.target.dataset.k) { tab = e.target.dataset.k; draw(); } };
+        : `<div class="gd2-intro">${icon('shield')}<span>${ROLES[tab].intro}</span></div><div class="gd-role">${ROLES[tab].parts.join('')}</div>`}`;
+    el.querySelector('#tabs').onclick = (e) => { const b = e.target.closest('[data-k]'); if (b) { tab = b.dataset.k; draw(); } };
   };
   draw();
 }

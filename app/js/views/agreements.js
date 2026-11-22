@@ -92,7 +92,7 @@ export async function newAgreement({ contactId, caseId, type = 'retainer' } = {}
       // Prefill the other signer from the client file (payer, sponsor) or the parent agreement's payer.
       if (['payer', 'conflict', 'consent_share'].includes(t)) {
         const { data: cf } = await db.from('client_files').select('payer_contact_id, sponsor_contact_id').eq('contact_id', cid).maybeSingle();
-        const pid = t === 'conflict' ? cf?.sponsor_contact_id : cf?.payer_contact_id;
+        const pid0 = t === 'conflict' ? cf?.sponsor_contact_id : cf?.payer_contact_id, pid = pid0 === cid ? null : pid0;
         const { data: pc } = pid ? await db.from('contacts').select('*').eq('id', pid).single() : { data: null };
         const pd = parent?.data || {};
         const who = pc ? { contact_id: pc.id, name: pc.full_name, email: pc.email || '', phone: pc.phone || '', dob: '', address: [pc.address, pc.city, pc.province, pc.postal_code, pc.country].filter(Boolean).join(', ') }

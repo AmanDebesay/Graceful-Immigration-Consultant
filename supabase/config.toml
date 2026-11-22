@@ -459,3 +459,6 @@ verify_jwt = false
 
 [functions.practice-alerts]
 verify_jwt = false
+
+[functions.ircc-forms]
+verify_jwt = false

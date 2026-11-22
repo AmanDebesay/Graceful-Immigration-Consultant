@@ -24,7 +24,7 @@ export const points = (flags = []) => RISK.filter(([k, , s]) => s && flags.inclu
 export const tierOf = (p) => (p <= 1 ? 'low' : p <= 3 ? 'mid' : 'high');
 export const factorFor = (p, pricing) => Number(pricing?.complexity?.[tierOf(p)] ?? { low: 1, mid: 1.15, high: 1.3 }[tierOf(p)]);
 
-export const REP_STATE = { not_needed: 'Not needed', printed: 'Printed for ink signature', signed: 'Signed in ink', scanned: 'Signed copy scanned', filed: 'Filed with IRCC', withdrawn: 'Withdrawn (Section D)' };
+export const REP_STATE = { not_needed: 'Not needed', printed: 'Prepared, waiting for signatures', signed: 'Signed', scanned: 'Signed copy scanned', filed: 'Filed with IRCC', withdrawn: 'Withdrawn (Section D)' };
 export const REP_FORM = { IMM5476: 'IMM 5476 — Use of a Representative', IMM5744: 'IMM 5744 — ATIP consent' };
 export const repBadge = (s) => `<span class="badge ${{ filed: 'b-GREEN', scanned: 'b-blue', signed: 'b-blue', printed: 'b-AMBER', withdrawn: '', not_needed: '' }[s] || ''}">${esc(REP_STATE[s] || s)}</span>`;
 export const DL_KIND = { ircc_letter: 'IRCC letter response', medical: 'Medical validity', biometrics: 'Biometrics validity', passport: 'Passport / ID', imm5744: 'IMM 5744 validity', status_check: 'Status check follow-up', court: 'Federal Court / appeal window', internal: 'Internal', agreement_end: 'Agreement end / closing letter', other: 'Other' };
@@ -129,7 +129,7 @@ export function checkFile({ contact: c, file: f, cases = [], reps = [], agreemen
   }
   if (!/^R\d{6,7}$/i.test(String(s.licence_number || ''))) add('warn', 'Representation', `Your CICC membership ID in Business Settings (“${s.licence_number || ''}”) doesn't look like R followed by 6 or 7 digits.`);
   // Payer and sharing
-  const payer = f.payer_contact_id || active.some((a) => a.data?.payer_other);
+  const payer = (f.payer_contact_id && f.payer_contact_id !== c.id) || active.some((a) => a.data?.payer_other);
   if (payer && !active.some((a) => a.type === 'payer')) add('warn', 'Payer', 'Someone else pays: record a Third-party payer agreement (Agreements → Third-party payer).');
   if (payer && !active.some((a) => a.type === 'consent_share')) add('warn', 'Payer', 'No consent-to-share on file: the payer may receive only invoices, receipts and an “in progress” status.');
   if ((f.interpreter_needed || flags.includes('language_barrier')) && !h.interpreter_declaration) add('warn', 'Language', 'Interpreter needed: add the interpreter declaration to the forms and consents (tick it in Background when done).');
@@ -160,7 +160,7 @@ export function dataSheet({ contact: c, file: f, cases = [], settings: s = {} })
   const addr = [c.address, c.city, c.province, c.postal_code, c.country].filter(Boolean).join(', ');
   const yn = (v) => (v === 'yes' ? 'Yes' : v === 'no' ? 'No' : '');
   return [
-    { title: 'IMM 5476 — Use of a Representative', note: 'Print, then the client and you sign in ink. Date as YYYY-MM-DD. Tick the representative box truthfully (paid or unpaid) — never “friend or family” for a client.', rows: [
+    { title: 'IMM 5476 — Use of a Representative', note: 'Download the current edition from IRCC Forms. Hand or e-signature as IRCC allows. Date as YYYY-MM-DD. Tick the representative box truthfully (paid or unpaid) — never “friend or family” for a client.', rows: [
       ['Applicant family name', n.family, 'Check against the passport'], ['Applicant given name(s)', n.given], ['Date of birth (YYYY-MM-DD)', c.date_of_birth || ''],
       ['UCI', k.uci || ''], ['Application type', k.application_type || k.title || ''], ['Application number', k.ircc_file_number || ''],
       ['Representative', `${s.rcic_name || ''}`], ['Representative type', 'Member of the College of Immigration and Citizenship Consultants (CICC)'],
@@ -333,8 +333,8 @@ export async function signingPacket(contactId) {
   const box = (done) => `<span style="display:inline-block;width:14px;height:14px;border:1.5px solid #0B2A5C;border-radius:3px;text-align:center;line-height:13px;font-size:12px;margin-right:8px">${done ? '✓' : ''}</span>`;
   const r5476 = rep('IMM5476'), r5744 = rep('IMM5744');
   const items = [
-    ['IMM 5476 — Use of a Representative', 'Wet ink (blue). Client signs Section C; you sign Section B. Date YYYY-MM-DD. Representative box: ' + (r5476?.paid_box ? r5476.paid_box.toUpperCase() : 'paid / unpaid — tick truthfully'), r5476 && ['signed', 'scanned', 'filed'].includes(r5476.state)],
-    ['IMM 5744 — ATIP consent', 'Wet ink (blue), client’s original signature. Valid for the period set in Settings.', r5744 && ['signed', 'scanned', 'filed'].includes(r5744.state)],
+    ['IMM 5476 — Use of a Representative', 'Use the current edition from IRCC Forms. Hand signature or e-signature (IRCC accepts both on the current edition). Date YYYY-MM-DD. Representative box: ' + (r5476?.paid_box ? r5476.paid_box.toUpperCase() : 'paid / unpaid — tick truthfully'), r5476 && ['signed', 'scanned', 'filed'].includes(r5476.state)],
+    ['IMM 5744 — ATIP consent', 'Client’s signature as the form instructs. Valid for the period set in Settings.', r5744 && ['signed', 'scanned', 'filed'].includes(r5744.state)],
     ...(agrs || []).filter((a) => a.type === 'consent_share').map((a) => [`${AGR_TYPE[a.type]} ${a.number}`, 'Client signs (e-sign or paper).', a.status === 'signed']),
     ...(agrs || []).filter((a) => !['consent_share', 'termination', 'non_engagement'].includes(a.type)).map((a) => [`${AGR_TYPE[a.type]} ${a.number}`, a.sign_method === 'paper' ? 'Signed on paper — scan and upload.' : 'E-sign link or paper.', a.status === 'signed']),
   ];
@@ -345,7 +345,7 @@ export async function signingPacket(contactId) {
     <h2 style="font-family:Georgia,serif;color:#0B2A5C">${esc(c.full_name)}</h2>
     <p style="margin:0 0 12px">Prepared ${today()} · ${esc(s.rcic_name)}, College ID ${esc(s.licence_number)}</p>
     ${items.map(([t, how, done], i) => `<div style="border:1px solid #E3DCCD;border-radius:8px;padding:10px 14px;margin-bottom:8px">${box(done)}<b>${i + 1}. ${esc(t)}</b><br><small style="color:#5B6476;margin-left:24px;display:block">${esc(how)}</small></div>`).join('')}
-    <p style="font-size:12px;color:#5B6476">Before printing: check the phone, address and firm name on every form against your current details. Wet-ink forms are never e-signed.</p>
+    <p style="font-size:12px;color:#5B6476">Before printing: check the phone, address and firm name on every form against your current details, and download each IRCC form fresh from IRCC Forms (barcoded forms expire).</p>
     ${sheet.slice(0, 2).map((sec) => `<div style="page-break-before:always"><h3 style="font-family:Georgia,serif;color:#0B2A5C;border-bottom:1px solid #EFE6D2;padding-bottom:6px">${esc(sec.title)} — data sheet</h3><p style="font-size:12px;color:#5B6476">${esc(sec.note)}</p>
       <table style="width:100%;border-collapse:collapse;font-size:13px" border="1" cellpadding="6">${sec.rows.map(([k, v, n]) => `<tr><th style="text-align:left;width:40%;background:#FBF7EE">${esc(k)}</th><td>${esc(v) || '<span style="color:#B42318">—</span>'}${n ? `<br><small style="color:#8A90A0">${esc(n)}</small>` : ''}</td></tr>`).join('')}</table></div>`).join('')}</div>`, `Signing packet — ${c.full_name}`);
 }
