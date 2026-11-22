@@ -416,3 +416,27 @@ db.auth.onAuthStateChange((event) => {
 });
 
 boot().catch(fail);
+
+// ── House style: every table's column headings get the matching icon (as on Contacts), on every page, including lists that load later ──
+const TH_ICON = [
+  [/deadline/i, 'clock'], [/phone|mobile/i, 'phone'], [/e-?mail/i, 'mail'],
+  [/\b(when|date|added|due|sent|signed|created|updated|opened|issued|expires|expiry|last|submitted|decision|received|period|month)\b/i, 'calendar'],
+  [/\b(status|stage|state)\b/i, 'layers'], [/\b(owner|who|assigned|reviewer|prepared by|by)\b/i, 'user'],
+  [/\b(total|amount|balance|paid|fee|fees|price|rate|debit|credit|value|gst|tax|due amount)\b/i, 'coins'],
+  [/^(no\.?|number|#|invoice|quote|receipt)$/i, 'hash'], [/\b(action|activity)\b/i, 'pulse'], [/\b(priority|triage)\b/i, 'award'],
+  [/\b(case|application|file)\b/i, 'briefcase'], [/\b(client|contact|name|person|staff|employee|vendor|payer|company|member)\b/i, 'users'],
+  [/\b(record|document|agreement|letter|form|checklist)\b/i, 'file'], [/\b(detail|details|note|notes|description|memo|subject|summary)\b/i, 'note'],
+  [/\b(type|category|program|service|kind|account|method)\b/i, 'layers'], [/\b(country|citizenship|location)\b/i, 'globe'],
+];
+function decorateTables(root) {
+  root.querySelectorAll('table.t thead th').forEach((th) => {
+    if (th.dataset.dec || th.children.length) return;
+    th.dataset.dec = '1';
+    const txt = th.textContent.trim(); if (!txt) return;
+    const m = TH_ICON.find(([re]) => re.test(txt)); if (!m) return;
+    th.innerHTML = `<span class="th-i">${icon(m[1])}${esc(txt)}</span>`;
+  });
+}
+{ let pending = false;
+  new MutationObserver(() => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; const v = document.getElementById('view'); if (v) decorateTables(v); }); })
+    .observe(document.documentElement, { childList: true, subtree: true }); }

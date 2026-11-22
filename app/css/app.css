@@ -1228,3 +1228,21 @@ table.t{width:100%;border-collapse:collapse}
 .main.themed .content .cx-main #tabBody .t th{background:#F3ECDD}
 .cell-name .cav,.main.themed .content .cell-name .cav{color:#fff;font-size:14px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.45)}
 .main.themed .content .t-rich .avatar{width:46px;height:46px}
+
+/* ── Audit Log ── */
+.au-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.au-tile{display:flex;gap:14px;align-items:center;padding:16px 18px;border-radius:18px;background:linear-gradient(180deg,rgba(18,48,98,.72),rgba(8,26,58,.85));border:1px solid rgba(242,196,98,.55);box-shadow:0 12px 28px rgba(0,0,0,.35);color:#fff}
+.au-tile>svg{width:40px;height:40px;padding:9px;border-radius:12px;background:linear-gradient(180deg,#F7D47F,#C9932E);color:#0B2A5C;flex:none}
+.au-tile small{display:block;color:rgba(255,255,255,.8);font-size:13px}.au-tile b{font-size:24px;color:#fff}
+.ap{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.ap svg{width:15px;height:15px}
+.ap-green{background:#E3F5EC;color:#05603A}.ap-red{background:#FDE7E4;color:#9A2214}.ap-blue{background:#E6EEFB;color:#163E86}.ap-gold{background:#FBF0D3;color:#7A4B07}.ap-navy{background:#E9ECF3;color:#0B2A5C}
+.au-rec{display:inline-flex;align-items:center;gap:9px}.au-rec>svg{width:30px;height:30px;padding:6px;border-radius:9px;background:#EEF2F9;color:#0B2A5C;flex:none}
+.au-rec b{display:block;font-size:14px;color:#0B1F44}.au-rec small{display:block;font-size:12px;color:#667085}
+.au-link{text-decoration:none}.au-link:hover b{text-decoration:underline}
+.au-when{display:inline-flex;align-items:center;gap:9px}.au-when>svg{width:18px;height:18px;color:#0B2A5C}.au-when b{display:block;font-size:14px;color:#0B1F44}.au-when small{display:block;font-size:12px;color:#667085}
+.au-chips{display:flex;flex-wrap:wrap;gap:6px}
+.au-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:9px;background:#F6F1E6;border:1px solid #EADFC6;font-size:12.5px;color:#1C2333;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.au-chip i{font-style:normal;color:#8A6A23;font-weight:600}
+@media (max-width:1000px){.au-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cell-name .avatar,.main.themed .content .cell-name .avatar{color:#fff;font-size:12px;font-weight:700}
