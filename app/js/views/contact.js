@@ -1,12 +1,12 @@
 import { db, state, can, canDraftAgreements, esc, icon, STAGES, triageBadge, priorityBadge, staffName, staffOptions, fmtDate, fmtDateTime, timeAgo,
-  modal, confirmBox, toast, fail, today, SERVICE_LABEL, initials, rpc, callFn } from '../core.js';
+  modal, confirmBox, toast, fail, today, SERVICE_LABEL, initials, rpc, callFn, clientAvatar } from '../core.js';
 import { money, invoiceBadge, newInvoice, receivePayment, trustTxn } from '../fin.js';
 import { logActivity, editDeal, editCase, dealBadge, caseBadge, ACT_LABEL, ACT_ICON, composeEmail } from '../crm.js';
 
 export async function render(el, [id], { setTitle }) {
   const { data: c, error } = await db.from('contacts').select('*, companies(id, name)').eq('id', id).single();
   if (error) { el.innerHTML = '<div class="alert err">Contact not found.</div>'; return; }
-  setTitle(c.full_name);
+  setTitle(`<span class="cx-title">${icon('maple')}<span>${esc(c.full_name)}</span></span>`, true);
   const edit = can('crm.edit'), fin = can('finance.view');
   let tab = sessionStorage.getItem('gi_contact_tab') || 'activity';
   const [{ data: openDeals }, money360] = await Promise.all([
@@ -17,54 +17,50 @@ export async function render(el, [id], { setTitle }) {
   const owing = (invs?.data || []).filter((i) => ['open', 'partial'].includes(i.status)).reduce((s, i) => s + +i.balance, 0);
   const billed = (invs?.data || []).filter((i) => i.status !== 'void' && i.status !== 'draft').reduce((s, i) => s + +i.total, 0);
 
+  const TABS = [['activity', 'Activity', 'pulse'], ['file', 'File', 'folder'], ['deadlines', 'Deadlines<br>& IRCC', 'calendar'], ['forms', 'Forms', 'note'], ['emails', 'Emails', 'mail'],
+    ['deals', 'Deals', 'handshake'], ['cases', 'Cases', 'briefcase'], ...(can('documents.view') ? [['documents', 'Documents', 'file']] : []), ['agreements', 'Agreements', 'pen'],
+    ...(can('letters.view') ? [['letters', 'Letters', 'mail']] : []), ...(fin ? [['billing', 'Billing', 'coins']] : []), ['tasks', 'Tasks', 'checksq'],
+    ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments', 'bars']] : []), ['portal', 'Portal', 'monitor']];
+  const kv = (ic, k, v) => `<div class="cx-kv">${icon(ic)}<span>${k}</span><b>${v}</b></div>`;
+  const tile = (ic, label, val, red) => `<div class="cx-tile">${icon(ic)}<div><small>${label}</small><b ${red ? 'style="color:var(--red)"' : ''}>${val}</b></div></div>`;
   el.innerHTML = `
-    <div class="toolbar"><a class="btn btn-sm" href="#/contacts">← Contacts</a><div class="grow"></div>
-      ${c.phone ? `<a class="btn" href="tel:${esc(c.phone)}">${icon('phone')} Call</a>` : ''}
-      ${c.email && edit ? `<button class="btn" id="emailBtn">${icon('mail')} Email</button>` : ''}
-      <a class="btn" href="#/chat?contact=${c.id}">${icon('chat')} Team chat</a>
-      ${edit ? `<button class="btn" id="logAct">${icon('note')} Log activity</button>` : ''}
-      ${can('letters.edit') ? `<button class="btn" id="genLetter">${icon('note')} Submission letter</button>` : ''}
-      ${canDraftAgreements() ? `<button class="btn btn-gold" id="genAgr">${icon('file')} Generate agreement</button>` : ''}
-      <div style="position:relative"><button class="btn btn-primary" id="moreNew">${icon('plus')} New ▾</button></div>
-      ${edit ? `<button class="btn" id="editBtn">Edit</button>` : ''}
-      ${can('crm.delete') ? `<button class="btn btn-danger" id="delBtn" aria-label="Delete">${icon('trash')}</button>` : ''}
+    <div class="cx">
+    <div class="cx-bar"><a class="cx-back" href="#/contacts">${icon('arrowL')} Contacts</a><div class="grow"></div>
+      ${c.phone ? `<a class="cx-btn" href="tel:${esc(c.phone)}">${icon('phone')} Call</a>` : ''}
+      ${c.email && edit ? `<button class="cx-btn" id="emailBtn">${icon('mail')} Email</button>` : ''}
+      <a class="cx-btn" href="#/chat?contact=${c.id}">${icon('chat')} Team chat</a>
+      ${edit ? `<button class="cx-btn" id="logAct">${icon('bars')} Log activity</button>` : ''}
+      ${can('letters.edit') ? `<button class="cx-btn" id="genLetter">${icon('note')} Submission letter</button>` : ''}
+      ${canDraftAgreements() ? `<button class="cx-btn gold" id="genAgr">${icon('file')} Generate agreement</button>` : ''}
+      <div style="position:relative"><button class="cx-btn blue" id="moreNew">${icon('plus')} New ${icon('down')}</button></div>
+      ${edit ? `<button class="cx-btn" id="editBtn">${icon('edit')} Edit</button>` : ''}
+      ${can('crm.delete') ? `<button class="cx-btn" id="delBtn" aria-label="Delete">${icon('trash')}</button>` : ''}
     </div>
     <div class="detail">
-      <div class="grid">
-        <div class="card"><div class="card-b">
-          <div class="row" style="margin-bottom:14px"><span class="avatar gold" style="width:52px;height:52px;font-size:17px">${esc(initials(c.full_name))}</span>
-            <div><h2 style="font-family:var(--serif);color:var(--navy);font-size:21px">${esc(c.full_name)}</h2>
-            <small style="color:var(--muted)">${c.job_title ? esc(c.job_title) + (c.companies ? ' at ' : '') : ''}${c.companies ? `<a href="#/companies/${c.companies.id}">${esc(c.companies.name)}</a>` : ''}${!c.job_title && !c.companies ? 'Added ' + fmtDate(c.created_at) + ' · ' + esc(c.source) : ''}</small></div></div>
-          <div class="row" style="margin-bottom:14px">${triageBadge(c.priority)}${c.last_activity_at ? `<small style="color:var(--muted)">Last contact ${timeAgo(c.last_activity_at)}</small>` : ''}</div>
-          <div class="field"><label>Lifecycle stage</label><select class="input" id="stage" ${edit ? '' : 'disabled'}>
-            ${STAGES.map(([k, l]) => `<option value="${k}" ${k === c.stage ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
-          <div class="field"><label>Owner</label><select class="input" id="assign" ${edit ? '' : 'disabled'}>${staffOptions(c.assigned_to)}</select></div>
-          <dl class="kv" style="margin-top:6px">
-            <dt>Email</dt><dd>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : '—'}</dd>
-            <dt>Phone</dt><dd>${esc(c.phone || '—')}</dd>
-            <dt>Address</dt><dd>${esc([c.address, c.city, c.province, c.postal_code, c.country].filter(Boolean).join(', ') || '—')}</dd>
-            <dt>Date of birth</dt><dd>${fmtDate(c.date_of_birth)}</dd>
-            <dt>Citizenship</dt><dd>${esc(c.citizenship || '—')}</dd>
-            <dt>Language</dt><dd>${esc(c.language || '—')}</dd>
-            <dt>Prefers</dt><dd>${esc(c.contact_pref || '—')}</dd>
-            <dt>Location</dt><dd>${c.location === 'in' ? 'In Canada' : c.location === 'out' ? 'Outside Canada' : '—'}</dd>
-            <dt>Status</dt><dd>${esc(c.status_in_canada || '—')}</dd>
-            <dt>Services</dt><dd>${esc((c.services || []).map((k) => SERVICE_LABEL[k] || k).join(', ') || '—')}</dd>
-          </dl>
-        </div></div>
-        <div class="card"><div class="card-b grid g-2" style="gap:12px">
-          <div><small style="color:var(--muted)">Open deals</small><div style="font-weight:700;color:var(--navy);font-size:18px">${money((openDeals || []).filter((d) => !['won', 'lost'].includes(d.stage)).reduce((s, d) => s + +d.value, 0))}</div></div>
-          ${fin ? `<div><small style="color:var(--muted)">Total billed</small><div style="font-weight:700;color:var(--navy);font-size:18px">${money(billed)}</div></div>
-          <div><small style="color:var(--muted)">Balance owing</small><div style="font-weight:700;font-size:18px;color:${owing ? 'var(--red)' : 'var(--navy)'}">${money(owing)}</div></div>
-          <div><small style="color:var(--muted)">Held in trust</small><div style="font-weight:700;color:var(--navy);font-size:18px">${money(trust)}</div></div>` : ''}
-        </div></div>
+      <div class="grid" style="gap:16px">
+        <div class="cx-prof">
+          <div class="cx-head">${clientAvatar(c, 'cx-av')}
+            <div><h2>${esc(c.full_name)}</h2>
+              <small>${c.job_title ? esc(c.job_title) + (c.companies ? ' at ' : '') : ''}${c.companies ? `<a href="#/companies/${c.companies.id}">${esc(c.companies.name)}</a>` : ''}${!c.job_title && !c.companies ? 'Added ' + fmtDate(c.created_at) + ' · ' + esc(c.source) : ''}</small>
+              <div class="cx-pills">${c.priority ? triageBadge(c.priority) : ''}${c.last_activity_at ? `<span class="cx-pill">${icon('clock')} Last contact ${timeAgo(c.last_activity_at)}</span>` : ''}</div></div></div>
+          <div class="cx-body">
+            <div class="cx-field">${icon('idcard')}<div class="field"><label>Lifecycle stage</label><select class="input" id="stage" ${edit ? '' : 'disabled'}>
+              ${STAGES.map(([k, l]) => `<option value="${k}" ${k === c.stage ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>
+            <div class="cx-field">${icon('user')}<div class="field"><label>Owner</label><select class="input" id="assign" ${edit ? '' : 'disabled'}>${staffOptions(c.assigned_to)}</select></div></div>
+            ${kv('mail', 'Email', c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : '—')}${kv('phone', 'Phone', esc(c.phone || '—'))}
+            ${kv('pin', 'Address', esc([c.address, c.city, c.province, c.postal_code, c.country].filter(Boolean).join(', ') || '—'))}${kv('calendar', 'Date of birth', fmtDate(c.date_of_birth))}
+            ${kv('idcard', 'Citizenship', esc(c.citizenship || '—'))}${kv('globe', 'Language', esc(c.language || '—'))}${kv('heart', 'Prefers', esc(c.contact_pref || '—'))}
+            ${kv('pin', 'Location', c.location === 'in' ? 'In Canada' : c.location === 'out' ? 'Outside Canada' : '—')}${kv('pulse', 'Status', esc(c.status_in_canada || '—'))}
+            ${kv('layers', 'Services', esc((c.services || []).map((k) => SERVICE_LABEL[k] || k).join(', ') || '—'))}
+          </div></div>
+        <div class="cx-money">${tile('handshake', 'Open deals', money((openDeals || []).filter((d) => !['won', 'lost'].includes(d.stage)).reduce((s, d) => s + +d.value, 0)))}
+          ${fin ? tile('file', 'Total billed', money(billed)) + tile('wallet', 'Balance owing', money(owing), owing > 0) + tile('shield', 'Held in trust', money(trust)) : ''}</div>
       </div>
-      <div class="card">
-        <div class="tabs" id="tabs">${[['activity', 'Activity'], ['file', 'File'], ['deadlines', 'Deadlines & IRCC'], ['forms', 'Forms'], ['emails', 'Emails'], ['deals', 'Deals'], ['cases', 'Cases'], ...(can('documents.view') ? [['documents', 'Documents']] : []), ['agreements', 'Agreements'], ...(can('letters.view') ? [['letters', 'Letters']] : []), ...(fin ? [['billing', 'Billing']] : []), ['tasks', 'Tasks'], ...(can('intake.view') || can('pathway.view') ? [['assessments', 'Assessments']] : []), ['portal', 'Portal']]
-          .map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
+      <div class="cx-main">
+        <div class="cx-tabs" id="tabs">${TABS.map(([k, l, ic]) => `<button data-k="${k}">${icon(ic)}<span>${l}</span></button>`).join('')}</div>
         <div class="card-b" id="tabBody"></div>
       </div>
-    </div>`;
+    </div></div>`;
 
   // Header actions
   el.querySelector('#genLetter')?.addEventListener('click', async () => (await import('./letters.js')).newLetter({ contactId: id }));
@@ -145,7 +141,7 @@ export async function render(el, [id], { setTitle }) {
   const tabs = el.querySelector('#tabs'), body = el.querySelector('#tabBody');
   const documentsTab = async () => (await import('../files.js')).documentsPanel(body, { contactId: c.id });
   if (!tabs.querySelector(`[data-k="${tab}"]`)) tab = 'activity';
-  tabs.onclick = (e) => { if (e.target.dataset.k) { tab = e.target.dataset.k; sessionStorage.setItem('gi_contact_tab', tab); showTab(); } };
+  tabs.onclick = (e) => { const b = e.target.closest('[data-k]'); if (b) { tab = b.dataset.k; sessionStorage.setItem('gi_contact_tab', tab); showTab(); } };
   const rerender = () => render(el, [id], { setTitle });
   window.addEventListener('crm-changed', rerender, { once: true });
   window.addEventListener('books-changed', rerender, { once: true });

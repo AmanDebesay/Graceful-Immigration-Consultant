@@ -1,4 +1,4 @@
-import { db, state, can, esc, icon, STAGES, stageBadge, triageBadge, staffName, staffOptions, timeAgo, modal, toast } from '../core.js';
+import { db, state, can, esc, icon, STAGES, stageBadge, triageBadge, staffName, staffOptions, timeAgo, modal, toast, clientAvatar } from '../core.js';
 import { clearFinCache, downloadCsv } from '../fin.js';
 
 export async function render(el) {
@@ -24,7 +24,7 @@ export async function render(el) {
     if (!data.length) { box.innerHTML = `<div class="empty">${icon('users')}<div>No contacts found.</div></div>`; return; }
     box.innerHTML = `<table class="t"><thead><tr><th>Name</th><th>Phone</th><th>Stage</th><th>Priority</th><th>Owner</th><th>Last contacted</th><th>Added</th></tr></thead><tbody>
       ${data.map((c) => `<tr class="click" data-id="${c.id}">
-        <td><div class="cell-name"><span class="avatar sm">${esc(c.full_name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase())}</span><div><b>${esc(c.full_name)}</b><span>${esc(c.email || '')}</span></div></div></td>
+        <td><div class="cell-name">${clientAvatar(c, 'avatar sm')}<div><b>${esc(c.full_name)}</b><span>${esc(c.email || '')}</span></div></div></td>
         <td>${esc(c.phone || '—')}</td><td>${stageBadge(c.stage)}</td><td>${triageBadge(c.priority)}</td>
         <td>${c.assigned_to ? esc(staffName(c.assigned_to)) : '<span style="color:var(--muted)">Unassigned</span>'}</td>
         <td>${c.last_activity_at ? timeAgo(c.last_activity_at) : '<span style="color:var(--muted)">Never</span>'}</td><td>${timeAgo(c.created_at)}</td></tr>`).join('')}</tbody></table>`;

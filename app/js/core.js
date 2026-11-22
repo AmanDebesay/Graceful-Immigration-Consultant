@@ -35,6 +35,27 @@ export const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&a
 export const avatarHtml = (p, cls = 'avatar') => p?.avatar_url
   ? `<span class="${cls} photo"><img src="${esc(p.avatar_url)}" alt=""></span>`
   : `<span class="${cls}">${esc(initials(p?.full_name || p?.email))}</span>`;
+// Client avatars: every client gets their own picture — a colour pair and a pattern chosen from their id/name,
+// so two clients rarely look alike and the same client always looks the same.
+const AV_COLORS = [['#0B2A5C', '#2F6FD0'], ['#7A1F3D', '#D0506F'], ['#0E5E55', '#2FB39C'], ['#5B2A86', '#A46BE0'], ['#8A4B12', '#E39A3B'], ['#1F4E3D', '#56A57B'],
+  ['#2B3A67', '#6C83D9'], ['#7C2D12', '#E0703C'], ['#134E6F', '#3BA3D6'], ['#4A4F12', '#A9B33A'], ['#6B1F5F', '#D35BB8'], ['#23313F', '#6F8AA6'], ['#9A6B12', '#F2C462'], ['#3F2A1E', '#A9744F']];
+const AV_PATTERNS = [
+  '<circle cx="80" cy="20" r="34" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="6"/><circle cx="80" cy="20" r="20" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="5"/>',
+  '<path d="M-10 70 L70 -10 M10 90 L90 10 M30 110 L110 30" stroke="#fff" stroke-opacity=".13" stroke-width="9"/>',
+  '<path d="M0 72 Q25 58 50 72 T100 72 V100 H0Z" fill="#fff" fill-opacity=".13"/><path d="M0 84 Q25 70 50 84 T100 84 V100 H0Z" fill="#fff" fill-opacity=".1"/>',
+  '<g fill="#fff" fill-opacity=".16">' + [0, 1, 2, 3, 4].map((i) => [0, 1, 2, 3, 4].map((j) => `<circle cx="${10 + i * 20}" cy="${10 + j * 20}" r="2.6"/>`).join('')).join('') + '</g>',
+  '<path d="M0 100 L30 62 L48 80 L70 50 L100 86 V100Z" fill="#fff" fill-opacity=".15"/>',
+  '<path d="M78 6l3.6 7.2 3.6-1.9-1.3 9.2 6-5.6 1.9 3.6 6.5-1-2.7 7.3 3.6 1.9-10.1 7.3 1.9 3.6-11.1-1.9V50h-3.6V35.1l-11.1 1.9 1.9-3.6-10.1-7.3 3.6-1.9-2.7-7.3 6.5 1 1.9-3.6 6 5.6-1.3-9.2 3.6 1.9z" fill="#fff" fill-opacity=".16"/>',
+];
+const avHash = (s) => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+export function avatarArt(seed) {
+  const h = avHash(seed), [a, b] = AV_COLORS[h % AV_COLORS.length], pat = AV_PATTERNS[(h >>> 8) % AV_PATTERNS.length], ang = (h >>> 16) % 2 ? '0 0 1 1' : '1 0 0 1';
+  const [x1, y1, x2, y2] = ang.split(' ');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/>${pat}</svg>`;
+  return `url('data:image/svg+xml,${encodeURIComponent(svg).replace(/'/g, '%27')}') center/cover`;
+}
+/** A client's avatar: their unique pattern with initials on top. */
+export const clientAvatar = (c, cls = 'avatar') => `<span class="${cls} cav" style="background:${avatarArt(c?.id || c?.full_name || '?')}">${esc(initials(c?.full_name))}</span>`;
 export const initials = (n) => (n || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
 export function fmtDate(d, opts = { year: 'numeric', month: 'short', day: 'numeric' }) {
   if (!d) return '—';
@@ -94,6 +115,16 @@ const P = {
   award: '<circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/>',
   clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
   arrowr: '<path d="M5 12h14M12 5l7 7-7 7"/>',
+  pulse: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  handshake: '<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>',
+  pen: '<path d="M20 19.5c-1.5 1-3 1.5-4.5 1.5-2 0-2.5-2-4-2s-2 1-3.5 1"/><path d="M15.2 3.8a2.1 2.1 0 0 1 3 3L8 17l-4 1 1-4Z"/>',
+  monitor: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  bars: '<path d="M3 3v18h18"/><path d="M8 17v-5M13 17V8M18 17v-9"/>',
+  coins: '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  heart: '<path d="M19 14c1.5-1.5 3-3.3 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/>',
+  pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  idcard: '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5 16c.5-1.5 1.7-2 3-2s2.5.5 3 2M14 10h5M14 13h4"/>',
+  wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
   up: '<path d="m18 15-6-6-6 6"/>',
   down: '<path d="m6 9 6 6 6-6"/>',
   trend: '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',

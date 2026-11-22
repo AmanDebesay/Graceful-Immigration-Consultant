@@ -1073,3 +1073,42 @@ table.t{width:100%;border-collapse:collapse}
 .sl-score{flex:none;width:64px;height:64px;border-radius:50%;border:5px solid var(--c);display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1}
 .sl-score b{font-size:20px;color:var(--c)}.sl-score small{font-size:10px;color:var(--muted)}
 .ai-out h4{margin:12px 0 6px;color:var(--navy)}.ai-out p{margin:0 0 8px}.ai-out ul,.ai-out ol{margin:0 0 8px 18px}
+
+/* ── Client page (contact): white pill actions, navy profile card, gold money tiles, icon tabs ── */
+.cav{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);letter-spacing:.02em}
+.cx-title{display:inline-flex;align-items:center;gap:10px;font-family:var(--serif)}.cx-title svg{width:34px;height:34px;color:#E9B653;filter:drop-shadow(0 2px 6px rgba(242,196,98,.35))}
+.cx-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.cx-back{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;border:1.5px solid #E2AE45;color:#fff;font-weight:600;background:rgba(11,42,92,.65);text-decoration:none}
+.cx-back:hover{background:rgba(11,42,92,.9)}.cx-back svg{width:18px;height:18px}
+.cx-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:1px solid #E4DAC6;background:linear-gradient(180deg,#fff,#F6F1E7);color:var(--navy);font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,.22)}
+.cx-btn svg{width:18px;height:18px}.cx-btn:hover{box-shadow:0 8px 20px rgba(0,0,0,.3),0 0 0 1px #E2AE45}
+.cx-btn.gold{background:linear-gradient(180deg,#F7D47F,#E2AE45);border-color:#C99634;color:#2A1C04}
+.cx-btn.blue{background:linear-gradient(180deg,#2F64C4,#123B86);border-color:#0E2F6E;color:#fff}
+.cx .detail{grid-template-columns:370px 1fr}
+.cx-prof{border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#FFFEFB,#F4EEE2);box-shadow:0 18px 40px rgba(0,0,0,.35);border:1px solid rgba(226,174,69,.5)}
+.cx-head{position:relative;display:flex;gap:16px;align-items:center;padding:22px 20px 26px;background:linear-gradient(135deg,#0B2A5C 0%,#123B7A 60%,#0A2350 100%);border-bottom-right-radius:60px;overflow:hidden}
+.cx-head::after{content:"";position:absolute;right:-30px;top:-40px;width:150px;height:180px;border-radius:50%;border:3px solid rgba(242,196,98,.85);border-left-color:transparent;border-bottom-color:transparent;transform:rotate(18deg);pointer-events:none}
+.cx-av{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;flex:none;box-shadow:0 0 0 3px #F2C462,0 8px 18px rgba(0,0,0,.4)}
+.cx-head h2{font-family:var(--serif);color:#fff;font-size:24px;line-height:1.15}.cx-head small{color:rgba(255,255,255,.85);font-size:13.5px}.cx-head small a{color:#F2C462}
+.cx-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.cx-pill{display:inline-flex;align-items:center;gap:5px;background:#fff;color:var(--navy);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}.cx-pill svg{width:13px;height:13px}
+.cx-body{padding:14px 18px 16px}
+.cx-field{display:grid;grid-template-columns:26px 1fr;gap:8px;align-items:end;margin-bottom:4px}.cx-field>svg{width:20px;height:20px;color:var(--navy);margin-bottom:22px}
+.cx-field .field{margin-bottom:10px}
+.cx-kv{display:grid;grid-template-columns:22px 104px 1fr;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #ECE4D4;font-size:14px}
+.cx-kv:last-child{border-bottom:0}.cx-kv svg{width:17px;height:17px;color:var(--navy)}.cx-kv span{color:#344054}.cx-kv b{font-weight:500;color:#101828;word-break:break-word}.cx-kv a{color:#1849A9}
+.cx-money{display:grid;grid-template-columns:1fr 1fr;border-radius:18px;overflow:hidden;background:#FFFEFB;border:1px solid rgba(226,174,69,.55);box-shadow:0 16px 34px rgba(0,0,0,.3)}
+.cx-tile{display:flex;gap:12px;align-items:center;padding:16px 18px;border-right:1px solid #EEE5D3;border-bottom:1px solid #EEE5D3}
+.cx-tile:nth-child(2n){border-right:0;background:linear-gradient(180deg,#FFFBF1,#F7EBCF)}.cx-tile:nth-last-child(-n+2){border-bottom:0}
+.cx-tile>svg{width:30px;height:30px;color:#B8861F;flex:none}.cx-tile small{display:block;color:#344054;font-size:13px}.cx-tile b{font-size:21px;color:var(--navy)}
+.cx-main{border-radius:22px;background:linear-gradient(180deg,#FFFEFB,#F6F1E8);box-shadow:0 18px 40px rgba(0,0,0,.35);border:1px solid rgba(226,174,69,.45);overflow:hidden;min-width:0}
+.cx-tabs{display:flex;overflow-x:auto;border-bottom:1px solid #E6DCC8;padding:8px 8px 0;gap:2px;scrollbar-width:thin}
+.cx-tabs button{flex:1 0 auto;min-width:76px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;border:0;background:none;padding:10px 10px 11px;color:#344054;font-weight:500;font-size:13px;line-height:1.15;cursor:pointer;border-radius:12px 12px 0 0;border-bottom:3px solid transparent;text-align:center}
+.cx-tabs button svg{width:22px;height:22px;color:var(--navy)}
+.cx-tabs button:hover{background:#F3ECDD}
+.cx-tabs button.on{background:linear-gradient(180deg,#123B7A,#0B2A5C);color:#fff;border-bottom-color:#F2C462;font-weight:700}.cx-tabs button.on svg{color:#F2C462}
+@media (max-width:1180px){.cx .detail{grid-template-columns:1fr}}
+@media (max-width:640px){.cx-bar .cx-btn{padding:8px 12px;font-size:13px}.cx-kv{grid-template-columns:22px 90px 1fr}.cx-title svg{width:24px;height:24px}}
+.main.themed .content .cx :where(.cx-prof,.cx-money,.cx-main,.cx-btn,.cx-pill){color:var(--ink);--muted:#667085;--navy:#0B2A5C;--green:#067647;--red:#B42318}
+.main.themed .content .cx .cx-btn.blue{color:#fff}.main.themed .content .cx .cx-btn.gold{color:#2A1C04}
+.cx-tabs button{min-width:0;padding:10px 7px 11px;font-size:12.5px}

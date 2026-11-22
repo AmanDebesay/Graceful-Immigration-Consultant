@@ -1,4 +1,4 @@
-import { db, state, can, esc, icon, fmtDate, initials, today, timeAgo, staffName } from '../core.js';
+import { db, state, can, esc, icon, fmtDate, initials, today, timeAgo, staffName, clientAvatar } from '../core.js';
 import { CASE_LABEL, APPT_LABEL, editAppointment, editKeyDate } from '../crm.js';
 
 const ACTIVE = ['open', 'in_progress', 'submitted', 'decision_pending'];
@@ -144,7 +144,7 @@ export async function render(el, _params, ctx) {
     <div class="dk-row r3">
       <div class="dk-card"><div class="dk-h">${H3('users', 'Recent Clients')}<a href="#/contacts">View all ${icon('arrowr')}</a></div>
         ${recent.length ? `<div class="dk-list">${recent.map((c) => { const k = latestCase[c.id]; return `<a class="rc" href="#/contacts/${c.id}">
-          <span class="rc-av">${esc(initials(c.full_name))}</span><b>${esc(c.full_name)}</b>
+          ${clientAvatar(c, 'rc-av')}<b>${esc(c.full_name)}</b>
           <span class="rc-type">${esc(k?.application_type || (c.services || [])[0] || '—')}</span><span class="rc-date">${fmtDate(c.created_at)}</span>
           <span class="pill ${k ? STATUS_PILL[k.status] : 'p-grey'}">${esc(k ? CASE_LABEL[k.status] : STAGE_LABEL[c.stage] || c.stage)}</span></a>`; }).join('')}</div>`
           : `<div class="dk-empty">${icon('users')}<p>No clients yet.</p>${can('crm.edit') ? `<a class="btn btn-gold btn-sm" href="#/contacts?new=1">${icon('plus')} Add your first client</a>` : ''}</div>`}
