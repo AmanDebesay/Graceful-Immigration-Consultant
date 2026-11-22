@@ -53,6 +53,7 @@ const NAV = [
   { path: '/team', label: 'Team & Access', icon: 'shield', show: () => can('staff.manage') },
   { path: '/staff-agreements', label: 'Staff Agreements', icon: 'file', show: () => can('staff.manage') },
   { path: '/settings', label: 'Business Settings', icon: 'settings', show: () => can('settings.manage') },
+  { path: '/business-files', label: 'Business Files', icon: 'folder', show: () => can('settings.manage'), count: 'bizdocs_due', red: true },
   { path: '/audit', label: 'Audit Log', icon: 'history', show: () => can('audit.view') },
 ];
 
@@ -96,6 +97,7 @@ const ROUTES = [
   [/^\/forms$/, 'forms', 'IRCC Forms'],
   [/^\/weekly$/, 'weekly', 'Weekly Report'],
   [/^\/file-prep$/, 'file-prep', 'File Prep for Portal Upload Limits'],
+  [/^\/business-files$/, 'business-files', 'Business Files'],
   [/^\/accounting$/, 'accounting', 'Accounting'],
   [/^\/invoices$/, 'invoices', 'Sales & Invoices'],
   [/^\/invoices\/([\w-]+)$/, 'invoice', 'Invoice'],
@@ -306,12 +308,13 @@ export async function refreshCounts() {
   try {
     const me = state.profile.id;
     const soon = new Date(Date.now() + 2 * 86400000).toLocaleDateString('en-CA');
-    const [s, u, cl, ar, pm, dl] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread'),
+    const [s, u, cl, ar, pm, dl, bd] = await Promise.all([db.rpc('dashboard_stats'), db.rpc('chat_unread'),
       db.from('case_checklists').select('id', { count: 'exact', head: true }).eq('assigned_to', me).neq('stage', 'approved'),
       can('agreements.manage') ? db.from('agreements').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('reviewer_id', me).not('review_requested_at', 'is', null) : { count: 0 },
       can('crm.view') ? db.from('portal_messages').select('id', { count: 'exact', head: true }).eq('from_client', true).is('read_by_staff_at', null) : { count: 0 },
-      can('crm.view') ? db.from('deadlines').select('id', { count: 'exact', head: true }).eq('done', false).lte('due_on', soon) : { count: 0 }]);
-    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0), my_checklists: cl.count || 0, agr_review: ar.count || 0, portal_unread: pm.count || 0, deadlines_due: dl.count || 0 };
+      can('crm.view') ? db.from('deadlines').select('id', { count: 'exact', head: true }).eq('done', false).lte('due_on', soon) : { count: 0 },
+      can('settings.manage') ? db.from('business_documents').select('id', { count: 'exact', head: true }).lte('expires_on', new Date(Date.now() + 30 * 86400000).toLocaleDateString('en-CA')) : { count: 0 }]);
+    counts = { ...(s.data || {}), chat_unread: (u.data || []).reduce((n, r) => n + Number(r.unread), 0), my_checklists: cl.count || 0, agr_review: ar.count || 0, portal_unread: pm.count || 0, deadlines_due: dl.count || 0, bizdocs_due: bd.count || 0 };
   } catch { counts = {}; }
   if (shellBuilt) {
     renderNav();

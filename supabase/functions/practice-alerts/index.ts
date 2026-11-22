@@ -22,14 +22,14 @@ function windows(docType: string): number[] {
   return [60, 14];
 }
 
-type Row = { when: string; client: string; contactId: string; what: string; tag: string; red: boolean };
+type Row = { when: string; client: string; contactId: string; what: string; tag: string; red: boolean; href?: string };
 
 function section(title: string, rows: Row[]) {
   if (!rows.length) return "";
   return `<tr><td style="padding:16px 0 6px;font-family:Georgia,serif;font-size:16px;color:#0B2A5C;font-weight:bold">${escapeHtml(title)}</td></tr>
     ${rows.map((r) => `<tr><td style="padding:8px 10px;border-left:4px solid ${r.red ? "#B42318" : "#C9A24A"};background:${r.red ? "#FEF3F2" : "#FFFBF2"};margin-bottom:6px">
       <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:${r.red ? "#B42318" : "#9A7420"};font-weight:bold">${escapeHtml(r.tag)} · ${escapeHtml(r.when)}</div>
-      <div style="font-size:14px;margin-top:2px"><a href="${APP}#/contacts/${r.contactId}" style="color:#0B2A5C;font-weight:bold;text-decoration:none">${escapeHtml(r.client)}</a> — ${escapeHtml(r.what)}</div></td></tr>
+      <div style="font-size:14px;margin-top:2px"><a href="${r.href ?? `${APP}#/contacts/${r.contactId}`}" style="color:#0B2A5C;font-weight:bold;text-decoration:none">${escapeHtml(r.client)}</a> — ${escapeHtml(r.what)}</div></td></tr>
       <tr><td style="height:6px"></td></tr>`).join("")}`;
 }
 
@@ -84,6 +84,18 @@ Deno.serve(async (req) => {
       what: "IMM 5744 consent expires — get a new original signature before any further ATIP or status request", tag: "IMM 5744", red: n <= 7 });
   }
 
+  // ── Business files (insurance, registrations, licences): 60, 30, 7 days before and on the day ──
+  const bizRows: Row[] = [];
+  const { data: bds } = await admin.from("business_documents").select("id, title, issuer, expires_on, alerts_sent").not("expires_on", "is", null).order("expires_on");
+  for (const b of bds ?? []) {
+    const n = days(today, b.expires_on), sent: number[] = b.alerts_sent ?? [];
+    const w = [0, 7, 30, 60].find((l) => n <= l && !sent.includes(l));
+    if (w === undefined || n < -1) continue;
+    await admin.from("business_documents").update({ alerts_sent: [...new Set([...sent, ...[0, 7, 30, 60].filter((l) => l >= w)])] }).eq("id", b.id);
+    bizRows.push({ when: n < 0 ? `EXPIRED ${nice(b.expires_on)}` : n === 0 ? "EXPIRES TODAY" : `expires in ${n} day${n === 1 ? "" : "s"} · ${nice(b.expires_on)}`,
+      client: b.title, contactId: "", href: `${APP}#/business-files`, what: `renew it${b.issuer ? ` with ${b.issuer}` : ""} and upload the new copy`, tag: "Business file", red: n <= 7 });
+  }
+
   // ── Monthly reconciliation ──
   const { data: s } = await admin.from("org_settings").select("rules").eq("id", 1).single();
   const recDay = Number(s?.rules?.reconciliation_day ?? 5);
@@ -110,15 +122,15 @@ Deno.serve(async (req) => {
       + list("Retained files with no activity for 30 days", (w.inactive ?? []).map((x: any) => link(x.contact_id, x.client)));
   }
 
-  if (!dueRows.length && !expRows.length && !recon && !weekly) return json(req, { ok: true, sent: false });
+  if (!dueRows.length && !expRows.length && !bizRows.length && !recon && !weekly) return json(req, { ok: true, sent: false });
   const html = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:660px;font-family:Arial,Helvetica,sans-serif;color:#1C2333">
     <tr><td style="padding:0 0 10px;border-bottom:3px solid #C9A24A"><div style="font-family:Georgia,serif;font-size:21px;color:#0B2A5C;font-weight:bold">Practice Hub — ${escapeHtml(nice(today))}</div>
       <div style="font-size:13px;color:#6B7385">Deadlines, expiring documents and reminders for Graceful Immigration Consultant Inc.</div></td></tr>
-    ${section("Deadlines", dueRows)}${section("Expiring documents", expRows)}
+    ${section("Deadlines", dueRows)}${section("Expiring documents", expRows)}${section("Business files", bizRows)}
     ${recon ? `<tr><td style="padding:14px 10px;background:#FFFBF2;border-left:4px solid #C9A24A;font-size:14px"><b>Monthly reconciliation for ${escapeHtml(monthName)} is still open.</b> Match the bank statement, the journal and every client ledger, then sign it off in <a href="${APP}#/trust" style="color:#0B2A5C">Trust (Client Funds)</a>.</td></tr>` : ""}
     ${weekly}
     <tr><td style="padding:18px 0 0;font-size:11px;color:#8A90A0">Sent automatically by your Practice Hub. Open <a href="${APP}#/deadlines" style="color:#8A90A0">Deadlines</a> to mark items done.</td></tr></table>`;
   const subject = dueRows.some((r) => r.red) ? `⚠ Practice Hub: ${dueRows.filter((r) => r.red).length} urgent deadline(s)` : weekly ? "Practice Hub weekly report" : "Practice Hub reminders";
   const ok = await sendEmail(TO, subject, html);
-  return json(req, { ok, sent: ok, deadlines: dueRows.length, expiring: expRows.length, recon, weekly: !!weekly });
+  return json(req, { ok, sent: ok, deadlines: dueRows.length, expiring: expRows.length, business: bizRows.length, recon, weekly: !!weekly });
 });
