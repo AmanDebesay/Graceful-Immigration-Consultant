@@ -65,7 +65,7 @@ export async function render(el, [id], { setTitle }) {
         <div style="flex:1">${editable ? `<div class="field"><label>Message on invoice</label><textarea class="input" id="notes">${esc(inv.notes || '')}</textarea></div>
           <div class="field"><label>Terms</label><input class="input" id="terms" value="${esc(inv.terms || '')}"></div>`
           : `${inv.notes ? `<p style="white-space:pre-wrap">${esc(inv.notes)}</p>` : ''}<p class="inv-muted" style="margin-top:8px">${esc(inv.terms || '')}</p>
-             <p class="inv-muted" style="margin-top:8px">Pay by Interac e-Transfer to ${esc(s.email)}, or call ${esc(s.phone)}.</p>`}</div>
+             <p class="inv-muted" style="margin-top:8px">Pay by Interac e-Transfer to <b>${esc(s.pay_email || s.email)}</b> with the invoice number in the message, or call ${esc(s.phone)}.</p>`}</div>
         <div class="inv-totals">
           <div><span>Subtotal</span><b id="tSub">${money(inv.subtotal)}</b></div>
           <div><span>GST ${rate || ''}${rate ? '%' : ''}</span><b id="tTax">${money(inv.tax_total)}</b></div>
@@ -83,7 +83,7 @@ export async function render(el, [id], { setTitle }) {
   el.querySelector('#mail')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const first = String((payer ? payer.name : c.full_name) || '').split(' ')[0] || 'there';
-    const body = `Hello ${first},\n\nPlease find invoice ${inv.number} for ${money(inv.total)}${payer ? `, for immigration services provided to ${c.full_name}` : ''}, due ${fmtDate(inv.due_date)}. The balance due is ${money(inv.balance)}.\n\nYou can pay by Interac e-Transfer to ${s.email}, or call ${s.phone}.\n\nThank you,\n${s.rcic_name}\n${s.business_name}`;
+    const body = `Hello ${first},\n\nPlease find invoice ${inv.number} for ${money(inv.total)}${payer ? `, for immigration services provided to ${c.full_name}` : ''}, due ${fmtDate(inv.due_date)}. The balance due is ${money(inv.balance)}.\n\nYou can pay by Interac e-Transfer to ${s.pay_email || s.email} (please put ${inv.number} in the message), or call ${s.phone}.\n\nThank you,\n${s.rcic_name}\n${s.business_name}`;
     (await import('../crm.js')).composeEmail({ contact: { ...c, email: mailTo }, to: mailTo, subject: `Invoice ${inv.number} from ${s.business_name}`, body });
     toast('Tip: print the invoice to PDF (Print / PDF) and attach it to the email.');
   });

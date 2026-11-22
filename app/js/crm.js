@@ -131,7 +131,7 @@ export const EMAIL_TEMPLATES = [
   ['Update on your application', 'Application update',
     'Hello {first},\n\nI wanted to give you an update on your file: [update].\n\nNext steps: [next steps].\n\nPlease let me know if you have any questions.'],
   ['Payment reminder', 'Payment reminder',
-    'Hello {first},\n\nThis is a friendly reminder that [amount] is due for [milestone/invoice number]. You can pay by Interac e-Transfer to info@gracefulimmigration.ca or by calling (403) 915-4230.\n\nThank you.'],
+    'Hello {first},\n\nThis is a friendly reminder that [amount] is due for [milestone/invoice number]. You can pay by Interac e-Transfer to payments@gracefulimmigration.ca (please put the invoice number in the message) or by calling (403) 915-4230.\n\nThank you.'],
 ];
 
 let commsStatus = null;

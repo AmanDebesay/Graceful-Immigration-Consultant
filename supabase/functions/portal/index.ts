@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     switch (body.action) {
       case "home": {
         const [org, cases, agrs, invs, docs, msgs] = await Promise.all([
-          admin.from("org_settings").select("business_name, rcic_name, licence_number, phone, email, address").eq("id", 1).single(),
+          admin.from("org_settings").select("business_name, rcic_name, licence_number, phone, email, address, pay_email, trust_email").eq("id", 1).single(),
           admin.from("cases").select("id, case_number, title, application_type, status, opened_on, submitted_on, decision_on").eq("contact_id", c.id).order("created_at", { ascending: false }),
           admin.from("agreements").select("id, number, title, type, status, sent_at, client_signed_at, signing_token, token_expires_at, drive_item_id").eq("contact_id", c.id).in("status", ["sent", "viewed", "signed"]).order("created_at", { ascending: false }),
           admin.from("invoices").select("id, number, issue_date, due_date, total, balance, status").eq("contact_id", c.id).in("status", OPEN_STATUSES).order("issue_date", { ascending: false }),
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
         if (!OPEN_STATUSES.includes(inv.status)) throw new Error("Not found.");
         const [{ data: lines }, { data: org }] = await Promise.all([
           admin.from("invoice_lines").select("description, quantity, unit_price, amount, tax_amount, tax_rate").eq("invoice_id", inv.id).order("position"),
-          admin.from("org_settings").select("business_name, rcic_name, licence_number, phone, email, address, gst_number").eq("id", 1).single()]);
+          admin.from("org_settings").select("business_name, rcic_name, licence_number, phone, email, address, gst_number, pay_email, trust_email").eq("id", 1).single()]);
         return json(req, { invoice: inv, lines: lines ?? [], firm: org, client: { name: c.full_name, email: c.email } });
       }
       case "upload_session": {

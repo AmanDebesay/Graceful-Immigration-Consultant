@@ -27,6 +27,7 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
     client_address: [contact.address, contact.city, contact.province, contact.postal_code, contact.country].filter(Boolean).join(', '),
     rcic_name: settings.rcic_name || '', rcic_id: settings.licence_number || '', business_name: settings.business_name || '',
     business_address: settings.address || '', business_phone: settings.phone || '', business_email: settings.email || '',
+    pay_email: settings.pay_email || 'payments@gracefulimmigration.ca', trust_email: settings.trust_email || 'clientfunds@gracefulimmigration.ca',
     gst_rate: settings.gst_number ? Number(settings.gst_rate || 5) : 0, gst_number: settings.gst_number || '', province: 'Alberta',
     fee_basis: proBono ? 'pro_bono' : 'paid', pro_bono_reason: proBono || '', relationship: '', pro_bono_note: '',
     payer_other: false, payer_name: '', payer_relationship: '', payer_email: '', payer_phone: '', payer_address: '', payer_contact_id: '', payer_refund_to: 'payer',
@@ -44,7 +45,7 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
     documents: '', final_account: '', trust_refund: 0, refund_days: 30, notify_ircc: true, authority: 'Immigration, Refugees and Citizenship Canada (IRCC)', retention_years: 6 };
   if (type === 'consultation') {
     return { ...base, purpose: 'Initial assessment of eligibility and immigration options in Canada.', consult_date: today, consult_length: `${consult?.minutes || 60} minutes`,
-      consult_method: 'Video call (Zoom or Microsoft Teams)', fee: proBono ? 0 : Number(consult?.fee ?? 60), payment_method: proBono ? 'Not applicable (no fee)' : 'Interac e-Transfer or by phone before the consultation' };
+      consult_method: 'Video call (Zoom or Microsoft Teams)', fee: proBono ? 0 : Number(consult?.fee ?? 60), payment_method: proBono ? 'Not applicable (no fee)' : `Interac e-Transfer to ${settings.pay_email || 'payments@gracefulimmigration.ca'} before the consultation, or by phone` };
   }
   const d = { ...base,
     file_number: caseRow?.case_number || '', program: caseRow?.application_type ? `${caseRow.application_type}` : '',
@@ -60,7 +61,7 @@ export function defaults(type, { contact = {}, settings = {}, caseRow = null, pk
     retainer: 0, retainer_replenish: 'The retainer will not be replenished unless agreed in writing.',
     disbursements: 'Courier and postage: at cost (estimated $0–$50)\nCertified translations: at cost, quoted before ordering\nDocument notarization: at cost',
     payment_days: 14, interest: 0, admin_fee: 0, cooling_off: true, dispute_days: 30, successor: '',
-    payment_methods: 'Interac e-Transfer to the business email, cheque, or cash with receipt' };
+    payment_methods: `Interac e-Transfer to ${settings.pay_email || 'payments@gracefulimmigration.ca'} (invoices), cheque, or cash with receipt` };
   if (pkg) {
     d.program = pkg.program || d.program;
     if (pkg.scope) d.scope = pkg.scope;
@@ -317,7 +318,7 @@ function retainer(d) {
 
   ${H(7, free ? 'Professional fees (pro bono)' : 'Professional fees and billing method')}${fees}
   ${free ? '' : `<p>All amounts are in <b>Canadian dollars (CAD)</b>. Applicable taxes: ${rate ? `GST at ${e(rate)}% (${e(d.province)})${d.gst_number ? `, registration no. ${e(d.gst_number)}` : ''}` : '<b>Not applicable</b>'}. Contingency billing (payment only on a successful decision) is not used. All fees are fair and reasonable.</p>
-  <p><b>Retainer held in trust:</b> ${Number(d.retainer) > 0 ? `The Client will deposit ${money(d.retainer)} in advance. These funds will be held in the RCIC's client (trust) account until earned, withdrawn only after an invoice is issued, and maintained in accordance with the College's Client Account Regulation. ${e(d.retainer_replenish)}` : 'No funds will be held in trust; no advance payment is required.'}</p>
+  <p><b>Retainer held in trust:</b> ${Number(d.retainer) > 0 ? `The Client will deposit ${money(d.retainer)} in advance. These funds will be held in the RCIC's client (trust) account until earned, withdrawn only after an invoice is issued, and maintained in accordance with the College's Client Account Regulation. The Client sends this deposit by Interac e-Transfer to <b>${e(d.trust_email || 'clientfunds@gracefulimmigration.ca')}</b>, which deposits directly into the client (trust) account. ${e(d.retainer_replenish)}` : 'No funds will be held in trust; no advance payment is required.'}</p>
   <p><b>Invoices:</b> each invoice will state the Client's name, the services rendered, the dates they were rendered and the total professional fees payable for them.</p>`}
 
   ${H(8, 'Disbursements and government fees')}
@@ -568,7 +569,7 @@ function consentShare(d) {
 }
 
 export function extraDefaults(type, base, { caseRow = null, parent = null, pkg = null } = {}) {
-  const common = { program: caseRow?.application_type || pkg?.program || '', payment_days: 14, payment_methods: 'Interac e-Transfer to the business email, or by phone', dispute_days: 30,
+  const common = { program: caseRow?.application_type || pkg?.program || '', payment_days: 14, payment_methods: `Interac e-Transfer to ${base.pay_email || 'payments@gracefulimmigration.ca'}, or by phone`, dispute_days: 30,
     milestones: [], excluded: '', agreement_ref: parent?.number || '' };
   if (type === 'limited_scope') return { ...base, ...common, milestones: [{ name: 'Application status check and report', included: 'Check the status with IRCC and report in writing', fee: 0 }],
     end_trigger: 'when the named services are completed', end_date: '', forward_days: 2, needs_5476: true,

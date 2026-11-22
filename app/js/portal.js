@@ -137,7 +137,8 @@ export async function renderPortal(app) {
     el.innerHTML = `<div class="cp-card"><h2>${icon('dollar')} Your invoices</h2>
       ${data.invoices.length ? data.invoices.map((i) => `<div class="cp-row"><span class="cp-ico">${icon('dollar')}</span><span class="cp-rt"><b>Invoice ${esc(i.number)}</b><small>${fmtDate(i.issue_date)} · total ${money(i.total)}${+i.balance > 0 ? ` · due ${fmtDate(i.due_date)}` : ''}</small></span>
         ${+i.balance > 0 ? `<span class="cp-chip wait">${money(i.balance)} to pay</span>` : '<span class="cp-chip ok">Paid</span>'}<button class="cp-btn sm" data-inv="${i.id}">View</button></div>`).join('') : '<p class="cp-muted">No invoices yet.</p>'}</div>
-      <div class="cp-card cp-pay"><h2>${icon('check')} How to pay</h2><p><b>Interac e-Transfer</b> to <b>${esc(f.email || 'info@gracefulimmigration.ca')}</b>. Please put the invoice number in the message.</p>
+      <div class="cp-card cp-pay"><h2>${icon('check')} How to pay</h2><p><b>Invoices:</b> Interac e-Transfer to <b>${esc(f.pay_email || 'payments@gracefulimmigration.ca')}</b>. Please put the invoice number in the message.</p>
+        <p><b>Retainer or advance payment</b> (money held in trust before work is done): Interac e-Transfer to <b>${esc(f.trust_email || 'clientfunds@gracefulimmigration.ca')}</b>.</p>
         <p class="cp-muted">Prefer another way? Call us at ${esc(f.phone || '')}. Payments usually show here within one business day.</p></div>`;
     el.onclick = (e) => { const b = e.target.closest('[data-inv]'); if (b) openInvoice(b.dataset.inv).catch(fail); };
   }
@@ -151,7 +152,7 @@ export async function renderPortal(app) {
       <tfoot><tr><td colspan="3" class="r">Subtotal</td><td class="r">${money(i.subtotal)}</td></tr><tr><td colspan="3" class="r">GST</td><td class="r">${money(i.tax_total)}</td></tr>
         <tr><td colspan="3" class="r"><b>Total</b></td><td class="r"><b>${money(i.total)}</b></td></tr><tr><td colspan="3" class="r">Paid</td><td class="r">${money(i.amount_paid)}</td></tr>
         <tr class="due"><td colspan="3" class="r"><b>Balance due</b></td><td class="r"><b>${money(i.balance)}</b></td></tr></tfoot></table>
-      ${i.notes ? `<p>${esc(i.notes)}</p>` : ''}<p class="inv-terms">${esc(i.terms || '')}<br>Pay by Interac e-Transfer to ${esc(f.email || '')} with the invoice number in the message.</p></div>`;
+      ${i.notes ? `<p>${esc(i.notes)}</p>` : ''}<p class="inv-terms">${esc(i.terms || '')}<br>Pay by Interac e-Transfer to ${esc(f.pay_email || 'payments@gracefulimmigration.ca')} with the invoice number in the message.</p></div>`;
     const m = modal({ title: `Invoice ${i.number}`, wide: true, body: `<div class="cp-invwrap">${html}</div>`,
       actions: [{ label: 'Close' }, { label: 'Print or save PDF', cls: 'btn-primary', onClick: () => { printHtml(`<style>${INV_CSS}</style>${html}`, `Invoice ${i.number}`); return false; } }] });
     m.el.querySelector('.cp-invwrap').insertAdjacentHTML('afterbegin', `<style>${INV_CSS}</style>`);

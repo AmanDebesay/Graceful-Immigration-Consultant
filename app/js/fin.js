@@ -318,7 +318,7 @@ export async function trustTxn(type = 'deposit', contactId) {
   modal({
     title: type === 'deposit' ? 'Receive retainer into trust' : 'Refund client from trust',
     body: `<div class="alert info">${type === 'deposit'
-      ? 'Money paid in advance for work not yet done is client money. It goes into the trust account and stays there until you invoice earned fees.'
+      ? 'Money paid in advance for work not yet done is client money. It goes into the trust account and stays there until you invoice earned fees. Clients send it by Interac e-Transfer to clientfunds@gracefulimmigration.ca, which deposits straight into the TD client account.'
       : 'Return unearned client money from the trust account.'}</div>
       <div class="field"><label>Client</label><select class="input" id="c">${contactOptions(contacts, contactId)}</select></div>
       <div class="row-2"><div class="field"><label>Date</label><input class="input" type="date" id="d" value="${today()}"></div>
