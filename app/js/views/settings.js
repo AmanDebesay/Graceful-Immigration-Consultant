@@ -79,13 +79,29 @@ async function integrations(el) {
 async function business(el) {
   const { data: s, error } = await db.from('org_settings').select('*').eq('id', 1).single();
   if (error) { el.innerHTML = `<div class="alert err">${esc(error.message)}</div>`; return; }
-  el.innerHTML = `<div class="card" style="max-width:760px"><div class="card-h"><h3>Business details</h3>
-      <small style="color:var(--muted)">Used on agreements, invoices and emails</small></div>
-    <form class="card-b" id="f">${FIELDS.map(([k, l]) => `<div class="field"><label for="${k}">${l}</label>
-      <input class="input" id="${k}" value="${esc(s[k] ?? '')}" ${k === 'gst_rate' ? 'type="number" step="0.01" min="0" max="20"' : ''}></div>`).join('')}
-      <label class="row" style="gap:8px;margin:4px 0 14px;cursor:pointer"><input type="checkbox" id="cao" ${s.client_account_open ? 'checked' : ''}>
-        <span><b>Client Account is open</b><br><small style="color:var(--muted)">The College-required account for client funds. Until it is ticked, pathway assessments warn against taking retainers or advance payments.</small></span></label>
-      <div class="row" style="justify-content:flex-end"><button class="btn btn-primary" type="submit">Save changes</button></div></form></div>`;
+  const FI = { business_name: 'briefcase', rcic_name: 'user', licence_number: 'idcard', phone: 'phone', email: 'mail', address: 'pin', gst_number: 'hash', gst_rate: 'coins', notify_email: 'bell' };
+  el.innerHTML = `<div class="bs-grid">
+    <div class="card"><div class="card-h"><h3>${icon('briefcase')} Business details</h3><small style="color:var(--muted)">Used on agreements, invoices and emails</small></div>
+      <form class="card-b" id="f"><div class="bs-fields">${FIELDS.map(([k, l]) => `<div class="field ${k === 'address' ? 'bs-wide' : ''}"><label for="${k}">${icon(FI[k] || 'note')} ${l}</label>
+        <input class="input" id="${k}" value="${esc(s[k] ?? '')}" ${k === 'gst_rate' ? 'type="number" step="0.01" min="0" max="20"' : ''}></div>`).join('')}</div>
+        <label class="bs-toggle"><input type="checkbox" id="cao" ${s.client_account_open ? 'checked' : ''}><span class="bs-sw"></span>
+          <span><b>Client Account is open</b><small>The College-required account for client funds. Until it is ticked, pathway assessments warn against taking retainers or advance payments.</small></span></label>
+        <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn btn-primary" type="submit">${icon('check')} Save changes</button></div></form></div>
+    <div class="bs-side">
+      <div class="card"><div class="card-h"><h3>${icon('file')} Your letterhead</h3><small style="color:var(--muted)">Live preview</small></div>
+        <div class="card-b"><div class="bs-lh" id="lh"></div><small class="dk-muted">This is how your details appear at the top of agreements, letters, invoices and receipts.</small></div></div>
+      <div class="card"><div class="card-h"><h3>${icon('shield')} Compliance check</h3></div><div class="card-b" id="cc"></div></div>
+    </div></div>`;
+  const val = (k) => el.querySelector('#' + k)?.value.trim() || '';
+  const drawLh = () => {
+    el.querySelector('#lh').innerHTML = `<div class="bs-lh-top"><img src="../public/img/logo-emblem.png" alt=""><div><b>${esc(val('business_name') || 'Business name')}</b>
+      <span>Guide · Support · Belong</span><small>${esc(val('rcic_name'))}, RCIC-IRB · College ID ${esc(val('licence_number'))}</small></div></div>
+      <div class="bs-lh-contact">${icon('pin')} ${esc(val('address') || '—')}<br>${icon('phone')} ${esc(val('phone') || '—')} &nbsp; ${icon('mail')} ${esc(val('email') || '—')}${val('gst_number') ? `<br>${icon('hash')} GST/HST ${esc(val('gst_number'))}` : ''}</div>`;
+    const checks = [[/^R\d{6,7}$/i.test(val('licence_number')), 'College ID looks right (R + 6 or 7 digits)'], [/\d/.test(val('address')) , 'Full street address (the College requires it on agreements)'],
+      [!!val('phone') && !!val('email'), 'Phone and email filled in'], [!!val('gst_number'), 'GST/HST number (only if you are registered)'], [el.querySelector('#cao').checked, 'Client (trust) account recorded as open']];
+    el.querySelector('#cc').innerHTML = checks.map(([ok, t]) => `<div class="bs-chk ${ok ? 'ok' : ''}">${icon(ok ? 'check' : 'alert')}<span>${t}</span></div>`).join('');
+  };
+  el.querySelector('#f').addEventListener('input', drawLh); el.querySelector('#f').addEventListener('change', drawLh); drawLh();
   el.querySelector('#f').onsubmit = async (e) => {
     e.preventDefault();
     const patch = Object.fromEntries(FIELDS.map(([k]) => [k, el.querySelector('#' + k).value.trim() || null]));

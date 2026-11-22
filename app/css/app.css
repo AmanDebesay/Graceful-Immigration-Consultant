@@ -1246,3 +1246,38 @@ table.t{width:100%;border-collapse:collapse}
 .au-chip i{font-style:normal;color:#8A6A23;font-weight:600}
 @media (max-width:1000px){.au-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .cell-name .avatar,.main.themed .content .cell-name .avatar{color:#fff;font-size:12px;font-weight:700}
+
+/* ── Forms, headings and empty states on every page ── */
+.main.themed .content .field>label{display:flex;align-items:center;gap:7px}
+.main.themed .content .field>label>svg{width:16px;height:16px;color:#B8861F;flex:none}
+.main.themed .content .card-h h3>svg,.main.themed .content .card-h h2>svg{width:22px;height:22px;padding:4px;box-sizing:content-box;border-radius:9px;background:linear-gradient(180deg,#123B7A,#0B2A5C);color:#F2C462}
+/* Long forms use two columns; notes and anything that isn't a single field span both */
+.main.themed .content .card-b:has(> .field ~ .field ~ .field ~ .field){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px}
+.main.themed .content .card-b:has(> .field ~ .field ~ .field ~ .field)>:not(.field),.main.themed .content .card-b>.field:has(textarea){grid-column:1 / -1}
+@media (max-width:800px){.main.themed .content .card-b:has(> .field ~ .field ~ .field ~ .field){grid-template-columns:1fr}}
+.main.themed .content .input{min-height:44px}
+/* Empty states: a proper illustrated panel with the next action */
+.main.themed .content .empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 24px;font-size:15.5px;color:#3B3216}
+.main.themed .content .empty>svg{width:44px;height:44px;padding:20px;box-sizing:content-box;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2A64C0,#0B2A5C);color:#F2C462;box-shadow:0 0 0 5px #F3DFA6,0 12px 24px rgba(11,42,92,.3);margin-bottom:6px}
+.main.themed .content .empty>div{font-weight:600}
+.main.themed .content .empty-cta{margin-top:6px}
+/* Business Settings */
+.bs-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:18px;align-items:start}
+.bs-side{display:grid;gap:18px}
+.bs-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}.bs-fields .bs-wide{grid-column:1 / -1}
+.bs-toggle{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px solid #E7D7AE;border-radius:14px;background:linear-gradient(180deg,#FFFCF4,#FBF1D9);cursor:pointer;margin-top:6px}
+.bs-toggle input{position:absolute;opacity:0;width:0;height:0}
+.bs-sw{flex:none;width:46px;height:26px;border-radius:999px;background:#CBD2DD;position:relative;transition:background .2s;margin-top:2px}
+.bs-sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:left .2s}
+.bs-toggle input:checked+.bs-sw{background:linear-gradient(90deg,#1F56AE,#0B2A5C)}.bs-toggle input:checked+.bs-sw::after{left:23px}
+.bs-toggle b{display:block;color:#0B2A5C}.bs-toggle small{display:block;color:#5B4A1E;font-size:12.5px;margin-top:2px}
+.bs-lh{border-radius:14px;border:1px solid #E7D7AE;background:#fff;padding:16px;margin-bottom:10px;box-shadow:inset 0 -4px 0 #E2AE45}
+.bs-lh-top{display:flex;gap:12px;align-items:center;padding-bottom:10px;border-bottom:3px double #C9A24A}
+.bs-lh-top img{width:52px;height:auto}.bs-lh-top b{display:block;font-family:Georgia,serif;font-size:17px;color:#0B2A5C;letter-spacing:.04em}
+.bs-lh-top span{display:block;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:#9A7420}.bs-lh-top small{display:block;font-size:11.5px;color:#5B6476}
+.bs-lh-contact{font-size:12.5px;color:#3B4456;line-height:1.9;padding-top:8px}.bs-lh-contact svg{width:13px;height:13px;color:#B8861F;vertical-align:-2px}
+.bs-chk{display:flex;gap:9px;align-items:center;padding:8px 0;border-bottom:1px dashed #EADFC6;font-size:13.5px;color:#7A4B07}.bs-chk:last-child{border-bottom:0}
+.bs-chk svg{width:18px;height:18px;padding:3px;border-radius:50%;background:#FBF0D3;color:#B8861F;flex:none}
+.bs-chk.ok{color:#05603A}.bs-chk.ok svg{background:#E3F5EC;color:#067647}
+@media (max-width:1100px){.bs-grid{grid-template-columns:1fr}}
+.main.themed .content .empty .btn svg{width:18px;height:18px;padding:0;margin:0;background:none;box-shadow:none;color:currentColor;border-radius:0}

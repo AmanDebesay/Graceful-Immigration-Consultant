@@ -428,6 +428,38 @@ const TH_ICON = [
   [/\b(record|document|agreement|letter|form|checklist)\b/i, 'file'], [/\b(detail|details|note|notes|description|memo|subject|summary)\b/i, 'note'],
   [/\b(type|category|program|service|kind|account|method)\b/i, 'layers'], [/\b(country|citizenship|location)\b/i, 'globe'],
 ];
+const LABEL_ICON = [
+  [/e-?mail/i, 'mail'], [/phone|mobile|telephone/i, 'phone'], [/address|city|province|postal|country|location/i, 'pin'], [/date|day|deadline|due|expires|valid until|start|end/i, 'calendar'],
+  [/licen[cs]e|college id|uci|passport|number|no\.|reference|id\b/i, 'idcard'], [/gst|tax|fee|price|amount|rate|cost|cad|\$|balance|deposit|retainer|discount/i, 'coins'],
+  [/name|client|person|staff|owner|assign|payer|sponsor|reviewer|who/i, 'user'], [/note|summary|description|details|reason|message|memo|comment|instructions/i, 'note'],
+  [/status|stage|type|category|program|kind|role|method|model/i, 'layers'], [/language|website|url|link|web/i, 'globe'], [/alert|notify|remind/i, 'bell'],
+  [/password|secret|key|access|permission/i, 'lock'], [/file|document|upload|attach|pdf/i, 'file'], [/time|hour|minute|length/i, 'clock'], [/priority/i, 'award'],
+];
+const HEAD_ICON = [[/deadline|calendar|appointment|schedule/i, 'calendar'], [/money|invoice|fee|price|payment|balance|trust|account|bank|ledger|tax|gst|expense|bill|quote/i, 'coins'],
+  [/client|contact|people|team|staff|member/i, 'users'], [/agreement|letter|sign/i, 'pen'], [/document|file|form/i, 'file'], [/task|checklist|review/i, 'checksq'],
+  [/email|mail|message|chat/i, 'mail'], [/setting|integration|business|detail/i, 'settings'], [/security|access|privacy|compliance|rule/i, 'shield'], [/report|chart|summary|overview/i, 'bars'],
+  [/case|application|ircc/i, 'briefcase'], [/ai|assistant/i, 'sparkle']];
+function decorateAll(root) {
+  decorateTables(root);
+  root.querySelectorAll('.field > label').forEach((l) => {
+    if (l.dataset.dec || l.querySelector('svg,input,select')) return;
+    l.dataset.dec = '1';
+    const m = LABEL_ICON.find(([re]) => re.test(l.textContent)); if (m) l.insertAdjacentHTML('afterbegin', icon(m[1]));
+  });
+  root.querySelectorAll('.card-h > h3, .card-h > h2').forEach((h) => {
+    if (h.dataset.dec || h.querySelector('svg')) return;
+    h.dataset.dec = '1';
+    const m = HEAD_ICON.find(([re]) => re.test(h.textContent)); h.insertAdjacentHTML('afterbegin', icon(m ? m[1] : 'layers'));
+  });
+  // Empty lists offer the page's main action right there.
+  const main = root.querySelector(':scope > div > .toolbar .btn-primary, :scope > div > .toolbar .btn-gold, :scope > .toolbar .btn-primary, :scope > .toolbar .btn-gold');
+  root.querySelectorAll('.empty').forEach((e) => {
+    if (e.dataset.dec) return; e.dataset.dec = '1';
+    if (main && !e.querySelector('.btn') && e.closest('.card') && !e.closest('#tabBody, .modal')) {
+      const b = document.createElement('button'); b.className = 'btn btn-gold empty-cta'; b.innerHTML = main.innerHTML; b.onclick = () => main.click(); e.appendChild(b);
+    }
+  });
+}
 function decorateTables(root) {
   root.querySelectorAll('table.t thead th').forEach((th) => {
     if (th.dataset.dec || th.children.length) return;
@@ -438,5 +470,5 @@ function decorateTables(root) {
   });
 }
 { let pending = false;
-  new MutationObserver(() => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; const v = document.getElementById('view'); if (v) decorateTables(v); }); })
+  new MutationObserver(() => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; const v = document.getElementById('view'); if (v) decorateAll(v); }); })
     .observe(document.documentElement, { childList: true, subtree: true }); }
