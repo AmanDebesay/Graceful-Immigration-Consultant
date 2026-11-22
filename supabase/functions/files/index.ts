@@ -8,6 +8,7 @@
 //   replace_session / replace_done → upload a new version of a file (OneDrive keeps the old one in version history)
 //   delete          → move to the OneDrive recycle bin and remove from the list
 //   save_agreement  → save a signed agreement's signed copy to "01 Agreements"
+//   save_ircc_form  → copy IRCC's current official PDF of a form into the client's "03 Forms & submissions"
 import { adminClient, callerProfile, corsHeaders, hasPerm, json } from "../_shared/common.ts";
 import { graphConfigured } from "../_shared/m365.ts";
 import { cleanName, clientFolder, deleteItem, driveConfig, getItem, replaceSession, rootFolder, saveAgreementToDrive, SUBFOLDER, updateItem, uploadSession } from "../_shared/drive.ts";
@@ -73,6 +74,33 @@ Deno.serve(async (req) => {
         const f = await clientFolder(admin, contactId, category);
         const s = await uploadSession(f.user, f.folderId, name);
         return json(req, { upload_url: s.uploadUrl });
+      }
+      case "save_ircc_form": {
+        if (!(await canUpload())) return json(req, { error: "You don't have permission to save client documents." }, 403);
+        const contactId = String(body.contact_id ?? "");
+        const l = await links(contactId);
+        const { data: form } = await admin.from("ircc_forms").select("code, title, edition, pdf_url").eq("code", String(body.code ?? "")).maybeSingle();
+        if (!form?.pdf_url) return json(req, { error: "This form has no PDF on file yet. Run “Check for updates now” on IRCC Forms." }, 400);
+        const src = new URL(form.pdf_url);
+        if (src.protocol !== "https:" || src.hostname !== "www.canada.ca") return json(req, { error: "Only official canada.ca forms can be saved." }, 400);
+        const r = await fetch(src, { headers: { "User-Agent": "Mozilla/5.0 (Practice Hub)" }, signal: AbortSignal.timeout(30000) });
+        const bytes = new Uint8Array(await r.arrayBuffer());
+        if (!r.ok || bytes.length < 1000 || String.fromCharCode(...bytes.slice(0, 5)) !== "%PDF-") return json(req, { error: "IRCC didn't return the PDF. Try again, or download it from the form page." }, 502);
+        if (bytes.length > 60 * 1024 * 1024) return json(req, { error: "The form is too large to copy." }, 400);
+        const code = form.code.replace(/^(IMM|CIT)(\d)/, "$1 $2");
+        const name = cleanName(`${code} - ${form.title}${form.edition ? ` (edition ${form.edition})` : ""}`) + ".pdf";
+        const f = await clientFolder(admin, contactId, "forms");
+        const sess = await uploadSession(f.user, f.folderId, name);
+        const up = await fetch(sess.uploadUrl, { method: "PUT", headers: { "Content-Length": String(bytes.length), "Content-Range": `bytes 0-${bytes.length - 1}/${bytes.length}` }, body: bytes });
+        const item = await up.json().catch(() => null);
+        if (!up.ok || !item?.id) return json(req, { error: "OneDrive didn't accept the file. Try again." }, 502);
+        const { data, error } = await admin.from("client_documents").insert({
+          contact_id: contactId, ...l, category: "forms", doc_type: `IRCC form ${code}${form.edition ? ` (${form.edition})` : ""}`, name: item.name, drive_item_id: item.id,
+          web_url: item.webUrl, size: item.size, mime: "application/pdf", uploaded_by: caller.id,
+        }).select().single();
+        if (error) throw error;
+        await admin.from("audit_log").insert({ actor_id: caller.id, action: "ircc_form_saved", entity: "contact", entity_id: contactId, details: { code: form.code, edition: form.edition } });
+        return json(req, data);
       }
       case "register": {
         if (!(await canUpload())) return json(req, { error: "You don't have permission to upload client documents." }, 403);

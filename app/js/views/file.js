@@ -298,7 +298,9 @@ export async function formsPanel(body, c) {
           <td style="width:44px">${v ? `<button class="btn btn-ghost btn-sm" data-copy="${esc(v)}" title="Copy">⧉</button>` : ''}</td></tr>`).join('')}</tbody></table>`).join('')}</div></div>`;
 
   Promise.all([import('./forms.js'), db.from('ircc_forms').select('*').in('code', ['IMM5476', 'IMM5744', 'IMM0008', 'IMM5669']).order('sort')]).then(([F, { data: fl }]) => {
-    const box = body.querySelector('#curForms'); if (box) box.innerHTML = (fl || []).map((x) => F.formCard(x, true)).join('') || '<small class="dk-muted">Forms library not loaded yet.</small>';
+    const box = body.querySelector('#curForms'); if (!box) return;
+    box.innerHTML = (fl || []).map((x) => F.formCard(x, true)).join('') || '<small class="dk-muted">Forms library not loaded yet.</small>';
+    F.wireSave(box, c.id);
   }).catch(() => {});
   body.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast('Copied'); } catch { toast('Copy failed — select the text instead', true); } }));
   body.querySelector('#pk').onclick = () => signingPacket(c.id).catch(fail);
