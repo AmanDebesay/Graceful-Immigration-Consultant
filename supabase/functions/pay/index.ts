@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
         "payment_intent_data[metadata][invoice_id]": inv.id,
         "payment_intent_data[metadata][invoice_number]": inv.number,
         "payment_intent_data[description]": `Invoice ${inv.number}`,
-        "payment_method_types[0]": "card",
+        "allowed_payment_method_types[0]": "card",
         success_url: `${back}&session={CHECKOUT_SESSION_ID}`,
         cancel_url: `${back}&cancelled=1`,
         expires_at: String(Math.floor(Date.now() / 1000) + 3600),

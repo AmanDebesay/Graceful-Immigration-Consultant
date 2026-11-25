@@ -292,7 +292,7 @@ Deno.serve(async (req) => {
         const label = new Date(start).toLocaleString("en-CA", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
         const back = `${SITE}/public/book.html`;
         const params: Record<string, string> = {
-          mode: "payment", customer_email: email, "payment_method_types[0]": "card",
+          mode: "payment", customer_email: email, "allowed_payment_method_types[0]": "card",
           "line_items[0][quantity]": "1", "line_items[0][price_data][currency]": "cad",
           "line_items[0][price_data][unit_amount]": String(net),
           "line_items[0][price_data][product_data][name]": service.name,
@@ -304,7 +304,12 @@ Deno.serve(async (req) => {
         };
         if (gst) Object.assign(params, { "line_items[1][quantity]": "1", "line_items[1][price_data][currency]": "cad", "line_items[1][price_data][unit_amount]": String(gst),
           "line_items[1][price_data][product_data][name]": `GST ${Number(org?.gst_rate ?? 5)}% (GST No. ${org?.gst_number})` });
-        const sess = await stripe("checkout/sessions", params);
+        let sess: any;
+        try { sess = await stripe("checkout/sessions", params); } catch (e) {
+          console.error("stripe checkout", (e as Error).message);
+          await admin.from("pending_bookings").delete().eq("id", pend.id);
+          return json(req, { error: `Card payment could not start: ${(e as Error).message}` }, 502);
+        }
         await admin.from("pending_bookings").update({ session_id: sess.id }).eq("id", pend.id);
         return json(req, { pay: sess.url });
       }
