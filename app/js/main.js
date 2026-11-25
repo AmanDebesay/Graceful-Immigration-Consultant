@@ -43,7 +43,7 @@ const NAV = [
   { path: '/reports', label: 'Reports', icon: 'trend', show: () => can('finance.view') },
   { path: '/coa', label: 'Chart of Accounts', icon: 'note', show: () => can('finance.view') },
   { path: '/journal', label: 'Journal', icon: 'history', show: () => can('finance.view') },
-  { path: '/items', label: 'Products & Services', icon: 'clipboard', show: () => can('finance.view') || can('crm.edit') },
+  { path: '/items', label: 'Products & Services', icon: 'clipboard', show: () => isStaff() },
   { group: 'Business' },
   { path: '/newsletter', label: 'Newsletter', icon: 'mail', show: () => can('newsletter.view') },
   { path: '/agreements', label: 'Agreements', icon: 'file', show: () => canDraftAgreements() || can('crm.view'), count: 'agr_review' },

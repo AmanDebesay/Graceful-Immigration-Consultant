@@ -1,6 +1,6 @@
 // Audit Log: every recorded change, in plain words. Entries cannot be edited or deleted.
 import { db, state, esc, icon, fmtDate, staffName, avatarHtml } from '../core.js';
-import { downloadCsv } from '../fin.js';
+import { downloadCsv, downloadXlsx } from '../fin.js';
 
 // action → [label, icon, tone, category]
 export const A = {
@@ -53,8 +53,9 @@ export async function render(el) {
     <div class="toolbar">
       <input class="input" id="q" placeholder="Search client, person, action or detail" style="max-width:340px">
       <select class="input" id="cat" style="max-width:250px"><option value="">All activity</option>${Object.entries(CATS).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
+      <select class="input" id="who" style="max-width:220px"><option value="">Everyone</option>${[...new Set(rows.map((r) => r.actor_id).filter(Boolean))].map((id) => [id, staffName(id)]).sort((a, b) => a[1].localeCompare(b[1])).map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')}<option value="system">Website / system</option></select>
       <select class="input" id="per" style="max-width:180px"><option value="">Any time</option><option value="1">Today</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select>
-      <div class="grow"></div><button class="btn" id="csv">${icon('file')} Export CSV</button></div>
+      <div class="grow"></div><button class="btn btn-gold" id="xl">${icon('file')} Download Excel</button><button class="btn" id="csv">${icon('file')} CSV</button></div>
     <div class="alert info">Every change to clients, documents, money, agreements and staff access is recorded here automatically. Entries can't be edited or deleted, so this is your record for the College.</div>
     <div class="card"><div class="table-wrap" id="list"></div></div>`;
 
@@ -74,9 +75,9 @@ export async function render(el) {
     .map(([k, v]) => { const val = UUID.test(String(v)) ? nameOf(v) : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v).replace(/_/g, ' '); return val ? `<span class="au-chip"><i>${esc(KEY[k] || human(k))}</i>${esc(val)}</span>` : ''; })
     .join('') || '<span style="color:#98A2B3">—</span>';
   const draw = () => {
-    const q = el.querySelector('#q').value.trim().toLowerCase(), cat = el.querySelector('#cat').value, per = Number(el.querySelector('#per').value || 0);
+    const q = el.querySelector('#q').value.trim().toLowerCase(), cat = el.querySelector('#cat').value, whoF = el.querySelector('#who').value, per = Number(el.querySelector('#per').value || 0);
     const since = per ? Date.now() - per * 864e5 : 0;
-    shown = rows.filter((r) => (!cat || meta(r)[3] === cat) && (!since || new Date(r.created_at).getTime() >= (per === 1 ? new Date(today + 'T00:00:00').getTime() : since))
+    shown = rows.filter((r) => (!cat || meta(r)[3] === cat) && (!whoF || (whoF === 'system' ? !r.actor_id : r.actor_id === whoF)) && (!since || new Date(r.created_at).getTime() >= (per === 1 ? new Date(today + 'T00:00:00').getTime() : since))
       && (!q || [meta(r)[0], staffName(r.actor_id), names[r.entity_id], r.entity, JSON.stringify(r.details || {})].join(' ').toLowerCase().includes(q)));
     el.querySelector('#list').innerHTML = shown.length ? `<table class="t"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Record</th><th>Details</th></tr></thead><tbody>
       ${shown.slice(0, 500).map((r) => { const [label, ic, tone] = meta(r); return `<tr>
@@ -86,7 +87,25 @@ export async function render(el) {
       : `<div class="empty">${icon('history')}<div>No activity matches.</div></div>`;
   };
   let t; el.querySelector('#q').oninput = () => { clearTimeout(t); t = setTimeout(draw, 200); };
-  el.querySelector('#cat').onchange = draw; el.querySelector('#per').onchange = draw;
+  el.querySelector('#cat').onchange = draw; el.querySelector('#per').onchange = draw; el.querySelector('#who').onchange = draw;
+  const flat = (d) => Object.entries(d || {}).filter(([k, v]) => v !== null && v !== '' && k !== 'contact_id' && typeof v !== 'object')
+    .map(([k, v]) => `${KEY[k] || human(k)}: ${UUID.test(String(v)) ? nameOf(v) || v : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v).replace(/_/g, ' ')}`).join('; ');
+  el.querySelector('#xl').onclick = async (e) => {
+    const b = e.currentTarget, old = b.innerHTML; b.disabled = true; b.innerHTML = 'Preparing…';
+    const whoF = el.querySelector('#who').value, person = whoF && whoF !== 'system' ? staffName(whoF) : whoF ? 'website' : 'everyone';
+    const t = (x) => new Date(x).toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+    const byPerson = {};
+    shown.forEach((r) => { const k = r.actor_id ? staffName(r.actor_id) : 'Website / system'; byPerson[k] = (byPerson[k] || 0) + 1; });
+    try {
+      await downloadXlsx(`audit-log-${person.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${today}.xlsx`, [
+        ['Activity', [['Date', 'Time', 'Who', 'Action', 'Area', 'Record', 'Client / name', 'Details'],
+          ...shown.map((r) => [dayOf(r.created_at), t(r.created_at), r.actor_id ? staffName(r.actor_id) : 'Website / system', meta(r)[0], CATS[meta(r)[3]] || '',
+            (ENTITY[r.entity] || [human(r.entity)])[0], names[r.entity_id] || nameOf(r.details?.contact_id) || '', flat(r.details)])], [12, 10, 22, 30, 26, 20, 26, 60]],
+        ['By person', [['Person', 'Actions'], ...Object.entries(byPerson).sort((a, b) => b[1] - a[1])], [28, 10]],
+      ]);
+    } catch (err) { (await import('../core.js')).fail(err); }
+    b.disabled = false; b.innerHTML = old;
+  };
   el.querySelector('#csv').onclick = () => downloadCsv(`audit-log-${today}.csv`, [['When', 'Who', 'Action', 'Record', 'Record name', 'Details'],
     ...shown.map((r) => [r.created_at, r.actor_id ? staffName(r.actor_id) : 'Website / system', meta(r)[0], (ENTITY[r.entity] || [human(r.entity)])[0], names[r.entity_id] || '', JSON.stringify(r.details || {})])]);
   draw();

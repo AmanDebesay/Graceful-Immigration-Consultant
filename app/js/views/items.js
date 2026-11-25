@@ -4,7 +4,7 @@ import { money, accounts, acctOptions, clearFinCache } from '../fin.js';
 export async function render(el) {
   const [{ data }, accs] = await Promise.all([db.from('items').select('*, accounts(name)').order('name'), accounts()]);
   const edit = can('finance.manage') || can('crm.edit');
-  el.innerHTML = `<div class="toolbar"><span style="color:var(--muted)">Your price list. Used on deals and invoice lines.</span><div class="grow"></div>
+  el.innerHTML = `<div class="toolbar"><input class="input" id="q" placeholder="Search services (e.g. study, spousal, refugee)" style="max-width:320px"><span style="color:var(--muted)">Professional fees before GST. Government fees are separate.</span><div class="grow"></div>
     ${edit ? `<button class="btn btn-primary" id="new">${icon('plus')} New product/service</button>` : ''}</div>
     <div class="card"><div class="table-wrap">${data.length ? `<table class="t"><thead><tr><th>Name</th><th>Description</th><th>Income account</th><th>GST</th><th style="text-align:right">Price</th><th></th></tr></thead><tbody>
       ${data.map((i) => `<tr style="${i.active ? '' : 'opacity:.5'}"><td><b>${esc(i.name)}</b></td><td>${esc(i.description || '')}</td><td>${esc(i.accounts?.name || '—')}</td>
@@ -27,6 +27,8 @@ export async function render(el) {
       if (error) throw error; clearFinCache(); toast('Saved'); render(el);
     } }],
   });
+  el.querySelector('#q').oninput = (e) => { const q = e.target.value.trim().toLowerCase();
+    el.querySelectorAll('tbody tr').forEach((tr) => { tr.hidden = !!q && !tr.textContent.toLowerCase().includes(q); }); };
   el.querySelector('#new')?.addEventListener('click', () => open());
   el.querySelectorAll('[data-e]').forEach((b) => (b.onclick = () => open(data.find((x) => x.id === b.dataset.e))));
 }

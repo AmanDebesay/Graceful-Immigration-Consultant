@@ -57,6 +57,25 @@ export function downloadCsv(name, rows) {
   a.download = name; a.click();
 }
 
+/** Downloads an Excel workbook. sheets = [[sheetName, rows (first row = headings), column widths?], ...] */
+let xlsxP = null;
+export async function downloadXlsx(name, sheets) {
+  const X = await (xlsxP = xlsxP || new Promise((res, rej) => {
+    if (window.XLSX) return res(window.XLSX);
+    const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = () => (window.XLSX ? res(window.XLSX) : rej(new Error('The Excel maker did not load.')));
+    s.onerror = () => { xlsxP = null; rej(new Error('Could not load the Excel maker. Check your connection and try again.')); };
+    document.head.appendChild(s);
+  }));
+  const wb = X.utils.book_new();
+  for (const [title, rows, widths] of sheets) {
+    const ws = X.utils.aoa_to_sheet(rows);
+    ws['!cols'] = (widths || rows[0]?.map(() => 18) || []).map((w) => ({ wch: w }));
+    X.utils.book_append_sheet(wb, ws, String(title).slice(0, 31));
+  }
+  X.writeFile(wb, name);
+}
+
 /** Asks for a date range, then downloads the rows returned by run(fromIso, toIso) as a CSV that opens in Excel. */
 export function exportRange({ title, file, note = '', run }) {
   const y = new Date().getFullYear(), pad = (n) => String(n).padStart(2, '0'), d = new Date();
