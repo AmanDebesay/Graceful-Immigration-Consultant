@@ -217,6 +217,8 @@ function buildShell() {
   setupBell();
   setupChatAlerts();
   refreshCounts();
+  // Catch online card payments (invoices and paid bookings) whose page was closed before they were confirmed.
+  if (can('finance.view')) import('./core.js').then((c) => c.callFn('pay', { action: 'sync' })).then((r) => { if (r?.recorded) toast(`${r.recorded} online card payment${r.recorded > 1 ? 's' : ''} recorded`); }).catch(() => {});
 }
 
 // New team-chat messages: update the unread count and show a toast when not on the chat page.

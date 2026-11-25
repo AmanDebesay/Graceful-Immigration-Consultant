@@ -51,7 +51,19 @@ Deno.serve(async (req) => {
       const list = await stripe(`checkout/sessions?limit=100&created[gte]=${since}`);
       let n = 0;
       for (const s of list.data || []) {
-        if (s.payment_status !== "paid" || !s.metadata?.invoice_id) continue;
+        if (s.payment_status !== "paid") continue;
+        // Paid consultation whose page was closed before it confirmed: let the booking function book it (it checks with Stripe and books only once).
+        if (s.metadata?.kind === "booking") {
+          const { data: pb } = await admin.from("pending_bookings").select("booked_at").eq("id", s.metadata.pending_id).maybeSingle();
+          if (pb && !pb.booked_at) {
+            const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/booking`, { method: "POST",
+              headers: { "Content-Type": "application/json", apikey: Deno.env.get("SUPABASE_ANON_KEY") ?? "", Origin: SITE },
+              body: JSON.stringify({ action: "confirm", session: s.id }) }).then((x) => x.json()).catch(() => null);
+            if (r?.paid) n++;
+          }
+          continue;
+        }
+        if (!s.metadata?.invoice_id) continue;
         const { data: done } = await admin.from("stripe_payments").select("session_id").eq("session_id", s.id).maybeSingle();
         if (!done && (await record(s))) n++;
       }
