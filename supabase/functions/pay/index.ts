@@ -1,6 +1,6 @@
 // Online card payments for invoices through Stripe Checkout. The card is typed on Stripe's own page;
 // card numbers never reach this site. Payments are confirmed by asking Stripe directly (no webhook secret needed).
-// Public (pay link):  info {i,k} · checkout {i,k} · confirm {i,k,session}
+// Public (pay link):  info {i,k} · checkout {i,k} · confirm {i,k,session} · find {number,email} -> {i,k} ("Pay an invoice" page)
 // Staff (signed in):  sync — records any paid Stripe sessions from the last 7 days that were not recorded yet.
 import { adminClient, callerProfile, corsHeaders, hasPerm, json, rateLimit } from "../_shared/common.ts";
 
@@ -54,8 +54,8 @@ Deno.serve(async (req) => {
         if (s.payment_status !== "paid") continue;
         // Paid consultation whose page was closed before it confirmed: let the booking function book it (it checks with Stripe and books only once).
         if (s.metadata?.kind === "booking") {
-          const { data: pb } = await admin.from("pending_bookings").select("booked_at").eq("id", s.metadata.pending_id).maybeSingle();
-          if (pb && !pb.booked_at) {
+          const { data: pb } = await admin.from("pending_bookings").select("paid_at, status").eq("id", s.metadata.pending_id).maybeSingle();
+          if (pb && !pb.paid_at && ["awaiting_payment", "cancelled_unpaid"].includes(pb.status)) {
             const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/booking`, { method: "POST",
               headers: { "Content-Type": "application/json", apikey: Deno.env.get("SUPABASE_ANON_KEY") ?? "", Origin: SITE },
               body: JSON.stringify({ action: "confirm", session: s.id }) }).then((x) => x.json()).catch(() => null);
@@ -73,6 +73,20 @@ Deno.serve(async (req) => {
     // Pay-link actions: the invoice id and its secret token must match.
     const rl = await rateLimit(req, admin, "pay", 40, 10);
     if (!rl.allowed) return json(req, { error: "Too many attempts. Please wait a few minutes." }, 429);
+
+    // "Pay an invoice" on the website: invoice number + the email on file -> that invoice's pay link.
+    if (body.action === "find") {
+      const number = String(body.number ?? "").trim().replace(/^#/, "").slice(0, 40), email = String(body.email ?? "").trim().toLowerCase().slice(0, 200);
+      const notFound = json(req, { error: "We couldn't find an unpaid invoice with that number and email. Please check both, or call (403) 915-4230." }, 404);
+      if (!number || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return notFound;
+      const { data: list } = await admin.from("invoices").select("id, number, status, pay_token, contacts(email)").ilike("number", number.replace(/[%_\\]/g, "")).limit(5);
+      const hit = (list ?? []).find((x: any) => String(x.contacts?.email ?? "").toLowerCase() === email);
+      if (!hit) return notFound;
+      if (hit.status === "paid") return json(req, { error: `Invoice ${hit.number} is already paid. Thank you!` }, 400);
+      if (!["open", "partial"].includes(hit.status)) return notFound;
+      return json(req, { i: hit.id, k: hit.pay_token });
+    }
+
     const i = String(body.i ?? ""), k = String(body.k ?? "");
     if (!/^[0-9a-f-]{36}$/i.test(i) || !/^[0-9a-f]{32,80}$/i.test(k)) return json(req, { error: "This payment link is not valid." }, 404);
     const { data: inv } = await admin.from("invoices").select("id, number, status, total, balance, due_date, pay_token").eq("id", i).maybeSingle();

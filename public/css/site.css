@@ -616,6 +616,8 @@ h3{font-size:18px;font-weight:600}
 .wk-form textarea{resize:vertical;min-height:52px}
 .wk-check{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:#667085;line-height:1.4}.wk-check input{margin-top:2px;accent-color:#0B2A5C;flex:none}
 .wk-live{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12.5px;color:#344054;margin:2px 0 4px}.wk-live>span{font-weight:600;color:#0B2A5C;width:100%}.wk-live label{display:flex;gap:6px;align-items:center;cursor:pointer}.wk-live input{accent-color:#0B2A5C}
+.wk-promo{display:flex;gap:6px}.wk-promo input{flex:1;min-width:0;text-transform:uppercase}.wk-promo input::placeholder{text-transform:none}.wk-apply{flex:none;border:1px solid #0B2A5C;background:#fff;color:#0B2A5C;font:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:0 14px;cursor:pointer}.wk-apply:hover{background:#F1F4FA}
+.wk-promo-msg{font-size:12.5px;margin:-2px 0 2px;min-height:0}.wk-promo-msg:empty{display:none}.wk-promo-msg.ok{color:#067647;font-weight:600}.wk-promo-msg.bad{color:#B42318}
 .wk-err{color:#B42318;font-size:12.5px;min-height:0;margin:0}.wk-err:empty{display:none}
 .wk-pop-f{display:flex;justify-content:flex-end;gap:8px;margin-top:2px}
 .wk-cancel{border:1px solid #D9DEE7;background:#fff;border-radius:9px;padding:9px 14px;font:inherit;font-weight:600;color:#475467;cursor:pointer}
@@ -627,3 +629,4 @@ h3{font-size:18px;font-weight:600}
 @media (max-width:640px){.wk{margin:0 8px 8px}.wk-body{--gut:46px}.wk-tip{display:none}.wk-nav h3{font-size:16px}.wk-scroll{max-height:480px}}
 .bk-card>.wk-pop{position:absolute}.bk-card>.wk-pop.sheet{position:fixed}
 .wk-join{display:inline-block;margin:4px 0 2px;background:#4B53BC;color:#fff!important;font-weight:700;border-radius:9px;padding:9px 16px;text-decoration:none!important}.wk-join:hover{background:#3D44A6}.wk-small{font-size:12px!important;color:#667085!important}
+.wk-paynow{background:linear-gradient(180deg,#EDBE55,#D19A2E)!important;color:#1B1405!important;padding:11px 20px;font-size:15px}.wk-paynow:hover{filter:brightness(.96)}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pay Invoice — Graceful Immigration Consultant</title>
+  <title>Pay an Invoice — Graceful Immigration Consultant</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
   <link rel="icon" href="img/favicon.png">
@@ -31,6 +31,9 @@
     .safe svg{flex:none;width:20px;height:20px;color:#067647;margin-top:1px}
     .other{margin-top:16px;font-size:13px;color:#667085;text-align:center}
     .loading{text-align:center;padding:60px;color:#667085}
+    .lbl{display:block;font-size:13px;font-weight:600;color:#344054;margin:12px 0 6px}
+    .in{width:100%;padding:12px 14px;border:1px solid #D0D5DD;border-radius:10px;font:inherit;font-size:16px}
+    .in:focus{outline:2px solid #D19A2E;outline-offset:1px;border-color:#D19A2E}
   </style>
 </head>
 <body>
@@ -67,7 +70,22 @@
       };
     }
     var fail = function (e) { main.innerHTML = '<div class="card"><div class="banner err">' + esc(e.message) + '</div><div class="muted">Please contact our office at (403) 915-4230 if you need help.</div></div>'; };
-    if (session) {
+    if (!i || !k) {
+      // "Pay an invoice": find it by invoice number and the email we have on file.
+      main.innerHTML = '<div class="card"><h2>Pay an invoice</h2><div class="muted">Enter the invoice number and the email address we send your invoices to.</div>' +
+        '<form id="find" novalidate style="margin-top:18px"><label class="lbl" for="num">Invoice number</label><input class="in" id="num" placeholder="e.g. INV-0012" autocomplete="off" required>' +
+        '<label class="lbl" for="em">Email address</label><input class="in" id="em" type="email" autocomplete="email" required>' +
+        '<div class="banner err" id="ferr" hidden style="margin:14px 0 0"></div><button class="btn" type="submit">' + lock + ' Find my invoice</button></form>' +
+        '<div class="safe">' + lock + '<span>You will pay on Stripe\'s secure page. Your card number is never seen or stored by Graceful Immigration.</span></div>' +
+        '<div class="other">Retainer (trust) deposits are paid by Interac e-Transfer, as set out in your agreement. Questions? Call (403) 915-4230.</div></div>';
+      document.getElementById('find').onsubmit = function (ev) {
+        ev.preventDefault();
+        var b = ev.target.querySelector('button'), er = document.getElementById('ferr'); er.hidden = true; b.disabled = true;
+        call({ action: 'find', number: document.getElementById('num').value, email: document.getElementById('em').value })
+          .then(function (r) { location.href = location.pathname + '?i=' + encodeURIComponent(r.i) + '&k=' + encodeURIComponent(r.k); })
+          .catch(function (e) { er.textContent = e.message; er.hidden = false; b.disabled = false; });
+      };
+    } else if (session) {
       main.innerHTML = '<div class="loading">Confirming your payment…</div>';
       call({ action: 'confirm', session: session }).then(function (d) {
         history.replaceState(null, '', location.pathname + '?i=' + encodeURIComponent(i) + '&k=' + encodeURIComponent(k));

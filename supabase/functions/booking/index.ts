@@ -1,9 +1,12 @@
 // Public booking on the website, backed by Microsoft Bookings: the website shows open times and books them;
 // Bookings adds the meeting to the Outlook calendar, creates the Teams link and emails the client.
-// Actions: services | slots { serviceId, from, days } | book { serviceId, start, name, email, phone, notes, tz, consent, inCanada } -> { pay: Stripe URL }
-//          | confirm { session } - after payment: books the time and records the paid invoice (only once).
-import { adminClient, corsHeaders, json, rateLimit, sha256 } from "../_shared/common.ts";
-import { bookings, graph, HUB, notifyTeams } from "../_shared/m365.ts";
+// Actions: services | slots { serviceId, from, days } | promo { serviceId, code, inCanada } -> price check
+//          | book { serviceId, start, name, email, phone, notes, tz, consent, inCanada, promo } -> the time is held and
+//            the client is emailed a Stripe pay link; unpaid after 2 hours = cancelled automatically (history kept)
+//          | confirm { session } - after payment: records the paid invoice (only once)
+//          | expire - run every 5 minutes: reminders, and releases unpaid holds past their deadline.
+import { adminClient, corsHeaders, escapeHtml, json, rateLimit, sendEmail, sha256 } from "../_shared/common.ts";
+import { bookings, graph, graphDeleteEvent, HUB, notifyTeams } from "../_shared/m365.ts";
 
 const TZ = "America/Edmonton";
 const DAY = 864e5;
@@ -164,7 +167,39 @@ async function stripe(path: string, params?: Record<string, string>) {
   if (!res.ok) throw new Error(data?.error?.message || "Stripe error");
   return data;
 }
-type Booking = { serviceId: string; start: number; name: string; email: string; phone: string; notes: string; tz: string; inCanada?: boolean; net?: number; gst?: number };
+type Booking = { serviceId: string; start: number; name: string; email: string; phone: string; notes: string; tz: string; inCanada?: boolean; net?: number; gst?: number;
+  price?: number; discount?: number; promo?: string | null; percent?: number };
+
+const HOLD_MS = 2 * 36e5;                                   // time to pay after booking
+const REFUND_POLICY = "Cancel at least 3 hours before your appointment for a full refund. Cancellations less than 3 hours before, and missed appointments, are not refunded.";
+const fmtAB = (t: number, o: Intl.DateTimeFormatOptions = { weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) =>
+  new Date(t).toLocaleString("en-CA", { timeZone: TZ, ...o });
+const cad = (n: number) => n.toLocaleString("en-CA", { style: "currency", currency: "CAD" });
+
+/** A valid promo code for this service today, or null. */
+async function findPromo(admin: any, code: unknown, minutes: number) {
+  const c = String(code ?? "").trim().toUpperCase();
+  if (!/^[A-Z0-9_-]{3,30}$/.test(c)) return null;
+  const { data: p } = await admin.from("promo_codes").select("code, percent, applies_to, starts_on, ends_on, max_uses, uses, active").eq("code", c).maybeSingle();
+  const today = localDate(Date.now());
+  if (!p || !p.active || (p.starts_on && p.starts_on > today) || (p.ends_on && p.ends_on < today) || (p.max_uses && p.uses >= p.max_uses)) return null;
+  if (p.applies_to !== "consultations" && p.applies_to !== String(minutes)) return null;
+  return { code: p.code as string, percent: Number(p.percent) };
+}
+
+/** Price in cents: fee, promo discount, then GST on the discounted fee (only for clients living in Canada). */
+async function pricing(admin: any, price: number, inCanada: boolean, promo: { code: string; percent: number } | null) {
+  const { data: org } = await admin.from("org_settings").select("gst_number, gst_rate").eq("id", 1).single();
+  const full = Math.round(price * 100);
+  const off = promo ? Math.round(full * promo.percent / 100) : 0;
+  const net = full - off, rate = Number(org?.gst_rate ?? 5);
+  const gst = inCanada && org?.gst_number ? Math.round(net * rate / 100) : 0;
+  return { full, off, net, gst, total: net + gst, rate, gstNo: org?.gst_number as string | undefined };
+}
+
+const mailShell = (inner: string) => `<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.55;color:#1C2333;max-width:560px">${inner}
+  <p style="color:#667085;font-size:13px;margin-top:24px">Graceful Immigration Consultant Inc. · 2318 23rd St N #3, Lethbridge, AB · (403) 915-4230 · gracefulimmigration.ca</p></div>`;
+const payButton = (url: string, label: string) => `<p style="margin:22px 0"><a href="${escapeHtml(url)}" style="background:#D19A2E;color:#1B1405;font-weight:bold;padding:13px 24px;border-radius:10px;text-decoration:none;display:inline-block">${label}</a></p>`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
@@ -196,16 +231,22 @@ Deno.serve(async (req) => {
     }
 
     const cat = await catalog();
-    const makeBooking = async (service: Svc, d: Booking, staffId?: string) => {
+    // Consultation prices come from Business Settings in the dashboard (30- and 60-minute fees).
+    if (cat.cal) {
+      const { data: fees } = await admin.from("org_settings").select("consult_fee_30, consult_fee_60").eq("id", 1).single();
+      cat.list = cat.list.map((s) => ({ ...s, price: Number((s.minutes === 30 ? fees?.consult_fee_30 : fees?.consult_fee_60) ?? s.price) }));
+    }
+    const makeBooking = async (service: Svc, d: Booking, staffId?: string, payBy?: number) => {
       const { start, name, email, phone, notes, tz } = d;
       const slot = { staff: staffId ?? service.staff[0] };
       const end = start + service.minutes * 60000;
       const when = (t: number) => ({ dateTime: new Date(t).toISOString().slice(0, 19), timeZone: "UTC" });
+      const payLine = payBy ? `\n\nPayment: please pay by ${fmtAB(payBy, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} (Alberta time) using the secure link we emailed you, or this time will be released.\n${REFUND_POLICY}` : "";
       const appt = cat.cal ? await graph(`/users/${encodeURIComponent(CAL_USER)}/events`, { method: "POST", body: JSON.stringify({
         subject: `${service.name}: ${name}`, start: when(start), end: when(end), showAs: "busy", isReminderOn: true, reminderMinutesBeforeStart: 15,
         isOnlineMeeting: true, onlineMeetingProvider: "teamsForBusiness", attendees: [{ emailAddress: { address: email, name }, type: "required" }],
-        body: { contentType: "Text", content: `Booked on the website.\nClient: ${name}\nEmail: ${email}${phone ? `\nPhone: ${phone}` : ""}\nTime zone: ${tz}${notes ? `\n\nWhat they need help with:\n${notes}` : ""}` },
-      }) }).then((ev: any) => ({ joinUrl: ev?.onlineMeeting?.joinUrl ?? null })) : await bookings("/appointments", { method: "POST", body: JSON.stringify({
+        body: { contentType: "Text", content: `Booked on the website.\nClient: ${name}\nEmail: ${email}${phone ? `\nPhone: ${phone}` : ""}\nTime zone: ${tz}${notes ? `\n\nWhat they need help with:\n${notes}` : ""}${payLine}` },
+      }) }).then((ev: any) => ({ id: ev?.id, joinUrl: ev?.onlineMeeting?.joinUrl ?? null })) : await bookings("/appointments", { method: "POST", body: JSON.stringify({
         "@odata.type": "#microsoft.graph.bookingAppointment",
         serviceId: service.id, serviceName: service.name, staffMemberIds: [slot.staff],
         startDateTime: when(start), endDateTime: when(end), isLocationOnline: true, optOutOfCustomerEmail: false,
@@ -215,13 +256,32 @@ Deno.serve(async (req) => {
       const joinUrl = appt?.joinUrl ?? appt?.joinWebUrl ?? appt?.anonymousJoinWebUrl ?? null;
 
       const label = new Date(start).toLocaleString("en-CA", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
-      await admin.from("appointments").insert({
+      const { data: row } = await admin.from("appointments").insert({
         title: `${service.name}: ${name}`, kind: "consultation", starts_at: new Date(start).toISOString(), ends_at: new Date(end).toISOString(),
         location: "Microsoft Teams", meeting_link: joinUrl,
-        notes: `Booked on the website.\nEmail: ${email}${phone ? `\nPhone: ${phone}` : ""}${notes ? `\n\n${notes}` : ""}`, created_by: null,
-      });
-      await notifyTeams(admin, `📅 New website booking: ${service.name}`, `${name} · ${email}${phone ? " · " + phone : ""}\n\n${label} (Alberta time)`, HUB);
-      return { start: new Date(start).toISOString(), end: new Date(end).toISOString(), service: service.name, joinUrl };
+        notes: `Booked on the website.${payBy ? " Payment: awaiting card payment (due " + fmtAB(payBy, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + ")." : ""}\nEmail: ${email}${phone ? `\nPhone: ${phone}` : ""}${notes ? `\n\n${notes}` : ""}`, created_by: null,
+      }).select("id").single();
+      await notifyTeams(admin, `📅 New website booking: ${service.name}${payBy ? " (awaiting payment)" : ""}`, `${name} · ${email}${phone ? " · " + phone : ""}\n\n${label} (Alberta time)${payBy ? "\nTo be paid within 2 hours, or it is cancelled automatically." : ""}`, HUB);
+      return { start: new Date(start).toISOString(), end: new Date(end).toISOString(), service: service.name, joinUrl, eventId: (appt?.id ?? null) as string | null, appointmentId: (row?.id ?? null) as string | null };
+    };
+    // Releases a hold: cancels the meeting (the client gets Outlook's cancellation), removes it from the dashboard calendar, keeps the record.
+    const releaseHold = async (p: any, reason: string, emailClient: boolean) => {
+      const { data: claim } = await admin.from("pending_bookings").update({ status: "cancelled_unpaid", cancelled_at: new Date().toISOString(), cancel_reason: reason })
+        .eq("id", p.id).eq("status", "awaiting_payment").select("id");
+      if (!claim?.length) return false;
+      const d = p.details as Booking;
+      if (p.session_id) await stripe(`checkout/sessions/${p.session_id}/expire`, {}).catch(() => null);
+      try {
+        if (p.event_id && p.cal_mode !== false) await graphDeleteEvent(CAL_USER, p.event_id, "This booking was released because the payment was not received in time.");
+        else if (p.event_id) await bookings(`/appointments/${p.event_id}/cancel`, { method: "POST", body: JSON.stringify({ cancellationMessage: "Released: payment not received in time." }) });
+      } catch (e) { console.error("release event", String(e)); }
+      if (p.appointment_id) await admin.from("appointments").delete().eq("id", p.appointment_id);
+      const when = fmtAB(d.start);
+      if (emailClient) await sendEmail(d.email, "Your consultation time was released",
+        mailShell(`<p>Hello ${escapeHtml(d.name)},</p><p>We did not receive the payment for your consultation on <b>${escapeHtml(when)}</b> (Alberta time) within 2 hours, so the time has been released and you have not been charged.</p>
+        <p>You are welcome to book again at any time:</p>${payButton(`${SITE}/public/book.html`, "Book a consultation")}<p>Questions? Reply to this email or call (403) 915-4230.</p>`));
+      await notifyTeams(admin, "⌛ Unpaid booking released", `${d.name} · ${d.email}\n${when} (Alberta time)\n${reason}`, HUB);
+      return true;
     };
     const confirmPaid = async (sid: string): Promise<Record<string, unknown>> => {
       const sess = await stripe(`checkout/sessions/${sid}`);
@@ -231,23 +291,29 @@ Deno.serve(async (req) => {
       if (!pend) throw new Error("Booking not found.");
       const d = pend.details as Booking;
       const service = cat.list.find((x) => x.id === d.serviceId) ?? cat.list.find((x) => `cal-${x.minutes}` === d.serviceId) ?? cat.list[0];
-      let r: Record<string, unknown> = { start: new Date(d.start).toISOString(), end: new Date(d.start + service.minutes * 60000).toISOString(), service: service.name, joinUrl: null };
-      // Claim the booking so a second confirm (page reload, sync) never books twice.
-      const { data: claim } = await admin.from("pending_bookings").update({ booked_at: new Date().toISOString(), session_id: sid }).eq("id", pend.id).is("booked_at", null).select("id");
+      const { data: appt } = pend.appointment_id ? await admin.from("appointments").select("meeting_link").eq("id", pend.appointment_id).maybeSingle() : { data: null };
+      const r = { start: new Date(d.start).toISOString(), end: new Date(d.start + service.minutes * 60000).toISOString(), service: service.name, joinUrl: appt?.meeting_link ?? null };
+      // Claim the payment so a second confirm (page reload, sync) never records it twice.
+      const late = pend.status === "cancelled_unpaid";
+      const { data: claim } = await admin.from("pending_bookings").update({ paid_at: new Date().toISOString(), session_id: sid, status: late ? "paid_after_cancel" : "paid" })
+        .eq("id", pend.id).is("paid_at", null).in("status", ["awaiting_payment", "cancelled_unpaid"]).select("id");
       if (claim?.length) {
-        try {
-          const day = localDate(d.start);
-          const slot = (await (cat.cal ? calSlots(service.minutes, addDays(day, -1), addDays(day, 1)) : openSlots(service, addDays(day, -1), addDays(day, 1))).catch(() => [] as any[])).find((s: any) => s.t === d.start);
-          r = await makeBooking(service, d, slot?.staff);
-        } catch (e) { await admin.from("pending_bookings").update({ booked_at: null }).eq("id", pend.id); throw e; }
         let fee = 0;
         try { const pi = await stripe(`payment_intents/${sess.payment_intent}?expand[]=latest_charge.balance_transaction`); fee = (pi.latest_charge?.balance_transaction?.fee ?? 0) / 100; } catch { /* fee unknown */ }
+        const promoNote = d.promo ? ` — promo ${d.promo} (${d.percent}% off ${cad(Number(d.price ?? 0))})` : "";
         const { error } = await admin.rpc("stripe_record_booking", { p_session: sid, p_name: d.name, p_email: d.email, p_phone: d.phone || "", p_item: service.name,
-          p_desc: `${service.name}, ${new Date(d.start).toLocaleString("en-CA", { timeZone: TZ, month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })} (Alberta time)`,
+          p_desc: `${service.name}, ${fmtAB(d.start, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })} (Alberta time)${promoNote}`,
           p_net: Number(d.net ?? service.price ?? 0), p_gst: Number(d.gst ?? 0), p_fee: fee, p_date: localDate(sess.created * 1000), p_reference: `Stripe ${sess.payment_intent}` });
         if (error) console.error("stripe_record_booking", error.message);
+        if (d.promo) await admin.rpc("promo_redeem", { p_code: d.promo });
+        if (pend.appointment_id) {
+          const { data: a } = await admin.from("appointments").select("notes").eq("id", pend.appointment_id).maybeSingle();
+          if (a) await admin.from("appointments").update({ notes: String(a.notes ?? "").replace(/ Payment: awaiting card payment \(due [^)]*\)\./, " Paid by card (Stripe).") }).eq("id", pend.appointment_id);
+        }
+        await notifyTeams(admin, late ? "⚠️ Paid after the booking was released" : `💳 Booking paid: ${service.name}`,
+          `${d.name} · ${d.email}\n${fmtAB(d.start)} (Alberta time)\n${cad((Number(d.net ?? 0) + Number(d.gst ?? 0)))} paid by card${late ? "\nThe time was already released. Please rebook the client or refund them in Stripe." : ""}`, HUB, late);
       }
-      return { ok: true, paid: true, ...r };
+      return { ok: true, paid: true, late, ...r };
     };
     if (body.action === "services") return json(req, { services: cat.list.map(({ id, name, minutes, price, description }) => ({ id, name, minutes, price, description })) });
 
@@ -282,42 +348,113 @@ Deno.serve(async (req) => {
       if (!slot) return json(req, { error: "Sorry, that time was just taken. Please choose another time.", taken: true }, 409);
       const d: Booking = { serviceId: service.id, start, name, email, phone, notes, tz, inCanada: body.inCanada !== false };
 
-      // Paid at booking: the time is put in the calendar only after Stripe confirms the payment.
+      // Book first, pay within 2 hours: the time is put in the calendar now and the client is emailed a Stripe pay link.
       if (STRIPE_KEY && Number(service.price) > 0) {
-        const { data: org } = await admin.from("org_settings").select("gst_number, gst_rate").eq("id", 1).single();
-        const net = Math.round(Number(service.price) * 100);
-        const gst = d.inCanada && org?.gst_number ? Math.round(net * Number(org.gst_rate ?? 5) / 100) : 0;
-        const { data: pend, error: pe } = await admin.from("pending_bookings").insert({ details: { ...d, net: net / 100, gst: gst / 100 } }).select("id").single();
+        const promo = body.promo ? await findPromo(admin, body.promo, service.minutes) : null;
+        if (body.promo && !promo) return json(req, { error: "That promo code is not valid or has expired.", badPromo: true }, 400);
+        const p = await pricing(admin, Number(service.price), d.inCanada !== false, promo);
+        Object.assign(d, { price: p.full / 100, discount: p.off / 100, net: p.net / 100, gst: p.gst / 100, promo: promo?.code ?? null, percent: promo?.percent ?? 0 });
+
+        // 100% promo: nothing to pay, book it straight away.
+        if (p.total < 50) {
+          const r = await makeBooking(service, d, slot.staff);
+          await admin.from("pending_bookings").insert({ details: d, status: "free", booked_at: new Date().toISOString(), paid_at: new Date().toISOString(),
+            event_id: r.eventId, cal_mode: cat.cal, appointment_id: r.appointmentId, promo_code: d.promo, discount: d.discount });
+          if (promo) await admin.rpc("promo_redeem", { p_code: promo.code });
+          return json(req, { ok: true, free: true, start: r.start, end: r.end, service: r.service, joinUrl: r.joinUrl });
+        }
+
+        const deadline = Math.min(Date.now() + HOLD_MS, start - 30 * 60000);
+        const { data: pend, error: pe } = await admin.from("pending_bookings").insert({ details: d, pay_deadline: new Date(deadline).toISOString(),
+          cal_mode: cat.cal, promo_code: d.promo, discount: d.discount }).select("id").single();
         if (pe) throw new Error(pe.message);
-        const label = new Date(start).toLocaleString("en-CA", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
+        const label = fmtAB(start, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
         const back = `${SITE}/public/book.html`;
         const params: Record<string, string> = {
           mode: "payment", customer_email: email, "allowed_payment_method_types[0]": "card",
           "line_items[0][quantity]": "1", "line_items[0][price_data][currency]": "cad",
-          "line_items[0][price_data][unit_amount]": String(net),
-          "line_items[0][price_data][product_data][name]": service.name,
+          "line_items[0][price_data][unit_amount]": String(p.net),
+          "line_items[0][price_data][product_data][name]": service.name + (promo ? ` (promo ${promo.code}: ${promo.percent}% off)` : ""),
           "line_items[0][price_data][product_data][description]": `${label} (Alberta time), online by Microsoft Teams`,
           "metadata[kind]": "booking", "metadata[pending_id]": pend.id,
           "payment_intent_data[metadata][kind]": "booking", "payment_intent_data[description]": `${service.name}, ${label}`,
-          success_url: `${back}?paid={CHECKOUT_SESSION_ID}`, cancel_url: `${back}?cancelled=1`,
-          expires_at: String(Math.floor(Date.now() / 1000) + 31 * 60),
+          success_url: `${back}?paid={CHECKOUT_SESSION_ID}`, cancel_url: `${back}?held=1`,
+          // Stripe needs at least 30 minutes; the hold itself is released by the 5-minute job at the deadline.
+          expires_at: String(Math.floor(Math.max(deadline, Date.now() + 31 * 60000) / 1000)),
         };
-        if (gst) Object.assign(params, { "line_items[1][quantity]": "1", "line_items[1][price_data][currency]": "cad", "line_items[1][price_data][unit_amount]": String(gst),
-          "line_items[1][price_data][product_data][name]": `GST ${Number(org?.gst_rate ?? 5)}% (GST No. ${org?.gst_number})` });
+        if (p.gst) Object.assign(params, { "line_items[1][quantity]": "1", "line_items[1][price_data][currency]": "cad", "line_items[1][price_data][unit_amount]": String(p.gst),
+          "line_items[1][price_data][product_data][name]": `GST ${p.rate}% (GST No. ${p.gstNo})` });
         let sess: any;
         try { sess = await stripe("checkout/sessions", params); } catch (e) {
           console.error("stripe checkout", (e as Error).message);
           await admin.from("pending_bookings").delete().eq("id", pend.id);
           return json(req, { error: `Card payment could not start: ${(e as Error).message}` }, 502);
         }
-        await admin.from("pending_bookings").update({ session_id: sess.id }).eq("id", pend.id);
-        return json(req, { pay: sess.url });
+        let r: Awaited<ReturnType<typeof makeBooking>>;
+        try { r = await makeBooking(service, d, slot.staff, deadline); }
+        catch (e) { await stripe(`checkout/sessions/${sess.id}/expire`, {}).catch(() => null); await admin.from("pending_bookings").delete().eq("id", pend.id); throw e; }
+        await admin.from("pending_bookings").update({ session_id: sess.id, pay_url: sess.url, booked_at: new Date().toISOString(), event_id: r.eventId, appointment_id: r.appointmentId }).eq("id", pend.id);
+
+        const due = fmtAB(deadline, { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
+        const rows = `<tr><td>${escapeHtml(service.name)}</td><td align="right">${cad(p.full / 100)}</td></tr>` +
+          (p.off ? `<tr><td>Promo ${escapeHtml(promo!.code)} (${promo!.percent}% off)</td><td align="right">−${cad(p.off / 100)}</td></tr>` : "") +
+          (p.gst ? `<tr><td>GST ${p.rate}%</td><td align="right">${cad(p.gst / 100)}</td></tr>` : "") +
+          `<tr><td><b>Total (CAD)</b></td><td align="right"><b>${cad(p.total / 100)}</b></td></tr>`;
+        await sendEmail(email, `Please pay to keep your consultation on ${fmtAB(start, { month: "short", day: "numeric" })}`, mailShell(
+          `<p>Hello ${escapeHtml(name)},</p><p>Thank you for booking with Graceful Immigration. Your time is held:</p>
+          <p style="background:#F5F6FA;border-radius:10px;padding:12px 16px"><b>${escapeHtml(service.name)}</b><br>${escapeHtml(label)} (Alberta time)<br>Online by Microsoft Teams (the meeting invitation is in a separate email)</p>
+          <p><b>Please pay by ${escapeHtml(due)} (Alberta time)</b> to keep this time. If it is not paid by then, the booking is cancelled automatically.</p>
+          ${payButton(sess.url, `Pay ${cad(p.total / 100)} securely by card`)}
+          <table cellpadding="6" style="border-collapse:collapse;font-size:14px;min-width:300px">${rows}</table>
+          <p style="font-size:14px">The payment page is Stripe's; we never see or store your card number.</p>
+          <p style="font-size:14px"><b>Cancellation and refunds:</b> ${REFUND_POLICY} To cancel, reply to this email or call (403) 915-4230.</p>`));
+        return json(req, { ok: true, held: true, pay: sess.url, deadline: new Date(deadline).toISOString(), total: p.total / 100, start: r.start, end: r.end, service: r.service, joinUrl: r.joinUrl });
       }
       const r = await makeBooking(service, d, slot.staff);
-      return json(req, { ok: true, ...r });
+      return json(req, { ok: true, start: r.start, end: r.end, service: r.service, joinUrl: r.joinUrl });
     }
 
-    // After Stripe payment: check the payment with Stripe, then book the time and record the money (only once).
+    // Promo code check while booking: shows the client the discounted price before they book.
+    if (body.action === "promo") {
+      if (!service) return json(req, { error: "Please choose a consultation." }, 400);
+      if (!(await rateLimit(req, admin, "booking-promo", 20, 10)).allowed) return json(req, { error: "Too many tries. Please wait a few minutes." }, 429);
+      const promo = await findPromo(admin, body.code, service.minutes);
+      if (!promo) return json(req, { error: "That promo code is not valid or has expired." }, 400);
+      const p = await pricing(admin, Number(service.price), body.inCanada !== false, promo);
+      return json(req, { code: promo.code, percent: promo.percent, price: p.full / 100, discount: p.off / 100, net: p.net / 100, gst: p.gst / 100, total: p.total / 100 });
+    }
+
+    // Every 5 minutes (scheduled job): a reminder about 35 minutes before the deadline, then release unpaid holds.
+    // Only holds already past their deadline are touched, so calling it early does nothing harmful.
+    if (body.action === "expire") {
+      if (!(await rateLimit(req, admin, "booking-expire", 30, 10)).allowed) return json(req, { error: "Too many requests" }, 429);
+      const now = Date.now();
+      let released = 0, paid = 0, reminded = 0;
+      const { data: due } = await admin.from("pending_bookings").select("*").eq("status", "awaiting_payment").lt("pay_deadline", new Date(now).toISOString()).limit(20);
+      for (const p of due ?? []) {
+        try {
+          if (p.session_id) {
+            const s = await stripe(`checkout/sessions/${p.session_id}`).catch(() => null);
+            if (s?.payment_status === "paid") { await confirmPaid(p.session_id); paid++; continue; }
+          }
+          if (await releaseHold(p, "Not paid within 2 hours of booking", true)) released++;
+        } catch (e) { console.error("expire", p.id, String(e)); }
+      }
+      const { data: soon } = await admin.from("pending_bookings").select("*").eq("status", "awaiting_payment").is("reminder_sent_at", null)
+        .gt("pay_deadline", new Date(now).toISOString()).lt("pay_deadline", new Date(now + 40 * 60000).toISOString()).limit(20);
+      for (const p of soon ?? []) {
+        const { data: claim } = await admin.from("pending_bookings").update({ reminder_sent_at: new Date().toISOString() }).eq("id", p.id).is("reminder_sent_at", null).select("id");
+        if (!claim?.length || !p.pay_url) continue;
+        const d = p.details as Booking;
+        await sendEmail(d.email, "Reminder: please pay to keep your consultation", mailShell(
+          `<p>Hello ${escapeHtml(d.name)},</p><p>Your consultation on <b>${escapeHtml(fmtAB(d.start))}</b> (Alberta time) is not paid yet. Please pay by <b>${escapeHtml(fmtAB(Date.parse(p.pay_deadline), { hour: "numeric", minute: "2-digit" }))}</b> (Alberta time), or the time will be released.</p>
+          ${payButton(p.pay_url, `Pay ${cad(Number(d.net ?? 0) + Number(d.gst ?? 0))} securely by card`)}<p style="font-size:14px">${REFUND_POLICY}</p>`));
+        reminded++;
+      }
+      return json(req, { released, paid, reminded });
+    }
+
+    // After Stripe payment: check the payment with Stripe and record the money (only once).
     if (body.action === "confirm") {
       const sid = String(body.session ?? "");
       if (!/^cs_[A-Za-z0-9_]+$/.test(sid) || !STRIPE_KEY) return json(req, { error: "Payment not found." }, 400);

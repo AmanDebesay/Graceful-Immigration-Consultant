@@ -6,7 +6,7 @@
   var BOOKINGS_PAGE = 'https://bookings.cloud.microsoft/book/GracefulImmigrationConsultant@gracefulimmigration.ca/';
   var MT = 'America/Edmonton';
   var MY_TZ = (Intl.DateTimeFormat().resolvedOptions().timeZone) || MT;
-  var PLANS = { '30': { label: '30-Minute Consultation · $75', short: '30 min', minutes: 30, price: 30 },
+  var PLANS = { '30': { label: '30-Minute Consultation · $75', short: '30 min', minutes: 30, price: 75 },
                 '60': { label: '1-Hour Consultation · $150', short: '1 hour', minutes: 60, price: 150 } };
   var $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return String(n).padStart(2, '0'); };
@@ -203,13 +203,22 @@
       '<textarea name="notes" maxlength="1500" rows="2" placeholder="What would you like help with? (optional)" aria-label="What would you like help with"></textarea>' +
       '<input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">' +
       '<div class="wk-live" role="radiogroup" aria-label="Where do you live?"><span>Where do you live?</span><label><input type="radio" name="live" value="in" checked> In Canada</label><label><input type="radio" name="live" value="out"> Outside Canada</label></div>' +
-      '<label class="wk-check"><input type="checkbox" name="consent"><span>I understand this is a $' + PLANS[plan].price + ' CAD consultation (plus 5% GST if I live in Canada), paid now by card to confirm my time. I will receive a consultation agreement by email.</span></label>' +
+      '<div class="wk-promo"><input name="promo" maxlength="30" autocomplete="off" placeholder="Promo code (optional)" aria-label="Promo code"><button type="button" class="wk-apply">Apply</button></div><p class="wk-promo-msg" aria-live="polite"></p>' +
+      '<label class="wk-check"><input type="checkbox" name="consent"><span>I understand this is a $' + PLANS[plan].price + ' CAD consultation (plus 5% GST if I live in Canada). I will pay by card within 2 hours of booking, or the time is released. Cancel 3+ hours before for a full refund; later cancellations and missed appointments are not refunded. I will receive a consultation agreement by email.</span></label>' +
       '<p class="wk-err" role="alert"></p>' +
-      '<div class="wk-pop-f"><button type="button" class="wk-cancel">Cancel</button><button type="submit" class="wk-book">Continue to secure payment</button></div></form>';
+      '<div class="wk-pop-f"><button type="button" class="wk-cancel">Cancel</button><button type="submit" class="wk-book">Book this time</button></div></form>';
     $('calendar').appendChild(pop);
     place(btn);
     pop.querySelector('.wk-x').onclick = pop.querySelector('.wk-cancel').onclick = function () { closePop(); sel = null; };
     pop.querySelector('form').onsubmit = function (ev) { submit(ev, t); };
+    var pf = pop.querySelector('form'), pmsg = pop.querySelector('.wk-promo-msg');
+    pop.querySelector('.wk-apply').onclick = function () {
+      var code = pf.elements.promo.value.trim(); if (!code) { pmsg.textContent = ''; return; }
+      pmsg.className = 'wk-promo-msg'; pmsg.textContent = 'Checking…';
+      api({ action: 'promo', serviceId: serviceFor(plan).id, code: code, inCanada: !(pf.elements.live && pf.elements.live.value === 'out') })
+        .then(function (r) { pmsg.className = 'wk-promo-msg ok'; pmsg.textContent = r.percent + '% off: $' + r.net.toFixed(2) + (r.gst ? ' + $' + r.gst.toFixed(2) + ' GST = $' + r.total.toFixed(2) : '') + ' CAD'; })
+        .catch(function (e) { pmsg.className = 'wk-promo-msg bad'; pmsg.textContent = e.message; });
+    };
     setTimeout(function () { pop && pop.querySelector('input[name=name]').focus({ preventScroll: true }); }, 30);
   }
   function place(btn) {
@@ -227,23 +236,28 @@
     if (v('name').length < 2) { err.textContent = 'Please enter your full name.'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) { err.textContent = 'Please enter a valid email address.'; return; }
     if (!f.elements.consent.checked) { err.textContent = 'Please tick the box to confirm.'; return; }
-    err.textContent = ''; btn.disabled = true; btn.textContent = 'Opening secure payment…';
+    err.textContent = ''; btn.disabled = true; btn.textContent = 'Booking…';
     var svc = serviceFor(plan);
-    api({ action: 'book', serviceId: svc.id, start: t.toISOString(), name: v('name'), email: v('email'), phone: v('phone'), notes: v('notes'), website: f.elements.website.value, consent: true, tz: MY_TZ, inCanada: !(f.elements.live && f.elements.live.value === 'out') })
+    api({ action: 'book', serviceId: svc.id, start: t.toISOString(), name: v('name'), email: v('email'), phone: v('phone'), notes: v('notes'), website: f.elements.website.value, consent: true, tz: MY_TZ, inCanada: !(f.elements.live && f.elements.live.value === 'out'), promo: v('promo') || undefined })
       .then(function (res) {
-        if (res && res.pay) { location.href = res.pay; return; }
         var key = svc.id; slots[key] = (slots[key] || []).filter(function (d) { return +d !== +t; });
         booked.push({ t: t, name: v('name') }); sel = null;
         var email = v('email'); draw();
         pop = document.createElement('div'); pop.className = 'wk-pop wk-done' + (innerWidth < 640 ? ' sheet' : '');
-        pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button><div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>You are booked!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + PLANS[plan].label + '</p><p>A confirmation with your Microsoft Teams link is on its way to <b>' + esc(email) + '</b>. We will also email your consultation agreement and payment link.</p>' +
+        if (res && res.held) {
+          var due = new Date(res.deadline);
+          pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button><div class="bk-tick"><svg><use href="#i-clock"/></svg></div><h4>Your time is held</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + esc(res.service || PLANS[plan].label) + '</p>' +
+            '<p>Please pay <b>$' + Number(res.total).toFixed(2) + ' CAD</b> by <b>' + esc(fmtTime(due)) + (due.toDateString() === new Date().toDateString() ? ' today' : ' on ' + esc(fmtDay(due))) + '</b> to keep this time. Otherwise it is released automatically.</p>' +
+            '<a class="wk-join wk-paynow" href="' + esc(res.pay) + '">Pay now by card</a>' +
+            '<p class="wk-small">We also emailed the payment link to <b>' + esc(email) + '</b>, and the Teams meeting invitation separately. Cancel 3+ hours before for a full refund.</p>';
+        } else pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button><div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>You are booked!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + PLANS[plan].label + '</p><p>A confirmation with your Microsoft Teams link is on its way to <b>' + esc(email) + '</b>.</p>' +
           (res && res.joinUrl ? '<a class="wk-join" href="' + esc(res.joinUrl) + '" target="_blank" rel="noopener">Your Microsoft Teams link</a><p class="wk-small">Save this link. Use it to join at the time of your consultation.</p>' : '');
         $('calendar').appendChild(pop);
         var ev2 = body.querySelector('.wk-ev:last-of-type'); if (ev2 && innerWidth >= 640) place(ev2);
         pop.querySelector('.wk-x').onclick = closePop;
       })
       .catch(function (er) {
-        btn.disabled = false; btn.textContent = 'Continue to secure payment'; err.textContent = er.message;
+        btn.disabled = false; btn.textContent = 'Book this time'; err.textContent = er.message;
         if (er.data && er.data.taken) { var key = svc.id; covered[key] = []; slots[key] = []; setTimeout(function () { go(anchor); }, 1500); }
       });
   }
@@ -286,23 +300,35 @@
     $('calendar').appendChild(pop); pop.querySelector('.wk-x').onclick = closePop;
     $('bookLayout').scrollIntoView({ block: 'start' });
   }
-  if (paidSession || qs.get('cancelled')) history.replaceState(null, '', location.pathname);
+  if (paidSession || qs.get('cancelled') || qs.get('held')) history.replaceState(null, '', location.pathname);
   if (paidSession) {
     notice('<div class="bk-tick"><svg><use href="#i-clock"/></svg></div><h4>Confirming your payment…</h4><p>Please keep this page open.</p>');
     api({ action: 'confirm', session: paidSession }).then(function (r) {
       if (pop) closePop();
-      if (!r || !r.paid) return notice('<h4>Payment not finished</h4><p>We have not received your payment yet, so the time is not booked. Please try again or call (403) 915-4230.</p>');
+      if (!r || !r.paid) return notice('<h4>Payment not finished</h4><p>We have not received your payment yet. Your time stays held until the deadline in our email; use the link in that email to pay.</p>');
+      if (r.late) return notice('<h4>Payment received</h4><p>Thank you. Your earlier hold had already been released, so our office will contact you shortly to confirm a time or refund you.</p>');
       var t = new Date(r.start);
-      notice('<div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>Paid and booked!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + esc(r.service || '') + '</p>' +
-        '<p class="wk-small">Your receipt from Stripe and the meeting invitation are on their way to your email.</p>' +
+      notice('<div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>Paid. You are all set!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + esc(r.service || '') + '</p>' +
+        '<p class="wk-small">Your receipt from Stripe is on its way to your email, and the Teams meeting invitation is already in your inbox.</p>' +
         (r.joinUrl ? '<a class="wk-join" href="' + esc(r.joinUrl) + '" target="_blank" rel="noopener">Your Microsoft Teams link</a><p class="wk-small">Save this link. Use it to join at the time of your consultation.</p>' : ''));
-    }).catch(function (e) { if (pop) closePop(); notice('<h4>We could not confirm the booking</h4><p>' + esc(e.message) + '</p><p>If you were charged, don\'t worry: call (403) 915-4230 and we will book your time.</p>'); });
-  } else if (qs.get('cancelled')) {
-    setTimeout(function () { notice('<h4>Payment cancelled</h4><p>You have not been charged and the time was not booked. You can choose a time again.</p>'); }, 300);
+    }).catch(function (e) { if (pop) closePop(); notice('<h4>We could not confirm the payment</h4><p>' + esc(e.message) + '</p><p>If you were charged, don\'t worry: call (403) 915-4230 and we will sort it out.</p>'); });
+  } else if (qs.get('held') || qs.get('cancelled')) {
+    setTimeout(function () { notice('<h4>Payment not finished</h4><p>You have not been charged. Your time stays held until the deadline in our email; use the payment link in that email to keep it.</p>'); }, 300);
   }
 
   api({ action: 'services' })
-    .then(function (j) { services = j.services || []; })
+    .then(function (j) {
+      services = j.services || [];
+      // Prices come from the dashboard (Business Settings), so a change there shows here too.
+      ['30', '60'].forEach(function (p) {
+        var s = services.filter(function (x) { return x.minutes === PLANS[p].minutes; })[0];
+        if (!s || !(s.price > 0)) return;
+        var n = Number(s.price), txt = '$' + (n % 1 ? n.toFixed(2) : n);
+        PLANS[p].price = n % 1 ? n.toFixed(2) : n; PLANS[p].label = s.name + ' · ' + txt;
+        document.querySelectorAll('[data-price="' + p + '"]').forEach(function (el) { if (el.firstChild) el.firstChild.nodeValue = txt; });
+        document.querySelectorAll('.wk-len button[data-plan="' + p + '"]').forEach(function (b) { b.textContent = PLANS[p].short + ' · ' + txt; });
+      });
+    })
     .catch(function (e) { services = []; setupError = e.message; })
     .then(function () { choosePlan(pre === '60' ? '60' : '30', pre === '30' || pre === '60'); });
 })();
