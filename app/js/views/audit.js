@@ -3,7 +3,7 @@ import { db, state, esc, icon, fmtDate, staffName, avatarHtml } from '../core.js
 import { downloadCsv } from '../fin.js';
 
 // action → [label, icon, tone, category]
-const A = {
+export const A = {
   created: ['Created', 'plus', 'green', 'clients'], deleted: ['Deleted', 'trash', 'red', 'clients'], stage_changed: ['Stage changed', 'layers', 'blue', 'clients'],
   assigned: ['Assigned', 'user', 'blue', 'clients'], submitted: ['Assessment submitted', 'send', 'green', 'clients'], status_changed: ['Status changed', 'layers', 'blue', 'clients'],
   access_changed: ['Access changed', 'shield', 'gold', 'security'], invited: ['Staff invited', 'mail', 'gold', 'security'], permission_changed: ['Permission changed', 'shield', 'gold', 'security'],
@@ -17,11 +17,11 @@ const A = {
   correspondence_logged: ['IRCC correspondence logged', 'mail', 'blue', 'clients'], file_closed: ['Client file closed', 'lock', 'navy', 'clients'], file_reopened: ['Client file reopened', 'lock', 'gold', 'clients'],
 };
 const CATS = { clients: 'Clients & cases', security: 'Staff access & security', documents: 'Documents & portal', money: 'Money', agreements: 'Agreements, letters & assessments' };
-const ENTITY = { contact: ['Client', 'user', (id) => `#/contacts/${id}`], case: ['Case', 'briefcase', (id) => `#/cases/${id}`], invoice: ['Invoice', 'file', (id) => `#/invoices/${id}`],
+export const ENTITY = { contact: ['Client', 'user', (id) => `#/contacts/${id}`], case: ['Case', 'briefcase', (id) => `#/cases/${id}`], invoice: ['Invoice', 'file', (id) => `#/invoices/${id}`],
   payment: ['Payment', 'coins', null], profile: ['Staff account', 'shield', null], role: ['Role permissions', 'shield', null], assessment: ['Assessment', 'clipboard', (id) => `#/assessments/${id}`],
   pathway_assessment: ['Pathway assessment', 'route', (id) => `#/pathways/${id}`], agreement: ['Agreement', 'pen', (id) => `#/agreements/${id}`], quote: ['Quote', 'coins', null],
   month_close: ['Month', 'calendar', null], submission_letter: ['Submission letter', 'pen', (id) => `#/letters/${id}`] };
-const human = (s) => String(s || '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+export const human = (s) => String(s || '').replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const KEY = { to: 'To', from: 'From', name: 'Name', source: 'Source', email: 'Email', total: 'Total', number: 'Number', top_route: 'Recommended route', received_from: 'Received from',
   role: 'Role', active: 'Active', permission: 'Permission', granted: 'Granted', subject: 'Subject', in_scope: 'Inside scope', code: 'Form', edition: 'Edition', reason: 'Reason' };

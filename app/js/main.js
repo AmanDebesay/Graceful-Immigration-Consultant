@@ -11,6 +11,7 @@ const NAV = [
   { path: '/email', label: 'Email', icon: 'mail', show: () => isStaff() },
   { path: '/calendar', label: 'Calendar', icon: 'calendar', show: () => isStaff() },
   { path: '/chat', label: 'Team Chat', icon: 'chat', show: () => isStaff(), count: 'chat_unread' },
+  { path: '/worktime', label: 'Work Time', icon: 'clock', show: () => isStaff() },
   { group: 'IRCC' },
   { path: '/ircc', label: 'IRCC Portal', icon: 'globe', show: () => can('crm.view') },
   { path: '/forms', label: 'IRCC Forms', icon: 'note', show: () => isStaff() },
@@ -62,6 +63,7 @@ const ROUTES = [
   [/^\/resources$/, 'resources', 'Legal & Research Resources'],
   [/^\/assistant$/, 'assistant', 'AI Assistant'],
   [/^\/chat$/, 'chat', 'Team Chat'],
+  [/^\/worktime$/, 'worktime', 'Work Time'],
   [/^\/email$/, 'email', 'Email'],
   [/^\/calendar$/, 'calendar', 'Calendar'],
   [/^\/receipts$/, 'receipts', 'Expense Receipts'],
@@ -169,6 +171,7 @@ async function boot() {
   }
   buildShell();
   route();
+  import('./worktime.js').then((m) => m.startWorkTimer()).catch(() => {});
 }
 
 function buildShell() {
