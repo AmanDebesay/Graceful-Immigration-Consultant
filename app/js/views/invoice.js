@@ -1,9 +1,9 @@
 import { db, state, can, esc, icon, fmtDate, rpc, toast, fail, confirmBox, modal } from '../core.js';
-import { money, num, invoiceBadge, accounts, itemsList, contactsList, contactOptions, orgSettings, receivePayment, METHOD_LABEL, clearFinCache, payerModal } from '../fin.js';
+import { money, num, invoiceBadge, accounts, itemsList, contactsList, contactOptions, orgSettings, receivePayment, METHOD_LABEL, clearFinCache, payerModal, outsideCanada, ZERO_RATED_NOTE } from '../fin.js';
 
 export async function render(el, [id], { setTitle }) {
   const [{ data: inv, error }, accs, items, contacts, s] = await Promise.all([
-    db.from('invoices').select('*, contacts(id, full_name, email, phone, address, city, province, postal_code)').eq('id', id).single(),
+    db.from('invoices').select('*, contacts(id, full_name, email, phone, address, city, province, postal_code, location, country)').eq('id', id).single(),
     accounts(), itemsList(), contactsList(), orgSettings(),
   ]);
   if (error) { el.innerHTML = '<div class="alert err">Invoice not found.</div>'; return; }
@@ -65,6 +65,7 @@ export async function render(el, [id], { setTitle }) {
         <div style="flex:1">${editable ? `<div class="field"><label>Message on invoice</label><textarea class="input" id="notes">${esc(inv.notes || '')}</textarea></div>
           <div class="field"><label>Terms</label><input class="input" id="terms" value="${esc(inv.terms || '')}"></div>`
           : `${inv.notes ? `<p style="white-space:pre-wrap">${esc(inv.notes)}</p>` : ''}<p class="inv-muted" style="margin-top:8px">${esc(inv.terms || '')}</p>
+             ${rate && outsideCanada(c) && !Number(inv.tax_total) ? `<p class="inv-muted" style="margin-top:8px">${esc(ZERO_RATED_NOTE)}</p>` : ''}
              <p class="inv-muted" style="margin-top:8px">Pay by Interac e-Transfer to <b>${esc(s.pay_email || s.email)}</b> with the invoice number in the message, or call ${esc(s.phone)}.</p>`}</div>
         <div class="inv-totals">
           <div><span>Subtotal</span><b id="tSub">${money(inv.subtotal)}</b></div>
@@ -118,14 +119,23 @@ export async function render(el, [id], { setTitle }) {
     tr.querySelector('.li-item').onchange = (e) => {
       const it = items.find((x) => x.id === e.target.value); if (!it) return;
       tr.querySelector('.li-desc').value = it.description || it.name; tr.querySelector('.li-price').value = it.unit_price;
-      tr.querySelector('.li-tax').checked = it.taxable; if (it.income_account_id) tr.querySelector('.li-acct').value = it.income_account_id; recalc();
+      tr.querySelector('.li-tax').checked = it.taxable && !abroad(); if (it.income_account_id) tr.querySelector('.li-acct').value = it.income_account_id; recalc();
     };
     tr.querySelector('.li-del').onclick = () => { tr.remove(); recalc(); };
   };
+  const abroad = () => outsideCanada(contacts.find((x) => x.id === el.querySelector('#client')?.value));
+  const gstRule = (announce) => {
+    const out = !!rate && abroad();
+    el.querySelector('#gstNote')?.remove();
+    if (!out) return;
+    tbody.closest('.card')?.insertAdjacentHTML('beforebegin', `<div class="alert info" id="gstNote">${esc(ZERO_RATED_NOTE)}</div>`);
+    if (announce) { tbody.querySelectorAll('.li-tax').forEach((x) => (x.checked = false)); recalc(); }
+  };
+  el.querySelector('#client')?.addEventListener('change', () => gstRule(true));
   tbody.querySelectorAll('tr.ln').forEach(wire);
   tbody.addEventListener('input', recalc); tbody.addEventListener('change', recalc);
-  el.querySelector('#addLine').onclick = () => { tbody.insertAdjacentHTML('beforeend', lineRow()); wire(tbody.lastElementChild); };
-  recalc();
+  el.querySelector('#addLine').onclick = () => { tbody.insertAdjacentHTML('beforeend', lineRow()); wire(tbody.lastElementChild); if (abroad()) { tbody.lastElementChild.querySelector('.li-tax').checked = false; recalc(); } };
+  recalc(); gstRule(!(lines || []).length);
 
   async function save() {
     const rows = [...tbody.querySelectorAll('tr.ln')].map((tr, i) => ({

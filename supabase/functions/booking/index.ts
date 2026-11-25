@@ -45,7 +45,7 @@ function dt(x: { dateTime: string; timeZone?: string }): number {
 const CAL_USER = Deno.env.get("BOOKING_CALENDAR") ?? "aman.debesay@gracefulimmigration.ca";
 const HOURS: Record<number, [number, number]> = { 1: [9, 17], 2: [9, 17], 3: [9, 17], 4: [9, 17], 5: [9, 17] }; // Mon–Fri, Alberta time
 const LEAD = 12 * 36e5, AHEAD = 60 * DAY, STEP = 30, AFTER = 15 * 60000;
-const CAL_SERVICES = [30, 60].map((m) => ({ id: `cal-${m}`, name: m === 30 ? "30-Minute Consultation" : "1-Hour Consultation", minutes: m, price: m, description: "",
+const CAL_SERVICES = [30, 60].map((m) => ({ id: `cal-${m}`, name: m === 30 ? "30-Minute Consultation" : "1-Hour Consultation", minutes: m, price: m === 30 ? 75 : 150, description: "",
   staff: [], pre: 0, post: AFTER, policy: null }));
 function statHolidays(y: number) {
   const nthMon = (m: number, n: number) => { const d = new Date(Date.UTC(y, m, 1)); return 1 + (8 - d.getUTCDay()) % 7 + (n - 1) * 7; };

@@ -315,7 +315,7 @@ async function editor(el, a, setTitle) {
       ${f('reason_note', 'Reason in your words (used for “Other reason”)')}${f('matter', 'What they asked about (e.g. “a spousal sponsorship for your husband”)', 'textarea', 'rows="2"')}
       ${chk('advice_given', 'General preliminary information was shared (adds a “do not rely on it” statement)')}
       ${f('deadlines', 'Deadlines you know of — one per line (the letter warns the person about them)', 'textarea', 'rows="3"')}
-      ${f('documents', 'Documents', 'textarea', 'rows="2"')}${f('fees_note', 'Fees (e.g. “The consultation fee of $60 was earned; nothing else is owing.”)', 'textarea', 'rows="2"')}
+      ${f('documents', 'Documents', 'textarea', 'rows="2"')}${f('fees_note', 'Fees (e.g. “The consultation fee of $150 was earned; nothing else is owing.”)', 'textarea', 'rows="2"')}
       <div class="alert info" style="font-size:12.5px">Send this whenever you decline a matter, including after a consultation, so the person knows in writing that you are not acting for them and that deadlines may apply.</div>`, true),
     termination: () => sec('Closing / termination letter', `${opts('close_kind', CLOSE_KIND, 'completed')}${ref}${f('effective_date', 'Effective date', 'date')}
       ${f('reason', 'Reason (required when you withdraw; the client’s instructions when they end the services)', 'textarea', 'rows="2"')}

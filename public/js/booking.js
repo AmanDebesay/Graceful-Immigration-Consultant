@@ -6,8 +6,8 @@
   var BOOKINGS_PAGE = 'https://bookings.cloud.microsoft/book/GracefulImmigrationConsultant@gracefulimmigration.ca/';
   var MT = 'America/Edmonton';
   var MY_TZ = (Intl.DateTimeFormat().resolvedOptions().timeZone) || MT;
-  var PLANS = { '30': { label: '30-Minute Consultation · $30', short: '30 min', minutes: 30, price: 30 },
-                '60': { label: '1-Hour Consultation · $60', short: '1 hour', minutes: 60, price: 60 } };
+  var PLANS = { '30': { label: '30-Minute Consultation · $75', short: '30 min', minutes: 30, price: 30 },
+                '60': { label: '1-Hour Consultation · $150', short: '1 hour', minutes: 60, price: 150 } };
   var $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return String(n).padStart(2, '0'); };
   var esc = function (t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };

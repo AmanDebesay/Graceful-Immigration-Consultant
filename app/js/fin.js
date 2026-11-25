@@ -26,9 +26,12 @@ export async function accounts() {
   return cache.accounts;
 }
 export async function contactsList() {
-  if (!cache.contacts) cache.contacts = (await db.from('contacts').select('id, full_name, email').order('full_name').limit(2000)).data || [];
+  if (!cache.contacts) cache.contacts = (await db.from('contacts').select('id, full_name, email, location, country').order('full_name').limit(2000)).data || [];
   return cache.contacts;
 }
+/** Client lives outside Canada: services to a non-resident outside Canada are zero-rated (no GST). Uses the contact's Location, or a country other than Canada. */
+export const outsideCanada = (c) => !!c && (c.location === 'out' || (!!c.country && !/^\s*(canada|ca|can)\s*$/i.test(c.country)));
+export const ZERO_RATED_NOTE = 'No GST: services to a client living outside Canada are zero-rated (Excise Tax Act, Schedule VI, Part V).';
 export async function vendorsList() {
   if (!cache.vendors) cache.vendors = (await db.from('vendors').select('*').eq('active', true).order('name')).data || [];
   return cache.vendors;
@@ -538,5 +541,9 @@ export async function quickSale(contactId) {
   };
   el.addEventListener('input', tot); el.addEventListener('change', tot);
   const fill = async () => { const cid = el.querySelector('#qc').value; el.querySelector('#qfrom').value = cid ? (await payerFor(cid))?.name || contacts.find((c) => c.id === cid)?.full_name || '' : ''; };
-  el.querySelector('#qc').addEventListener('change', fill); fill();
+  const gstRule = () => { const c = contacts.find((x) => x.id === el.querySelector('#qc').value);
+    if (rate && outsideCanada(c)) { el.querySelector('#qt').checked = false; toast(ZERO_RATED_NOTE); } tot(); };
+  el.querySelector('#qc').addEventListener('change', () => { fill(); gstRule(); });
+  el.querySelector('#qi').addEventListener('change', gstRule);
+  fill(); gstRule();
 }
