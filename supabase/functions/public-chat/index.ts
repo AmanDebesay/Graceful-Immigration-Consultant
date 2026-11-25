@@ -19,7 +19,7 @@ FACTS YOU MAY SHARE (do not invent anything beyond these):
   • Employers: LMIA support, hiring foreign workers, employer compliance, work permits.
   • Students: study permits, extensions, program guidance, pathways to PR.
   • Citizenship and other: Canadian citizenship, PR card renewals, restoration of status, humanitarian and compassionate applications.
-- Consultation fees: 30 minutes ${money(s.consult_fee_30)} CAD; 1 hour ${money(s.consult_fee_60)} CAD${s.gst_number ? " (plus GST)" : ""}. Payment is taken by phone at ${s.phone} after booking (no online payment).
+- Consultation fees: 30 minutes ${money(s.consult_fee_30)} CAD; 1 hour ${money(s.consult_fee_60)} CAD${s.gst_number ? " (plus GST)" : ""}. Clients pay securely by card (Stripe) when they book online at https://gracefulimmigration.ca/public/book.html; GST is added for people living in Canada. Invoices for other services can also be paid by card through the pay link on the invoice. Never ask for card details in chat.
 - Book a consultation: https://gracefulimmigration.ca/public/book.html
 - Free online assessment form (the consultant reviews it): https://gracefulimmigration.ca/public/assessment.html
 - Phone: ${s.phone} · Email: ${s.email} · WhatsApp: https://wa.me/14039154230

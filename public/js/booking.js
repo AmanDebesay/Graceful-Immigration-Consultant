@@ -202,9 +202,10 @@
       '<input name="phone" type="tel" autocomplete="tel" maxlength="40" placeholder="Phone (optional)" aria-label="Phone">' +
       '<textarea name="notes" maxlength="1500" rows="2" placeholder="What would you like help with? (optional)" aria-label="What would you like help with"></textarea>' +
       '<input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px">' +
-      '<label class="wk-check"><input type="checkbox" name="consent"><span>I understand this is a $' + PLANS[plan].price + ' CAD consultation. I will receive a consultation agreement and a secure payment link by email; my time is confirmed once both are done.</span></label>' +
+      '<div class="wk-live" role="radiogroup" aria-label="Where do you live?"><span>Where do you live?</span><label><input type="radio" name="live" value="in" checked> In Canada</label><label><input type="radio" name="live" value="out"> Outside Canada</label></div>' +
+      '<label class="wk-check"><input type="checkbox" name="consent"><span>I understand this is a $' + PLANS[plan].price + ' CAD consultation (plus 5% GST if I live in Canada), paid now by card to confirm my time. I will receive a consultation agreement by email.</span></label>' +
       '<p class="wk-err" role="alert"></p>' +
-      '<div class="wk-pop-f"><button type="button" class="wk-cancel">Cancel</button><button type="submit" class="wk-book">Book this time</button></div></form>';
+      '<div class="wk-pop-f"><button type="button" class="wk-cancel">Cancel</button><button type="submit" class="wk-book">Continue to secure payment</button></div></form>';
     $('calendar').appendChild(pop);
     place(btn);
     pop.querySelector('.wk-x').onclick = pop.querySelector('.wk-cancel').onclick = function () { closePop(); sel = null; };
@@ -226,10 +227,11 @@
     if (v('name').length < 2) { err.textContent = 'Please enter your full name.'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) { err.textContent = 'Please enter a valid email address.'; return; }
     if (!f.elements.consent.checked) { err.textContent = 'Please tick the box to confirm.'; return; }
-    err.textContent = ''; btn.disabled = true; btn.textContent = 'Booking…';
+    err.textContent = ''; btn.disabled = true; btn.textContent = 'Opening secure payment…';
     var svc = serviceFor(plan);
-    api({ action: 'book', serviceId: svc.id, start: t.toISOString(), name: v('name'), email: v('email'), phone: v('phone'), notes: v('notes'), website: f.elements.website.value, consent: true, tz: MY_TZ })
+    api({ action: 'book', serviceId: svc.id, start: t.toISOString(), name: v('name'), email: v('email'), phone: v('phone'), notes: v('notes'), website: f.elements.website.value, consent: true, tz: MY_TZ, inCanada: !(f.elements.live && f.elements.live.value === 'out') })
       .then(function (res) {
+        if (res && res.pay) { location.href = res.pay; return; }
         var key = svc.id; slots[key] = (slots[key] || []).filter(function (d) { return +d !== +t; });
         booked.push({ t: t, name: v('name') }); sel = null;
         var email = v('email'); draw();
@@ -241,7 +243,7 @@
         pop.querySelector('.wk-x').onclick = closePop;
       })
       .catch(function (er) {
-        btn.disabled = false; btn.textContent = 'Book this time'; err.textContent = er.message;
+        btn.disabled = false; btn.textContent = 'Continue to secure payment'; err.textContent = er.message;
         if (er.data && er.data.taken) { var key = svc.id; covered[key] = []; slots[key] = []; setTimeout(function () { go(anchor); }, 1500); }
       });
   }
@@ -276,6 +278,29 @@
 
   anchor = addDays(today, 0); draw();
   var pre = new URLSearchParams(location.search).get('length');
+  // Back from Stripe: confirm the payment, which books the time.
+  var qs = new URLSearchParams(location.search), paidSession = qs.get('paid');
+  function notice(html) {
+    pop = document.createElement('div'); pop.className = 'wk-pop wk-done sheet';
+    pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button>' + html;
+    $('calendar').appendChild(pop); pop.querySelector('.wk-x').onclick = closePop;
+    $('bookLayout').scrollIntoView({ block: 'start' });
+  }
+  if (paidSession || qs.get('cancelled')) history.replaceState(null, '', location.pathname);
+  if (paidSession) {
+    notice('<div class="bk-tick"><svg><use href="#i-clock"/></svg></div><h4>Confirming your payment…</h4><p>Please keep this page open.</p>');
+    api({ action: 'confirm', session: paidSession }).then(function (r) {
+      if (pop) closePop();
+      if (!r || !r.paid) return notice('<h4>Payment not finished</h4><p>We have not received your payment yet, so the time is not booked. Please try again or call (403) 915-4230.</p>');
+      var t = new Date(r.start);
+      notice('<div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>Paid and booked!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + esc(r.service || '') + '</p>' +
+        '<p class="wk-small">Your receipt from Stripe and the meeting invitation are on their way to your email.</p>' +
+        (r.joinUrl ? '<a class="wk-join" href="' + esc(r.joinUrl) + '" target="_blank" rel="noopener">Your Microsoft Teams link</a><p class="wk-small">Save this link. Use it to join at the time of your consultation.</p>' : ''));
+    }).catch(function (e) { if (pop) closePop(); notice('<h4>We could not confirm the booking</h4><p>' + esc(e.message) + '</p><p>If you were charged, don\'t worry: call (403) 915-4230 and we will book your time.</p>'); });
+  } else if (qs.get('cancelled')) {
+    setTimeout(function () { notice('<h4>Payment cancelled</h4><p>You have not been charged and the time was not booked. You can choose a time again.</p>'); }, 300);
+  }
+
   api({ action: 'services' })
     .then(function (j) { services = j.services || []; })
     .catch(function (e) { services = []; setupError = e.message; })
