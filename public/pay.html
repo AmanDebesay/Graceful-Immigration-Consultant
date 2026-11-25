@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pay Invoice — Graceful Immigration Consultant</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,Arial,sans-serif;background:#F5F6FA;color:#1C2333;font-size:15px;line-height:1.55;min-height:100vh}
+    header{background:#fff;border-bottom:1px solid #E7E9F0;padding:14px 20px;display:flex;align-items:center;gap:12px}
+    header img{width:48px}header b{font-family:'Playfair Display',Georgia,serif;font-size:20px;color:#0B2A5C;display:block;line-height:1}header span{font-size:12px;color:#667085}
+    main{max-width:520px;margin:0 auto;padding:28px 16px 60px}
+    .card{background:#fff;border:1px solid #E7E9F0;border-radius:16px;box-shadow:0 8px 24px rgba(16,24,40,.06);padding:28px 24px}
+    h2{font-family:'Playfair Display',Georgia,serif;color:#0B2A5C;font-size:24px;margin-bottom:4px}
+    .muted{color:#667085;font-size:14px}
+    .amt{font-size:40px;font-weight:700;color:#0B2A5C;margin:18px 0 4px;letter-spacing:-.02em}
+    .rows{border-top:1px solid #EEF0F5;margin-top:18px;padding-top:12px}
+    .rows div{display:flex;justify-content:space-between;padding:5px 0;font-size:14px}
+    .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 22px;border-radius:12px;border:0;font:inherit;font-weight:700;font-size:16px;cursor:pointer;margin-top:22px;
+      background:linear-gradient(180deg,#EDBE55,#D19A2E);color:#1B1405}
+    .btn:disabled{opacity:.6;cursor:wait}
+    .banner{border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:14px}
+    .banner.ok{background:#ECFDF3;color:#067647}.banner.err{background:#FEF3F2;color:#B42318}.banner.info{background:#EFF8FF;color:#1849A9}
+    .safe{display:flex;gap:10px;align-items:flex-start;margin-top:18px;font-size:13px;color:#475467}
+    .safe svg{flex:none;width:20px;height:20px;color:#067647;margin-top:1px}
+    .other{margin-top:16px;font-size:13px;color:#667085;text-align:center}
+    .loading{text-align:center;padding:60px;color:#667085}
+  </style>
+</head>
+<body>
+<header><img src="img/logo-emblem.png" alt=""><div><b>Graceful</b><span>Immigration Consultant Inc. · Secure payment</span></div></header>
+<main id="main"><div class="loading">Loading your invoice…</div></main>
+<script>
+  (function () {
+    var FN = 'https://bmzhcprthrocbqluxpwa.supabase.co/functions/v1/pay';
+    var KEY = 'sb_publishable_ZcaXkELPK820lTD41ffw2Q_iMTta3uT';
+    var q = new URLSearchParams(location.search), i = q.get('i') || '', k = q.get('k') || '', session = q.get('session'), cancelled = q.get('cancelled');
+    var main = document.getElementById('main');
+    var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+    var money = function (n) { return Number(n || 0).toLocaleString('en-CA', { style: 'currency', currency: 'CAD' }); };
+    var call = function (body) {
+      body.i = i; body.k = k;
+      return fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: 'Bearer ' + KEY }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json().then(function (d) { if (!r.ok || d.error) throw new Error(d.error || 'Something went wrong.'); return d; }); });
+    };
+    var lock = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    function show(d, note) {
+      var paid = d.status === 'paid' || Number(d.balance) <= 0;
+      main.innerHTML = '<div class="card">' + (note || '') +
+        '<h2>Invoice ' + esc(d.number) + '</h2><div class="muted">' + esc(d.business || 'Graceful Immigration Consultant Inc.') + '</div>' +
+        '<div class="amt">' + money(paid ? d.total : d.balance) + '</div><div class="muted">' + (paid ? 'Paid in full — thank you.' : 'Amount due (CAD)') + '</div>' +
+        '<div class="rows"><div><span>Invoice total</span><b>' + money(d.total) + '</b></div>' + (d.due_date && !paid ? '<div><span>Due</span><b>' + esc(new Date(d.due_date + 'T12:00:00').toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' })) + '</b></div>' : '') + '</div>' +
+        (paid ? '' : '<button class="btn" id="pay">' + lock + ' Pay ' + money(d.balance) + ' by card</button>' +
+          '<div class="safe">' + lock + '<span>You will pay on Stripe\'s secure page. Your card number is never seen or stored by Graceful Immigration. Visa, Mastercard, American Express, Apple Pay and Google Pay are accepted.</span></div>') +
+        '<div class="other">Questions about this invoice? Call ' + esc(d.phone || '(403) 915-4230') + '.</div></div>';
+      var b = document.getElementById('pay');
+      if (b) b.onclick = function () {
+        b.disabled = true; b.textContent = 'Opening secure payment…';
+        call({ action: 'checkout' }).then(function (r) { location.href = r.url; })
+          .catch(function (e) { b.disabled = false; b.innerHTML = lock + ' Try again'; alert(e.message); });
+      };
+    }
+    var fail = function (e) { main.innerHTML = '<div class="card"><div class="banner err">' + esc(e.message) + '</div><div class="muted">Please contact our office at (403) 915-4230 if you need help.</div></div>'; };
+    if (session) {
+      main.innerHTML = '<div class="loading">Confirming your payment…</div>';
+      call({ action: 'confirm', session: session }).then(function (d) {
+        history.replaceState(null, '', location.pathname + '?i=' + encodeURIComponent(i) + '&k=' + encodeURIComponent(k));
+        show(d, d.paid ? '<div class="banner ok"><b>Payment received.</b> Thank you! A receipt from Stripe is on its way to your email, and our office has been notified.</div>' : '<div class="banner info">Your payment is still being processed. Please check back in a few minutes.</div>');
+      }).catch(fail);
+    } else {
+      call({ action: 'info' }).then(function (d) { show(d, cancelled ? '<div class="banner info">Payment was cancelled. You have not been charged.</div>' : ''); }).catch(fail);
+    }
+  })();
+</script>
+</body>
+</html>

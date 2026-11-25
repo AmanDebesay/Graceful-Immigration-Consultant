@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
           admin.from("org_settings").select("business_name, rcic_name, licence_number, phone, email, address, pay_email, trust_email").eq("id", 1).single(),
           admin.from("cases").select("id, case_number, title, application_type, status, opened_on, submitted_on, decision_on").eq("contact_id", c.id).order("created_at", { ascending: false }),
           admin.from("agreements").select("id, number, title, type, status, sent_at, client_signed_at, signing_token, token_expires_at, drive_item_id").eq("contact_id", c.id).in("status", ["sent", "viewed", "signed"]).order("created_at", { ascending: false }),
-          admin.from("invoices").select("id, number, issue_date, due_date, total, balance, status").eq("contact_id", c.id).in("status", OPEN_STATUSES).order("issue_date", { ascending: false }),
+          admin.from("invoices").select("id, number, issue_date, due_date, total, balance, status, pay_token").eq("contact_id", c.id).in("status", OPEN_STATUSES).order("issue_date", { ascending: false }),
           admin.from("client_documents").select("id, name, doc_type, category, size, created_at, from_client, checklist_item_id").eq("contact_id", c.id).or("shared.eq.true,from_client.eq.true").order("created_at", { ascending: false }),
           admin.from("portal_messages").select("id, from_client, body, created_at, sender_id, profiles:sender_id(full_name)").eq("contact_id", c.id).order("created_at").limit(200),
         ]);

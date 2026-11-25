@@ -1,7 +1,15 @@
 import { db, esc, icon, fmtDate, can, rpc, confirmBox, toast, fail, today } from '../core.js';
 import { money, invoiceBadge, METHOD_LABEL, newInvoice, receivePayment, downloadCsv } from '../fin.js';
 
+// Card payments made online: record any that came back while nobody had the pay page open (quietly, at most every 2 minutes).
+let lastSync = 0;
+async function syncOnline() {
+  if (Date.now() - lastSync < 120000) return 0; lastSync = Date.now();
+  try { const r = await (await import('../core.js')).callFn('pay', { action: 'sync' }); return r?.recorded || 0; } catch { return 0; }
+}
+
 export async function render(el) {
+  syncOnline().then((n) => { if (n) { toast(`${n} online card payment${n > 1 ? 's' : ''} recorded`); window.dispatchEvent(new Event('books-changed')); } });
   const qs = new URLSearchParams(location.hash.split('?')[1] || '');
   let tab = qs.get('tab') || 'invoices';
   let filter = qs.get('f') || 'all';

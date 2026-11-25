@@ -136,8 +136,9 @@ export async function renderPortal(app) {
     const f = data.firm || {};
     el.innerHTML = `<div class="cp-card"><h2>${icon('dollar')} Your invoices</h2>
       ${data.invoices.length ? data.invoices.map((i) => `<div class="cp-row"><span class="cp-ico">${icon('dollar')}</span><span class="cp-rt"><b>Invoice ${esc(i.number)}</b><small>${fmtDate(i.issue_date)} · total ${money(i.total)}${+i.balance > 0 ? ` · due ${fmtDate(i.due_date)}` : ''}</small></span>
-        ${+i.balance > 0 ? `<span class="cp-chip wait">${money(i.balance)} to pay</span>` : '<span class="cp-chip ok">Paid</span>'}<button class="cp-btn sm" data-inv="${i.id}">View</button></div>`).join('') : '<p class="cp-muted">No invoices yet.</p>'}</div>
-      <div class="cp-card cp-pay"><h2>${icon('check')} How to pay</h2><p><b>Invoices:</b> Interac e-Transfer to <b>${esc(f.pay_email || 'payments@gracefulimmigration.ca')}</b>. Please put the invoice number in the message.</p>
+        ${+i.balance > 0 ? `<span class="cp-chip wait">${money(i.balance)} to pay</span>` : '<span class="cp-chip ok">Paid</span>'}${+i.balance > 0 && i.pay_token ? `<a class="cp-btn sm gold" href="../public/pay.html?i=${i.id}&k=${i.pay_token}" target="_blank" rel="noopener">Pay by card</a>` : ''}<button class="cp-btn sm" data-inv="${i.id}">View</button></div>`).join('') : '<p class="cp-muted">No invoices yet.</p>'}</div>
+      <div class="cp-card cp-pay"><h2>${icon('check')} How to pay</h2><p><b>Pay by card online:</b> press <b>Pay by card</b> next to the invoice. You pay on Stripe's secure page; we never see your card number.</p>
+        <p><b>Invoices:</b> Interac e-Transfer to <b>${esc(f.pay_email || 'payments@gracefulimmigration.ca')}</b>. Please put the invoice number in the message.</p>
         <p><b>Retainer or advance payment</b> (money held in trust before work is done): Interac e-Transfer to <b>${esc(f.trust_email || 'clientfunds@gracefulimmigration.ca')}</b>.</p>
         <p class="cp-muted">Prefer another way? Call us at ${esc(f.phone || '')}. Payments usually show here within one business day.</p></div>`;
     el.onclick = (e) => { const b = e.target.closest('[data-inv]'); if (b) openInvoice(b.dataset.inv).catch(fail); };

@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
         subject: `${service.name}: ${name}`, start: when(start), end: when(end), showAs: "busy", isReminderOn: true, reminderMinutesBeforeStart: 15,
         isOnlineMeeting: true, onlineMeetingProvider: "teamsForBusiness", attendees: [{ emailAddress: { address: email, name }, type: "required" }],
         body: { contentType: "Text", content: `Booked on the website.\nClient: ${name}\nEmail: ${email}${phone ? `\nPhone: ${phone}` : ""}\nTime zone: ${tz}${notes ? `\n\nWhat they need help with:\n${notes}` : ""}` },
-      }) }).then((ev: any) => ({ joinUrl: ev?.onlineMeeting?.joinUrl ?? null })) }) : await bookings("/appointments", { method: "POST", body: JSON.stringify({
+      }) }).then((ev: any) => ({ joinUrl: ev?.onlineMeeting?.joinUrl ?? null })) : await bookings("/appointments", { method: "POST", body: JSON.stringify({
         "@odata.type": "#microsoft.graph.bookingAppointment",
         serviceId: service.id, serviceName: service.name, staffMemberIds: [slot.staff],
         startDateTime: when(start), endDateTime: when(end), isLocationOnline: true, optOutOfCustomerEmail: false,

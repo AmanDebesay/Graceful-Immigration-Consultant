@@ -18,6 +18,7 @@ export async function render(el, [id], { setTitle }) {
   const c = inv.contacts || {};
   const payer = inv.bill_to?.name ? inv.bill_to : null;   // someone else pays for the client's services
   const mailTo = payer ? payer.email || '' : c.email;
+  const payLink = inv.pay_token && ['open', 'partial'].includes(inv.status) ? `https://gracefulimmigration.ca/public/pay.html?i=${inv.id}&k=${inv.pay_token}` : '';
 
   const lineRow = (l = {}) => `<tr class="ln">
     <td><select class="input li-item"><option value="">— Product/service —</option>${items.map((it) => `<option value="${it.id}" ${it.id === l.item_id ? 'selected' : ''}>${esc(it.name)}</option>`).join('')}</select></td>
@@ -33,6 +34,7 @@ export async function render(el, [id], { setTitle }) {
     <div class="toolbar"><a class="btn btn-sm" href="#/invoices">← Invoices</a><div class="grow"></div>
       <button class="btn" id="print">${icon('file')} Print / PDF</button>
       ${manage && inv.status !== 'void' ? `<button class="btn" id="payer" title="Bill the client, or someone who pays on their behalf">${icon('users')} ${payer ? 'Payer' : 'Bill someone else'}</button>` : ''}
+      ${payLink ? `<button class="btn" id="payLink" title="Link where the client pays this invoice by card">${icon('dollar')} Copy pay link</button>` : ''}
       ${!draft ? `<a class="btn" id="mail" href="#">${icon('mail')} Email${payer ? ' payer' : ''}</a>` : ''}
       ${editable ? `<button class="btn btn-danger" id="delDraft">${icon('trash')}</button><button class="btn" id="save">Save draft</button><button class="btn btn-gold" id="post">${icon('check')} Approve & post</button>` : ''}
       ${manage && ['open', 'partial'].includes(inv.status) ? `<button class="btn btn-primary" id="recv">${icon('dollar')} Receive payment</button>` : ''}
@@ -66,7 +68,7 @@ export async function render(el, [id], { setTitle }) {
           <div class="field"><label>Terms</label><input class="input" id="terms" value="${esc(inv.terms || '')}"></div>`
           : `${inv.notes ? `<p style="white-space:pre-wrap">${esc(inv.notes)}</p>` : ''}<p class="inv-muted" style="margin-top:8px">${esc(inv.terms || '')}</p>
              ${rate && outsideCanada(c) && !Number(inv.tax_total) ? `<p class="inv-muted" style="margin-top:8px">${esc(ZERO_RATED_NOTE)}</p>` : ''}
-             <p class="inv-muted" style="margin-top:8px">Pay by Interac e-Transfer to <b>${esc(s.pay_email || s.email)}</b> with the invoice number in the message, or call ${esc(s.phone)}.</p>`}</div>
+             <p class="inv-muted" style="margin-top:8px">Pay by Interac e-Transfer to <b>${esc(s.pay_email || s.email)}</b> with the invoice number in the message, or call ${esc(s.phone)}.${payLink ? ` <b>Pay online by card:</b> ${esc(payLink)}` : ''}</p>`}</div>
         <div class="inv-totals">
           <div><span>Subtotal</span><b id="tSub">${money(inv.subtotal)}</b></div>
           <div><span>GST ${rate || ''}${rate ? '%' : ''}</span><b id="tTax">${money(inv.tax_total)}</b></div>
@@ -81,10 +83,14 @@ export async function render(el, [id], { setTitle }) {
 
   // ── Interactions ──
   el.querySelector('#print').onclick = () => window.print();
+  el.querySelector('#payLink')?.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(payLink); toast('Pay link copied. Paste it into an email or text to the client.'); }
+    catch { modal({ title: 'Pay link', body: `<input class="input" value="${esc(payLink)}" readonly onclick="this.select()">`, actions: [{ label: 'Close' }] }); }
+  });
   el.querySelector('#mail')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const first = String((payer ? payer.name : c.full_name) || '').split(' ')[0] || 'there';
-    const body = `Hello ${first},\n\nPlease find invoice ${inv.number} for ${money(inv.total)}${payer ? `, for immigration services provided to ${c.full_name}` : ''}, due ${fmtDate(inv.due_date)}. The balance due is ${money(inv.balance)}.\n\nYou can pay by Interac e-Transfer to ${s.pay_email || s.email} (please put ${inv.number} in the message), or call ${s.phone}.\n\nThank you,\n${s.rcic_name}\n${s.business_name}`;
+    const body = `Hello ${first},\n\nPlease find invoice ${inv.number} for ${money(inv.total)}${payer ? `, for immigration services provided to ${c.full_name}` : ''}, due ${fmtDate(inv.due_date)}. The balance due is ${money(inv.balance)}.\n\n${payLink ? `Pay online by card (secure, through Stripe):\n${payLink}\n\nOr pay` : 'You can pay'} by Interac e-Transfer to ${s.pay_email || s.email} (please put ${inv.number} in the message), or call ${s.phone}.\n\nThank you,\n${s.rcic_name}\n${s.business_name}`;
     (await import('../crm.js')).composeEmail({ contact: { ...c, email: mailTo }, to: mailTo, subject: `Invoice ${inv.number} from ${s.business_name}`, body });
     toast('Tip: print the invoice to PDF (Print / PDF) and attach it to the email.');
   });
