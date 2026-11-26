@@ -106,6 +106,8 @@
 
   // ── Booking: an Outlook-style week calendar. Open times sit in the calendar; click one to book it right there. ──
   var plan = '30', services = null, setupError = null;
+  // Changing an unpaid booking from the private link in the client's email (book.html?change=...).
+  var CHANGE = new URLSearchParams(location.search).get('change'), HELD = null;
   var slots = {}, covered = {}, booked = [], anchor = null, sel = null, loading = false, firstJump = true;
   var body = $('wkBody'), pop = null;
   var HOUR = 56;
@@ -131,7 +133,7 @@
     if (have.some(function (w) { return w[0] <= start && w[1] >= end; })) return Promise.resolve();
     loading = true; draw();
     var winFrom = addDays(start, -1);
-    return api({ action: 'slots', serviceId: svc.id, from: dkey(winFrom), days: 42 }).then(function (j) {
+    return api({ action: 'slots', serviceId: svc.id, from: dkey(winFrom), days: 42, change: HELD ? CHANGE : undefined }).then(function (j) {
       slots[key] = (slots[key] || []).concat(j.slots.map(function (s) { return new Date(s); }))
         .filter(function (d, i, a) { return a.findIndex(function (x) { return +x === +d; }) === i; }).sort(function (a, b) { return a - b; });
       (covered[key] = have).push([start, addDays(winFrom, 41)]);
@@ -193,6 +195,7 @@
     var t = new Date(btn.dataset.t), end = new Date(+t + PLANS[plan].minutes * 6e4);
     closePop(); sel = t; btn.classList.add('sel');
     pop = document.createElement('div'); pop.className = 'wk-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Book this time');
+    if (HELD) return openMove(t, end, btn);
     pop.innerHTML = '<div class="wk-pop-h"><span class="wk-pop-bar"></span><div><b>' + PLANS[plan].label + '</b><small>with Aman Debesay, RCIC-IRB</small></div><button type="button" class="wk-x" aria-label="Close">×</button></div>' +
       '<div class="wk-pop-when"><svg><use href="#i-clock"/></svg><span><b>' + esc(t.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })) + '</b><br>' + esc(fmtTime(t) + ' – ' + fmtTime(end)) + (sameTz ? '' : ' your time · ' + esc(fmtTime(t, MT)) + ' Alberta') + '</span></div>' +
       '<div class="wk-pop-when"><svg><use href="#i-phone"/></svg><span>Microsoft Teams video call · link sent by email</span></div>' +
@@ -216,10 +219,61 @@
       var code = pf.elements.promo.value.trim(); if (!code) { pmsg.textContent = ''; return; }
       pmsg.className = 'wk-promo-msg'; pmsg.textContent = 'Checking…';
       api({ action: 'promo', serviceId: serviceFor(plan).id, code: code, inCanada: !(pf.elements.live && pf.elements.live.value === 'out') })
-        .then(function (r) { pmsg.className = 'wk-promo-msg ok'; pmsg.textContent = r.percent + '% off: $' + r.net.toFixed(2) + (r.gst ? ' + $' + r.gst.toFixed(2) + ' GST = $' + r.total.toFixed(2) : '') + ' CAD'; })
+        .then(function (r) { pmsg.className = 'wk-promo-msg ok'; pmsg.textContent = (r.label || r.percent + '% off') + ': $' + r.net.toFixed(2) + (r.gst ? ' + $' + r.gst.toFixed(2) + ' GST = $' + r.total.toFixed(2) : '') + ' CAD'; })
         .catch(function (e) { pmsg.className = 'wk-promo-msg bad'; pmsg.textContent = e.message; });
     };
     setTimeout(function () { pop && pop.querySelector('input[name=name]').focus({ preventScroll: true }); }, 30);
+  }
+
+  // -- Moving an unpaid booking to another time (or length) --
+  function openMove(t, end, btn) {
+    var same = +t === +new Date(HELD.start) && PLANS[plan].minutes === HELD.minutes;
+    pop.innerHTML = '<div class="wk-pop-h"><span class="wk-pop-bar"></span><div><b>Move my booking here</b><small>' + esc(PLANS[plan].label) + '</small></div><button type="button" class="wk-x" aria-label="Close">×</button></div>' +
+      '<div class="wk-pop-when"><svg><use href="#i-clock"/></svg><span><b>' + esc(t.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })) + '</b><br>' + esc(fmtTime(t) + ' – ' + fmtTime(end)) + (sameTz ? '' : ' your time · ' + esc(fmtTime(t, MT)) + ' Alberta') + '</span></div>' +
+      '<p class="wk-small" style="margin:6px 0 10px">Was: ' + esc(fmtDay(new Date(HELD.start)) + ' at ' + fmtTime(new Date(HELD.start))) + '. The payment deadline stays the same, and we will email you a new payment link.</p>' +
+      '<p class="wk-err" role="alert">' + (same ? 'This is your current time.' : '') + '</p>' +
+      '<div class="wk-pop-f"><button type="button" class="wk-cancel">Back</button><button type="button" class="wk-book"' + (same ? ' disabled' : '') + '>Move to this time</button></div>';
+    $('calendar').appendChild(pop);
+    place(btn);
+    pop.querySelector('.wk-x').onclick = pop.querySelector('.wk-cancel').onclick = function () { closePop(); sel = null; };
+    var b = pop.querySelector('.wk-book'), err = pop.querySelector('.wk-err');
+    b.onclick = function () {
+      b.disabled = true; b.textContent = 'Moving…'; err.textContent = '';
+      var svc = serviceFor(plan);
+      api({ action: 'reschedule', token: CHANGE, serviceId: svc.id, start: t.toISOString(), tz: MY_TZ }).then(function (res) {
+        HELD.start = res.start; HELD.minutes = PLANS[plan].minutes; HELD.service = res.service; HELD.total = res.total; HELD.pay = res.pay; HELD.deadline = res.deadline;
+        covered = {}; slots = {}; sel = null; changeBar();
+        closePop(); ensure(viewStart()).then(draw);
+        var due = new Date(res.deadline);
+        notice('<div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>Your booking was moved</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + esc(res.service) + '</p>' +
+          '<p>Please pay <b>$' + Number(res.total).toFixed(2) + ' CAD</b> by <b>' + esc(fmtTime(due)) + (due.toDateString() === new Date().toDateString() ? ' today' : ' on ' + esc(fmtDay(due))) + '</b> to keep it.</p>' +
+          '<a class="wk-join wk-paynow" href="' + esc(res.pay) + '">Pay now by card</a><p class="wk-small">Outlook will send you the updated meeting invitation; your Teams link stays the same. We also emailed the new payment link.</p>');
+      }).catch(function (e) {
+        b.disabled = false; b.textContent = 'Move to this time'; err.textContent = e.message;
+        if (e.data && e.data.taken) { covered = {}; slots = {}; setTimeout(function () { go(anchor); }, 1500); }
+        if (e.data && e.data.status) { HELD = null; changeBar(e.message); }
+      });
+    };
+  }
+  function changeBar(msg) {
+    var bar = $('wkChange');
+    if (!bar) { bar = document.createElement('div'); bar.id = 'wkChange'; bar.className = 'wk-changebar'; $('calendar').insertBefore(bar, $('calendar').firstChild); }
+    if (!HELD) { bar.innerHTML = '<div><b>This booking can no longer be changed online</b><span>' + esc(msg || '') + '</span></div>'; return; }
+    var st = new Date(HELD.start), due = new Date(HELD.deadline);
+    bar.innerHTML = '<div><b>Change your booking</b><span>Now booked: ' + esc(HELD.service) + ', ' + esc(fmtDay(st) + ' at ' + fmtTime(st)) +
+      '. Pick a new time below, or switch the length. Pay by ' + esc(fmtTime(due)) + (due.toDateString() === new Date().toDateString() ? ' today' : ' on ' + esc(fmtDay(due))) + ' to keep it.</span></div>' +
+      '<div class="wk-changebar-a">' + (HELD.pay ? '<a class="wk-cb-pay" href="' + esc(HELD.pay) + '">Pay $' + Number(HELD.total).toFixed(2) + '</a>' : '') + '<button type="button" class="wk-cb-cancel">Cancel booking</button></div>';
+    bar.querySelector('.wk-cb-cancel').onclick = cancelHeld;
+  }
+  function cancelHeld() {
+    if (!HELD) return;
+    if (!confirm('Cancel your booking on ' + fmtDay(new Date(HELD.start)) + ' at ' + fmtTime(new Date(HELD.start)) + '? You have not paid, so you will not be charged.')) return;
+    var b = document.querySelector('.wk-cb-cancel'); if (b) { b.disabled = true; b.textContent = 'Cancelling…'; }
+    api({ action: 'cancelhold', token: CHANGE }).then(function () {
+      HELD = null; CHANGE = null; var bar = $('wkChange'); if (bar) bar.remove();
+      covered = {}; slots = {}; ensure(viewStart()).then(draw);
+      notice('<div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>Your booking is cancelled</h4><p>You have not been charged. We emailed you a confirmation.</p><p class="wk-small">You can choose a new time below whenever you are ready.</p>');
+    }).catch(function (e) { if (b) { b.disabled = false; b.textContent = 'Cancel booking'; } alert(e.message); });
   }
   function place(btn) {
     if (innerWidth < 640) { pop.classList.add('sheet'); return; }
@@ -249,6 +303,7 @@
           pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button><div class="bk-tick"><svg><use href="#i-clock"/></svg></div><h4>Your time is held</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + esc(res.service || PLANS[plan].label) + '</p>' +
             '<p>Please pay <b>$' + Number(res.total).toFixed(2) + ' CAD</b> by <b>' + esc(fmtTime(due)) + (due.toDateString() === new Date().toDateString() ? ' today' : ' on ' + esc(fmtDay(due))) + '</b> to keep this time. Otherwise it is released automatically.</p>' +
             '<a class="wk-join wk-paynow" href="' + esc(res.pay) + '">Pay now by card</a>' +
+            (res.manage ? '<a class="wk-change-link" href="' + esc(res.manage) + '">Change date or time</a>' : '') +
             '<p class="wk-small">We also emailed the payment link to <b>' + esc(email) + '</b>, and the Teams meeting invitation separately. Cancel 3+ hours before for a full refund.</p>';
         } else pop.innerHTML = '<button type="button" class="wk-x" aria-label="Close">×</button><div class="bk-tick"><svg><use href="#i-check"/></svg></div><h4>You are booked!</h4><p><b>' + esc(fmtDay(t) + ' at ' + fmtTime(t)) + '</b>' + (sameTz ? '' : '<br>' + esc(fmtTime(t, MT)) + ' Alberta time') + '<br>' + PLANS[plan].label + '</p><p>A confirmation with your Microsoft Teams link is on its way to <b>' + esc(email) + '</b>.</p>' +
           (res && res.joinUrl ? '<a class="wk-join" href="' + esc(res.joinUrl) + '" target="_blank" rel="noopener">Your Microsoft Teams link</a><p class="wk-small">Save this link. Use it to join at the time of your consultation.</p>' : '');
@@ -300,7 +355,12 @@
     $('calendar').appendChild(pop); pop.querySelector('.wk-x').onclick = closePop;
     $('bookLayout').scrollIntoView({ block: 'start' });
   }
-  if (paidSession || qs.get('cancelled') || qs.get('held')) history.replaceState(null, '', location.pathname);
+  if (paidSession || qs.get('cancelled') || qs.get('held') || qs.get('cancel')) history.replaceState(null, '', location.pathname + (CHANGE ? '?change=' + encodeURIComponent(CHANGE) : ''));
+  var heldReady = CHANGE ? api({ action: 'held', token: CHANGE }).then(function (h) {
+    if (h.status === 'held') { HELD = h; changeBar(); if (qs.get('cancel')) setTimeout(cancelHeld, 600); }
+    else changeBar(h.message);
+    return h;
+  }).catch(function (e) { changeBar(e.message); return null; }) : Promise.resolve(null);
   if (paidSession) {
     notice('<div class="bk-tick"><svg><use href="#i-clock"/></svg></div><h4>Confirming your payment…</h4><p>Please keep this page open.</p>');
     api({ action: 'confirm', session: paidSession }).then(function (r) {
@@ -330,5 +390,9 @@
       });
     })
     .catch(function (e) { services = []; setupError = e.message; })
-    .then(function () { choosePlan(pre === '60' ? '60' : '30', pre === '30' || pre === '60'); });
+    .then(function () { return heldReady; })
+    .then(function () {
+      if (HELD) { anchor = addDays(new Date(HELD.start), 0); firstJump = false; return choosePlan(HELD.minutes === 60 ? '60' : '30', true); }
+      choosePlan(pre === '60' ? '60' : '30', pre === '30' || pre === '60');
+    });
 })();

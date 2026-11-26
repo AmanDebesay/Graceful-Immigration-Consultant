@@ -127,6 +127,7 @@ async function fees(el) {
       <form class="card-b" id="cf"><div class="row-2">
         <div class="field"><label for="c30">30-minute consultation (CAD)</label><input class="input" id="c30" type="number" step="0.01" min="0" value="${esc(s.consult_fee_30)}"></div>
         <div class="field"><label for="c60">60-minute consultation (CAD)</label><input class="input" id="c60" type="number" step="0.01" min="0" value="${esc(s.consult_fee_60)}"></div></div>
+        <p style="color:var(--muted);font-size:12.5px;margin:0 0 10px">Linked to the <b>30-Minute Consultation</b> and <b>1-Hour Consultation</b> items in Products &amp; Services: changing the price in either place changes both, and the website booking page and card payments use it right away.</p>
         <div class="row" style="justify-content:flex-end"><button class="btn btn-primary" type="submit">Save consultation fees</button></div></form></div>
     <div class="card"><div class="card-h"><h3>Services & prices</h3><div class="grow"></div><button class="btn btn-gold btn-sm" id="add">${icon('plus')} Add service</button></div>
       ${unpriced ? `<div class="alert err" style="margin:12px 16px 0">${unpriced} active service${unpriced > 1 ? 's have' : ' has'} no price yet. Click a row to set its milestone fees.</div>` : ''}
