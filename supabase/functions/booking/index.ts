@@ -220,13 +220,7 @@ const mailShell = (inner: string, o: { title?: string; sub?: string; pre?: strin
     </tr></table></td></tr>
   ${o.title ? `<tr><td style="background:${NAVY};padding:20px 30px"><div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:bold;color:#ffffff;line-height:1.3">${o.title}</div>
     ${o.sub ? `<div style="font-size:14px;color:#D6DEEC;margin-top:4px">${o.sub}</div>` : ""}</td></tr>` : ""}
-  <tr><td style="padding:26px 30px 10px;font-size:15px;line-height:1.6">${inner}</td></tr>
-  <tr><td style="padding:18px 30px 24px;border-top:1px solid ${LINE};font-size:12.5px;line-height:1.7;color:${MUTED}">
-    <b style="color:${NAVY}">Graceful Immigration Consultant Inc.</b><br>
-    Aman Debesay, Regulated Canadian Immigration Consultant (RCIC-IRB) · CICC licence R1056136<br>
-    2318 23rd St N #3, Lethbridge, AB T1H 4R7<br>
-    <a href="tel:+14039154230" style="color:${NAVY};text-decoration:none">(403) 915-4230</a> &nbsp;·&nbsp; <a href="mailto:info@gracefulimmigration.ca" style="color:${NAVY};text-decoration:none">info@gracefulimmigration.ca</a> &nbsp;·&nbsp; <a href="${SITE}" style="color:${NAVY};text-decoration:none">gracefulimmigration.ca</a>
-  </td></tr>
+  <tr><td style="padding:26px 30px 16px;font-size:15px;line-height:1.6">${inner}</td></tr>
 </table></td></tr></table></body></html>`;
 const btn = (url: string, label: string, primary = true) => `<a href="${escapeHtml(url)}" style="display:inline-block;padding:14px 26px;border-radius:10px;font-weight:bold;font-size:15px;text-decoration:none;${primary
   ? `background:${GOLD};color:#1B1405;border:1px solid ${GOLD}` : `background:#ffffff;color:${NAVY};border:1px solid #C4CCDA`}">${label}</a>`;
@@ -378,6 +372,20 @@ Deno.serve(async (req) => {
           const { data: a } = await admin.from("appointments").select("notes").eq("id", pend.appointment_id).maybeSingle();
           if (a) await admin.from("appointments").update({ notes: String(a.notes ?? "").replace(/ Payment: awaiting card payment \(due [^)]*\)\./, " Paid by card (Stripe).") }).eq("id", pend.appointment_id);
         }
+        // Confirmation to the client with the Teams link (sent once, when the payment is first recorded).
+        const paidAmt = cad(Number(d.net ?? 0) + Number(d.gst ?? 0));
+        if (!late) await sendEmail(d.email, `Confirmed: your consultation on ${fmtAB(d.start, { month: "short", day: "numeric" })}`, mailShell(
+          `<p>Hello ${escapeHtml(d.name)},</p><p>Thank you, we received your payment of <b>${paidAmt}</b>. Your consultation is confirmed:</p>
+          ${apptCard(service.name, d.start, d.tz)}
+          ${r.joinUrl ? `<p style="margin:22px 0 8px">${btn(r.joinUrl, "Join the Microsoft Teams meeting")}</p>
+          <p style="font-size:13px;color:${MUTED}">Save this email. At the time of your consultation, click the button above to join. No Teams account is needed; you can join from your browser or phone.</p>` : ""}
+          <p style="font-size:14px">Stripe has emailed your payment receipt separately. We will also send your consultation agreement.</p>
+          <p style="font-size:13px;color:${MUTED};background:#FBF6EA;border-radius:8px;padding:12px 14px"><b style="color:#1C2333">Need to cancel or change?</b> ${REFUND_POLICY} Reply to this email or call (403) 915-4230.</p>`,
+          { title: "Your consultation is confirmed", sub: escapeHtml(fmtAB(d.start)) + " (Alberta time)", pre: `Payment received. Your Teams link for ${fmtAB(d.start, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} is inside.` }));
+        else await sendEmail(d.email, "We received your payment", mailShell(
+          `<p>Hello ${escapeHtml(d.name)},</p><p>Thank you, we received your payment of <b>${paidAmt}</b>. Your earlier time had already been released because the payment came after the deadline.</p>
+          <p>Our office will contact you shortly to book a new time or refund you in full. Questions? Reply to this email or call (403) 915-4230.</p>`,
+          { title: "Payment received", sub: "We will contact you to confirm a time", pre: "We received your payment and will contact you shortly." }));
         await notifyTeams(admin, late ? "⚠️ Paid after the booking was released" : `💳 Booking paid: ${service.name}`,
           `${d.name} · ${d.email}\n${fmtAB(d.start)} (Alberta time)\n${cad((Number(d.net ?? 0) + Number(d.gst ?? 0)))} paid by card${late ? "\nThe time was already released. Please rebook the client or refund them in Stripe." : ""}`, HUB, late);
       }
