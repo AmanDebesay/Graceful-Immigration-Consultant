@@ -68,3 +68,4 @@ export function countryOf(n) {
 }
 /** The caller's number for a call (ours dialled out, theirs called in). */
 export const otherParty = (c) => (c.direction === 'outbound' ? c.to_number || c.from_number : c.from_number) || '';
+export const PHONE_TABLES = { CA_AREAS, NANP_OTHER, CC };

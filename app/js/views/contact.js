@@ -63,6 +63,11 @@ export async function render(el, [id], { setTitle }) {
     </div></div>`;
 
   // Header actions
+  // Flagged person? Show it at the top of their page.
+  import('../flags.js').then(async ({ loadFlags, matchFlags, flagBanner }) => {
+    const hits = matchFlags(await loadFlags(), { name: c.full_name, phone: c.phone, email: c.email });
+    if (hits.length && el.isConnected) el.insertAdjacentHTML('afterbegin', flagBanner(hits));
+  }).catch(() => {});
   el.querySelector('#genLetter')?.addEventListener('click', async () => (await import('./letters.js')).newLetter({ contactId: id }));
   el.querySelector('#logAct')?.addEventListener('click', () => logActivity({ contactId: id, companyId: c.company_id }));
   el.querySelector('#emailBtn')?.addEventListener('click', () => composeEmail({ contact: c }));

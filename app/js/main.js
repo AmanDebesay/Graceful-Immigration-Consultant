@@ -1,6 +1,7 @@
 // App bootstrap: session → profile & permissions → shell → hash router.
 import { db, state, can, canDraftAgreements, isStaff, esc, icon, avatarHtml, fmtDate, ROLE_LABEL, loadStaff, fail, toast } from './core.js';
 import { showLogin, showSetPassword, showLinkError, showMfaChallenge } from './auth.js';
+import { loadFlags, matchFlags, REASON_LABEL } from './flags.js';
 performance.setResourceTimingBufferSize?.(2000); // keep the list of loaded scripts for healStaleModules
 
 const NAV = [
@@ -24,6 +25,7 @@ const NAV = [
   { path: '/pipeline', label: 'Lead Pipeline', icon: 'kanban', show: () => can('crm.view') },
   { path: '/activities', label: 'Activities', icon: 'phone', show: () => can('crm.view') },
   { path: '/calls', label: 'Call Log', icon: 'phone', show: () => can('crm.view') },
+  { path: '/flags', label: 'Flagged', icon: 'alert', show: () => can('crm.view') },
   { path: '/cases', label: 'Cases', icon: 'file', show: () => can('crm.view') },
   { path: '/letters', label: 'Submission Letters', icon: 'note', show: () => can('letters.view') },
   { path: '/documents', label: 'Documents', icon: 'folder', show: () => can('documents.view') },
@@ -94,6 +96,7 @@ const ROUTES = [
   [/^\/deals$/, 'deals', 'Deals'],
   [/^\/activities$/, 'activities', 'Activities'],
   [/^\/calls$/, 'calls', 'Call Log'],
+  [/^\/flags$/, 'flags', 'Flagged'],
   [/^\/marketing$/, 'marketing', 'Marketing'],
   [/^\/cases$/, 'cases', 'Cases'],
   [/^\/cases\/([\w-]+)$/, 'case', 'Case'],
@@ -350,6 +353,7 @@ function setupSearch() {
     if (q.length < 2) { box.hidden = true; return; }
     t = setTimeout(async () => {
       const my = ++seq, w = `%${q.replace(/[%_,()]/g, ' ').trim()}%`, crm = can('crm.view'), fin = can('finance.view');
+      const flagged = crm ? matchFlags(await loadFlags(), { text: q }).slice(0, 6) : [];
       const [con, cas, com, inv, agr, ass, tsk, apt] = await Promise.all([
         q1(crm, 'contacts', 'id, full_name, email, phone, citizenship', `full_name.ilike.${w},email.ilike.${w},phone.ilike.${w},citizenship.ilike.${w}`, 6),
         q1(crm, 'cases', 'id, case_number, title, application_type, ircc_file_number, uci, contacts(full_name)', `case_number.ilike.${w},title.ilike.${w},application_type.ilike.${w},ircc_file_number.ilike.${w},uci.ilike.${w}`),
@@ -363,7 +367,8 @@ function setupSearch() {
       if (my !== seq) return;
       const group = (label, ico, rows, href, main, sub) => (rows || []).length ? `<div class="sr-g">${label}</div>` + rows.map((r) =>
         `<a href="${href(r)}">${icon(ico)}<span>${esc(main(r))}</span><small>${esc(sub(r) || '')}</small></a>`).join('') : '';
-      const html = group('Clients', 'user', con.data, (r) => `#/contacts/${r.id}`, (r) => r.full_name, (r) => r.email || r.phone || r.citizenship)
+      const html = (flagged.length ? `<div class="sr-g" style="color:#B42318">⚑ Flagged</div>` + flagged.map((f) => `<a href="#/flags" style="background:rgba(180,35,24,.08)">${icon('alert')}<span><b style="color:#B42318">⚑ ${esc(f.name)}</b></span><small>${esc(REASON_LABEL[f.reason])}${f.notes ? ' · ' + esc(f.notes.slice(0, 60)) : ''}</small></a>`).join('') : '')
+        + group('Clients', 'user', con.data, (r) => `#/contacts/${r.id}`, (r) => r.full_name, (r) => r.email || r.phone || r.citizenship)
         + group('Cases', 'folder', cas.data, (r) => `#/cases/${r.id}`, (r) => `${r.case_number} · ${r.title}`, (r) => r.contacts?.full_name || r.ircc_file_number)
         + group('Companies', 'briefcase', com.data, (r) => `#/companies/${r.id}`, (r) => r.name, () => '')
         + group('Invoices', 'dollar', inv.data, (r) => `#/invoices/${r.id}`, (r) => r.number, (r) => `${r.contacts?.full_name || ''} · ${r.status}`)
