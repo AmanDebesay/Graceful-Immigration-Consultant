@@ -1,9 +1,9 @@
 // Client receipts: a receipt for every payment received (PMT-) and every retainer paid into trust (TRD-).
 // Receipts are addressed to whoever paid: the client, or the fee payer named in the agreement / on the invoice.
 // The client stays on the receipt as the person the services are for.
-import { db, state, can, esc, icon, fmtDate, toast, fail, rpc, modal, today } from '../core.js';
+import { db, state, can, esc, icon, fmtDate, toast, fail, rpc, modal, today, confirmBox } from '../core.js';
 import { receiptHtml, receiptEmailHtml, receiptPdf } from '../receipt-template.js';
-import { money, num, METHOD_LABEL, orgSettings, receivePayment, trustTxn, quickSale, payerFor, downloadCsv } from '../fin.js';
+import { money, num, METHOD_LABEL, orgSettings, receivePayment, trustTxn, quickSale, payerFor, downloadCsv, accounts, itemsList, clearFinCache } from '../fin.js';
 
 export async function render(el, [kind, id] = [], ctx = {}) {
   if (kind && id) return receipt(el, kind, id, ctx);
@@ -40,16 +40,16 @@ async function list(el) {
 
   async function load() {
     const [{ data: pays }, { data: trust }] = await Promise.all([
-      db.from('payments').select('id, number, payment_date, amount, method, reference, voided, received_from, receipt_sent_at, contacts(full_name), payment_applications(invoices(number, bill_to))')
+      db.from('payments').select('id, number, payment_date, amount, method, reference, voided, moved_to_trust, received_from, receipt_sent_at, contacts(full_name), payment_applications(invoices(number, bill_to))')
         .order('payment_date', { ascending: false }).limit(1000),
-      db.from('trust_transactions').select('id, number, txn_date, amount, method, reference, received_from, receipt_sent_at, contacts(full_name)')
+      db.from('trust_transactions').select('id, number, txn_date, amount, method, reference, received_from, receipt_sent_at, moved_to_payment, contacts(full_name)')
         .eq('type', 'deposit').order('txn_date', { ascending: false }).limit(1000),
     ]);
     rows = [
-      ...(pays || []).map((p) => ({ kind: 'payment', id: p.id, number: p.number, date: p.payment_date, amount: p.amount, method: p.method, ref: p.reference, voided: p.voided, sent: p.receipt_sent_at,
+      ...(pays || []).map((p) => ({ kind: 'payment', id: p.id, number: p.number, date: p.payment_date, amount: p.amount, method: p.method, ref: p.reference, voided: p.voided, moved: !!p.moved_to_trust, sent: p.receipt_sent_at,
         client: p.contacts?.full_name || '', from: p.received_from || p.payment_applications?.find((a) => a.invoices?.bill_to?.name)?.invoices.bill_to.name || p.contacts?.full_name || '',
         what: (p.payment_applications || []).map((a) => a.invoices?.number).filter(Boolean).join(', ') })),
-      ...(trust || []).map((t) => ({ kind: 'trust', id: t.id, number: t.number, date: t.txn_date, amount: t.amount, method: t.method, ref: t.reference, voided: false, sent: t.receipt_sent_at,
+      ...(trust || []).map((t) => ({ kind: 'trust', id: t.id, number: t.number, date: t.txn_date, amount: t.amount, method: t.method, ref: t.reference, voided: !!t.moved_to_payment, moved: !!t.moved_to_payment, sent: t.receipt_sent_at,
         client: t.contacts?.full_name || '', from: t.received_from || t.contacts?.full_name || '', what: 'Retainer held in trust' })),
     ].sort((a, b) => (b.date || '').localeCompare(a.date || '') || String(b.number).localeCompare(String(a.number)));
     draw();
@@ -62,7 +62,7 @@ async function list(el) {
       ${shown.map((r) => `<tr class="click" data-k="${r.kind}" data-id="${r.id}" style="${r.voided ? 'opacity:.5;text-decoration:line-through' : ''}"><td>${fmtDate(r.date)}</td><td><b>${esc(r.number || '')}</b></td>
         <td>${esc(r.from)}</td><td>${r.from !== r.client ? esc(r.client) : '<span class="dk-muted">same</span>'}</td><td>${esc(r.what || '—')}</td>
         <td>${esc(METHOD_LABEL[r.method] || r.method || '')}</td><td style="text-align:right"><b>${money(r.amount)}</b></td>
-        <td>${r.voided ? '<span class="badge">Void</span>' : r.sent ? `<span class="badge b-GREEN" title="${esc(fmtDate(r.sent))}">Sent</span>` : '<span class="badge b-AMBER">Not sent</span>'}</td></tr>`).join('')}</tbody></table>`
+        <td>${r.moved ? '<span class="badge b-blue">Moved</span>' : r.voided ? '<span class="badge">Void</span>' : r.sent ? `<span class="badge b-GREEN" title="${esc(fmtDate(r.sent))}">Sent</span>` : '<span class="badge b-AMBER">Not sent</span>'}</td></tr>`).join('')}</tbody></table>`
       : `<div class="empty">${icon('dollar')}<div>${rows.length ? 'Nothing matches.' : 'No payments received yet. Use “Issue a receipt” when a client pays you.'}</div></div>`;
     el.querySelectorAll('tr[data-id]').forEach((tr) => (tr.onclick = () => (location.hash = `#/client-receipts/${tr.dataset.k}/${tr.dataset.id}`)));
   }
@@ -88,7 +88,7 @@ async function receipt(el, kind, id, { setTitle } = {}) {
   } else {
     const { data, error } = await db.from('trust_transactions').select('*, contacts(id, full_name, email, phone, address, city, province, postal_code)').eq('id', id).eq('type', 'deposit').single();
     if (error || !data) { el.innerHTML = '<div class="alert err">Receipt not found.</div>'; return; }
-    r = { ...data, date: data.txn_date, voided: false };
+    r = { ...data, date: data.txn_date, voided: !!data.moved_to_payment };
     payer = await payerFor(data.contact_id);
   }
   const c = r.contacts || {}, ed = r.receipt_edits || {};
@@ -110,6 +110,21 @@ async function receipt(el, kind, id, { setTitle } = {}) {
     signature: mine?.signature || '', issued: today(),
   };
   const html = receiptHtml(model);
+  // Which account the money is recorded in, and links between moved receipts.
+  const accs = await accounts();
+  const heldIn = kind === 'trust' ? (accs.find((a) => a.subtype === 'trust_bank')?.name || 'Trust bank account')
+    : r.method === 'trust' ? 'Paid from trust into the operating account' : (accs.find((a) => a.id === r.deposit_account_id)?.name || 'Operating bank account');
+  let movedBanner = '';
+  if (kind === 'trust' && r.moved_to_payment) {
+    const { data: np } = await db.from('payments').select('id, number').eq('id', r.moved_to_payment).maybeSingle();
+    movedBanner = `<div class="alert info">This money was moved out of trust on ${esc(fmtDate(r.moved_at))} (it was recorded in trust by mistake). This receipt is no longer valid. ${np ? `The receipt now is <a href="#/client-receipts/payment/${np.id}"><b>${esc(np.number)}</b></a>.` : ''}</div>`;
+  } else if (kind === 'payment' && r.moved_to_trust) {
+    const { data: nt } = await db.from('trust_transactions').select('id, number').eq('id', r.moved_to_trust).maybeSingle();
+    movedBanner = `<div class="alert info">This payment was moved into trust (it was really a retainer). This receipt is no longer valid. ${nt ? `The receipt now is <a href="#/client-receipts/trust/${nt.id}"><b>${esc(nt.number)}</b></a>.` : ''}</div>`;
+  } else if (kind === 'payment' && r.moved_from_trust) {
+    const { data: ot } = await db.from('trust_transactions').select('id, number').eq('id', r.moved_from_trust).maybeSingle();
+    movedBanner = ot ? `<div class="alert info" style="margin-bottom:8px">Moved here from trust receipt <a href="#/client-receipts/trust/${ot.id}"><b>${esc(ot.number)}</b></a>.</div>` : '';
+  }
   const fileName = `Receipt ${model.number}.pdf`;
   setTitle?.(`Receipt ${model.number}`);
 
@@ -120,7 +135,8 @@ async function receipt(el, kind, id, { setTitle } = {}) {
       <button class="btn" id="print">${icon('file')} Print</button><button class="btn" id="pdf">${icon('file')} Download PDF</button>
       ${manage && !r.voided ? `${r.receipt_sent_at ? '' : '<button class="btn" id="given" title="You gave or sent it another way">Mark as sent</button>'}<button class="btn btn-gold" id="mail">${icon('mail')} Email receipt</button>` : ''}
     </div>
-    ${r.voided ? '<div class="alert err">This payment was voided, so this receipt is no longer valid.</div>' : ''}
+    ${movedBanner}${r.voided && !movedBanner ? '<div class="alert err">This payment was voided, so this receipt is no longer valid.</div>' : ''}
+    ${!r.voided ? `<div class="row" style="gap:8px;margin-bottom:12px;font-size:14px"><span class="dk-muted">Held in:</span><b>${esc(heldIn)}</b>${manage ? `<button class="btn btn-sm" id="move">${icon('wallet')} Change account</button>` : ''}</div>` : ''}
     ${!mine?.signature && !r.voided ? `<div class="alert info">Your handwritten signature isn't saved yet, so your name is printed in script. <button class="btn btn-sm" id="addSig">Add my signature</button></div>` : ''}
     <div class="card" style="padding:0;overflow:auto;max-width:818px"><div id="doc">${html}</div></div>`;
 
@@ -182,6 +198,69 @@ async function receipt(el, kind, id, { setTitle } = {}) {
           toast('Receipt updated'); again();
         } }] });
   });
+  el.querySelector('#move')?.addEventListener('click', () => moveAccount());
+  async function moveAccount() {
+    const banks = accs.filter((a) => a.subtype === 'bank' && a.active !== false);
+    const opt = (list, sel) => list.map((a) => `<option value="${a.id}" ${a.id === sel ? 'selected' : ''}>${esc(a.code ? a.code + ' · ' : '')}${esc(a.name)}</option>`).join('');
+    const realMoney = `<div class="alert" style="margin-top:10px;font-size:13px"><b>This fixes the records only.</b> Make sure the real money is in that bank account too. A retainer for work not done yet must be in the trust account (CICC rules); if it went into the operating account, transfer it to the trust account. Everything is kept in the Audit Log.</div>`;
+    if (kind === 'trust') {
+      const [{ data: open }, items] = await Promise.all([db.from('invoices').select('id, number, issue_date, balance').eq('contact_id', r.contact_id).in('status', ['open', 'partial']).order('issue_date'), itemsList()]);
+      const gstOn = !!s.gst_number;
+      modal({ title: `Move ${model.number} out of trust`, wide: true,
+        body: `<p style="margin-bottom:10px">Use this when this money was <b>recorded in trust by mistake</b>, for example a consultation fee that was paid into the operating account. ${money(r.amount)} is taken out of ${esc(c.full_name || 'the client')}’s trust balance and recorded as a payment in the account you choose. You get a new receipt (PMT-…) and this one is marked as moved.</p>
+          <div class="alert info" style="font-size:13px;margin-bottom:10px">If the money really is in the trust account and the work is now done, don’t use this: invoice the client and pay the invoice <b>from trust</b> (Sales &amp; Invoices → Receive payment → “Transfer from trust”).</div>
+          <div class="field"><label>Money is in</label><select class="input" id="mv_acc">${opt(banks, accs.find((a) => a.system_key === 'operating_bank')?.id)}</select></div>
+          ${(open || []).length ? `<div class="field"><label>Apply to open invoices</label>${open.map((i) => `<div class="row" style="gap:8px;margin-bottom:4px"><label class="row" style="gap:6px;min-width:220px"><input type="checkbox" data-inv="${i.id}"> ${esc(i.number)} · ${esc(fmtDate(i.issue_date))} · balance ${money(i.balance)}</label><input class="input" type="number" step="0.01" data-amt="${i.id}" style="max-width:120px" placeholder="0.00" data-max="${i.balance}"></div>`).join('')}</div>` : ''}
+          <div class="field"><label>For the rest: what was it for? (a paid invoice is made for it)</label><div class="row-2"><select class="input" id="mv_item"><option value="">— Product / service —</option>${items.map((it) => `<option value="${it.id}">${esc(it.name)}</option>`).join('')}</select>
+            <input class="input" id="mv_desc" placeholder="e.g. 1-hour consultation, Nov 27"></div></div>
+          ${gstOn ? `<label class="row" style="gap:8px"><input type="checkbox" id="mv_gst"> GST is included in this amount (the client lives in Canada)</label>` : ''}
+          <p class="dk-muted" style="font-size:13px;margin-top:8px" id="mv_sum"></p>${realMoney}`,
+        onOpen: (m) => {
+          const sum = () => { let ap = 0; m.querySelectorAll('[data-amt]').forEach((x) => { if (m.querySelector(`[data-inv="${x.dataset.amt}"]`).checked) ap += num(x.value); });
+            m.querySelector('#mv_sum').textContent = `Applied to invoices: ${money(ap)} · New paid invoice: ${money(Math.max(0, num(r.amount) - ap))} · Total ${money(r.amount)}`; };
+          let left = num(r.amount);
+          m.querySelectorAll('[data-inv]').forEach((cb) => (cb.onchange = () => { const a = m.querySelector(`[data-amt="${cb.dataset.inv}"]`);
+            if (cb.checked && !num(a.value)) { const used = [...m.querySelectorAll('[data-inv]:checked')].filter((x) => x !== cb).reduce((t, x) => t + num(m.querySelector(`[data-amt="${x.dataset.inv}"]`).value), 0);
+              a.value = Math.min(num(a.dataset.max), Math.max(0, left - used)).toFixed(2); } if (!cb.checked) a.value = ''; sum(); }));
+          m.querySelectorAll('[data-amt]').forEach((x) => (x.oninput = sum));
+          m.querySelector('#mv_item').onchange = (e) => { const it = items.find((x) => x.id === e.target.value); if (it && !m.querySelector('#mv_desc').value) m.querySelector('#mv_desc').value = it.description || it.name; if (it && m.querySelector('#mv_gst')) m.querySelector('#mv_gst').checked = !!it.taxable; };
+          sum();
+        },
+        actions: [{ label: 'Cancel' }, { label: 'Move out of trust', cls: 'btn-gold', onClick: async (m) => {
+          const apps = [...m.querySelectorAll('[data-inv]:checked')].map((cb) => ({ invoice_id: cb.dataset.inv, amount: num(m.querySelector(`[data-amt="${cb.dataset.inv}"]`).value) })).filter((a) => a.amount > 0);
+          const applied = apps.reduce((t, a) => t + a.amount, 0), desc = m.querySelector('#mv_desc').value.trim();
+          if (applied > num(r.amount) + 0.001) throw new Error('The invoice amounts are more than the money received.');
+          if (applied < num(r.amount) - 0.001 && !desc) throw new Error('Describe what the rest was for (or apply it all to invoices).');
+          if (!(await confirmBox('Move out of trust', `Take ${money(r.amount)} out of the trust records and record it in ${m.querySelector('#mv_acc').selectedOptions[0].textContent}?`, 'Move'))) return false;
+          const pid = await rpc('move_trust_to_operating', { p_trust: id, p_deposit_account: m.querySelector('#mv_acc').value, p_apps: apps,
+            p_item: m.querySelector('#mv_item').value || null, p_desc: desc || null, p_gst_included: !!m.querySelector('#mv_gst')?.checked });
+          clearFinCache(); toast('Moved out of trust. Here is the new receipt.');
+          location.hash = `#/client-receipts/payment/${pid}`;
+        } }] });
+    } else {
+      if (r.method === 'trust') return toast('This payment was paid out of trust for earned fees, so it is already in the operating account.');
+      const trustBank = accs.find((a) => a.subtype === 'trust_bank');
+      const invs = apps.map((a) => a.invoices?.number).filter(Boolean);
+      modal({ title: `Change the account for ${model.number}`,
+        body: `<div class="field"><label>Money is in</label><select class="input" id="mv_to"><option value="trust">${esc(trustBank?.name || 'Trust Bank Account (Client Funds)')} — it was a retainer</option>${opt(accs.filter((a) => a.subtype === 'bank' && a.active !== false), r.deposit_account_id)}</select></div>
+          <div id="mv_note" class="dk-muted" style="font-size:13px"></div>${realMoney}`,
+        onOpen: (m) => { const note = () => { m.querySelector('#mv_note').innerHTML = m.querySelector('#mv_to').value === 'trust'
+            ? `This payment is voided and the money is recorded as a retainer in trust for ${esc(c.full_name || 'the client')}, with a new trust receipt (TRD-…).${invs.length ? ` Invoice ${esc(invs.join(', '))} becomes unpaid again: void it if it was only made for this payment.` : ''}`
+            : 'The receipt stays the same; the books record that the money is in this account instead.'; };
+          m.querySelector('#mv_to').onchange = note; note(); },
+        actions: [{ label: 'Cancel' }, { label: 'Save', cls: 'btn-gold', onClick: async (m) => {
+          const to = m.querySelector('#mv_to').value;
+          if (to === 'trust') {
+            if (!(await confirmBox('Move into trust', `Void ${model.number} and record ${money(r.amount)} as a retainer held in trust?`, 'Move into trust'))) return false;
+            const tid = await rpc('move_payment_to_trust', { p_payment: id });
+            clearFinCache(); toast('Moved into trust. Here is the new trust receipt.'); location.hash = `#/client-receipts/trust/${tid}`;
+          } else {
+            if (to === r.deposit_account_id) return;
+            await rpc('change_payment_account', { p_payment: id, p_account: to }); clearFinCache(); toast('Account changed'); again();
+          }
+        } }] });
+    }
+  }
   el.querySelector('#from')?.addEventListener('click', () => modal({
     title: 'Received from',
     body: `<div class="field"><label>Name shown on the receipt</label><input class="input" id="rf" value="${esc(fromName)}"></div>
