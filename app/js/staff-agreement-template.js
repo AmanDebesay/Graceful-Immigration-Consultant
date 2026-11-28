@@ -117,6 +117,10 @@ Brand guide and templates
 Content calendar, drafting and approval workflow
 Monthly results review with the Supervising Consultant`,
   },
+  marketing_contractor: {
+    label: 'Marketing & Social Media Contractor (outside Canada)', role_title: 'Marketing, Graphics and Social Media Specialist', kind: 'contractor',
+    duties: '', access: '', training: '',
+  },
   bookkeeper: {
     label: 'Bookkeeper', role_title: 'Bookkeeper',
     duties: `record sales, expenses, bills and receipts in the Employer’s accounting system
@@ -154,13 +158,15 @@ export function staffDefaults(settings = {}, preset = 'case_assistant') {
     pay_type: 'hourly', wage: '', pay_frequency: 'every two weeks', vacation_pct: 4, benefits: 'The Employee is not entitled to group benefits.',
     non_solicit_months: 6, include_training: true, include_witness: true,
     duties: p.duties, not_allowed: NOT_ALLOWED, escalation: ESCALATE, access: p.access + '\n' + DEVICES, training: p.training, extra_terms: '',
+    ...(p.kind === 'contractor' ? contractorDefaults() : {}),
   };
 }
 
 // Pieces the editor and list need too.
-export const docTitle = (d) => String(d.doc_title || '').trim() || (d.term_type === 'fixed' ? 'Fixed-Term Employment Agreement' : 'Employment Agreement');
+export const docTitle = (d) => String(d.doc_title || '').trim() || (d.kind === 'contractor' ? 'Independent Contractor Agreement' : d.term_type === 'fixed' ? 'Fixed-Term Employment Agreement' : 'Employment Agreement');
 export function subtitle(d) {
   if (String(d.subtitle || '').trim()) return d.subtitle.trim();
+  if (d.kind === 'contractor') return `${d.role_title || 'Contractor'} (Remote, ${d.country || 'outside Canada'})`;
   const hrs = { part_time: 'Part-Time, As Needed', part_time_fixed: 'Part-Time', full_time: 'Full-Time' }[d.hours_type] || '';
   const place = { remote: 'Remote', office: 'In Office', hybrid: 'Hybrid' }[d.work_place] || '';
   return `${d.role_title || 'Employee'} (${[hrs, place].filter(Boolean).join(', ')})`;
@@ -211,6 +217,7 @@ function runningPage(d) {
 
 const wordmark = (name) => { const [first, ...rest] = String(name || '').trim().split(/\s+/); return first ? `<div class="wm"><b>${e(first)}</b>${rest.length ? `<span>${e(rest.join(' '))}</span>` : ''}</div>` : ''; };
 export function render(d) {
+  if (d.kind === 'contractor') return renderContractor(d);
   const P = prov(d), fixed = d.term_type === 'fixed', end = endDate(d);
   const sv = `${e(d.supervisor_name || d.rcic_name)}`;
   let n = 0;
@@ -318,6 +325,14 @@ export function render(d) {
 // Facts that are still blank, shown as a checklist before printing.
 export function missing(d) {
   const m = [];
+  if (d.kind === 'contractor') {
+    if (!String(d.employee_name || '').trim()) m.push('contractor’s full legal name');
+    if (!String(d.employee_address || '').trim()) m.push('contractor’s address');
+    if (!d.start_date) m.push('start date');
+    if (!Number(d.fee_amount)) m.push('fee');
+    if (!String(d.rcic_name || '').trim() || !String(d.rcic_id || '').trim()) m.push('RCIC name and licence number (Business Settings)');
+    return m;
+  }
   if (!String(d.employee_name || '').trim()) m.push('employee’s full legal name');
   if (!String(d.employee_address || '').trim()) m.push('employee’s address');
   if (!String(d.role_title || '').trim()) m.push('job title');
@@ -328,4 +343,124 @@ export function missing(d) {
   if (d.hours_type !== 'full_time' && !String(d.hours_max || '').trim()) m.push('maximum hours per week');
   if (!String(d.rcic_name || '').trim() || !String(d.rcic_id || '').trim()) m.push('RCIC name and licence number (Business Settings)');
   return m;
+}
+
+// ── Independent contractor outside Canada (e.g. marketing and social media from Ethiopia) ──
+// Not an employment agreement: no Canadian payroll, the contractor handles their own taxes where they live.
+export const CONTRACTOR_DUTIES = `plan, script, film or assemble, and edit short videos for the Company’s social media, at least the minimum in Schedule A, and post them consistently once the Supervising Consultant has approved them
+design graphics, thumbnails, flyers and post templates in the Company’s brand
+manage the Company’s social media pages: posting, captions, hashtags, scheduling, profile information and keeping the pages up to date
+reply to public comments and messages with general, approved information only, and direct people to the Company’s booking page or phone line
+pass every enquiry from a possible client to the Company on the same day, without keeping copies
+keep the content plan in the Company’s dashboard (Marketing page) up to date and record each post’s results
+send a short weekly report (what was posted, views, followers and enquiries) and take part in a monthly review`;
+export const CONTRACTOR_NOT_ALLOWED = `give immigration or legal advice, or tell anyone which program fits them, whether they are eligible or what their chances are, in comments, messages, videos or anywhere else
+promise or suggest guaranteed results, approvals or processing times
+post anything that has not been approved in writing by the Supervising Consultant
+use any client’s name, image, voice, story, documents or details, or any testimonial, without the client’s written consent obtained by the Company
+spend Company money (including paid advertising or boosted posts), or sign up for paid services in the Company’s name, without written approval
+change the name, ownership, password, recovery email or phone number of any Company account, or add or remove administrators, without written approval
+create fake accounts, reviews, followers or engagement`;
+export const CONTRACTOR_ACCESS = `Practice dashboard | Own login with multi-factor authentication. “Marketing” role only: Marketing page, Team Chat, Work Time and Tasks. No access to client files, contacts, call details, money or settings.
+Social media accounts | Access through page roles (for example Meta Business Suite or TikTok Business Center) under the Company’s ownership. Never the owner’s personal password.
+Files | Drafts and source files are kept in the Company’s shared folder, not only on personal devices.
+Devices | A device protected by a screen lock and up-to-date software; no shared computers for Company accounts.
+Messages from the public | Used only to pass the enquiry to the Company, then deleted from personal devices.`;
+
+export function contractorDefaults() {
+  return {
+    kind: 'contractor', role_title: 'Marketing, Graphics and Social Media Specialist', country: 'Ethiopia',
+    start_date: '', trial_months: 1, notice_days: 14,
+    videos_min: 3, videos_period: 'week', platforms: 'TikTok, Instagram, Facebook and YouTube', reply_hours: 24, approval_hours: 24,
+    fee_amount: '', fee_currency: 'USD', fee_period: 'month', payment_terms: 'within seven (7) days after the Company receives the Contractor’s invoice',
+    payment_method: 'bank transfer or a licensed money-transfer service chosen by the Company, to an account in the Contractor’s own name',
+    duties: CONTRACTOR_DUTIES, not_allowed: CONTRACTOR_NOT_ALLOWED, access: CONTRACTOR_ACCESS, non_solicit_months: 6, include_witness: false, extra_terms: '',
+  };
+}
+
+function renderContractor(d) {
+  const sv = e(d.supervisor_name || d.rcic_name);
+  let n = 0;
+  const sec = (title, clauses) => { n++; let c = 0; return `<h2>${n}. ${e(title)}</h2>${clauses.filter(Boolean).map((x) => `<div class="cl"><b>${n}.${++c}</b><div>${x}</div></div>`).join('')}`; };
+  const ul = (t) => `<ul>${lines(t).map((x) => `<li>${e(x.replace(/[;.]\s*(and)?$/, ''))}</li>`).join('')}</ul>`;
+  const per = { day: 'day', week: 'week', month: 'month' }[d.videos_period] || 'week';
+  const feePer = { month: 'per month', two_weeks: 'every two weeks', week: 'per week', project: 'per project' }[d.fee_period] || 'per month';
+  const ctry = val(d.country, 14), cur = e(d.fee_currency || 'USD');
+  const access = lines(d.access).map((l) => { const [k, ...v] = l.split('|'); return [k.trim(), v.join('|').trim()]; });
+
+  const body = [
+    sec('Services', [
+      `<p>The Company engages the Contractor as an independent contractor to provide marketing, graphic design, video and social media management services as <b>${val(d.role_title, 24)}</b> (the “Services”), as described in this Agreement and Schedule A.</p>`,
+      `<p>The Contractor will perform the Services under the direction, as to results and content approval, of ${sv}, a Regulated Canadian Immigration Consultant (${e(d.rcic_designation || 'RCIC')}, CICC Licence No. ${val(d.supervisor_id || d.rcic_id, 10)}) (the “Supervising Consultant”).</p>`,
+      `<p><b>The Contractor will:</b></p>${ul(d.duties)}`]),
+    sec('Independent contractor', [
+      `<p>The Contractor is an independent contractor and not an employee, partner, agent or legal representative of the Company. Nothing in this Agreement creates an employment relationship in Canada, in ${ctry}, or anywhere else.</p>`,
+      `<p>The Contractor works from ${ctry}, chooses their own working hours and methods, and provides their own equipment, internet, phone and software (unless the Company agrees in writing to provide them), subject to the deadlines, standards and approvals in this Agreement.</p>`,
+      `<p>The Contractor is solely responsible for all taxes, business registrations, licences, pension or social contributions and insurance required in ${ctry} or anywhere else on the fees paid under this Agreement. The Company will not withhold or pay them, and the Contractor will indemnify the Company for any such amount claimed from it.</p>`,
+      `<p>The Contractor is not entitled to employee benefits, vacation pay, overtime, holiday pay or severance from the Company.</p>`]),
+    sec('Term, trial period and ending the Agreement', [
+      `<p>This Agreement begins on ${longDate(d.start_date)} and continues until it is ended under this Section.</p>`,
+      Number(d.trial_months) ? `<p>The first ${months(Number(d.trial_months))} are a trial period, during which either party may end this Agreement by giving seven (7) days’ written notice.</p>` : '',
+      `<p>After the trial period, either party may end this Agreement at any time by giving <b>${val(d.notice_days, 3)} days’</b> written notice (email is sufficient). The Company may pay the fee for the notice period instead of receiving the Services during it.</p>`,
+      `<p>The Company may end this Agreement immediately by written notice if the Contractor breaches Sections 5, 6, 7 or 8, publishes content that was not approved, gives immigration advice, or misuses any Company account or information.</p>`,
+      `<p>On the end of this Agreement, the Contractor will be paid the fee earned up to the last day, prorated for any part period, and nothing more.</p>`]),
+    sec('Fees and payment', [
+      `<p>The Company will pay the Contractor <b>${cur} ${money(d.fee_amount)} ${feePer}</b> for the Services (the “Fee”).</p>`,
+      `<p>The Contractor will send an invoice at the end of each period listing the work delivered (the dashboard’s Marketing page may be used as the record). The Company will pay ${e(d.payment_terms)}, by ${e(d.payment_method)}. The Company pays its own sending fees; any fees charged by the Contractor’s bank or receiving service are the Contractor’s.</p>`,
+      `<p>If the minimum deliverables in Schedule A are not met in a period, without a reason agreed in advance (such as illness or the Company not approving content in time), the Company may reduce that period’s Fee in proportion to the work not delivered, after discussing it with the Contractor.</p>`,
+      `<p>Expenses (such as paid apps, music licences, stock footage or advertising) are paid or reimbursed only if the Company approves them in writing in advance.</p>`]),
+    sec('Approval and advertising rules', [
+      `<p>The Company is a regulated immigration practice. All content must follow the advertising rules of the College of Immigration and Citizenship Consultants (the “CICC”) and Canadian law. <b>Nothing may be published before the Supervising Consultant approves it in writing</b> (approval in the Company’s dashboard counts as written approval). The Supervising Consultant aims to review content within ${val(d.approval_hours, 3)} hours.</p>`,
+      `<p><b>The Contractor must not:</b></p>${ul(d.not_allowed)}`,
+      `<p>Content must be accurate and up to date, must show the Supervising Consultant’s name, designation and licence number where required or reasonably possible, and must direct people to the Company’s official booking page and phone numbers.</p>`]),
+    sec('Social media accounts and brand', [
+      `<p>All social media pages, accounts, channels, followers, handles, domains and advertising accounts created or managed for the Company belong to the Company, even if the Contractor set them up.</p>`,
+      `<p>The Contractor will use them only for the Company, keep them secure with multi-factor authentication, and, when this Agreement ends or the Company asks, immediately hand over all access, passwords, recovery details and files, and remove their own access.</p>`,
+      `<p>The Contractor will use the Company’s logo, colours and brand as the Company directs and will not use them for any other purpose.</p>`]),
+    sec('Confidentiality and privacy', [
+      `<p>“Confidential Information” includes all information about the Company’s clients and enquirers (names, phone numbers, messages, immigration situations, documents and images), and the Company’s business information, fees, plans and results.</p>`,
+      `<p>The Contractor does not need client information to do the Services and will not ask for or keep it. If the Contractor receives personal information (for example in a direct message), they will use it only to pass the enquiry to the Company the same day and then delete it from personal devices and accounts.</p>`,
+      `<p>The Contractor will keep Confidential Information strictly confidential during and after this Agreement, will not copy, share, photograph or store it outside the Company’s systems, and will report any suspected breach, lost device or unauthorized access to the Supervising Consultant <b>the same day</b>. The Contractor will follow the Company’s privacy practices, which are based on Canada’s <i>Personal Information Protection and Electronic Documents Act</i> and Alberta’s <i>Personal Information Protection Act</i>.</p>`]),
+    sec('Ownership of the work', [
+      `<p>All work the Contractor creates for the Company under this Agreement, including videos, raw footage, project files, graphics, designs, captions, scripts and templates (the “Work”), belongs to the Company from creation. The Contractor assigns to the Company all copyright and other rights in the Work worldwide, waives all moral rights in it, and will deliver the final and source files on request.</p>`,
+      `<p>If the Contractor appears or speaks in any Work, the Contractor allows the Company to keep using that Work for as long as it remains published, including after this Agreement ends.</p>`,
+      `<p>The Contractor may show published Work in a personal portfolio only with the Company’s written permission, and never any client information.</p>`]),
+    sec('Dashboard access and work records', [
+      `<p>The Company will give the Contractor access to its practice dashboard and accounts only as set out in Schedule B. The Contractor will keep their login and codes private and will not share accounts.</p>`,
+      `<p>The Contractor is informed and agrees that the dashboard records sign-ins, active time while the dashboard is in use, pages used and actions taken, for work, payment and compliance purposes. The Contractor can see their own record at any time under <b>Work Time</b>. The Company may limit or remove access at any time.</p>`]),
+    sec('Other work and conflicts', [
+      `<p>The Contractor may work for other businesses, but during this Agreement will not provide marketing or social media services to another immigration consulting or immigration law practice without the Company’s written consent, and will disclose any conflict of interest.</p>`,
+      Number(d.non_solicit_months) ? `<p>During this Agreement and for ${months(Number(d.non_solicit_months))} afterwards, the Contractor will not use the Company’s Confidential Information, accounts or followers to direct clients or enquirers to anyone else.</p>` : '']),
+    lines(d.extra_terms).length ? sec('Additional terms', lines(d.extra_terms).map((x) => `<p>${e(x)}</p>`)) : '',
+    sec('General', [
+      `<p><b>Governing law.</b> This Agreement is governed by the laws of the Province of Alberta and the federal laws of Canada that apply there. The parties will first try to settle any disagreement in good faith by discussion; if they cannot, the courts of Alberta have jurisdiction. Each party remains responsible for complying with the laws of the country where they work.</p>`,
+      `<p><b>Entire agreement.</b> This is the whole agreement between the parties and may be changed only in writing signed by both parties (email confirmation by both is sufficient for changes to Schedule A).</p>`,
+      `<p><b>Severability.</b> If any part of this Agreement is found unenforceable, the rest continues in effect.</p>`,
+      `<p><b>Notices.</b> Notices may be given by email to the addresses in this Agreement.</p>`,
+      `<p><b>Independent advice.</b> The Contractor confirms they had the opportunity to obtain independent legal and tax advice before signing.</p>`,
+      `<p><b>Signatures.</b> This Agreement may be signed electronically and in counterparts.</p>`]),
+  ].join('');
+  n++;
+  const sigRows = (name) => `<div class="row"><span>Signature:</span><span>${blank(38)}</span></div><div class="row"><span>Name:</span><span>${name}</span></div><div class="row"><span>Date:</span><span>${blank(22)}</span></div>`;
+  const sig = `<div class="sig newpage"><h2>${n}. Signatures</h2><p><b>SIGNED</b> by the parties on the dates written below.</p>
+    <h3>COMPANY – ${e(d.business_name)}</h3>${sigRows(`${e(d.rcic_name)}, ${e(d.rcic_designation || 'RCIC')} (CICC Licence No. ${e(d.rcic_id)}), Authorized Signatory`)}
+    <h3>CONTRACTOR</h3>${sigRows(String(d.employee_name || '').trim() ? e(d.employee_name) : blank(34))}
+    ${d.include_witness ? `<h3>WITNESS (optional)</h3>${sigRows(blank(34))}` : ''}</div>`;
+  const schedA = `<div class="newpage"><h2>Schedule A – Services and minimum deliverables</h2><table><thead><tr><th>Item</th><th>Requirement</th></tr></thead><tbody>
+    <tr><td>Videos</td><td>At least <b>${val(d.videos_min, 3)}</b> finished, edited short videos per <b>${e(per)}</b>, posted consistently after approval.</td></tr>
+    <tr><td>Platforms</td><td>${val(d.platforms, 30)}, and any others the Company chooses.</td></tr>
+    <tr><td>Graphics</td><td>Thumbnails, covers and graphics for each video, plus flyers and post graphics the Company reasonably requests.</td></tr>
+    <tr><td>Approval</td><td>Each item is uploaded to the dashboard’s Marketing page with its caption and sent for approval, ideally at least ${val(d.approval_hours, 3)} hours before the planned posting time.</td></tr>
+    <tr><td>Community</td><td>Public comments and messages are checked at least once every ${val(d.reply_hours, 3)} hours on business days. Enquiries from possible clients go to the Company the same day.</td></tr>
+    <tr><td>Reporting</td><td>Each post’s views, likes, comments, shares, followers and enquiries recorded in the dashboard; a short weekly summary; a monthly review with the Supervising Consultant.</td></tr></tbody></table>
+    <h2>Schedule B – Access and security</h2><table><thead><tr><th>Item</th><th>Rule</th></tr></thead><tbody>${access.map(([k, v]) => `<tr><td>${e(k)}</td><td>${e(v)}</td></tr>`).join('')}</tbody></table></div>`;
+
+  return `${STYLE}${runningPage(d)}<div class="gi-emp">
+    <div class="lh"><img src="${LOGO}" alt="">${wordmark(d.business_name)}<div class="lh-line"><b>${e(d.rcic_name)}</b>, ${e(d.rcic_designation || 'RCIC')} &nbsp;|&nbsp; CICC Licence No. ${e(d.rcic_id)}<br>${[d.business_phone, d.business_email, d.website ? 'https://' + String(d.website).replace(/^https?:\/\//, '') : '', 'Canada'].filter(Boolean).map(e).join(' &nbsp;|&nbsp; ')}</div></div>
+    <h1>${e(docTitle(d))}</h1><div class="sub">${e(subtitle(d))}</div>
+    <p>This Agreement is made as of ${longDate(d.agreement_date)}.</p>
+    <p><b>BETWEEN:</b></p><p class="party"><b>${e(String(d.business_name || '').toUpperCase())}</b>, ${e(d.business_address)}, Canada (the “Company”)</p>
+    <p><b>AND:</b></p><p class="party">${String(d.employee_name || '').trim() ? `<b>${e(d.employee_name)}</b>` : `${blank(30)} (full legal name)`}, of ${val(d.employee_address, 40)}, ${ctry} (the “Contractor”)</p>
+    ${body}${sig}${schedA}
+    <div class="foot">${[d.business_name, d.business_phone, d.business_email, d.website].filter(Boolean).map(e).join(' | ')}<br>Confidential</div></div>`;
 }

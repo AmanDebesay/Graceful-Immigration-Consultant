@@ -1,7 +1,7 @@
 // Invites a staff member (or client) by email and assigns their role. Caller needs the staff.manage permission.
 import { adminClient, callerProfile, COMPANY_DOMAIN, corsHeaders, hasPerm, isCompanyEmail, json } from "../_shared/common.ts";
 
-const ROLES = ["owner", "rcic", "case_manager", "bookkeeper", "assistant", "client"];
+const ROLES = ["owner", "rcic", "case_manager", "bookkeeper", "assistant", "marketing", "client"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });

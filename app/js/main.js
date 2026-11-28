@@ -23,6 +23,7 @@ const NAV = [
   { path: '/deals', label: 'Deals', icon: 'trend', show: () => can('crm.view') },
   { path: '/pipeline', label: 'Lead Pipeline', icon: 'kanban', show: () => can('crm.view') },
   { path: '/activities', label: 'Activities', icon: 'phone', show: () => can('crm.view') },
+  { path: '/calls', label: 'Call Log', icon: 'phone', show: () => can('crm.view') },
   { path: '/cases', label: 'Cases', icon: 'file', show: () => can('crm.view') },
   { path: '/letters', label: 'Submission Letters', icon: 'note', show: () => can('letters.view') },
   { path: '/documents', label: 'Documents', icon: 'folder', show: () => can('documents.view') },
@@ -48,6 +49,7 @@ const NAV = [
   { group: 'Business' },
   { path: '/newsletter', label: 'Newsletter', icon: 'mail', show: () => can('newsletter.view') },
   { path: '/agreements', label: 'Agreements', icon: 'file', show: () => canDraftAgreements() || can('crm.view'), count: 'agr_review' },
+  { path: '/marketing', label: 'Marketing', icon: 'video', show: () => can('marketing.view') },
   { group: 'Resources' },
   { path: '/resources', label: 'Legal & Research', icon: 'book', show: () => isStaff() },
   { path: '/file-prep', label: 'File Prep (Upload Limits)', icon: 'layers', show: () => isStaff() },
@@ -58,6 +60,10 @@ const NAV = [
   { path: '/business-files', label: 'Business Files', icon: 'folder', show: () => can('settings.manage'), count: 'bizdocs_due', red: true },
   { path: '/audit', label: 'Audit Log', icon: 'history', show: () => can('audit.view') },
 ];
+
+// Pages the marketing role sees (everything else is hidden and redirected to Marketing).
+const MARKETING_PAGES = new Set(['/marketing', '/guide', '/chat', '/worktime', '/tasks', '/email', '/calendar']);
+const isMarketingOnly = () => state.profile?.role === 'marketing';
 
 const ROUTES = [
   [/^\/$/, 'dashboard', 'Dashboard'],
@@ -87,6 +93,8 @@ const ROUTES = [
   [/^\/companies\/([\w-]+)$/, 'company', 'Company'],
   [/^\/deals$/, 'deals', 'Deals'],
   [/^\/activities$/, 'activities', 'Activities'],
+  [/^\/calls$/, 'calls', 'Call Log'],
+  [/^\/marketing$/, 'marketing', 'Marketing'],
   [/^\/cases$/, 'cases', 'Cases'],
   [/^\/cases\/([\w-]+)$/, 'case', 'Case'],
   [/^\/letters$/, 'letters', 'Submission Letters'],
@@ -301,7 +309,7 @@ function renderNav() {
   let html = '', pendingGroup = null;
   for (const n of NAV) {
     if (n.group) { pendingGroup = n.group; continue; }
-    if (!n.show()) continue;
+    if (!n.show() || (isMarketingOnly() && !MARKETING_PAGES.has(n.path))) continue;
     if (pendingGroup) { html += `<div class="sb-group">${pendingGroup}</div>`; pendingGroup = null; }
     const active = n.path === '/' ? cur === '/' : cur.startsWith(n.path);
     const c = n.count && counts[n.count] ? `<span class="count${n.red ? ' red' : ''}">${counts[n.count]}</span>` : '';
@@ -380,6 +388,8 @@ async function route() {
   document.getElementById('sidebar').classList.remove('open');
   const match = ROUTES.map(([re, mod, title]) => [path.match(re), mod, title]).find(([m]) => m);
   if (!match) { location.hash = '#/'; return; }
+  // The marketing team member only works in marketing pages (no client information).
+  if (isMarketingOnly() && !MARKETING_PAGES.has(path) && path !== '/account') { location.hash = '#/marketing'; return; }
   const [m, mod, title] = match;
   { // Page title with the page's own menu icon (e.g. Contacts → people), in gold.
     const nav = NAV.filter((n) => n.path && n.path !== '/' && (path === n.path || path.startsWith(n.path + '/'))).sort((x, y) => y.path.length - x.path.length)[0];

@@ -1,7 +1,7 @@
 import { db, state, esc, icon, ROLE_LABEL, roleBadge, initials, modal, confirmBox, toast, fail, rpc, callFn, loadStaff, fmtDate } from '../core.js';
 
-const STAFF_ROLES = ['owner', 'rcic', 'case_manager', 'bookkeeper', 'assistant'];
-const EDITABLE_ROLES = ['rcic', 'case_manager', 'bookkeeper', 'assistant'];
+const STAFF_ROLES = ['owner', 'rcic', 'case_manager', 'bookkeeper', 'assistant', 'marketing'];
+const EDITABLE_ROLES = ['rcic', 'case_manager', 'bookkeeper', 'assistant', 'marketing'];
 
 export async function render(el) {
   const isOwner = state.profile.role === 'owner';

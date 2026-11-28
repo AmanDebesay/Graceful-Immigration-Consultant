@@ -465,3 +465,6 @@ verify_jwt = false
 
 [functions.pay]
 verify_jwt = false
+
+[functions.phone]
+verify_jwt = false

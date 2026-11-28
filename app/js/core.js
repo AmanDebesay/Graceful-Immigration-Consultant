@@ -17,7 +17,7 @@ export const isStaff = () => state.profile && state.profile.role !== 'client';
 export const canDraftAgreements = () => can('agreements.manage') || can('agreements.draft');
 
 export const ROLE_LABEL = {
-  owner: 'Owner', rcic: 'RCIC', case_manager: 'Case Manager', bookkeeper: 'Bookkeeper', assistant: 'Assistant', client: 'Client',
+  owner: 'Owner', rcic: 'RCIC', case_manager: 'Case Manager', bookkeeper: 'Bookkeeper', assistant: 'Assistant', marketing: 'Marketing', client: 'Client',
 };
 export const STAGES = [
   ['new', 'New'], ['contacted', 'Contacted'], ['consultation_booked', 'Consultation booked'],

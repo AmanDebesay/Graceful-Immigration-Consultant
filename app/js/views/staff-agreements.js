@@ -56,6 +56,21 @@ const F = {
   area: (k, label, d, rows, hint = '') => `<div class="field"><label>${label}</label><textarea class="input" data-k="${k}" rows="${rows}">${esc(d[k] || '')}</textarea>${hint ? `<small class="dk-muted">${hint}</small>` : ''}</div>`,
   check: (k, label, d) => `<label class="row" style="gap:8px;margin:4px 0 8px"><input type="checkbox" data-k="${k}" ${d[k] ? 'checked' : ''}> ${label}</label>`,
 };
+// Form for an independent contractor outside Canada (no payroll, hours or vacation).
+const contractorForm = (d) => `${group('Contractor and role', true, `${F.text('role_title', 'Role', d)}${F.text('employee_name', 'Contractor’s full legal name', d)}
+    ${F.text('employee_address', 'Contractor’s address (street, city)', d)}${F.text('country', 'Country where they work', d)}
+    <div class="row-2">${F.text('employee_email', 'Email', d, 'type="email"')}${F.text('employee_phone', 'Phone / WhatsApp', d)}</div>`)}
+  ${group('Start and notice', true, `<div class="row-2">${F.date('agreement_date', 'Agreement date', d)}${F.date('start_date', 'Start date', d)}</div>
+    <div class="row-2">${F.num('trial_months', 'Trial period (months, 0 = none)', d)}${F.num('notice_days', 'Notice to end (days)', d)}</div>`)}
+  ${group('Fee', true, `<div class="row-2">${F.num('fee_amount', 'Fee amount', d)}${F.sel('fee_currency', 'Currency', d, [['USD', 'US dollars (USD)'], ['CAD', 'Canadian dollars (CAD)'], ['ETB', 'Ethiopian birr (ETB)']])}</div>
+    ${F.sel('fee_period', 'Paid', d, [['month', 'Per month'], ['two_weeks', 'Every two weeks'], ['week', 'Per week'], ['project', 'Per project']])}
+    ${F.text('payment_terms', 'When it is paid', d)}${F.text('payment_method', 'How it is paid', d)}`)}
+  ${group('Work and minimum deliverables', true, `<div class="row-2">${F.num('videos_min', 'At least this many videos', d)}${F.sel('videos_period', 'Per', d, [['day', 'Day'], ['week', 'Week'], ['month', 'Month']])}</div>
+    ${F.text('platforms', 'Platforms', d)}<div class="row-2">${F.num('reply_hours', 'Check comments/messages every (hours)', d)}${F.num('approval_hours', 'RCIC approval time (hours)', d)}</div>
+    ${F.area('duties', 'Services (one per line)', d, 8)}${F.area('not_allowed', 'What the contractor must not do (one per line)', d, 7)}`)}
+  ${group('Access and other terms', false, `${F.area('access', 'Schedule B: access and security (Item | Rule)', d, 7)}
+    ${F.num('non_solicit_months', 'No directing clients elsewhere after leaving (months, 0 = leave out)', d)}${F.check('include_witness', 'Witness signature lines', d)}
+    ${F.area('extra_terms', 'Additional terms (each line is a clause)', d, 4)}`)}`;
 const group = (title, open, html) => `<details class="sa-g" ${open ? 'open' : ''}><summary>${title}</summary><div class="sa-gb">${html}</div></details>`;
 const CSS = `<style>
 .sa-wrap{display:grid;grid-template-columns:minmax(330px,420px) minmax(0,1fr);gap:16px;align-items:start}
@@ -89,7 +104,7 @@ async function editor(el, id, { setTitle }) {
     <div id="banner"></div>
     <div class="sa-wrap">
       ${locked ? '' : `<div class="sa-form" id="form">
-        ${group('Employee and role', true, `${F.sel('preset', 'Role template', d, [...Object.entries(ROLE_PRESETS).map(([k, p]) => [k, p.label]), ['custom', 'Custom']])}
+        ${d.kind === 'contractor' ? contractorForm(d) : `${group('Employee and role', true, `${F.sel('preset', 'Role template', d, [...Object.entries(ROLE_PRESETS).filter(([, p]) => !p.kind).map(([k, p]) => [k, p.label]), ['custom', 'Custom']])}
           ${F.text('role_title', 'Job title', d)}${F.text('employee_name', 'Employee’s full legal name', d)}
           ${F.text('employee_address', 'Employee’s address (street, city, province, postal code)', d)}
           <div class="row-2">${F.text('employee_email', 'Email', d, 'type="email"')}${F.text('employee_phone', 'Phone', d)}</div>
@@ -110,7 +125,7 @@ async function editor(el, id, { setTitle }) {
         ${group('Schedules and other terms', false, `${F.area('access', 'Schedule A: system access (one row per line: Item | Rule)', d, 8)}
           ${F.check('include_training', 'Include training (section and Schedule C)', d)}${F.area('training', 'Schedule C: training plan (lines starting with # are headings)', d, 10)}
           ${F.num('non_solicit_months', 'No soliciting clients after leaving (months, 0 = leave out)', d)}${F.check('include_witness', 'Witness signature lines', d)}
-          ${F.area('extra_terms', 'Additional terms (each line is a clause)', d, 4)}`)}
+          ${F.area('extra_terms', 'Additional terms (each line is a clause)', d, 4)}`)}`}
         ${group('Employer and supervisor', false, `${F.text('business_name', 'Business name', d)}${F.text('business_address', 'Business address', d)}
           <div class="row-2">${F.text('business_phone', 'Phone', d)}${F.text('business_email', 'Email', d)}</div>${F.text('website', 'Website', d)}
           <div class="row-2">${F.text('rcic_name', 'Signing RCIC', d)}${F.text('rcic_id', 'CICC licence no.', d)}</div>${F.text('rcic_designation', 'Designation', d)}
