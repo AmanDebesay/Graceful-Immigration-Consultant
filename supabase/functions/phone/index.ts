@@ -1,6 +1,7 @@
 // Business phone line (Twilio). Every call is logged in the dashboard's Call Log automatically.
 // Twilio calls this function (webhooks, form-encoded) and gets back TwiML:
 //   ?op=voice     incoming call -> "may be recorded" notice, ring the forwarding number (the caller's number shows)
+//   ?op=whisper / ?op=screen  the person answering hears the line name and presses 1 (screens out phone voicemail)
 //   ?op=dialdone  after ringing  -> answered: done; not answered: voicemail + a text with the booking link
 //   ?op=vmdone    after the voicemail
 //   ?op=recording / ?op=voicemail  recording ready -> copied into our Canadian storage, then deleted at Twilio
@@ -56,11 +57,25 @@ Deno.serve(async (req) => {
       }
       const rec = line.record ? ` record="record-from-answer-dual" recordingStatusCallback="${x(BASE)}?op=recording" recordingStatusCallbackEvent="completed"` : "";
       return xml((line.record ? say("Thank you for calling Graceful Immigration. This call may be recorded for quality and record keeping.") : "") +
-        `<Dial timeout="22" answerOnBridge="true" callerId="${x(from)}" action="${x(BASE)}?op=dialdone"${rec}><Number>${x(line.forward_to)}</Number></Dial>`);
+        `<Dial timeout="25" answerOnBridge="true" callerId="${x(from)}" action="${x(BASE)}?op=dialdone"${rec}><Number url="${x(`${BASE}?op=whisper&l=${line.id}`)}">${x(line.forward_to)}</Number></Dial>`);
+    }
+
+    // Call screening: the person answering hears which line it is and presses 1. A phone's own voicemail can't
+    // press 1, so an unanswered call is logged as missed and goes to OUR voicemail (and the caller gets the text).
+    if (op === "whisper") {
+      const { data: line } = await admin.from("phone_lines").select("label").eq("id", u.searchParams.get("l") ?? "").maybeSingle();
+      return xml(`<Gather numDigits="1" timeout="7" action="${x(`${BASE}?op=screen&parent=${p("ParentCallSid")}`)}">${say(`Graceful Immigration call from the ${line?.label || "business"} line. Press 1 to answer.`)}</Gather><Hangup/>`);
+    }
+    if (op === "screen") {
+      if (p("Digits") !== "1") return xml("<Hangup/>");
+      await admin.from("calls").update({ status: "answered" }).eq("twilio_sid", u.searchParams.get("parent") ?? "");
+      return xml("");
     }
 
     if (op === "dialdone") {
-      const answered = p("DialCallStatus") === "completed";
+      // Answered only if someone pressed 1 (see "screen"); otherwise a phone's voicemail may have picked up.
+      const { data: row } = await admin.from("calls").select("status").eq("twilio_sid", callSid).maybeSingle();
+      const answered = p("DialCallStatus") === "completed" && row?.status === "answered";
       await admin.from("calls").update(answered ? { status: "answered", duration_sec: Number(p("DialCallDuration")) || null } : { status: "missed" }).eq("twilio_sid", callSid);
       if (answered) return xml("<Hangup/>");
       const { data: line } = await admin.from("phone_lines").select("number, text_missed").eq("number", p("To")).maybeSingle();
