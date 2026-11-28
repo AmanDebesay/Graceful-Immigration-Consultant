@@ -91,17 +91,20 @@ async function receipt(el, kind, id, { setTitle } = {}) {
     r = { ...data, date: data.txn_date, voided: false };
     payer = await payerFor(data.contact_id);
   }
-  const c = r.contacts || {};
+  const c = r.contacts || {}, ed = r.receipt_edits || {};
   const fromName = r.received_from || payer?.name || c.full_name || '';
   const byPayer = payer && fromName === payer.name;              // the payer's address and email go on the receipt
   const fromClient = fromName === c.full_name;
   const email = byPayer ? payer.email : fromClient ? c.email : (payer?.email || c.email || '');
   const gst = apps.reduce((t, a) => t + (Number(a.invoices?.total) ? num(Number(a.amount) * Number(a.invoices.tax_total) / Number(a.invoices.total)) : 0), 0);
   const sg = prof?.email_sig || {};
+  const autoLines = byPayer ? [payer.address, payer.email, payer.phone] : fromClient ? [[c.address, c.city, c.province, c.postal_code].filter(Boolean).join(', '), c.email] : [];
+  const clientName = ed.client_name || c.full_name || '';
   const model = {
-    org: s, number: r.number || '', date: r.date, amount: r.amount, method: METHOD_LABEL[r.method] || r.method || '', reference: r.reference, kind, memo: r.memo, voided: r.voided,
-    from: { name: fromName, lines: byPayer ? [payer.address, payer.email, payer.phone] : fromClient ? [[c.address, c.city, c.province, c.postal_code].filter(Boolean).join(', '), c.email] : [] },
-    client: fromClient ? '' : c.full_name,
+    org: s, number: r.number || '', date: ed.date || r.date, amount: r.amount, method: ed.method || METHOD_LABEL[r.method] || r.method || '', reference: ed.reference ?? r.reference, kind, memo: r.memo, voided: r.voided,
+    from: { name: fromName, lines: ed.from_lines != null ? String(ed.from_lines).split('\n') : autoLines },
+    client: fromName === clientName ? '' : clientName,
+    desc: ed.desc_title || ed.desc_detail ? { title: ed.desc_title || '', detail: ed.desc_detail || '' } : null, note: ed.note || '',
     apps: apps.map((a) => ({ number: a.invoices?.number, date: a.invoices?.issue_date, total: a.invoices?.total, paid: a.amount, balance: a.invoices?.status === 'void' ? 0 : a.invoices?.balance })),
     gst, issuer: { name: prof?.full_name || state.profile.full_name, credentials: sg.credentials || '', title: sg.title || prof?.job_title || '' },
     signature: mine?.signature || '', issued: today(),
@@ -113,7 +116,7 @@ async function receipt(el, kind, id, { setTitle } = {}) {
   el.innerHTML = `
     <div class="toolbar"><a class="btn btn-sm" href="#/client-receipts">← Client Receipts</a><div class="grow"></div>
       ${r.receipt_sent_at ? `<span class="badge b-GREEN">Sent ${esc(fmtDate(r.receipt_sent_at))}</span>` : ''}
-      ${manage && !r.voided ? `<button class="btn" id="from">${icon('users')} Received from</button>` : ''}
+      ${manage && !r.voided ? `<button class="btn btn-primary" id="edit">${icon('edit')} Edit</button><button class="btn" id="from">${icon('users')} Received from</button>` : ''}
       <button class="btn" id="print">${icon('file')} Print</button><button class="btn" id="pdf">${icon('file')} Download PDF</button>
       ${manage && !r.voided ? `${r.receipt_sent_at ? '' : '<button class="btn" id="given" title="You gave or sent it another way">Mark as sent</button>'}<button class="btn btn-gold" id="mail">${icon('mail')} Email receipt</button>` : ''}
     </div>
@@ -142,6 +145,43 @@ async function receipt(el, kind, id, { setTitle } = {}) {
   el.querySelector('#given')?.addEventListener('click', async () => {
     try { await rpc('update_receipt', { p_kind: kind, p_id: id, p_sent: true }); toast('Marked as sent'); again(); } catch (e) { fail(e); }
   });
+  // Correct what the receipt shows. The amount stays tied to the payment record so the books always match.
+  el.querySelector('#edit')?.addEventListener('click', () => {
+    const f = (id, label, v, extra = '') => `<div class="field"><label>${label}</label><input class="input" id="${id}" value="${esc(v ?? '')}" ${extra}></div>`;
+    const defDesc = kind === 'trust' ? ['Retainer paid in advance', "Held in the RCIC's client (trust) account until earned"] : apps.length ? ['', ''] : ['Immigration and citizenship services', r.memo || ''];
+    modal({ title: `Edit receipt ${model.number}`,
+      body: `${r.receipt_sent_at ? `<div class="alert info" style="margin-bottom:10px">This receipt was already sent on ${esc(fmtDate(r.receipt_sent_at))}. After saving, email the corrected receipt again.</div>` : ''}
+        <div class="row-2">${f('e_from', 'Received from (name)', fromName)}${f('e_client', 'Client (name)', clientName)}</div>
+        ${c.id ? `<label class="row" style="gap:8px;margin:-4px 0 10px"><input type="checkbox" id="e_fix"> Also correct the client’s name in Contacts${c.full_name ? ` (now “${esc(c.full_name)}”)` : ''}</label>` : ''}
+        <div class="field"><label>Details under “Received from” (one per line: address, email, phone)</label><textarea class="input" id="e_lines" rows="3">${esc(model.from.lines.filter(Boolean).join('\n'))}</textarea></div>
+        <div class="row-2">${f('e_date', 'Date received', model.date, 'type="date"')}${f('e_method', 'Paid by', model.method)}</div>
+        ${f('e_ref', 'Reference', model.reference || '')}
+        <div class="row-2">${f('e_dt', 'Description', ed.desc_title || defDesc[0], apps.length && !ed.desc_title ? 'placeholder="Blank = list the invoices paid"' : '')}${f('e_dd', 'Description details', ed.desc_detail || defDesc[1])}</div>
+        <div class="field"><label>Extra note on the receipt (optional)</label><textarea class="input" id="e_note" rows="2">${esc(ed.note || '')}</textarea></div>
+        <p class="dk-muted" style="font-size:12.5px">Amount: <b>${money(r.amount)}</b> (cannot be edited here). If the amount is wrong, void the payment and record it again, so the books and trust records stay correct. Every edit is kept in the Audit Log.</p>`,
+      actions: [
+        ...(Object.keys(ed).length ? [{ label: 'Undo all edits', onClick: async () => { await rpc('edit_receipt', { p_kind: kind, p_id: id, p_edits: {}, p_received_from: null }); toast('Receipt back to the original'); again(); } }] : []),
+        { label: 'Cancel' }, { label: 'Save', cls: 'btn-primary', onClick: async (m) => {
+          const v = (q) => m.querySelector(q).value.trim();
+          const from = v('#e_from'); if (!from) throw new Error('Enter who the money was received from.');
+          const edits = {};
+          const put = (k, val, orig) => { if (val !== String(orig ?? '').trim()) edits[k] = val; };
+          put('client_name', v('#e_client'), c.full_name);
+          put('from_lines', v('#e_lines'), autoLines.filter(Boolean).join('\n'));
+          put('date', v('#e_date'), r.date);
+          put('method', v('#e_method'), METHOD_LABEL[r.method] || r.method || '');
+          put('reference', v('#e_ref'), r.reference);
+          put('desc_title', v('#e_dt'), defDesc[0]); put('desc_detail', v('#e_dd'), defDesc[1]);
+          if (edits.desc_title !== undefined || edits.desc_detail !== undefined) { edits.desc_title = v('#e_dt'); edits.desc_detail = v('#e_dd'); }
+          if (v('#e_note')) edits.note = v('#e_note');
+          if (edits.date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(edits.date)) throw new Error('Choose the date received.');
+          await rpc('edit_receipt', { p_kind: kind, p_id: id, p_edits: edits, p_received_from: from });
+          if (m.querySelector('#e_fix')?.checked && v('#e_client') && v('#e_client') !== c.full_name) {
+            const { error } = await db.from('contacts').update({ full_name: v('#e_client') }).eq('id', c.id); if (error) throw error;
+          }
+          toast('Receipt updated'); again();
+        } }] });
+  });
   el.querySelector('#from')?.addEventListener('click', () => modal({
     title: 'Received from',
     body: `<div class="field"><label>Name shown on the receipt</label><input class="input" id="rf" value="${esc(fromName)}"></div>
@@ -158,7 +198,7 @@ async function receipt(el, kind, id, { setTitle } = {}) {
     try { pdf = await receiptPdf(html); } catch (e) { b.disabled = false; return fail(e); }
     b.disabled = false;
     const first = String(fromName).split(' ')[0] || 'there';
-    const body = `Hello ${first},\n\nThank you for your payment of ${money(r.amount)} received on ${fmtDate(r.date, { year: 'numeric', month: 'long', day: 'numeric' })}${fromClient ? '' : ` on behalf of ${c.full_name}`}. Your official receipt is attached as a PDF, and the details are below.\n\nIf you have any questions, please reply to this email or call ${s.phone}.`;
+    const body = `Hello ${first},\n\nThank you for your payment of ${money(r.amount)} received on ${fmtDate(model.date, { year: 'numeric', month: 'long', day: 'numeric' })}${model.client ? ` on behalf of ${model.client}` : ''}. Your official receipt is attached as a PDF, and the details are below.\n\nIf you have any questions, please reply to this email or call ${s.phone}.`;
     (await import('../crm.js')).composeEmail({ contact: { ...c, email }, to: email || '', subject: `Official receipt ${model.number} · ${s.business_name}`, body,
       html: (text) => receiptEmailHtml(model, text), files: [{ name: fileName, contentType: 'application/pdf', contentBytes: pdf.base64 }],
       onSent: async () => { await rpc('update_receipt', { p_kind: kind, p_id: id, p_sent: true }).catch(() => {}); again(); } });

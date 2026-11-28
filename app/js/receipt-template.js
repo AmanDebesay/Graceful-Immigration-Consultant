@@ -66,7 +66,9 @@ const STYLE = `<style>
 export function receiptHtml(m) {
   const o = m.org || {};
   const fees = Number(m.amount) - Number(m.gst || 0);
-  const rows = m.kind === 'trust'
+  const rows = m.desc?.title || m.desc?.detail
+    ? `<tr><td><b>${e(m.desc.title || '')}</b>${m.desc.detail ? `<br><span style="color:#6B7385">${e(m.desc.detail)}</span>` : ''}</td><td class="r">${money(m.amount)}</td></tr>`
+    : m.kind === 'trust'
     ? `<tr><td><b>Retainer paid in advance</b><br><span style="color:#6B7385">Held in the RCIC's client (trust) account until earned${m.client ? `, for services to ${e(m.client)}` : ''}</span></td><td class="r">${money(m.amount)}</td></tr>`
     : m.apps.length ? m.apps.map((a) => `<tr><td><b>Payment toward invoice ${e(a.number)}</b><br><span style="color:#6B7385">Invoice dated ${e(longDate(a.date))} · invoice total ${money(a.total)} · balance remaining ${money(a.balance)}${Number(a.balance) <= 0 ? ' (paid in full)' : ''}</span></td><td class="r">${money(a.paid)}</td></tr>`).join('')
     : `<tr><td><b>Immigration and citizenship services</b>${m.memo ? `<br><span style="color:#6B7385">${e(m.memo)}</span>` : ''}</td><td class="r">${money(m.amount)}</td></tr>`;
@@ -86,6 +88,7 @@ export function receiptHtml(m) {
       <tr class="tot"><td class="r">Total received</td><td class="r">${money(m.amount)}</td></tr></tfoot></table>
   ${m.kind === 'trust' ? '<div class="gr-note">This money is client money held in trust. It is not yet earned: it is used to pay invoices for services once they are provided, as set out in the service agreement, and any unearned amount is refunded in accordance with the College\'s Client Account Regulation.</div>' : ''}
   ${m.client ? `<div class="gr-note">Paid by ${e(m.from.name)} on behalf of ${e(m.client)}. The client remains the person the services are provided to.</div>` : ''}
+  ${m.note ? `<div class="gr-note">${e(m.note).replace(/\n/g, '<br>')}</div>` : ''}
   <div class="gr-sig"><div class="who"><div class="ink">${sig.startsWith('data:image') ? `<img src="${sig}" alt="Signature">` : `<span class="typed">${e(sig || m.issuer?.name)}</span>`}</div>
       <div class="line"><b>${e(m.issuer?.name)}${m.issuer?.credentials ? `, ${e(m.issuer.credentials)}` : ''}</b><br>${m.issuer?.title ? `${e(m.issuer.title)}<br>` : ''}${e(o.business_name)}<br>Issued ${e(longDate(m.issued))}</div></div>
     <div class="gr-stamp">${m.voided ? '<b>VOID</b>' : `<span>RECEIVED</span><b>PAID</b><span>WITH THANKS</span>`}</div></div>
