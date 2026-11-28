@@ -1,8 +1,8 @@
 // Call Log: every phone / WhatsApp call — where it came from, what it turned into, and who still needs a call back.
 // Calls on the business line (Twilio) arrive here by themselves (with recordings); other calls are logged by staff in seconds.
 import { db, state, can, esc, icon, modal, toast, fail, fmtDateTime, confirmBox, SERVICE_LABEL } from '../core.js';
-import { downloadCsv } from '../fin.js';
-import { SOURCES, SOURCE_LABEL, CATEGORIES, CAT_LABEL, CAT_CLS, NOT_LEADS, CHANNELS, STATUSES, phoneKey, fmtPhone, abDate, AB_TZ } from '../calls-common.js';
+import { downloadCsv, downloadXlsx } from '../fin.js';
+import { SOURCES, SOURCE_LABEL, CATEGORIES, CAT_LABEL, CAT_CLS, NOT_LEADS, CHANNELS, STATUSES, phoneKey, fmtPhone, abDate, AB_TZ, countryOf, otherParty } from '../calls-common.js';
 
 const CSS = `<style>
 .cl-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
@@ -28,16 +28,43 @@ const range = (p) => {
 const nameOf = (c) => c.caller_name || (c.contacts?.full_name) || '';
 
 export async function render(el, _p, { setTitle } = {}) {
-  let tab = 'log', period = 'today', filter = 'all', rows = [], allRecent = [];
+  let tab = 'log', period = '7', filter = 'all', rows = [], allRecent = [], q = '', ctry = 'all';
   const edit = can('crm.edit'), admin = can('settings.manage');
   el.innerHTML = `${CSS}<div class="toolbar"><div class="seg" id="tab"><button data-k="log">Calls</button><button data-k="back">Call back <span id="backN" class="badge b-RED" hidden></span></button>${admin ? '<button data-k="lines">Phone lines</button>' : ''}</div>
     <div class="seg" id="per">${PERIODS.map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div><div class="grow"></div>
-    <button class="btn" id="csv">${icon('file')} Export</button>${edit ? `<button class="btn btn-primary" id="new">${icon('plus')} Log a call</button>` : ''}</div><div id="body"></div>`;
+    <button class="btn btn-gold" id="xl">${icon('file')} Excel</button><button class="btn" id="csv">CSV</button>${edit ? `<button class="btn btn-primary" id="new">${icon('plus')} Log a call</button>` : ''}</div><div id="body"></div>`;
   el.querySelector('#tab').onclick = (e) => { const b = e.target.closest('button'); if (b?.dataset.k) { tab = b.dataset.k; draw(); } };
   el.querySelector('#per').onclick = (e) => { if (e.target.dataset.k) { period = e.target.dataset.k; filter = 'all'; load(); } };
   el.querySelector('#new')?.addEventListener('click', () => editCall({ direction: 'inbound', channel: 'phone', status: 'answered', source: 'unknown', category: 'unreviewed' }));
-  el.querySelector('#csv').onclick = () => downloadCsv(`calls-${range(period).join('_')}.csv`, [['When', 'Direction', 'Channel', 'Status', 'Number', 'Name', 'Location', 'Source', 'Campaign', 'Category', 'Service', 'Notes', 'Called back'],
-    ...rows.map((c) => [fmtDateTime(c.occurred_at), c.direction, c.channel, c.status, c.from_number, nameOf(c), c.caller_location, SOURCE_LABEL[c.source] || c.source, c.campaign, CAT_LABEL[c.category], c.service_interest, c.notes, c.called_back_at || ''])]);
+  const HEAD = ['When (Alberta time)', 'Direction', 'Channel', 'Status', 'Number', 'Name', 'Country', 'Location', 'Source', 'Campaign', 'What it is', 'Service', 'Language', 'Notes', 'Called back'];
+  const line = (c) => [new Date(c.occurred_at).toLocaleString('en-CA', { timeZone: AB_TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }),
+    c.direction === 'outbound' ? 'We called' : 'They called', CHANNELS.find(([k]) => k === c.channel)?.[1] || c.channel, STATUSES.find(([k]) => k === c.status)?.[1] || c.status,
+    otherParty(c), nameOf(c), countryOf(otherParty(c)), c.caller_location || '', SOURCE_LABEL[c.source] || c.source, c.campaign || '', CAT_LABEL[c.category] || c.category,
+    c.service_interest || '', c.language || '', c.notes || '', c.called_back_at ? fmtDateTime(c.called_back_at) : ''];
+  const fileBase = () => `calls-${range(period).join('_')}${ctry !== 'all' ? '-' + ctry.toLowerCase().replace(/[^a-z0-9]+/g, '-') : ''}${q ? '-search' : ''}`;
+  el.querySelector('#csv').onclick = () => downloadCsv(`${fileBase()}.csv`, [HEAD, ...shown().map(line)]);
+  el.querySelector('#xl').onclick = async () => {
+    const list = shown(), inb = list.filter((c) => c.direction === 'inbound');
+    const group = (key) => { const m = {}; inb.forEach((c) => { const k = key(c); const g = m[k] ||= [0, 0, 0, 0, 0, 0, 0, 0];
+      g[0]++; if (c.status === 'answered') g[1]++; if (['missed', 'voicemail'].includes(c.status)) g[2]++; if (c.category === 'just_asking') g[3]++;
+      if (c.category === 'potential') g[4]++; if (c.category === 'booked') g[5]++; if (c.category === 'paying') g[6]++; if (NOT_LEADS.includes(c.category)) g[7]++; });
+      return Object.entries(m).sort((a, b) => b[1][0] - a[1][0]).map(([k, v]) => [k, ...v]); };
+    const H2 = ['Calls in', 'Answered', 'Missed', 'Just asking', 'Potential', 'Booked', 'Paying', 'Spam / not leads'];
+    try {
+      await downloadXlsx(`${fileBase()}.xlsx`, [
+        ['Calls', [HEAD, ...list.map(line)], [18, 11, 10, 12, 17, 22, 20, 24, 18, 22, 18, 22, 12, 50, 18]],
+        ['By country', [['Country', ...H2], ...group((c) => countryOf(c.from_number))], [24, 10, 10, 10, 11, 10, 10, 10, 15]],
+        ['By source', [['Source', ...H2], ...group((c) => SOURCE_LABEL[c.source] || c.source)], [26, 10, 10, 10, 11, 10, 10, 10, 15]],
+      ]);
+    } catch (e) { fail(e); }
+  };
+  // Calls in the period, narrowed by the number/name search and the country filter.
+  const shown = () => rows.filter((c) => (ctry === 'all' || countryOf(otherParty(c)) === ctry) && matches(c));
+  const matches = (c) => {
+    if (!q) return true;
+    const d = q.replace(/\D/g, ''), t = q.toLowerCase();
+    return (d.length >= 3 && String(otherParty(c)).replace(/\D/g, '').includes(d)) || nameOf(c).toLowerCase().includes(t) || (c.notes || '').toLowerCase().includes(t);
+  };
 
   // A missed call is still open until we call back, they reach us later, or it is marked done.
   const openMissed = (list) => {
@@ -70,9 +97,10 @@ export async function render(el, _p, { setTitle } = {}) {
     el.querySelector('#per').style.visibility = tab === 'log' ? '' : 'hidden';
     if (tab === 'lines') return lines();
     if (tab === 'back') return callBack(open);
-    const inb = rows.filter((c) => c.direction === 'inbound'), people = new Set(inb.map((c) => phoneKey(c.from_number) || c.id));
+    const base = shown();
+    const inb = base.filter((c) => c.direction === 'inbound'), people = new Set(inb.map((c) => phoneKey(c.from_number) || c.id));
     const cnt = (f) => inb.filter(f).length;
-    const openHere = openMissed(rows).length;
+    const openHere = openMissed(base).length;
     const K = [['all', inb.length, 'Calls in', ''], ['people', people.size, 'Different people', ''], ['answered', cnt((c) => c.status === 'answered'), 'Answered', 'good'],
       ['missed', cnt((c) => ['missed', 'voicemail'].includes(c.status)), 'Missed', 'warn'], ['open', openHere, 'Still to call back', openHere ? 'warn' : 'good'],
       ['unreviewed', cnt((c) => c.category === 'unreviewed'), 'To review', ''], ['potential', cnt((c) => c.category === 'potential'), 'Potential clients', ''],
@@ -85,25 +113,42 @@ export async function render(el, _p, { setTitle } = {}) {
     inb.forEach((c) => { const h = Number(new Date(c.occurred_at).toLocaleString('en-CA', { timeZone: AB_TZ, hour: 'numeric', hourCycle: 'h23' })); hours[h % 24][['missed', 'voicemail'].includes(c.status) ? 1 : 0]++; });
     const lo = Math.min(7, ...hours.map((h, i) => (h[0] + h[1] ? i : 24))), hi = Math.max(18, ...hours.map((h, i) => (h[0] + h[1] ? i : 0)));
     const max = Math.max(1, ...hours.map((h) => h[0] + h[1]));
-    const list = rows.filter((c) => filter === 'all' ? true : filter === 'people' ? true : filter === 'answered' ? c.status === 'answered' && c.direction === 'inbound'
-      : filter === 'missed' ? c.direction === 'inbound' && ['missed', 'voicemail'].includes(c.status) : filter === 'open' ? openMissed(rows).includes(c)
+    const list = base.filter((c) => filter === 'all' ? true : filter === 'people' ? true : filter === 'answered' ? c.status === 'answered' && c.direction === 'inbound'
+      : filter === 'missed' ? c.direction === 'inbound' && ['missed', 'voicemail'].includes(c.status) : filter === 'open' ? openMissed(base).includes(c)
       : filter === 'spam' ? NOT_LEADS.includes(c.category) : c.category === filter);
     const body = el.querySelector('#body');
-    body.innerHTML = `<div class="cl-kpis">${K.map(([k, v, l, cls]) => `<button class="cl-kpi ${cls} ${filter === k ? 'on' : ''}" data-f="${k}"><b>${v}</b><span>${l}</span></button>`).join('')}</div>
+    const cAll = {}; rows.forEach((c) => { if (c.direction === 'inbound') { const k = countryOf(c.from_number); cAll[k] = (cAll[k] || 0) + 1; } });
+    const byC = {}; inb.forEach((c) => { const k = countryOf(c.from_number); const g = byC[k] ||= { total: 0, missed: 0, leads: 0, paying: 0 };
+      g.total++; if (['missed', 'voicemail'].includes(c.status)) g.missed++; if (['potential', 'booked', 'paying'].includes(c.category)) g.leads++; if (c.category === 'paying') g.paying++; });
+    body.innerHTML = `<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <input class="input" id="q" type="search" placeholder="Search number, name or notes…" value="${esc(q)}" style="max-width:300px">
+        <select class="input" id="ctry" style="max-width:240px"><option value="all">All countries (${Object.values(cAll).reduce((a, b) => a + b, 0)})</option>
+          ${Object.entries(cAll).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<option value="${esc(k)}" ${ctry === k ? 'selected' : ''}>${esc(k)} (${v})</option>`).join('')}
+          ${ctry !== 'all' && !cAll[ctry] ? `<option value="${esc(ctry)}" selected>${esc(ctry)} (0)</option>` : ''}</select>
+        ${q || ctry !== 'all' ? `<button class="btn btn-sm" id="clr">Clear filters</button><span class="dk-muted" style="font-size:13px">Showing ${base.length} of ${rows.length} calls. Excel and CSV export what is shown.</span>` : ''}</div>
+      <div class="cl-kpis">${K.map(([k, v, l, cls]) => `<button class="cl-kpi ${cls} ${filter === k ? 'on' : ''}" data-f="${k}"><b>${v}</b><span>${l}</span></button>`).join('')}</div>
       ${inb.length ? `<div class="cl-grid"><div class="card"><div class="card-h"><h3>Where the calls came from</h3><small class="dk-muted">Ask every caller “How did you hear about us?”</small></div><div class="table-wrap"><table class="t"><thead><tr><th>Source</th><th>Calls</th><th>Missed</th><th>Just asking</th><th>Potential</th><th>Booked</th><th>Paying</th></tr></thead><tbody>
         ${Object.entries(bySrc).sort((x, y) => y[1].total - x[1].total).map(([s, v]) => `<tr><td><b>${esc(SOURCE_LABEL[s] || s)}</b></td><td>${v.total}</td><td>${v.missed}</td><td>${v.asking}</td><td>${v.potential}</td><td>${v.booked}</td><td>${v.paying}</td></tr>`).join('')}</tbody></table></div></div>
         <div class="card"><div class="card-h"><h3>Calls by hour (Alberta time)</h3><small class="dk-muted"><span style="color:var(--gold,#C9962B)">■</span> answered <span style="color:#E7A39B">■</span> missed</small></div><div class="card-b"><div class="cl-bars">
         ${hours.slice(lo, hi + 1).map((h, i) => `<div title="${h[0]} answered, ${h[1]} missed"><i class="m" style="height:${h[1] / max * 90}px"></i><i style="height:${h[0] / max * 90}px"></i>${(lo + i) % 12 || 12}${lo + i < 12 ? 'a' : 'p'}</div>`).join('')}</div>
         <p class="dk-muted" style="font-size:12.5px;margin-top:8px">Busy hours are when to have someone answering, or when to post (calls come in soon after a post).</p></div></div></div>` : ''}
+      ${inb.length ? `<div class="card" style="margin-bottom:14px"><div class="card-h"><h3>Calls by country</h3><small class="dk-muted">From the caller's number (country code; +1 numbers by area code). Click a country to filter.</small></div><div class="table-wrap"><table class="t"><thead><tr><th>Country</th><th>Calls</th><th>Missed</th><th>Leads (potential + booked + paying)</th><th>Paying</th><th style="width:40%"></th></tr></thead><tbody>
+        ${Object.entries(byC).sort((a, b) => b[1].total - a[1].total).map(([k, v]) => `<tr class="click" data-c="${esc(k)}"><td><b>${esc(k)}</b></td><td>${v.total}</td><td>${v.missed}</td><td>${v.leads}</td><td>${v.paying}</td>
+          <td><div style="height:8px;border-radius:5px;background:#EEF0F5"><div style="height:8px;border-radius:5px;width:${v.total / inb.length * 100}%;background:linear-gradient(90deg,#EDBE55,#D19A2E)"></div></div></td></tr>`).join('')}</tbody></table></div></div>` : ''}
       <div class="card"><div class="table-wrap">${list.length ? table(list) : `<div class="empty">${icon('phone')}<div>No calls ${filter === 'all' ? 'in this period' : 'with this filter'}.${edit ? ' Click <b>Log a call</b> to add one.' : ''}</div></div>`}</div></div>`;
     body.querySelectorAll('[data-f]').forEach((b) => (b.onclick = () => { filter = filter === b.dataset.f ? 'all' : b.dataset.f; draw(); }));
+    let tq = null;
+    body.querySelector('#q').oninput = (e) => { clearTimeout(tq); tq = setTimeout(() => { q = e.target.value.trim(); draw(); const i = el.querySelector('#q'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 250); };
+    body.querySelector('#ctry').onchange = (e) => { ctry = e.target.value; draw(); };
+    body.querySelector('#clr')?.addEventListener('click', () => { q = ''; ctry = 'all'; draw(); });
+    body.querySelectorAll('[data-c]').forEach((r) => (r.onclick = () => { ctry = ctry === r.dataset.c ? 'all' : r.dataset.c; draw(); }));
     wireRows(body, list);
   }
 
   const table = (list) => `<table class="t"><thead><tr><th>When</th><th>Caller</th><th>Call</th><th>Source</th><th>What it is</th><th>Notes</th><th></th></tr></thead><tbody>
     ${list.map((c) => { const out = c.direction === 'outbound', num = out ? c.to_number || c.from_number : c.from_number; return `<tr>
       <td style="white-space:nowrap">${esc(new Date(c.occurred_at).toLocaleString('en-CA', { timeZone: AB_TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</td>
-      <td class="cl-who">${c.contacts ? `<a href="#/contacts/${c.contacts.id}"><b>${esc(c.contacts.full_name)}</b></a>` : `<b>${esc(nameOf(c) || fmtPhone(num) || 'Unknown')}</b>`}<small>${nameOf(c) || c.contacts ? esc(fmtPhone(num)) : ''}${c.caller_location ? ' · ' + esc(c.caller_location) : ''}</small></td>
+      <td class="cl-who">${c.contacts ? `<a href="#/contacts/${c.contacts.id}"><b>${esc(c.contacts.full_name)}</b></a>` : `<b>${esc(nameOf(c) || fmtPhone(num) || 'Unknown')}</b>`}<small>${nameOf(c) || c.contacts ? esc(fmtPhone(num)) + ' · ' : ''}${esc(c.caller_location && c.caller_location !== countryOf(num) ? `${c.caller_location} · ${countryOf(num)}` : countryOf(num))}</small></td>
       <td><span class="badge ${c.status === 'answered' ? 'b-GREEN' : ['missed', 'voicemail'].includes(c.status) ? 'b-RED' : ''}">${out ? '↗ We called' : esc(STATUSES.find(([k]) => k === c.status)?.[1] || c.status)}</span>
         <small style="display:block;color:var(--muted)">${esc(CHANNELS.find(([k]) => k === c.channel)?.[1] || c.channel)}${c.duration_sec ? ' · ' + Math.ceil(c.duration_sec / 60) + ' min' : ''}</small>
         ${c.recording_path ? `<button class="btn btn-sm" data-play="${c.id}" style="margin-top:4px">${icon('phone')} ${c.status === 'voicemail' ? 'Voicemail' : 'Recording'}</button><span class="cl-rec" id="rec-${c.id}"></span>` : ''}</td>
@@ -147,7 +192,7 @@ export async function render(el, _p, { setTitle } = {}) {
       <div class="card"><div class="table-wrap">${groups.length ? `<table class="t"><thead><tr><th>Missed</th><th>Caller</th><th>Tries</th><th>Source</th><th>What it is</th><th></th></tr></thead><tbody>
       ${groups.map(({ c, tries, ids }) => `<tr><td style="white-space:nowrap">${esc(new Date(c.occurred_at).toLocaleString('en-CA', { timeZone: AB_TZ, weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}
           <small class="cl-open" style="display:block">${esc(ago(c.occurred_at))}</small></td>
-        <td class="cl-who"><b>${esc(nameOf(c) || fmtPhone(c.from_number) || 'Unknown')}</b><small>${nameOf(c) ? esc(fmtPhone(c.from_number)) : ''}${c.caller_location ? ' · ' + esc(c.caller_location) : ''} · ${esc(CHANNELS.find(([k]) => k === c.channel)?.[1] || '')}</small>
+        <td class="cl-who"><b>${esc(nameOf(c) || fmtPhone(c.from_number) || 'Unknown')}</b><small>${nameOf(c) ? esc(fmtPhone(c.from_number)) : ''}${c.caller_location ? ' · ' + esc(c.caller_location) : ''}${c.caller_location !== countryOf(c.from_number) ? ' · ' + esc(countryOf(c.from_number)) : ''} · ${esc(CHANNELS.find(([k]) => k === c.channel)?.[1] || '')}</small>
           ${c.notes ? `<small>${esc(c.notes.slice(0, 120))}</small>` : ''}</td>
         <td>${tries}</td><td>${esc(SOURCE_LABEL[c.source] || c.source)}</td><td><span class="badge ${CAT_CLS[c.category] || ''}">${esc(CAT_LABEL[c.category])}</span></td>
         <td style="text-align:right;white-space:nowrap">${c.from_number ? `<a class="btn btn-sm btn-gold" href="${c.channel === 'whatsapp' ? `https://wa.me/${esc(c.from_number.replace(/\D/g, ''))}` : `tel:${esc(c.from_number)}`}" target="_blank" rel="noopener">${icon('phone')} Call</a>` : ''}
